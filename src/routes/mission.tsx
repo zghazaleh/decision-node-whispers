@@ -43,13 +43,19 @@ function Mission() {
     return () => clearTimeout(t);
   }, []);
 
-  // Seed: if no saved messages, persist the opening so it's stable.
-  const initialMessages = useMemo<UIMessage[]>(() => {
+  // Seed once (lazy): use saved messages or the canonical opening.
+  const [initialMessages] = useState<UIMessage[]>(() => {
     const saved = readMission();
     if (saved.messages && saved.messages.length > 0) return saved.messages;
-    const seeded = [OPENING];
-    update({ messages: seeded });
-    return seeded;
+    return [OPENING];
+  });
+
+  // Persist the opening on first mount if nothing was saved yet.
+  useEffect(() => {
+    const saved = readMission();
+    if (!saved.messages || saved.messages.length === 0) {
+      update({ messages: initialMessages });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
