@@ -3,7 +3,8 @@ import { DefaultChatTransport, type UIMessage } from "ai";
 import { useServerFn } from "@tanstack/react-start";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Send, X, Check } from "lucide-react";
+import { Send, X, Check, Mic, Square } from "lucide-react";
+import { startRecording, type Recorder } from "@/lib/record-wav";
 import { toast } from "sonner";
 
 
@@ -456,17 +457,19 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
 
 
         {/* Composer */}
-        <div className="px-6 sm:px-10 pb-8 sm:pb-10">
+        <div className="px-6 sm:px-10 pb-6 sm:pb-8">
           <div className="mx-auto max-w-2xl">
-
-
             <form
               onSubmit={(e) => {
                 e.preventDefault();
                 submit(input);
               }}
-              className="mt-4 flex items-end gap-3 border-b border-foreground/20 focus-within:border-foreground/60 transition-colors py-2"
+              className="flex items-end gap-2 border-b border-foreground/20 focus-within:border-foreground/60 transition-colors py-2"
             >
+              <MicButton
+                disabled={busy}
+                onTranscribed={(t) => setInput((prev) => (prev ? prev + " " + t : t))}
+              />
               <textarea
                 ref={inputRef}
                 value={input}
@@ -480,7 +483,7 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
                 rows={1}
                 placeholder="Speak or act."
                 disabled={busy}
-                className="flex-1 resize-none bg-transparent text-foreground/95 placeholder:text-foreground/30 outline-none text-base font-sans leading-relaxed max-h-40"
+                className="flex-1 resize-none bg-transparent text-foreground/95 placeholder:text-foreground/30 outline-none text-base font-sans leading-relaxed max-h-40 py-2"
               />
               <button
                 type="submit"
@@ -490,10 +493,29 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
               >
                 <Send className="h-4 w-4" />
               </button>
-
             </form>
+
+            {/* Decide pill — fades in as the moment ripens */}
+            <div className="mt-5 flex justify-center" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
+              <button
+                type="button"
+                onClick={() => decideReady && openDecideWith("")}
+                disabled={!decideReady}
+                aria-disabled={!decideReady}
+                style={{ opacity: 0.15 + pressureForDecide * 0.85 }}
+                className={`group inline-flex items-center gap-2 rounded-full border px-5 py-2.5 text-[0.65rem] font-medium tracking-[0.32em] uppercase transition-all duration-700 ${
+                  decideReady
+                    ? "border-accent/70 bg-accent/10 text-accent hover:bg-accent/20 hover:border-accent shadow-[0_0_24px_-8px_var(--color-accent)] cursor-pointer"
+                    : "border-foreground/20 bg-transparent text-foreground/60 cursor-not-allowed"
+                }`}
+              >
+                <span className={`h-1.5 w-1.5 rounded-full transition-colors ${decideReady ? "bg-accent animate-pulse-soft" : "bg-foreground/30"}`} />
+                Decide
+              </button>
+            </div>
           </div>
         </div>
+
       </div>
 
       {/* Decide modal */}
@@ -853,6 +875,69 @@ function DecideModal({
     </div>
   );
 }
+
+function MicButton({
+  disabled,
+  onTranscribed,
+}: {
+  disabled?: boolean;
+  onTranscribed: (text: string) => void;
+}) {
+  const [recording, setRecording] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const recRef = useRef<Recorder | null>(null);
+
+  async function start() {
+    if (disabled || busy) return;
+    try {
+      const rec = await startRecording();
+      recRef.current = rec;
+      setRecording(true);
+    } catch (e) {
+      console.error("mic error", e);
+      toast("Microphone unavailable.", { description: "Check browser permissions." });
+    }
+  }
+
+  async function stop() {
+    const rec = recRef.current;
+    if (!rec) return;
+    recRef.current = null;
+    setRecording(false);
+    setBusy(true);
+    try {
+      const blob = await rec.stop();
+      if (blob.size < 1024) return;
+      const fd = new FormData();
+      fd.append("file", blob, "recording.wav");
+      const res = await fetch("/api/transcribe", { method: "POST", body: fd });
+      if (!res.ok) throw new Error(await res.text());
+      const data = await res.json();
+      const text = (data?.text ?? "").trim();
+      if (text) onTranscribed(text);
+    } catch (e) {
+      console.error("transcribe error", e);
+      toast("Couldn't catch that.", { description: "Try again." });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={recording ? stop : start}
+      disabled={disabled || busy}
+      aria-label={recording ? "Stop recording" : "Record"}
+      className={`shrink-0 p-2 transition-colors disabled:opacity-20 disabled:cursor-not-allowed ${
+        recording ? "text-accent animate-pulse-soft" : "text-foreground/50 hover:text-foreground"
+      }`}
+    >
+      {recording ? <Square className="h-4 w-4 fill-current" /> : <Mic className="h-4 w-4" />}
+    </button>
+  );
+}
+
 
 
 
