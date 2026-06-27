@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SoundTestRouteImport } from './routes/sound-test'
 import { Route as MissionsRouteImport } from './routes/missions'
+import { Route as ConstitutionRouteImport } from './routes/constitution'
 import { Route as AnalysisRouteImport } from './routes/analysis'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MissionIdRouteImport } from './routes/mission.$id'
@@ -25,6 +26,11 @@ const SoundTestRoute = SoundTestRouteImport.update({
 const MissionsRoute = MissionsRouteImport.update({
   id: '/missions',
   path: '/missions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConstitutionRoute = ConstitutionRouteImport.update({
+  id: '/constitution',
+  path: '/constitution',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AnalysisRoute = AnalysisRouteImport.update({
@@ -56,6 +62,7 @@ const ApiChatRoute = ApiChatRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/analysis': typeof AnalysisRoute
+  '/constitution': typeof ConstitutionRoute
   '/missions': typeof MissionsRoute
   '/sound-test': typeof SoundTestRoute
   '/api/chat': typeof ApiChatRoute
@@ -65,6 +72,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/analysis': typeof AnalysisRoute
+  '/constitution': typeof ConstitutionRoute
   '/missions': typeof MissionsRoute
   '/sound-test': typeof SoundTestRoute
   '/api/chat': typeof ApiChatRoute
@@ -75,6 +83,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/analysis': typeof AnalysisRoute
+  '/constitution': typeof ConstitutionRoute
   '/missions': typeof MissionsRoute
   '/sound-test': typeof SoundTestRoute
   '/api/chat': typeof ApiChatRoute
@@ -86,6 +95,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/analysis'
+    | '/constitution'
     | '/missions'
     | '/sound-test'
     | '/api/chat'
@@ -95,6 +105,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/analysis'
+    | '/constitution'
     | '/missions'
     | '/sound-test'
     | '/api/chat'
@@ -104,6 +115,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/analysis'
+    | '/constitution'
     | '/missions'
     | '/sound-test'
     | '/api/chat'
@@ -114,6 +126,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AnalysisRoute: typeof AnalysisRoute
+  ConstitutionRoute: typeof ConstitutionRoute
   MissionsRoute: typeof MissionsRoute
   SoundTestRoute: typeof SoundTestRoute
   ApiChatRoute: typeof ApiChatRoute
@@ -135,6 +148,13 @@ declare module '@tanstack/react-router' {
       path: '/missions'
       fullPath: '/missions'
       preLoaderRoute: typeof MissionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/constitution': {
+      id: '/constitution'
+      path: '/constitution'
+      fullPath: '/constitution'
+      preLoaderRoute: typeof ConstitutionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/analysis': {
@@ -178,6 +198,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AnalysisRoute: AnalysisRoute,
+  ConstitutionRoute: ConstitutionRoute,
   MissionsRoute: MissionsRoute,
   SoundTestRoute: SoundTestRoute,
   ApiChatRoute: ApiChatRoute,
