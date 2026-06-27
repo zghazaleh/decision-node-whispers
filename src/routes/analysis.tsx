@@ -160,24 +160,41 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
-function AnalysisBlock({
-  label,
-  body,
-  delay,
-}: {
-  label: string;
-  body: string;
-  delay: number;
-}) {
+function ExpandableBlock({ label, body }: { label: string; body: string }) {
   return (
-    <div className="animate-fade-up" style={{ animationDelay: `${delay}s` }}>
-      <p className="text-[0.6rem] tracking-[0.35em] uppercase text-foreground/45 mb-3">
-        {label}
-      </p>
-      <p className="font-display text-xl sm:text-2xl leading-relaxed text-foreground/90 text-pretty">
+    <ExpandableSection label={label}>
+      <p className="font-display text-lg sm:text-xl leading-relaxed text-foreground/85 text-pretty">
         {body}
       </p>
-    </div>
+    </ExpandableSection>
+  );
+}
+
+function ExpandableSection({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <Collapsible open={open} onOpenChange={setOpen}>
+      <CollapsibleTrigger className="group flex w-full items-center justify-between gap-6 py-5 text-left transition-colors hover:text-foreground">
+        <span className="text-[0.65rem] tracking-[0.4em] uppercase text-foreground/60 group-hover:text-foreground/90">
+          {label}
+        </span>
+        <span
+          className={`text-foreground/40 transition-transform duration-300 ${open ? "rotate-45" : ""}`}
+          aria-hidden
+        >
+          +
+        </span>
+      </CollapsibleTrigger>
+      <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
+        <div className="pb-8 pt-1">{children}</div>
+      </CollapsibleContent>
+    </Collapsible>
   );
 }
 
