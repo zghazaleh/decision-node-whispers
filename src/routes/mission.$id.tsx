@@ -496,11 +496,26 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
           <div className="mx-auto max-w-2xl">
             <QuickActions
               disabled={busy}
+              decideReady={decideReady}
+              userTurns={userTurnsCount}
               onAction={(prefix) => {
                 setInput((cur) => (cur ? cur : prefix));
                 inputRef.current?.focus();
               }}
+              onDecide={() => {
+                if (decideReady) {
+                  openDecideWith(input.trim());
+                } else {
+                  const turnsToGo = Math.max(0, 4 - userTurnsCount);
+                  toast("Not yet.", {
+                    description: turnsToGo > 0
+                      ? `Stay in the room — ${turnsToGo} more exchange${turnsToGo === 1 ? "" : "s"}.`
+                      : "The moment hasn't ripened.",
+                  });
+                }
+              }}
             />
+
 
             <form
               onSubmit={(e) => {
