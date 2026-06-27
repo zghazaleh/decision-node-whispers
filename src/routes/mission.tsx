@@ -27,7 +27,7 @@ const OPENING: UIMessage = {
   parts: [
     {
       type: "text",
-      text: `*Sarah Kwon*\n"Dr. Vasquez?"\n\n"They're seated. Jonas asked if you wanted coffee before. I said you didn't. Was that right?"`,
+      text: `*Sarah Kwon*\n"Dr. Vasquez?"\n\n"They're seated. Jonas asked if you wanted coffee before. I said you didn't. Was that right?"\n\n<<chips: "Sarah, who exactly is seated?" | "I look around the room" | "Give me a minute, Sarah">>`,
     },
   ],
 };
