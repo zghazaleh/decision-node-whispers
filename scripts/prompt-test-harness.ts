@@ -24,6 +24,14 @@ import { getMissionEngine } from "@/lib/missions/registry";
 import { generateObject, generateText } from "ai";
 import { z } from "zod";
 import { DIRECTOR_FIXTURES, ANALYSIS_FIXTURES } from "./prompt-test-fixtures";
+import {
+  diffSnapshot,
+  formatDiff,
+  loadSnapshot,
+  shapeOf,
+  writeSnapshot,
+  type Snapshot,
+} from "./prompt-snapshots";
 
 // ─── Documented schemas (mirrored from prompt-io-schema.md) ──────────────────
 
