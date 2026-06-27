@@ -125,8 +125,11 @@ function scoreFromAnalysis(a: DecisionAnalysis): {
   const biasResistance = clamp(
     70 - biases * 14 - (held > revised ? 8 : 0),
   );
-  const patternRecognition = clamp(
-    50 + strengths * 5 + reinforced * 4 - (held > 1 ? 8 : 0),
+  // Negotiation: signals of acknowledging counterparts' incentives, asking,
+  // and not steamrolling. Proxy: strengths present, biases low, and revising
+  // on the other side's evidence rather than holding.
+  const negotiation = clamp(
+    50 + strengths * 4 + revised * 5 - held * 8 - biases * 4,
   );
 
   const signals: string[] = [];
@@ -145,7 +148,7 @@ function scoreFromAnalysis(a: DecisionAnalysis): {
       informationGathering,
       longTermThinking,
       biasResistance,
-      patternRecognition,
+      negotiation,
     },
     signals,
   };
