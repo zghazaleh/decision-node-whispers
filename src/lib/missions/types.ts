@@ -20,6 +20,8 @@ export type DecisionPreset = {
   archetypeId: string;
 };
 
+export type MissionCanon = Record<string, unknown>;
+
 export type MissionEngine = {
   id: string;
   /** Full system prompt used by the narrative chat for this mission. */
@@ -34,4 +36,6 @@ export type MissionEngine = {
   getArchetype: (id: string) => Archetype | null;
   /** Preset stances surfaced in the Decide modal. */
   decisionPresets: DecisionPreset[];
+  /** Deterministic ground-truth facts for this mission. Shape is mission-specific. */
+  canon: MissionCanon;
 };
