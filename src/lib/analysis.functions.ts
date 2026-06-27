@@ -108,6 +108,13 @@ const AnalysisSchema = z.object({
       biasResistance: z.string(),
     })
     .optional(),
+
+  // NEW: 2–3 sentence executive-coach reflection addressed to "you", grounded
+  // in the player's own reasoning text + the structured calibrationVerdict +
+  // one or two dimensionNotes. Rephrases their stance back to them; MUST NOT
+  // invent consequences, MUST NOT contradict canon, MUST NOT use forbidden
+  // vocabulary (good/bad/right/wrong/correct/incorrect).
+  reasoningEcho: z.string().optional(),
 });
 
 
