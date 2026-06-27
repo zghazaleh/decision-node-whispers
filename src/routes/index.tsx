@@ -68,11 +68,11 @@ function Landing() {
           style={{ animationDelay: "1.6s" }}
         >
           <Link
-            to="/mission"
+            to="/missions"
             className="group inline-flex items-center gap-4 px-1 py-3 text-sm tracking-[0.4em] uppercase text-foreground/85 hover:text-foreground transition-colors"
           >
             <span className="h-px w-10 bg-foreground/30 group-hover:bg-foreground/70 group-hover:w-16 transition-all duration-500" />
-            Begin Mission
+            Select Mission
             <span className="h-px w-10 bg-foreground/30 group-hover:bg-foreground/70 group-hover:w-16 transition-all duration-500" />
           </Link>
         </div>
