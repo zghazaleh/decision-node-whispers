@@ -15,6 +15,9 @@ documented contract, the harness fails.
 - `scripts/prompt-test-harness.ts` — runner (CLI).
 - `scripts/prompt-test-fixtures.ts` — sample Director turn tails and
   Decision Analysis commits.
+- `scripts/prompt-snapshots.ts` — shape/critical-field extractor and
+  diff helpers for golden snapshots.
+- `scripts/snapshots/*.json` — golden snapshots, one file per fixture.
 
 ## Usage
 
@@ -23,10 +26,35 @@ LOVABLE_API_KEY=... bun run scripts/prompt-test-harness.ts
 LOVABLE_API_KEY=... bun run scripts/prompt-test-harness.ts --only=director
 LOVABLE_API_KEY=... bun run scripts/prompt-test-harness.ts --only=analysis
 LOVABLE_API_KEY=... bun run scripts/prompt-test-harness.ts --mission=mission-02
+LOVABLE_API_KEY=... bun run scripts/prompt-test-harness.ts --update-snapshots
 ```
 
-Exit code is `0` when every fixture conforms, `1` on any failure, `2` if
-`LOVABLE_API_KEY` is missing.
+Exit code is `0` when every fixture conforms AND every snapshot matches
+(or was just blessed via `--update-snapshots`), `1` on any schema failure
+or snapshot drift, `2` if `LOVABLE_API_KEY` is missing.
+
+## Golden snapshots
+
+Each fixture is paired with a JSON file in `scripts/snapshots/` that pins:
+
+- **`shape`** — recursive structural fingerprint of the validated
+  response. Keys and value types are pinned; array lengths are bucketed
+  into ranges (`0`, `1`, `2-3`, `4-5`, `6-8`, `9+`) so minor count drift
+  does not churn. Free-form prose is not recorded — only its type/presence.
+- **`critical`** — mission-defining invariants:
+  - Director: `chipCount`, `hasChipsTrailer`, `bodyNonEmpty`.
+  - Analysis: `archetypeId`, `archetypeMatchedCanon`, `timelineLength`,
+    `canonTimelineLength`, `timelineMatchesCanon`, `strengthsCount`,
+    `blindSpotsCount`, `biasesCount`, `beliefTrajectoryLength`,
+    `beliefUpdatesUsed` (sorted enum literals actually used),
+    `beliefConfidencesUsed`.
+
+A change in either bucket fails with a `[FAIL] … :: snapshot` line and a
+printed diff. Bless intentional changes with `--update-snapshots`.
+
+First-time fixtures have no golden file on disk and fail with
+`outcome=new`; run once with `--update-snapshots` to seed.
+
 
 Each line of output is one fixture result, e.g.
 

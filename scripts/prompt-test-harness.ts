@@ -15,8 +15,16 @@
  *   LOVABLE_API_KEY=... bun run scripts/prompt-test-harness.ts --only=director
  *   LOVABLE_API_KEY=... bun run scripts/prompt-test-harness.ts --only=analysis
  *   LOVABLE_API_KEY=... bun run scripts/prompt-test-harness.ts --mission=mission-02
+ *   LOVABLE_API_KEY=... bun run scripts/prompt-test-harness.ts --update-snapshots
  *
- * Exit code is non-zero if any sample fails schema validation.
+ * In addition to schema validation, each fixture is compared against a
+ * golden snapshot in `scripts/snapshots/` that pins the response SHAPE
+ * (recursive type signature) plus mission-critical fields (archetypeId,
+ * timeline length vs canon, belief-trajectory enum values used, etc.).
+ * Use `--update-snapshots` (or `-u`) to bless intentional contract changes.
+ *
+ * Exit code is non-zero if any sample fails schema validation OR snapshot
+ * comparison.
  */
 
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
@@ -24,6 +32,14 @@ import { getMissionEngine } from "@/lib/missions/registry";
 import { generateObject, generateText } from "ai";
 import { z } from "zod";
 import { DIRECTOR_FIXTURES, ANALYSIS_FIXTURES } from "./prompt-test-fixtures";
+import {
+  diffSnapshot,
+  formatDiff,
+  loadSnapshot,
+  shapeOf,
+  writeSnapshot,
+  type Snapshot,
+} from "./prompt-snapshots";
 
 // ─── Documented schemas (mirrored from prompt-io-schema.md) ──────────────────
 
@@ -84,10 +100,10 @@ const AnalysisSchema = z.object({
 
 // ─── CLI ─────────────────────────────────────────────────────────────────────
 
-type Args = { only?: "director" | "analysis"; mission: string };
+type Args = { only?: "director" | "analysis"; mission: string; updateSnapshots: boolean };
 
 function parseArgs(argv: string[]): Args {
-  const args: Args = { mission: "mission-01" };
+  const args: Args = { mission: "mission-01", updateSnapshots: false };
   for (const a of argv.slice(2)) {
     if (a.startsWith("--only=")) {
       const v = a.slice("--only=".length);
@@ -97,9 +113,39 @@ function parseArgs(argv: string[]): Args {
       args.only = v;
     } else if (a.startsWith("--mission=")) {
       args.mission = a.slice("--mission=".length);
+    } else if (a === "--update-snapshots" || a === "-u") {
+      args.updateSnapshots = true;
     }
   }
   return args;
+}
+
+// ─── Snapshot comparison ─────────────────────────────────────────────────────
+
+type SnapshotOutcome = "match" | "written" | "updated" | "drift" | "new";
+
+function compareOrBless(
+  id: string,
+  shape: string,
+  critical: Snapshot["critical"],
+  updateSnapshots: boolean,
+): { outcome: SnapshotOutcome; detail: string } {
+  const existing = loadSnapshot(id);
+  const candidate: Omit<Snapshot, "blessedAt"> = { id, shape, critical };
+  if (!existing) {
+    if (updateSnapshots) {
+      writeSnapshot({ ...candidate, blessedAt: new Date().toISOString() });
+      return { outcome: "written", detail: "snapshot written (new)" };
+    }
+    return { outcome: "new", detail: "no golden snapshot on disk (run with --update-snapshots to bless)" };
+  }
+  const diffs = diffSnapshot(existing, candidate);
+  if (diffs.length === 0) return { outcome: "match", detail: "snapshot matched" };
+  if (updateSnapshots) {
+    writeSnapshot({ ...candidate, blessedAt: new Date().toISOString() });
+    return { outcome: "updated", detail: `snapshot updated (${diffs.length} field(s) changed)` };
+  }
+  return { outcome: "drift", detail: `snapshot drift:\n${formatDiff(diffs)}` };
 }
 
 // ─── Chips parser ────────────────────────────────────────────────────────────
@@ -134,6 +180,7 @@ function record(name: string, ok: boolean, detail: string) {
 async function runDirector(
   gateway: ReturnType<typeof createLovableAiGatewayProvider>,
   missionId: string,
+  updateSnapshots: boolean,
 ) {
   const engine = getMissionEngine(missionId);
   if (!engine) throw new Error(`Unknown mission: ${missionId}`);
@@ -157,6 +204,20 @@ async function runDirector(
         true,
         `chips=[${parsed.chips.map((c) => JSON.stringify(c)).join(", ")}]`,
       );
+
+      // Snapshot: record the structural contract (chip count + body shape).
+      const body = text.replace(CHIPS_RE, "").trim();
+      const shape = shapeOf({
+        body: typeof body,
+        chips: parsed.chips,
+      });
+      const critical = {
+        chipCount: parsed.chips.length,
+        hasChipsTrailer: true,
+        bodyNonEmpty: body.length > 0,
+      };
+      const snap = compareOrBless(`director/${missionId}/${fx.id}`, shape, critical, updateSnapshots);
+      record(`${name} :: snapshot`, snap.outcome !== "drift" && snap.outcome !== "new", snap.detail);
     } catch (err) {
       record(name, false, (err as Error).message);
     }
@@ -168,6 +229,7 @@ async function runDirector(
 async function runAnalysis(
   gateway: ReturnType<typeof createLovableAiGatewayProvider>,
   missionId: string,
+  updateSnapshots: boolean,
 ) {
   const engine = getMissionEngine(missionId);
   if (!engine) throw new Error(`Unknown mission: ${missionId}`);
@@ -257,6 +319,37 @@ ${transcriptText}`,
         true,
         `archetypeId=${archetypeId ?? "(none)"} headline=${JSON.stringify(validated.headline.slice(0, 60))} beats=${validated.timeline.length} belief=${validated.beliefTrajectory.length}`,
       );
+
+      // Snapshot: pin the response shape + a tight set of mission-critical fields.
+      const shape = shapeOf(validated);
+      const beliefUpdates = Array.from(
+        new Set(validated.beliefTrajectory.map((b) => b.update)),
+      ).sort();
+      const beliefConfidences = Array.from(
+        new Set(validated.beliefTrajectory.map((b) => b.confidence)),
+      ).sort();
+      const critical: Snapshot["critical"] = {
+        archetypeId: archetypeId ?? null,
+        archetypeMatchedCanon: Boolean(archetype),
+        timelineLength: validated.timeline.length,
+        canonTimelineLength: archetype ? archetype.timeline.length : null,
+        timelineMatchesCanon: archetype
+          ? validated.timeline.length === archetype.timeline.length
+          : null,
+        strengthsCount: validated.reasoningAssessment.strengths.length,
+        blindSpotsCount: validated.reasoningAssessment.blindSpots.length,
+        biasesCount: validated.reasoningAssessment.possibleBiases.length,
+        beliefTrajectoryLength: validated.beliefTrajectory.length,
+        beliefUpdatesUsed: beliefUpdates,
+        beliefConfidencesUsed: beliefConfidences,
+      };
+      const snap = compareOrBless(
+        `analysis/${missionId}/${fx.id}`,
+        shape,
+        critical,
+        updateSnapshots,
+      );
+      record(`${name} :: snapshot`, snap.outcome !== "drift" && snap.outcome !== "new", snap.detail);
     } catch (err) {
       record(name, false, (err as Error).message);
     }
@@ -284,10 +377,12 @@ async function main() {
   const gateway = createLovableAiGatewayProvider(key);
 
   // eslint-disable-next-line no-console
-  console.log(`▶ Prompt test harness — mission=${args.mission} only=${args.only ?? "(all)"}`);
+  console.log(
+    `▶ Prompt test harness — mission=${args.mission} only=${args.only ?? "(all)"} update=${args.updateSnapshots}`,
+  );
 
-  if (args.only !== "analysis") await runDirector(gateway, args.mission);
-  if (args.only !== "director") await runAnalysis(gateway, args.mission);
+  if (args.only !== "analysis") await runDirector(gateway, args.mission, args.updateSnapshots);
+  if (args.only !== "director") await runAnalysis(gateway, args.mission, args.updateSnapshots);
 
   const failed = results.filter((r) => !r.ok);
   // eslint-disable-next-line no-console
