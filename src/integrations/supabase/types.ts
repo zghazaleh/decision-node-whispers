@@ -14,7 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      mission_plays: {
+        Row: {
+          completed: boolean
+          created_at: string
+          decision_seconds: number | null
+          difficulty_rating: number | null
+          id: string
+          investigation_seconds: number | null
+          message_count: number | null
+          mission_id: string
+        }
+        Insert: {
+          completed?: boolean
+          created_at?: string
+          decision_seconds?: number | null
+          difficulty_rating?: number | null
+          id?: string
+          investigation_seconds?: number | null
+          message_count?: number | null
+          mission_id: string
+        }
+        Update: {
+          completed?: boolean
+          created_at?: string
+          decision_seconds?: number | null
+          difficulty_rating?: number | null
+          id?: string
+          investigation_seconds?: number | null
+          message_count?: number | null
+          mission_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
