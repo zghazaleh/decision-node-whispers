@@ -614,9 +614,8 @@ function DecideModal({
             <h2 className="font-display text-3xl text-foreground mb-2">
               This is the moment.
             </h2>
-            <p className="text-sm text-muted-foreground mb-8 leading-relaxed">
-              You can't take it back. State what you do — out loud, to the room, to the
-              board, to whoever needs to hear it.
+            <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
+              Pick a stance, or write your own. You can't take it back.
             </p>
 
             <form
@@ -627,11 +626,37 @@ function DecideModal({
               className="space-y-6"
             >
               <div>
+                <label className="block text-[0.6rem] tracking-[0.3em] uppercase text-foreground/50 mb-3">
+                  Choose a stance
+                </label>
+                <div className="space-y-2 mb-4">
+                  {DECISION_PRESETS.map((p) => {
+                    const active = decision.trim() === p.text.trim();
+                    return (
+                      <button
+                        key={p.label}
+                        type="button"
+                        onClick={() => setDecision(p.text)}
+                        className={`w-full text-left rounded-sm border px-4 py-3 transition-colors ${
+                          active
+                            ? "border-accent/70 bg-accent/10 text-foreground"
+                            : "border-foreground/15 bg-background/40 text-foreground/80 hover:border-foreground/40 hover:text-foreground"
+                        }`}
+                      >
+                        <div className="text-[0.65rem] tracking-[0.3em] uppercase text-accent/80 mb-1">
+                          {p.label}
+                        </div>
+                        <div className="text-sm leading-relaxed text-pretty">
+                          {p.text}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
                 <label className="block text-[0.6rem] tracking-[0.3em] uppercase text-foreground/50 mb-2">
-                  What you do
+                  Or in your own words
                 </label>
                 <textarea
-                  autoFocus
                   value={decision}
                   onChange={(e) => setDecision(e.target.value)}
                   rows={3}
