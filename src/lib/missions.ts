@@ -21,7 +21,6 @@ export const MISSIONS: MissionMeta[] = [
     logline:
       "Twelve minutes until the boardroom. The model is ready. The memo is not.",
     status: "available",
-    route: "/mission",
     duration: "20–40 min",
     tone: "Tense · Suspended",
   },
@@ -32,8 +31,8 @@ export const MISSIONS: MissionMeta[] = [
     title: "Black Site",
     logline:
       "You are the prosecutor's last witness. You no longer remember which side you came in on.",
-    status: "classified",
-    duration: "Coming soon",
+    status: "available",
+    duration: "20–40 min",
     tone: "Claustrophobic · Cold",
   },
   {
@@ -42,9 +41,9 @@ export const MISSIONS: MissionMeta[] = [
     codename: "Lazarus",
     title: "Lazarus",
     logline:
-      "The ship is six hours from re-entry. The pilot has been dead for nine.",
-    status: "classified",
-    duration: "Coming soon",
+      "The capsule is six hours from re-entry. The pilot has been dead for nine.",
+    status: "available",
+    duration: "20–40 min",
     tone: "Vast · Quiet",
   },
   {
@@ -54,8 +53,8 @@ export const MISSIONS: MissionMeta[] = [
     title: "The Vote",
     logline:
       "You wake in the body of a senator on the night of a war authorization.",
-    status: "locked",
-    duration: "Locked",
+    status: "available",
+    duration: "20–40 min",
     tone: "Civic · Heavy",
   },
 ];
