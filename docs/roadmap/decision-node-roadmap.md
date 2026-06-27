@@ -21,36 +21,18 @@ work begins.
   to the legacy keyword path only when the model omits them.
   Contributions are tagged with `source: "model" | "heuristic"` so drift is
   observable.
+- **Reasoning-aware epilogue (Batch 3).** The Analyzer emits an optional
+  `reasoningEcho` — a 2–3 sentence executive-coach reflection grounded in
+  the player's own WHY, the `calibrationVerdict`, and one or two
+  `dimensionNotes`. Rendered as a quiet italic block above the canon
+  timeline on `/analysis`. Hard rule: may rephrase, may never invent
+  consequences. Canon remains the only source of consequence text.
 
 ---
 
 ## Next batches (committed direction)
 
-### Batch 3 — Reasoning-aware epilogue beat
-
-**Why.** The canon timeline is authored per archetype; players who write a
-thoughtful WHY currently see a default beat that can softly contradict their
-stated intent.
-
-**Shape.**
-
-- Add a `reasoningEcho: string` field to `DecisionAnalysis` (1–2 sentences,
-  grounded in the player's reasoning text, never canon-violating).
-- Render above the canon timeline on the analysis page in a quieter voice.
-- Hard rule: `reasoningEcho` may rephrase but may not invent consequences.
-  Canon remains the only source of consequence text.
-
-**Why.** The canon timeline is authored per archetype; players who write a
-thoughtful WHY currently see a default beat that can softly contradict their
-stated intent.
-
-**Shape.**
-
-- Add a `reasoningEcho: string` field to `DecisionAnalysis` (1–2 sentences,
-  grounded in the player's reasoning text, never canon-violating).
-- Render above the canon timeline on the analysis page in a quieter voice.
-- Hard rule: `reasoningEcho` may rephrase but may not invent consequences.
-  Canon remains the only source of consequence text.
+### Batch 4 — Player-built "what I've noticed" rail
 
 ### Batch 4 — Player-built "what I've noticed" rail
 
