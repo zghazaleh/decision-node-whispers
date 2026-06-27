@@ -95,4 +95,5 @@ export const ANALYSIS_FIXTURES: AnalysisFixture[] = [
       { role: "user", text: "Delay." },
     ],
   },
+  // <scaffold:analysis> — new Analysis fixtures are inserted above this line
 ];
