@@ -659,69 +659,6 @@ function ChipRow({ chips, onPick }: { chips: string[]; onPick: (text: string) =>
 }
 
 
-function QuickActions({
-  disabled,
-  decideReady,
-  userTurns,
-  onAction,
-  onDecide,
-}: {
-  disabled: boolean;
-  decideReady: boolean;
-  userTurns: number;
-  onAction: (prefix: string) => void;
-  onDecide: () => void;
-}) {
-  const actions = [
-    { icon: MessageCircle, label: "Ask", prefix: "" },
-    { icon: Eye, label: "Observe", prefix: "I look around. " },
-    { icon: BookOpen, label: "Read", prefix: "I pick up the " },
-    { icon: Phone, label: "Call", prefix: "I reach for the phone and call " },
-  ];
-  const turnsToGo = Math.max(0, 4 - userTurns);
-  const decideTitle = decideReady
-    ? "Make your decision"
-    : turnsToGo > 0
-    ? `Locked — ${turnsToGo} more exchange${turnsToGo === 1 ? "" : "s"}`
-    : "Locked";
-  return (
-    <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[0.6rem] tracking-[0.35em] uppercase text-foreground/40">
-      {actions.map(({ icon: Icon, label, prefix }) => (
-        <button
-          key={label}
-          type="button"
-          disabled={disabled}
-          onClick={() => onAction(prefix)}
-          className="flex items-center gap-2 hover:text-foreground/90 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-        >
-          <Icon className="h-3 w-3" />
-          {label}
-        </button>
-      ))}
-      <button
-        type="button"
-        disabled={disabled}
-        onClick={onDecide}
-        title={decideTitle}
-        aria-label={decideTitle}
-        className={`flex items-center gap-2 transition-colors disabled:opacity-30 disabled:cursor-not-allowed ml-auto ${
-          decideReady
-            ? "text-accent hover:text-accent/80"
-            : "text-foreground/30 hover:text-foreground/60"
-        }`}
-      >
-        {decideReady && (
-          <span className="relative flex h-1.5 w-1.5">
-            <span className="absolute inline-flex h-full w-full rounded-full bg-accent/60 animate-ping" />
-            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-accent" />
-          </span>
-        )}
-        <Scale className="h-3 w-3" />
-        Decide
-      </button>
-    </div>
-  );
-}
 
 function DecideModal({
   presets,
