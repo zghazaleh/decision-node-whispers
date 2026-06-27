@@ -4,6 +4,7 @@ import type { DecisionAnalysis } from "@/lib/analysis.functions";
 import { readMission, useMission, type SavedMission } from "@/lib/mission-store";
 import { readProfile, type DecisionProfile } from "@/lib/decision-profile";
 import { DecisionProfileCard } from "@/components/DecisionProfileCard";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import sceneCosmos from "@/assets/scene-cosmos.jpg";
 
 export const Route = createFileRoute("/analysis")({
