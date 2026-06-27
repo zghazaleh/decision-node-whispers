@@ -458,27 +458,6 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
         {/* Composer */}
         <div className="px-6 sm:px-10 pb-8 sm:pb-10">
           <div className="mx-auto max-w-2xl">
-            <QuickActions
-              disabled={busy}
-              decideReady={decideReady}
-              userTurns={userTurnsCount}
-              onAction={(prefix) => {
-                setInput((cur) => (cur ? cur : prefix));
-                inputRef.current?.focus();
-              }}
-              onDecide={() => {
-                if (decideReady) {
-                  openDecideWith(input.trim());
-                } else {
-                  const turnsToGo = Math.max(0, 4 - userTurnsCount);
-                  toast("Not yet.", {
-                    description: turnsToGo > 0
-                      ? `Continue the conversation — ${turnsToGo} more exchange${turnsToGo === 1 ? "" : "s"}.`
-                      : "The moment hasn't arrived.",
-                  });
-                }
-              }}
-            />
 
 
             <form
