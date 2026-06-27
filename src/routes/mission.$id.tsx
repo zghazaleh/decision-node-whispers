@@ -336,8 +336,9 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
         style={{ ["--px" as never]: "0px", ["--py" as never]: "0px" }}
       >
         <div
-          className="absolute inset-0 animate-scene-sway"
+          className="absolute inset-0 animate-scene-sway animate-chroma-breathe"
           style={{ transform: "translate3d(var(--px), var(--py), 0)" }}
+
         >
           <img
             src={ENGINE.scene.src}
