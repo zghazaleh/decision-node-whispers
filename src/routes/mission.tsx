@@ -3,11 +3,13 @@ import { DefaultChatTransport, type UIMessage } from "ai";
 import { useServerFn } from "@tanstack/react-start";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Eye, BookOpen, Phone, MessageCircle, Send, Scale, X } from "lucide-react";
+import { Eye, BookOpen, Phone, MessageCircle, Send, Scale, X, Mic, Square } from "lucide-react";
 
 import sceneOffice from "@/assets/scene-office.jpg";
 import { partsToText, readMission, useMission } from "@/lib/mission-store";
 import { analyzeDecision } from "@/lib/analysis.functions";
+import { startRecording, type Recorder } from "@/lib/record-wav";
+
 
 export const Route = createFileRoute("/mission")({
   head: () => ({
@@ -303,6 +305,13 @@ function Mission() {
                 disabled={busy}
                 className="flex-1 resize-none bg-transparent text-foreground/95 placeholder:text-foreground/30 outline-none text-base font-sans leading-relaxed max-h-40"
               />
+              <MicButton
+                disabled={busy}
+                onTranscript={(t) => {
+                  setInput((cur) => (cur ? cur.trimEnd() + " " + t : t));
+                  inputRef.current?.focus();
+                }}
+              />
               <button
                 type="submit"
                 disabled={!input.trim() || busy}
@@ -311,6 +320,7 @@ function Mission() {
               >
                 <Send className="h-4 w-4" />
               </button>
+
             </form>
           </div>
         </div>
@@ -612,3 +622,99 @@ function DecideModal({
     </div>
   );
 }
+
+function MicButton({
+  disabled,
+  onTranscript,
+}: {
+  disabled: boolean;
+  onTranscript: (text: string) => void;
+}) {
+  const [state, setState] = useState<"idle" | "recording" | "transcribing">("idle");
+  const [level, setLevel] = useState(0);
+  const recRef = useRef<Recorder | null>(null);
+  const rafRef = useRef<number | null>(null);
+
+  useEffect(() => () => {
+    recRef.current?.cancel();
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+  }, []);
+
+  async function start() {
+    try {
+      const rec = await startRecording();
+      recRef.current = rec;
+      setState("recording");
+      const tick = () => {
+        if (!recRef.current) return;
+        setLevel(recRef.current.getLevel());
+        rafRef.current = requestAnimationFrame(tick);
+      };
+      tick();
+    } catch (e) {
+      console.error(e);
+      alert("Microphone access denied. Allow it in your browser to speak.");
+    }
+  }
+
+  async function stop() {
+    const rec = recRef.current;
+    if (!rec) return;
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    setState("transcribing");
+    try {
+      const blob = await rec.stop();
+      recRef.current = null;
+      if (blob.size < 2048) {
+        setState("idle");
+        return;
+      }
+      const fd = new FormData();
+      fd.append("file", blob, "recording.wav");
+      const res = await fetch("/api/transcribe", { method: "POST", body: fd });
+      if (!res.ok) throw new Error(await res.text());
+      const data = (await res.json()) as { text?: string };
+      const text = (data.text ?? "").trim();
+      if (text) onTranscript(text);
+    } catch (e) {
+      console.error(e);
+      alert("Couldn't hear that. Try again.");
+    } finally {
+      setState("idle");
+      setLevel(0);
+    }
+  }
+
+  if (state === "recording") {
+    const scale = 1 + Math.min(0.6, level * 1.2);
+    return (
+      <button
+        type="button"
+        onClick={stop}
+        aria-label="Stop recording"
+        className="relative shrink-0 p-2 text-accent transition-colors"
+      >
+        <span
+          className="absolute inset-0 rounded-full bg-accent/20"
+          style={{ transform: `scale(${scale})`, transition: "transform 80ms linear" }}
+          aria-hidden
+        />
+        <Square className="relative h-4 w-4 fill-current" />
+      </button>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={start}
+      disabled={disabled || state === "transcribing"}
+      aria-label={state === "transcribing" ? "Transcribing" : "Hold to speak"}
+      title="Speak"
+      className="shrink-0 p-2 text-foreground/50 hover:text-foreground disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
+    >
+      <Mic className={`h-4 w-4 ${state === "transcribing" ? "animate-pulse" : ""}`} />
+    </button>
+  );
+}
+
