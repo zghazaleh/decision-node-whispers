@@ -352,8 +352,11 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
           />
 
         </div>
+        <div className="scene-haze" aria-hidden />
         <div className="scene-light" aria-hidden />
         <div className="scene-dust" aria-hidden />
+        <div className="scene-pulse" aria-hidden />
+
         {/* Base bottom-weighted shadow — deepens with pressure */}
         <div
           className="absolute inset-0"
