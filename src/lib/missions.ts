@@ -123,4 +123,21 @@ export const MISSIONS: MissionMeta[] = [
     creator: "House Edition",
     version: "v1.0",
   },
+  {
+    id: "mission-07",
+    number: "07",
+    codename: "Spillway",
+    title: "Spillway",
+    logline:
+      "Open the gate and the parish drowns by dawn. Hold it and the city might. The call is yours, now.",
+    status: "available",
+    duration: "20–40 min",
+    tone: "Procedural · 3 a.m. dread",
+    location: "Carrow River control station",
+    year: "Flood season",
+    category: "Crisis",
+    difficulty: 5,
+    creator: "House Edition",
+    version: "v1.0",
+  },
 ];
