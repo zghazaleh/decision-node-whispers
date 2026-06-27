@@ -116,29 +116,70 @@ function Analysis() {
           </div>
 
           {/* Expandable details — ordered per spec */}
-          <div className="animate-fade-up divide-y divide-foreground/10 border-y border-foreground/10" style={{ animationDelay: "1.7s" }}>
-            {a.reasoningAssessment && (
-              <ExpandableSection label="Reasoning assessment">
-                <ReasoningAssessment data={a.reasoningAssessment} />
-              </ExpandableSection>
-            )}
-            <ExpandableBlock label="Evidence considered" body={a.evidenceUsed} />
-            <ExpandableBlock label="Evidence ignored" body={a.evidenceIgnored} />
-            <ExpandableBlock label="Assumptions made" body={a.assumptions} />
-            <ExpandableBlock label="Alternative paths" body={a.alternatives} />
-            {a.reasoningAssessment && a.reasoningAssessment.possibleBiases.length > 0 && (
-              <ExpandableSection label="Potential cognitive biases">
-                <PossibleBiasesList biases={a.reasoningAssessment.possibleBiases} />
-              </ExpandableSection>
-            )}
-            <ExpandableSection label="Long-term consequences">
-              <LongTermConsequences timeline={a.timeline} />
-            </ExpandableSection>
-            {a.beliefTrajectory && a.beliefTrajectory.length > 0 && (
-              <ExpandableSection label="Belief trajectory">
-                <BeliefTrajectory trajectory={a.beliefTrajectory} />
-              </ExpandableSection>
-            )}
+          <div className="animate-fade-up" style={{ animationDelay: "1.7s" }}>
+            <SectionsProvider>
+              <SectionsToolbar />
+              <div className="divide-y divide-foreground/10 border-y border-foreground/10">
+                {a.reasoningAssessment && (
+                  <ExpandableSection
+                    id="reasoning"
+                    label="Reasoning assessment"
+                    hint="How you weighed what you knew."
+                  >
+                    <ReasoningAssessment data={a.reasoningAssessment} />
+                  </ExpandableSection>
+                )}
+                <ExpandableBlock
+                  id="evidence-used"
+                  label="Evidence considered"
+                  hint="What you noticed and let shape the choice."
+                  body={a.evidenceUsed}
+                />
+                <ExpandableBlock
+                  id="evidence-ignored"
+                  label="Evidence set aside"
+                  hint="What was within reach but went unread."
+                  body={a.evidenceIgnored}
+                />
+                <ExpandableBlock
+                  id="assumptions"
+                  label="Assumptions made"
+                  hint="The beliefs you treated as settled."
+                  body={a.assumptions}
+                />
+                <ExpandableBlock
+                  id="alternatives"
+                  label="Paths not taken"
+                  hint="Other shapes this decision could have held."
+                  body={a.alternatives}
+                />
+                {a.reasoningAssessment && a.reasoningAssessment.possibleBiases.length > 0 && (
+                  <ExpandableSection
+                    id="biases"
+                    label="Cognitive patterns"
+                    hint="Tendencies worth noticing — not verdicts."
+                  >
+                    <PossibleBiasesList biases={a.reasoningAssessment.possibleBiases} />
+                  </ExpandableSection>
+                )}
+                <ExpandableSection
+                  id="long-term"
+                  label="Long-term consequences"
+                  hint="Where this choice tends to lead, over time."
+                >
+                  <LongTermConsequences timeline={a.timeline} />
+                </ExpandableSection>
+                {a.beliefTrajectory && a.beliefTrajectory.length > 0 && (
+                  <ExpandableSection
+                    id="belief"
+                    label="Belief trajectory"
+                    hint="How your understanding shifted as it unfolded."
+                  >
+                    <BeliefTrajectory trajectory={a.beliefTrajectory} />
+                  </ExpandableSection>
+                )}
+              </div>
+            </SectionsProvider>
           </div>
 
           {percentile && percentile.plays >= 3 && (
