@@ -298,21 +298,29 @@ function DimensionRow({
           <p className="text-[0.6rem] tracking-[0.3em] uppercase text-foreground/40 mb-2">
             Missions that shaped this trait
           </p>
-          <ul className="space-y-1.5">
+          <ul className="space-y-3">
             {[...contributions]
               .slice()
               .reverse()
               .map((c) => {
                 const s = c.scores[dim];
+                const note = c.notes?.[dim];
                 return (
                   <li
                     key={c.missionId + c.at}
-                    className="grid grid-cols-[1fr_auto] items-center gap-3 text-xs text-foreground/65"
+                    className="text-xs text-foreground/65"
                   >
-                    <span className="truncate">{missionLabel(c.missionId)}</span>
-                    <span className="font-display tabular-nums text-foreground/85">
-                      {s}
-                    </span>
+                    <div className="grid grid-cols-[1fr_auto] items-center gap-3">
+                      <span className="truncate">{missionLabel(c.missionId)}</span>
+                      <span className="font-display tabular-nums text-foreground/85">
+                        {s}
+                      </span>
+                    </div>
+                    {note && (
+                      <p className="mt-1 text-[0.7rem] text-foreground/55 italic leading-relaxed">
+                        {note}
+                      </p>
+                    )}
                   </li>
                 );
               })}
