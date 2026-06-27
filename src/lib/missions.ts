@@ -89,4 +89,21 @@ export const MISSIONS: MissionMeta[] = [
     creator: "House Edition",
     version: "v1.0",
   },
+  {
+    id: "mission-05",
+    number: "05",
+    codename: "Code Black",
+    title: "Code Black",
+    logline:
+      "Pay the people who did this, or watch the monitors. You have until the next alarm.",
+    status: "available",
+    duration: "20–40 min",
+    tone: "Clinical · Under siege",
+    location: "Meridian General Hospital",
+    year: "2025",
+    category: "Crisis",
+    difficulty: 4,
+    creator: "House Edition",
+    version: "v1.0",
+  },
 ];
