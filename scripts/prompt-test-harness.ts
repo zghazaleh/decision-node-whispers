@@ -396,8 +396,8 @@ async function main() {
     `▶ Prompt test harness — mission=${args.mission} only=${args.only ?? "(all)"} update=${args.updateSnapshots}`,
   );
 
-  if (args.only !== "analysis") await runDirector(gateway, args.mission, args.updateSnapshots);
-  if (args.only !== "director") await runAnalysis(gateway, args.mission, args.updateSnapshots);
+  if (args.only !== "analysis") await runDirector(gateway, args.mission, args.updateSnapshots, args.fixture);
+  if (args.only !== "director") await runAnalysis(gateway, args.mission, args.updateSnapshots, args.fixture);
 
   const failed = results.filter((r) => !r.ok);
   // eslint-disable-next-line no-console
