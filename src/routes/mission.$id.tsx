@@ -567,6 +567,9 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
                 onClick={() => decideReady && openDecideWith("")}
                 disabled={!decideReady}
                 aria-disabled={!decideReady}
+                title={decideReady
+                  ? "Commit to a decision"
+                  : "Stay in the moment — the decision opens as the pressure builds."}
                 style={{ opacity: 0.15 + pressureForDecide * 0.85 }}
                 className={`group inline-flex items-center gap-2 rounded-full border px-5 py-2.5 text-[0.65rem] font-medium tracking-[0.32em] uppercase transition-all duration-700 ${
                   decideReady
