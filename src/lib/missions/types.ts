@@ -60,14 +60,13 @@ export type MissionAtmosphere = {
   // ── Audio bed ────────────────────────────────────────────────────────
   /** Sub-pad fundamental in Hz. Default 55. */
   padFrequency?: number;
-  /** Detune ratio for the second pad oscillator. Default 1.005. */
-  padDetune?: number;
   /** Low-pass cutoff centre in Hz. Default 1600. */
   filterBaseHz?: number;
-  /** LFO modulation depth in Hz. Default 800. */
+  /** LFO modulation depth in Hz. Default 280. Keep gentle — high depth pumps. */
   filterLfoDepthHz?: number;
   /** LFO rate in Hz. Default 0.05 (20s period). */
   lfoRateHz?: number;
+
 };
 
 
