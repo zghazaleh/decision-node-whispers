@@ -149,7 +149,7 @@ function Mission() {
     await sendMessage({ text: trimmed });
   }
 
-  async function handleDecide(decision: string, reasoning: string) {
+  async function handleDecide(decision: string, reasoning: string, archetypeId?: ArchetypeId) {
     if (!decision.trim()) return;
     setAnalyzing(true);
     try {
@@ -158,7 +158,12 @@ function Mission() {
         text: partsToText(m),
       }));
       const analysis = await analyzeFn({
-        data: { decision: decision.trim(), reasoning: reasoning.trim(), transcript },
+        data: {
+          decision: decision.trim(),
+          reasoning: reasoning.trim(),
+          transcript,
+          ...(archetypeId ? { archetypeId } : {}),
+        },
       });
       update({
         decision: decision.trim(),
