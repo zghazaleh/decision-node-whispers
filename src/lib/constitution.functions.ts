@@ -1,10 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
-import { z } from "zod";
-import { execSync } from "child_process";
-import { readdirSync, statSync } from "fs";
-import { join } from "path";
 
+const GITHUB_REPO = "zghazaleh/decision-node-whispers";
+const GITHUB_BRANCH = "main";
 const CONSTITUTION_DIR = "constitution";
+
 const EXPECTED_FILES = [
   "README.md",
   "00-product-philosophy.md",
@@ -36,77 +35,91 @@ export type ConstitutionStatus = {
   lastGitCommitTime: string | null;
 };
 
+type GhContentEntry = {
+  name: string;
+  size: number;
+  type: "file" | "dir" | "symlink" | "submodule";
+};
+
+type GhCommit = {
+  sha: string;
+  commit: { committer: { date: string } };
+};
+
 export const getConstitutionStatus = createServerFn({ method: "GET" }).handler(
   async (): Promise<ConstitutionStatus> => {
-    // Check GitHub remotes
+    const remoteUrl = `https://github.com/${GITHUB_REPO}`;
+    const headers: Record<string, string> = {
+      Accept: "application/vnd.github+json",
+      "User-Agent": "lovable-constitution-status",
+    };
+
     let githubConnected = false;
-    let githubRemoteUrl: string | null = null;
-    try {
-      const remotes = execSync("git remote -v", { encoding: "utf-8", timeout: 5000 });
-      const lines = remotes.split("\n").filter(Boolean);
-      const githubLine = lines.find((l) => l.includes("github.com"));
-      if (githubLine) {
-        githubConnected = true;
-        githubRemoteUrl = githubLine.split(/\s+/)[1] ?? null;
-      }
-    } catch {
-      // git not available or no remotes
-    }
-
-    // Check constitution files
     const files: ConstitutionFileInfo[] = [];
-    const missingFiles: string[] = [];
-
-    for (const name of EXPECTED_FILES) {
-      const path = join(CONSTITUTION_DIR, name);
-      try {
-        const stats = statSync(path);
-        files.push({
-          name,
-          size: stats.size,
-          modifiedAt: stats.mtime.toISOString(),
-        });
-      } catch {
-        missingFiles.push(name);
-      }
-    }
-
-    // Extra files not in expected list
-    try {
-      const entries = readdirSync(CONSTITUTION_DIR);
-      for (const name of entries) {
-        if (!EXPECTED_FILES.includes(name)) {
-          try {
-            const stats = statSync(join(CONSTITUTION_DIR, name));
-            files.push({
-              name,
-              size: stats.size,
-              modifiedAt: stats.mtime.toISOString(),
-            });
-          } catch { /* noop */ }
-        }
-      }
-    } catch { /* noop */ }
-
-    // Last git commit info
+    const missingFiles: string[] = [...EXPECTED_FILES];
     let lastGitCommit: string | null = null;
     let lastGitCommitTime: string | null = null;
+
+    // Verify repo reachable + list constitution dir
     try {
-      lastGitCommit = execSync("git log -1 --format=%H", {
-        encoding: "utf-8",
-        timeout: 5000,
-      }).trim();
-      lastGitCommitTime = execSync("git log -1 --format=%ci", {
-        encoding: "utf-8",
-        timeout: 5000,
-      }).trim();
+      const contentsRes = await fetch(
+        `https://api.github.com/repos/${GITHUB_REPO}/contents/${CONSTITUTION_DIR}?ref=${GITHUB_BRANCH}`,
+        { headers },
+      );
+      if (contentsRes.ok) {
+        githubConnected = true;
+        const entries = (await contentsRes.json()) as GhContentEntry[];
+        const presentNames = new Set<string>();
+        for (const e of entries) {
+          if (e.type !== "file") continue;
+          presentNames.add(e.name);
+          files.push({
+            name: e.name,
+            size: e.size,
+            modifiedAt: "",
+          });
+        }
+        for (let i = missingFiles.length - 1; i >= 0; i--) {
+          if (presentNames.has(missingFiles[i])) missingFiles.splice(i, 1);
+        }
+      } else if (contentsRes.status === 404) {
+        // Repo reachable but folder missing — still counts as connected if repo exists
+        const repoRes = await fetch(
+          `https://api.github.com/repos/${GITHUB_REPO}`,
+          { headers },
+        );
+        githubConnected = repoRes.ok;
+      }
     } catch {
-      // no commits
+      // network error — treat as disconnected
+    }
+
+    // Latest commit on the constitution dir
+    if (githubConnected) {
+      try {
+        const commitsRes = await fetch(
+          `https://api.github.com/repos/${GITHUB_REPO}/commits?path=${CONSTITUTION_DIR}&sha=${GITHUB_BRANCH}&per_page=1`,
+          { headers },
+        );
+        if (commitsRes.ok) {
+          const commits = (await commitsRes.json()) as GhCommit[];
+          if (commits[0]) {
+            lastGitCommit = commits[0].sha;
+            lastGitCommitTime = commits[0].commit.committer.date;
+            // Fill in modifiedAt for files with the commit time as a best-effort
+            for (const f of files) {
+              if (!f.modifiedAt) f.modifiedAt = lastGitCommitTime;
+            }
+          }
+        }
+      } catch {
+        // ignore
+      }
     }
 
     return {
       githubConnected,
-      githubRemoteUrl,
+      githubRemoteUrl: githubConnected ? remoteUrl : null,
       files: files.sort((a, b) => a.name.localeCompare(b.name)),
       allFilesPresent: missingFiles.length === 0,
       missingFiles,
