@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { partsToText, readMission, useMission } from "@/lib/mission-store";
 import { analyzeDecision } from "@/lib/analysis.functions";
 import { updateProfileWithAnalysis } from "@/lib/decision-profile";
+import { recordMissionPlay } from "@/lib/mission-stats.functions";
 
 import { createAmbient } from "@/lib/ambient";
 import { getMissionEngine } from "@/lib/missions/registry";
@@ -96,6 +97,10 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
   const [decideOpen, setDecideOpen] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const analyzeFn = useServerFn(analyzeDecision);
+  const recordPlayFn = useServerFn(recordMissionPlay);
+  // Track when the decide modal first opens, so we can measure decision time
+  // (deliberation inside the modal) separately from total investigation time.
+  const decideOpenedAtRef = useRef<number | null>(null);
 
   // Ambient score — starts on the first user gesture (browsers require it).
   // Missions without a registered soundtrack play silently.
