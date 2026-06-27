@@ -150,10 +150,46 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
   }, [awakening, status]);
 
   const busy = status === "submitted" || status === "streaming";
+  const userTurnsCount = messages.filter((m) => m.role === "user").length;
+  const pressureForDecide = Math.min(1, Math.max(0, (messages.length - 1) / 18));
+  const decideReady = !busy && pressureForDecide >= 0.45;
+  const [decidePrefill, setDecidePrefill] = useState<string>("");
+
+  // Natural-language decision triggers — opens the Decide modal pre-filled
+  // instead of sending the line into the chat. Keeps the commit ritual intact
+  // (reasoning, confidence) while letting the player initiate from the composer.
+  function detectDecisionIntent(text: string): string | null {
+    const t = text.trim();
+    const re = /^(?:i\s+(?:decide|choose|commit|will|am\s+going\s+to|'?ll|am\s+choosing)\s+(?:to\s+)?|my\s+(?:decision|choice)\s+(?:is|:)\s*|i'?m\s+going\s+to\s+|let's\s+|final\s+answer[:\s]+)(.+)$/i;
+    const m = t.match(re);
+    if (m && m[1].trim().length > 0) return m[1].trim();
+    return null;
+  }
+
+  function openDecideWith(prefill: string) {
+    setDecidePrefill(prefill);
+    setDecideOpen(true);
+  }
 
   async function submit(text: string) {
     const trimmed = text.trim();
     if (!trimmed || busy) return;
+    const intent = detectDecisionIntent(trimmed);
+    if (intent) {
+      if (decideReady) {
+        setInput("");
+        openDecideWith(intent);
+        return;
+      } else {
+        const turnsToGo = Math.max(0, 4 - userTurnsCount);
+        toast("Not yet — stay in the room a little longer.", {
+          description: turnsToGo > 0
+            ? `${turnsToGo} more exchange${turnsToGo === 1 ? "" : "s"} before you can commit.`
+            : "The moment hasn't ripened.",
+        });
+        return;
+      }
+    }
     setInput("");
     await sendMessage({ text: trimmed });
   }
@@ -460,11 +496,26 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
           <div className="mx-auto max-w-2xl">
             <QuickActions
               disabled={busy}
+              decideReady={decideReady}
+              userTurns={userTurnsCount}
               onAction={(prefix) => {
                 setInput((cur) => (cur ? cur : prefix));
                 inputRef.current?.focus();
               }}
+              onDecide={() => {
+                if (decideReady) {
+                  openDecideWith(input.trim());
+                } else {
+                  const turnsToGo = Math.max(0, 4 - userTurnsCount);
+                  toast("Not yet.", {
+                    description: turnsToGo > 0
+                      ? `Stay in the room — ${turnsToGo} more exchange${turnsToGo === 1 ? "" : "s"}.`
+                      : "The moment hasn't ripened.",
+                  });
+                }
+              }}
             />
+
 
             <form
               onSubmit={(e) => {
@@ -514,6 +565,7 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
         <DecideModal
           presets={ENGINE.decisionPresets}
           analyzing={analyzing}
+          initialDecision={decidePrefill}
           onClose={() => !analyzing && setDecideOpen(false)}
           onSubmit={handleDecide}
         />
@@ -673,10 +725,16 @@ function ChipRow({ chips, onPick }: { chips: string[]; onPick: (text: string) =>
 
 function QuickActions({
   disabled,
+  decideReady,
+  userTurns,
   onAction,
+  onDecide,
 }: {
   disabled: boolean;
+  decideReady: boolean;
+  userTurns: number;
   onAction: (prefix: string) => void;
+  onDecide: () => void;
 }) {
   const actions = [
     { icon: MessageCircle, label: "Ask", prefix: "" },
@@ -684,6 +742,12 @@ function QuickActions({
     { icon: BookOpen, label: "Read", prefix: "I pick up the " },
     { icon: Phone, label: "Call", prefix: "I reach for the phone and call " },
   ];
+  const turnsToGo = Math.max(0, 4 - userTurns);
+  const decideTitle = decideReady
+    ? "Commit your decision"
+    : turnsToGo > 0
+    ? `Locked — ${turnsToGo} more exchange${turnsToGo === 1 ? "" : "s"}`
+    : "Locked";
   return (
     <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[0.6rem] tracking-[0.35em] uppercase text-foreground/40">
       {actions.map(({ icon: Icon, label, prefix }) => (
@@ -698,6 +762,27 @@ function QuickActions({
           {label}
         </button>
       ))}
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={onDecide}
+        title={decideTitle}
+        aria-label={decideTitle}
+        className={`flex items-center gap-2 transition-colors disabled:opacity-30 disabled:cursor-not-allowed ml-auto ${
+          decideReady
+            ? "text-accent hover:text-accent/80"
+            : "text-foreground/30 hover:text-foreground/60"
+        }`}
+      >
+        {decideReady && (
+          <span className="relative flex h-1.5 w-1.5">
+            <span className="absolute inline-flex h-full w-full rounded-full bg-accent/60 animate-ping" />
+            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-accent" />
+          </span>
+        )}
+        <Scale className="h-3 w-3" />
+        Decide
+      </button>
     </div>
   );
 }
@@ -705,15 +790,17 @@ function QuickActions({
 function DecideModal({
   presets,
   analyzing,
+  initialDecision,
   onClose,
   onSubmit,
 }: {
   presets: MissionEngine["decisionPresets"];
   analyzing: boolean;
+  initialDecision?: string;
   onClose: () => void;
   onSubmit: (decision: string, reasoning: string, archetypeId?: string, confidence?: number) => void;
 }) {
-  const [decision, setDecision] = useState("");
+  const [decision, setDecision] = useState(initialDecision ?? "");
   const [reasoning, setReasoning] = useState("");
   const [archetypeId, setArchetypeId] = useState<string | undefined>();
   const [confidence, setConfidence] = useState<number>(60);
