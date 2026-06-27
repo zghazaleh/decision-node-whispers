@@ -63,28 +63,13 @@ function Analysis() {
           </h1>
         </section>
 
-        {/* Timeline */}
+        {/* Interactive Timeline */}
         <section className="animate-fade-up" style={{ animationDelay: "0.4s" }}>
           <SectionLabel>Consequence Timeline</SectionLabel>
-          <ol className="mt-8 space-y-8 relative before:absolute before:left-[7px] before:top-2 before:bottom-2 before:w-px before:bg-foreground/15">
-            {a.timeline.map((t, i) => (
-              <li
-                key={i}
-                className="relative pl-10 animate-fade-up"
-                style={{ animationDelay: `${0.6 + i * 0.25}s` }}
-              >
-                <span className="absolute left-0 top-2 h-3.5 w-3.5 rounded-full border border-accent/70 bg-background flex items-center justify-center">
-                  <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse-soft" />
-                </span>
-                <p className="text-[0.65rem] tracking-[0.3em] uppercase text-foreground/55 mb-2">
-                  {t.beat}
-                </p>
-                <p className="font-display text-xl sm:text-2xl leading-snug text-foreground/90 text-pretty">
-                  {t.consequence}
-                </p>
-              </li>
-            ))}
-          </ol>
+          <p className="mt-4 text-center text-xs text-foreground/45 tracking-wide">
+            Scrub through the turning points. Watch how the outcome assembled itself.
+          </p>
+          <TimelineScrubber timeline={a.timeline} />
         </section>
 
         {/* Decision Analysis */}
