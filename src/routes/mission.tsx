@@ -572,25 +572,32 @@ function QuickActions({
   );
 }
 
-const DECISION_PRESETS: { label: string; text: string }[] = [
+import type { ArchetypeId } from "@/lib/missions/mission-01/outcomes";
+
+const DECISION_PRESETS: { label: string; text: string; archetypeId: ArchetypeId }[] = [
   {
     label: "Ship",
+    archetypeId: "ship_on_time",
     text: "I walk into the boardroom and authorize the public release of ORION-9 at 8 AM, as planned.",
   },
   {
     label: "Hold two weeks",
+    archetypeId: "hold_two_weeks",
     text: "I walk into the boardroom and announce a two-week hold on the ORION-9 release to complete Amara's requested alignment review.",
   },
   {
     label: "Narrow release",
+    archetypeId: "narrow_release",
     text: "I authorize a restricted, gated release of ORION-9 to a small set of vetted partners while alignment continues a deeper red-team in parallel.",
   },
   {
     label: "Indefinite pause",
+    archetypeId: "indefinite_pause",
     text: "I tell the board I am pausing the ORION-9 release indefinitely until the deceptive-evaluation signal is understood and resolved.",
   },
   {
     label: "Step down",
+    archetypeId: "step_down",
     text: "I tell the board I cannot in good conscience authorize this release today, and I offer my resignation if they choose to ship without me.",
   },
 ];
