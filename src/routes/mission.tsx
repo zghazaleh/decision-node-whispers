@@ -305,6 +305,13 @@ function Mission() {
                 disabled={busy}
                 className="flex-1 resize-none bg-transparent text-foreground/95 placeholder:text-foreground/30 outline-none text-base font-sans leading-relaxed max-h-40"
               />
+              <MicButton
+                disabled={busy}
+                onTranscript={(t) => {
+                  setInput((cur) => (cur ? cur.trimEnd() + " " + t : t));
+                  inputRef.current?.focus();
+                }}
+              />
               <button
                 type="submit"
                 disabled={!input.trim() || busy}
@@ -313,6 +320,7 @@ function Mission() {
               >
                 <Send className="h-4 w-4" />
               </button>
+
             </form>
           </div>
         </div>
