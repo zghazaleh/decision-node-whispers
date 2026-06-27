@@ -158,7 +158,7 @@ function scoreFromAnalysis(a: DecisionAnalysis): {
   const signals: string[] = [];
   if (held > revised) signals.push("anchored-after-confidence-rose");
   if (revised >= 2) signals.push("updates-on-evidence");
-  if (biases >= 2) signals.push("multiple-bias-textures");
+  if (biasWeight >= 2) signals.push("multiple-bias-textures");
   if (ignored > used) signals.push("reachable-evidence-skipped");
   if (strengths >= 3 && blindSpots === 0) signals.push("strong-process");
 
