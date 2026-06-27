@@ -6,7 +6,7 @@
  */
 
 import type { MissionEngine, DecisionPreset } from "@/lib/missions/types";
-import { canonGroundTruthBlock } from "./canon";
+import { canonGroundTruthBlock, CANON } from "./canon";
 import {
   ARCHETYPES,
   ARCHETYPE_IDS,
