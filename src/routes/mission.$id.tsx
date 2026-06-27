@@ -202,10 +202,10 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
         return;
       } else {
         const turnsToGo = Math.max(0, 4 - userTurnsCount);
-        toast("Not yet.", {
+        toast("Stay in the room a little longer.", {
           description: turnsToGo > 0
-            ? `${turnsToGo} more exchange${turnsToGo === 1 ? "" : "s"} before you can commit.`
-            : "The moment hasn't arrived.",
+            ? `${turnsToGo} more exchange${turnsToGo === 1 ? "" : "s"} before this decision is yours to make.`
+            : "Give the moment a little more time.",
         });
         return;
       }
@@ -250,6 +250,29 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
       } catch (err) {
         console.error("profile update failed", err);
       }
+
+      // Fire-and-forget community telemetry — no PII, only timings + counts.
+      try {
+        const now = Date.now();
+        const investigationSeconds = mission.startedAt
+          ? Math.max(0, Math.round((now - mission.startedAt) / 1000))
+          : undefined;
+        const decisionSeconds = decideOpenedAtRef.current
+          ? Math.max(0, Math.round((now - decideOpenedAtRef.current) / 1000))
+          : undefined;
+        void recordPlayFn({
+          data: {
+            missionId: MISSION_ID,
+            investigationSeconds,
+            decisionSeconds,
+            messageCount: messages.length,
+            completed: true,
+          },
+        });
+      } catch (err) {
+        console.error("play telemetry failed", err);
+      }
+
       setDecideOpen(false);
       // Small dramatic pause before transition.
       setTimeout(() => navigate({ to: "/analysis" }), 600);
