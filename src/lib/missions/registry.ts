@@ -5,14 +5,37 @@
  * that exports a `MissionEngine`, then register it here. Everything
  * downstream (chat system prompt, decision classifier, outcome narration,
  * decision presets) reads from this registry by mission id.
+ *
+ * Every engine is validated at registration time. A mission with a missing
+ * or malformed canon / outcomes set fails loudly here instead of crashing
+ * deeper in the analyzer or chat route.
  */
 
 import type { MissionEngine } from "./types";
 import { missionOneEngine } from "./mission-01";
+import {
+  formatMissionEngineErrors,
+  validateMissionEngine,
+  type MissionEngineValidationError,
+} from "./validation";
 
-const REGISTRY: Record<string, MissionEngine> = {
-  [missionOneEngine.id]: missionOneEngine,
-};
+const REGISTRY: Record<string, MissionEngine> = {};
+const VALIDATION_ERRORS: Record<string, MissionEngineValidationError[]> = {};
+
+function register(engine: MissionEngine): void {
+  const result = validateMissionEngine(engine);
+  if (!result.ok) {
+    VALIDATION_ERRORS[engine?.id ?? "(unknown)"] = result.errors;
+    // Loud, single-line server-side warning so the failure is visible in logs
+    // even when callers use the safe lookups below.
+    // eslint-disable-next-line no-console
+    console.error(formatMissionEngineErrors(engine?.id ?? "(unknown)", result.errors));
+    return;
+  }
+  REGISTRY[engine.id] = engine;
+}
+
+register(missionOneEngine);
 
 export function getMissionEngine(missionId: string): MissionEngine | null {
   return REGISTRY[missionId] ?? null;
@@ -20,10 +43,18 @@ export function getMissionEngine(missionId: string): MissionEngine | null {
 
 export function requireMissionEngine(missionId: string): MissionEngine {
   const engine = getMissionEngine(missionId);
-  if (!engine) throw new Error(`Unknown mission id: ${missionId}`);
-  return engine;
+  if (engine) return engine;
+  const errs = VALIDATION_ERRORS[missionId];
+  if (errs) throw new Error(formatMissionEngineErrors(missionId, errs));
+  throw new Error(`Unknown mission id: ${missionId}`);
 }
 
 export function listMissionEngineIds(): string[] {
   return Object.keys(REGISTRY);
+}
+
+export function getMissionEngineValidationErrors(
+  missionId: string,
+): MissionEngineValidationError[] | null {
+  return VALIDATION_ERRORS[missionId] ?? null;
 }
