@@ -45,6 +45,9 @@ export type MissionEngine = {
   systemPrompt: string;
   /** Canonical opening message rendered as the first assistant turn. */
   opening: MissionOpening;
+  /** Cinematic background scene shown behind the dialogue. */
+  scene: MissionScene;
+
   /** All archetypes for this mission, keyed by id. */
   archetypes: Record<string, Archetype>;
   /** Stable list of archetype ids (excluding the "unclassified" fallback). */
