@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SoundTestRouteImport } from './routes/sound-test'
 import { Route as MissionsRouteImport } from './routes/missions'
 import { Route as AnalysisRouteImport } from './routes/analysis'
 import { Route as IndexRouteImport } from './routes/index'
@@ -16,6 +17,11 @@ import { Route as MissionIdRouteImport } from './routes/mission.$id'
 import { Route as ApiTranscribeRouteImport } from './routes/api/transcribe'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 
+const SoundTestRoute = SoundTestRouteImport.update({
+  id: '/sound-test',
+  path: '/sound-test',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MissionsRoute = MissionsRouteImport.update({
   id: '/missions',
   path: '/missions',
@@ -51,6 +57,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/analysis': typeof AnalysisRoute
   '/missions': typeof MissionsRoute
+  '/sound-test': typeof SoundTestRoute
   '/api/chat': typeof ApiChatRoute
   '/api/transcribe': typeof ApiTranscribeRoute
   '/mission/$id': typeof MissionIdRoute
@@ -59,6 +66,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/analysis': typeof AnalysisRoute
   '/missions': typeof MissionsRoute
+  '/sound-test': typeof SoundTestRoute
   '/api/chat': typeof ApiChatRoute
   '/api/transcribe': typeof ApiTranscribeRoute
   '/mission/$id': typeof MissionIdRoute
@@ -68,6 +76,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/analysis': typeof AnalysisRoute
   '/missions': typeof MissionsRoute
+  '/sound-test': typeof SoundTestRoute
   '/api/chat': typeof ApiChatRoute
   '/api/transcribe': typeof ApiTranscribeRoute
   '/mission/$id': typeof MissionIdRoute
@@ -78,6 +87,7 @@ export interface FileRouteTypes {
     | '/'
     | '/analysis'
     | '/missions'
+    | '/sound-test'
     | '/api/chat'
     | '/api/transcribe'
     | '/mission/$id'
@@ -86,6 +96,7 @@ export interface FileRouteTypes {
     | '/'
     | '/analysis'
     | '/missions'
+    | '/sound-test'
     | '/api/chat'
     | '/api/transcribe'
     | '/mission/$id'
@@ -94,6 +105,7 @@ export interface FileRouteTypes {
     | '/'
     | '/analysis'
     | '/missions'
+    | '/sound-test'
     | '/api/chat'
     | '/api/transcribe'
     | '/mission/$id'
@@ -103,6 +115,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AnalysisRoute: typeof AnalysisRoute
   MissionsRoute: typeof MissionsRoute
+  SoundTestRoute: typeof SoundTestRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiTranscribeRoute: typeof ApiTranscribeRoute
   MissionIdRoute: typeof MissionIdRoute
@@ -110,6 +123,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sound-test': {
+      id: '/sound-test'
+      path: '/sound-test'
+      fullPath: '/sound-test'
+      preLoaderRoute: typeof SoundTestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/missions': {
       id: '/missions'
       path: '/missions'
@@ -159,6 +179,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AnalysisRoute: AnalysisRoute,
   MissionsRoute: MissionsRoute,
+  SoundTestRoute: SoundTestRoute,
   ApiChatRoute: ApiChatRoute,
   ApiTranscribeRoute: ApiTranscribeRoute,
   MissionIdRoute: MissionIdRoute,
