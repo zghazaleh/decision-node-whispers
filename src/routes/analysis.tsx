@@ -1,5 +1,5 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { createFileRoute, useNavigate, useRouter } from "@tanstack/react-router";
+import { Component, createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import type { DecisionAnalysis } from "@/lib/analysis.functions";
 import { readMission, useMission, type SavedMission } from "@/lib/mission-store";
@@ -9,6 +9,122 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { getMissionPercentile, type MissionPercentile } from "@/lib/mission-stats.functions";
 import sceneCosmos from "@/assets/scene-cosmos.jpg";
 
+function AnalysisFallback({
+  title,
+  message,
+  onRetry,
+}: {
+  title: string;
+  message: string;
+  onRetry?: () => void;
+}) {
+  const navigate = useNavigate();
+  return (
+    <main className="relative min-h-screen bg-background text-foreground overflow-hidden">
+      <div className="fixed inset-0">
+        <img src={sceneCosmos} alt="" aria-hidden className="h-full w-full object-cover opacity-30" />
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(to bottom, oklch(0 0 0 / 0.75), oklch(0 0 0 / 0.9))",
+          }}
+        />
+        <div className="film-grain" aria-hidden />
+      </div>
+      <div className="relative z-10 mx-auto max-w-xl px-6 py-32 text-center animate-fade-up">
+        <p className="text-[0.6rem] tracking-[0.5em] uppercase text-accent/80 mb-6">
+          Signal lost
+        </p>
+        <h1 className="font-display text-3xl sm:text-4xl leading-tight text-foreground/95 text-balance">
+          {title}
+        </h1>
+        <p className="mt-6 text-sm sm:text-base text-foreground/60 leading-relaxed text-pretty">
+          {message}
+        </p>
+        <div className="mt-12 flex items-center justify-center gap-10">
+          {onRetry && (
+            <button
+              type="button"
+              onClick={onRetry}
+              className="group flex items-center gap-3 text-[0.65rem] tracking-[0.4em] uppercase text-foreground/70 hover:text-foreground transition-colors"
+            >
+              <span className="h-px w-8 bg-foreground/30 group-hover:bg-foreground/70 group-hover:w-12 transition-all" />
+              Try again
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => navigate({ to: "/missions" })}
+            className="text-[0.65rem] tracking-[0.4em] uppercase text-foreground/55 hover:text-foreground/90 transition-colors"
+          >
+            Back to case files
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate({ to: "/" })}
+            className="text-[0.65rem] tracking-[0.4em] uppercase text-foreground/40 hover:text-foreground/80 transition-colors"
+          >
+            Return home
+          </button>
+        </div>
+      </div>
+    </main>
+  );
+}
+
+function AnalysisErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
+  const router = useRouter();
+  if (import.meta.env.DEV) console.error("Analysis route error:", error);
+  return (
+    <AnalysisFallback
+      title="The analysis couldn't be assembled."
+      message="Something went wrong while reading this case. Your progress is safe — try again, or step back to the case files."
+      onRetry={() => {
+        router.invalidate();
+        reset();
+      }}
+    />
+  );
+}
+
+function AnalysisNotFound() {
+  return (
+    <AnalysisFallback
+      title="No case is open right now."
+      message="There's no decision to review yet. Pick a case file and finish a session to see your analysis here."
+    />
+  );
+}
+
+class AnalysisBoundary extends Component<
+  { children: ReactNode; fallback: (error: Error, reset: () => void) => ReactNode },
+  { error: Error | null }
+> {
+  state = { error: null as Error | null };
+  static getDerivedStateFromError(error: Error) {
+    return { error };
+  }
+  componentDidCatch(error: Error) {
+    if (import.meta.env.DEV) console.error("Analysis boundary caught:", error);
+  }
+  reset = () => this.setState({ error: null });
+  render() {
+    if (this.state.error) return this.props.fallback(this.state.error, this.reset);
+    return this.props.children;
+  }
+}
+
+function AnalysisRoute() {
+  return (
+    <AnalysisBoundary
+      fallback={(error, reset) => <AnalysisErrorComponent error={error} reset={reset} />}
+    >
+      <Analysis />
+    </AnalysisBoundary>
+  );
+}
+
 export const Route = createFileRoute("/analysis")({
   head: () => ({
     meta: [
@@ -16,7 +132,9 @@ export const Route = createFileRoute("/analysis")({
       { name: "robots", content: "noindex" },
     ],
   }),
-  component: Analysis,
+  component: AnalysisRoute,
+  errorComponent: AnalysisErrorComponent,
+  notFoundComponent: AnalysisNotFound,
   ssr: false,
 });
 
