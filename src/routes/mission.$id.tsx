@@ -150,10 +150,46 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
   }, [awakening, status]);
 
   const busy = status === "submitted" || status === "streaming";
+  const userTurnsCount = messages.filter((m) => m.role === "user").length;
+  const pressureForDecide = Math.min(1, Math.max(0, (messages.length - 1) / 18));
+  const decideReady = !busy && pressureForDecide >= 0.45;
+  const [decidePrefill, setDecidePrefill] = useState<string>("");
+
+  // Natural-language decision triggers — opens the Decide modal pre-filled
+  // instead of sending the line into the chat. Keeps the commit ritual intact
+  // (reasoning, confidence) while letting the player initiate from the composer.
+  function detectDecisionIntent(text: string): string | null {
+    const t = text.trim();
+    const re = /^(?:i\s+(?:decide|choose|commit|will|am\s+going\s+to|'?ll|am\s+choosing)\s+(?:to\s+)?|my\s+(?:decision|choice)\s+(?:is|:)\s*|i'?m\s+going\s+to\s+|let's\s+|final\s+answer[:\s]+)(.+)$/i;
+    const m = t.match(re);
+    if (m && m[1].trim().length > 0) return m[1].trim();
+    return null;
+  }
+
+  function openDecideWith(prefill: string) {
+    setDecidePrefill(prefill);
+    setDecideOpen(true);
+  }
 
   async function submit(text: string) {
     const trimmed = text.trim();
     if (!trimmed || busy) return;
+    const intent = detectDecisionIntent(trimmed);
+    if (intent) {
+      if (decideReady) {
+        setInput("");
+        openDecideWith(intent);
+        return;
+      } else {
+        const turnsToGo = Math.max(0, 4 - userTurnsCount);
+        toast("Not yet — stay in the room a little longer.", {
+          description: turnsToGo > 0
+            ? `${turnsToGo} more exchange${turnsToGo === 1 ? "" : "s"} before you can commit.`
+            : "The moment hasn't ripened.",
+        });
+        return;
+      }
+    }
     setInput("");
     await sendMessage({ text: trimmed });
   }
