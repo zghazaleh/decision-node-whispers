@@ -50,7 +50,7 @@ const empty = (): DecisionProfile => ({
     (acc, d) => ({ ...acc, [d]: 50 }),
     {} as Record<Dimension, number>,
   ),
-  emergingPattern: "Not enough data yet. Complete a mission to begin shaping your Decision DNA.",
+  emergingPattern: "Not enough data yet. Complete a mission to begin building your profile.",
 });
 
 export function readProfile(): DecisionProfile {
@@ -153,24 +153,24 @@ function scoreFromAnalysis(a: DecisionAnalysis): {
 
 function deriveEmergingPattern(contribs: MissionContribution[]): string {
   if (contribs.length === 0)
-    return "Not enough data yet. Complete a mission to begin shaping your Decision DNA.";
+    return "Not enough data yet. Complete a mission to begin building your profile.";
   const recent = contribs.slice(-5);
   const tally: Record<string, number> = {};
   for (const c of recent) for (const s of c.signals) tally[s] = (tally[s] ?? 0) + 1;
   const top = Object.entries(tally).sort((a, b) => b[1] - a[1])[0];
   if (!top || top[1] < 2) {
-    return "Your pattern is still forming. Each mission sharpens the read on how you decide.";
+    return "Your pattern is still forming. Each mission refines the assessment.";
   }
   const [tag] = top;
   switch (tag) {
     case "anchored-after-confidence-rose":
       return "You consistently form accurate early hypotheses, but you tend to stop searching for contradictory evidence once your confidence increases.";
     case "updates-on-evidence":
-      return "You let evidence move you. Your working theory gets revised when the room gives you reason to revise it — a rare habit.";
+      return "You revise your position when new evidence emerges — a valuable habit.";
     case "multiple-bias-textures":
-      return "Cognitive shortcuts show up under time pressure. Naming them in the moment is the next leverage point.";
+      return "Cognitive shortcuts appear under pressure. Recognizing them in the moment is the next step.";
     case "reachable-evidence-skipped":
-      return "You decide before the room is fully read. A pattern of leaving accessible information on the table.";
+      return "You tend to decide before gathering all available information.";
     case "strong-process":
       return "You separate facts from assumptions, weigh second-order effects, and act with measured confidence. A durable process.";
     default:
