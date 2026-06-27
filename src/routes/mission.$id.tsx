@@ -220,6 +220,11 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
   // 1 = deep in the decision. Used to drive slow, low-contrast lighting drift.
   // Capped softly so it never goes harsh.
   const pressure = Math.min(1, Math.max(0, (messages.length - 1) / 18));
+  // Slow audio swell that tracks the visual pressure curve.
+  useEffect(() => {
+    ambientRef.current?.setPressure(pressure);
+  }, [pressure]);
+
   const dusk = (0.35 + pressure * 0.55).toFixed(3);          // bottom gradient depth
   const ringDark = (pressure * 0.45).toFixed(3);             // edge encroachment
   const warmWash = (pressure * 0.18).toFixed(3);             // creeping color cast
