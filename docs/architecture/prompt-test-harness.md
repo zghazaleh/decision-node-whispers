@@ -137,6 +137,24 @@ the `// <scaffold:director>` / `// <scaffold:analysis>` marker comments at
 the end of each array so the scaffolder keeps working. Every fixture is
 one live gateway call, so keep them small and focused.
 
+### Integration test
+
+`scripts/scaffold-integration-test.ts` exercises the full
+scaffolder → harness → snapshot loop end-to-end:
+
+1. Runs the scaffolder with `--dry-run` and asserts no files mutated.
+2. Scaffolds a temporary Director and Analysis fixture for real.
+3. Calls the harness with `--fixture=<id> --update-snapshots` (skipped
+   with a warning when `LOVABLE_API_KEY` is missing).
+4. Validates the resulting snapshot JSON against the documented
+   `Snapshot` envelope and the kind-specific critical-field contract.
+5. Restores `prompt-test-fixtures.ts` and removes the temp snapshots.
+
+```sh
+bun run scripts/scaffold-integration-test.ts                  # stub mode
+LOVABLE_API_KEY=... bun run scripts/scaffold-integration-test.ts  # live mode
+```
+
 ### Registered fixtures
 
 <!-- fixtures:start -->
