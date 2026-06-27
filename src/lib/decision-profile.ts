@@ -88,26 +88,53 @@ const clamp = (n: number, lo = 0, hi = 100) =>
  *  "uncertain" matching "certain" or "not luck" matching "luck". */
 const has = (s: string, re: RegExp) => re.test(s);
 
-/** Deterministic score in 0–100 from analysis content. */
-function scoreFromAnalysis(a: DecisionAnalysis): {
-  scores: Record<Dimension, number>;
-  signals: string[];
-} {
+/** Validate the model's emitted dimensionScores. Returns null if any axis
+ *  is missing, not finite, or outside [0,100]. */
+function readModelScores(a: DecisionAnalysis): Record<Dimension, number> | null {
+  const ds = a.dimensionScores;
+  if (!ds) return null;
+  const out = {} as Record<Dimension, number>;
+  for (const d of DIMENSIONS) {
+    const v = (ds as Record<string, unknown>)[d];
+    if (typeof v !== "number" || !Number.isFinite(v) || v < 0 || v > 100) {
+      return null;
+    }
+    out[d] = Math.round(v);
+  }
+  return out;
+}
+
+function readModelNotes(a: DecisionAnalysis): Partial<Record<Dimension, string>> | undefined {
+  const dn = a.dimensionNotes;
+  if (!dn) return undefined;
+  const out: Partial<Record<Dimension, string>> = {};
+  for (const d of DIMENSIONS) {
+    const v = (dn as Record<string, unknown>)[d];
+    if (typeof v === "string" && v.trim().length > 0) out[d] = v.trim();
+  }
+  return Object.keys(out).length > 0 ? out : undefined;
+}
+
+/** Legacy keyword-based scorer. Kept as a fallback for analyses that lack
+ *  structured `dimensionScores` (older sessions, model omissions). */
+function heuristicScores(a: DecisionAnalysis): Record<Dimension, number> {
   const r = a.reasoningAssessment;
   const strengths = r?.strengths?.length ?? 0;
   const blindSpots = r?.blindSpots?.length ?? 0;
   const biasList = r?.possibleBiases ?? [];
-  // Hedged biases ("possibly/may/might/tendency") count at half weight —
-  // the Analyzer's own confidence should drive the penalty.
+  // Prefer the model's own `confidence` enum on each bias; fall back to
+  // hedge-word sniffing of the explanation text when absent.
   const hedgeRe = /\b(possibly|possible|may|might|tendency|tendencies|appears|appeared|seems|seemed|perhaps)\b/i;
   const biasWeight = biasList.reduce((sum, b) => {
+    if (b?.confidence === "high") return sum + 1;
+    if (b?.confidence === "medium") return sum + 0.66;
+    if (b?.confidence === "low") return sum + 0.33;
     const text = `${b?.name ?? ""} ${b?.evidence ?? ""} ${b?.gentleExplanation ?? ""}`;
     return sum + (hedgeRe.test(text) ? 0.5 : 1);
   }, 0);
   const traj = a.beliefTrajectory ?? [];
   const revised = traj.filter((t) => t.update === "revised").length;
   const held = traj.filter((t) => t.update === "held").length;
-  const reinforced = traj.filter((t) => t.update === "reinforced").length;
 
   const calText = (r?.calibration ?? "").toLowerCase();
   const luckText = (r?.luckVsSkill ?? "").toLowerCase();
@@ -129,20 +156,25 @@ function scoreFromAnalysis(a: DecisionAnalysis): {
   const adaptability = clamp(
     50 + revised * 10 - held * 12 + (traj.length >= 4 ? 5 : 0),
   );
-  // Word-boundary + negation-aware. "uncertain"/"uncertainty" no longer
-  // trigger the overconfidence penalty; "not luck"/"no luck" no longer
-  // trigger the luck penalty.
-  const calibratedRe = /\b(well[- ]calibrated|calibrated|appropriately\s+\w+|measured|matched\s+the\s+evidence|proportional)\b/;
-  const overconfidentRe = /\b(overconfiden\w*|overstated|overclaim\w*|unwarranted\s+certainty|absolute\s+certainty|certainty\s+(?:was|is)\s+(?:not\s+)?warranted)\b/;
-  const underconfidentRe = /\b(underconfiden\w*|understated|hedged\s+too\s+much)\b/;
-  const luckyRe = /(?<!\bno\s)(?<!\bnot\s)\b(lucky|fortunate|got\s+away|luck\s+rather\s+than)\b/;
-  const confidenceCalibration = clamp(
-    50 +
-      (has(calText, calibratedRe) ? 18 : 0) -
-      (has(calText, overconfidentRe) ? 22 : 0) -
-      (has(calText, underconfidentRe) ? 10 : 0) -
-      (has(luckText, luckyRe) ? 10 : 0),
-  );
+  // Prefer the structured calibrationVerdict when present.
+  const verdict = r?.calibrationVerdict;
+  let confidenceCalibration: number;
+  if (verdict === "calibrated") confidenceCalibration = 75;
+  else if (verdict === "under") confidenceCalibration = 45;
+  else if (verdict === "over") confidenceCalibration = 30;
+  else {
+    const calibratedRe = /\b(well[- ]calibrated|calibrated|appropriately\s+\w+|measured|matched\s+the\s+evidence|proportional)\b/;
+    const overconfidentRe = /\b(overconfiden\w*|overstated|overclaim\w*|unwarranted\s+certainty|absolute\s+certainty)\b/;
+    const underconfidentRe = /\b(underconfiden\w*|understated|hedged\s+too\s+much)\b/;
+    const luckyRe = /(?<!\bno\s)(?<!\bnot\s)\b(lucky|fortunate|got\s+away|luck\s+rather\s+than)\b/;
+    confidenceCalibration = clamp(
+      50 +
+        (has(calText, calibratedRe) ? 18 : 0) -
+        (has(calText, overconfidentRe) ? 22 : 0) -
+        (has(calText, underconfidentRe) ? 10 : 0) -
+        (has(luckText, luckyRe) ? 10 : 0),
+    );
+  }
   const informationGathering = clamp(
     50 + Math.min(20, used / 20) - Math.min(25, ignored / 18) + strengths * 4,
   );
@@ -151,17 +183,50 @@ function scoreFromAnalysis(a: DecisionAnalysis): {
       (has(alt + " " + closing, /\b(long[- ]term|future|downstream|second[- ]order)\b/) ? 18 : 0) -
       (has(closing, /\b(short[- ]term|immediate|reactive)\b/) ? 10 : 0),
   );
-  const biasResistance = clamp(
-    // Baseline aligned with the other axes at 50; hedged biases half-weight.
-    60 - biasWeight * 10 - (held > revised ? 8 : 0),
-  );
-  // Negotiation: acknowledging counterparts' incentives and updating rather
-  // than steamrolling. Hedged biases count at half weight here too.
+  const biasResistance = clamp(60 - biasWeight * 10 - (held > revised ? 8 : 0));
   const negotiation = clamp(
     50 + strengths * 4 + revised * 5 - held * 8 - biasWeight * 3,
   );
 
+  return {
+    curiosity,
+    strategicThinking,
+    adaptability,
+    confidenceCalibration,
+    informationGathering,
+    longTermThinking,
+    biasResistance,
+    negotiation,
+  };
+}
 
+/** Deterministic scoring entry point. Prefers model-emitted sub-scores
+ *  when present and valid, falls back to the heuristic scorer otherwise. */
+function scoreFromAnalysis(a: DecisionAnalysis): {
+  scores: Record<Dimension, number>;
+  signals: string[];
+  notes?: Partial<Record<Dimension, string>>;
+  source: "model" | "heuristic";
+} {
+  const r = a.reasoningAssessment;
+  const traj = a.beliefTrajectory ?? [];
+  const biasList = r?.possibleBiases ?? [];
+  const hedgeRe = /\b(possibly|possible|may|might|tendency|tendencies|appears|appeared|seems|seemed|perhaps)\b/i;
+  const biasWeight = biasList.reduce((sum, b) => {
+    if (b?.confidence === "high") return sum + 1;
+    if (b?.confidence === "medium") return sum + 0.66;
+    if (b?.confidence === "low") return sum + 0.33;
+    const text = `${b?.name ?? ""} ${b?.evidence ?? ""} ${b?.gentleExplanation ?? ""}`;
+    return sum + (hedgeRe.test(text) ? 0.5 : 1);
+  }, 0);
+  const revised = traj.filter((t) => t.update === "revised").length;
+  const held = traj.filter((t) => t.update === "held").length;
+  const strengths = r?.strengths?.length ?? 0;
+  const blindSpots = r?.blindSpots?.length ?? 0;
+  const ignored = (a.evidenceIgnored ?? "").length;
+  const used = (a.evidenceUsed ?? "").length;
+
+  // Signals are derived from the same transcript facts regardless of scorer.
   const signals: string[] = [];
   if (held > revised) signals.push("anchored-after-confidence-rose");
   if (revised >= 2) signals.push("updates-on-evidence");
@@ -169,18 +234,19 @@ function scoreFromAnalysis(a: DecisionAnalysis): {
   if (ignored > used) signals.push("reachable-evidence-skipped");
   if (strengths >= 3 && blindSpots === 0) signals.push("strong-process");
 
+  const modelScores = readModelScores(a);
+  if (modelScores) {
+    return {
+      scores: modelScores,
+      signals,
+      notes: readModelNotes(a),
+      source: "model",
+    };
+  }
   return {
-    scores: {
-      curiosity,
-      strategicThinking,
-      adaptability,
-      confidenceCalibration,
-      informationGathering,
-      longTermThinking,
-      biasResistance,
-      negotiation,
-    },
+    scores: heuristicScores(a),
     signals,
+    source: "heuristic",
   };
 }
 
