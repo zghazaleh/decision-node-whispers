@@ -10,6 +10,10 @@ export function ConstitutionStatusBadge() {
     queryKey: ["constitution-status"],
     queryFn: () => fetchStatus(),
     staleTime: 30_000,
+    refetchInterval: 30_000,
+    refetchIntervalInBackground: true,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
   });
 
   const [open, setOpen] = useState(false);
