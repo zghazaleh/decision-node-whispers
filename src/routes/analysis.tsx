@@ -565,22 +565,6 @@ function TimelineScrubber({ timeline }: { timeline: DecisionAnalysis["timeline"]
         </p>
       </div>
 
-      {/* Outcome accumulator — how the outcome assembled */}
-      <div className="border-t border-foreground/10 pt-6">
-        <p className="text-[0.55rem] tracking-[0.4em] uppercase text-foreground/40 mb-4 text-center">
-          Outcome through beat {index + 1}
-        </p>
-        <ol className="space-y-2 text-sm text-foreground/70 leading-relaxed">
-          {timeline.slice(0, index + 1).map((t, i) => (
-            <li key={i} className="flex gap-3 animate-fade-in">
-              <span className="text-accent/70 font-display text-base leading-none pt-[2px]">
-                {String(i + 1).padStart(2, "0")}
-              </span>
-              <span className="text-pretty">{t.consequence}</span>
-            </li>
-          ))}
-        </ol>
-      </div>
     </div>
   );
 }
