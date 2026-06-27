@@ -172,6 +172,7 @@ function record(name: string, ok: boolean, detail: string) {
 async function runDirector(
   gateway: ReturnType<typeof createLovableAiGatewayProvider>,
   missionId: string,
+  updateSnapshots: boolean,
 ) {
   const engine = getMissionEngine(missionId);
   if (!engine) throw new Error(`Unknown mission: ${missionId}`);
@@ -195,6 +196,20 @@ async function runDirector(
         true,
         `chips=[${parsed.chips.map((c) => JSON.stringify(c)).join(", ")}]`,
       );
+
+      // Snapshot: record the structural contract (chip count + body shape).
+      const body = text.replace(CHIPS_RE, "").trim();
+      const shape = shapeOf({
+        body: typeof body,
+        chips: parsed.chips,
+      });
+      const critical = {
+        chipCount: parsed.chips.length,
+        hasChipsTrailer: true,
+        bodyNonEmpty: body.length > 0,
+      };
+      const snap = compareOrBless(`director/${missionId}/${fx.id}`, shape, critical, updateSnapshots);
+      record(`${name} :: snapshot`, snap.outcome !== "drift" && snap.outcome !== "new", snap.detail);
     } catch (err) {
       record(name, false, (err as Error).message);
     }
