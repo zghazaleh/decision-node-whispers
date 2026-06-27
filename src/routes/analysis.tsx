@@ -104,34 +104,46 @@ function Analysis() {
           <TimelineScrubber timeline={a.timeline} />
         </section>
 
-        {/* Executive Summary */}
+        {/* Verdict + expandable detail drawers */}
         <section className="space-y-12">
           <div className="animate-fade-up text-center" style={{ animationDelay: "1.4s" }}>
             <p className="text-[0.6rem] tracking-[0.5em] uppercase text-accent/80 mb-4">
-              Executive summary
+              Verdict
             </p>
             <p className="font-display text-2xl sm:text-3xl leading-snug text-foreground/95 text-pretty max-w-2xl mx-auto">
               {a.closing}
             </p>
           </div>
 
-          {/* Expandable details */}
+          {/* Expandable details — ordered per spec */}
           <div className="animate-fade-up divide-y divide-foreground/10 border-y border-foreground/10" style={{ animationDelay: "1.7s" }}>
-            <ExpandableBlock label="Assumptions" body={a.assumptions} />
-            <ExpandableBlock label="Evidence considered" body={a.evidenceUsed} />
-            <ExpandableBlock label="Evidence overlooked" body={a.evidenceIgnored} />
-            <ExpandableBlock label="Alternatives" body={a.alternatives} />
-            {a.beliefTrajectory && a.beliefTrajectory.length > 0 && (
-              <ExpandableSection label="Belief trajectory">
-                <BeliefTrajectory trajectory={a.beliefTrajectory} />
-              </ExpandableSection>
-            )}
             {a.reasoningAssessment && (
               <ExpandableSection label="Reasoning assessment">
                 <ReasoningAssessment data={a.reasoningAssessment} />
               </ExpandableSection>
             )}
+            <ExpandableBlock label="Evidence considered" body={a.evidenceUsed} />
+            <ExpandableBlock label="Evidence ignored" body={a.evidenceIgnored} />
+            <ExpandableBlock label="Assumptions made" body={a.assumptions} />
+            <ExpandableBlock label="Alternative paths" body={a.alternatives} />
+            {a.reasoningAssessment && a.reasoningAssessment.possibleBiases.length > 0 && (
+              <ExpandableSection label="Potential cognitive biases">
+                <PossibleBiasesList biases={a.reasoningAssessment.possibleBiases} />
+              </ExpandableSection>
+            )}
+            <ExpandableSection label="Long-term consequences">
+              <LongTermConsequences timeline={a.timeline} />
+            </ExpandableSection>
+            {a.beliefTrajectory && a.beliefTrajectory.length > 0 && (
+              <ExpandableSection label="Belief trajectory">
+                <BeliefTrajectory trajectory={a.beliefTrajectory} />
+              </ExpandableSection>
+            )}
           </div>
+
+          {percentile && percentile.plays >= 3 && (
+            <CommunityComparison percentile={percentile} />
+          )}
 
           {profile && <DecisionProfileCard profile={profile} delay={2.4} />}
         </section>
