@@ -22,6 +22,10 @@ type Voice = {
   track: Soundtrack;
   missionId: string;
   fadeRaf: number | null;
+  // WebAudio chain (optional — only present if the AudioContext was unlocked).
+  source?: MediaElementAudioSourceNode;
+  filter?: BiquadFilterNode;
+  gain?: GainNode;
 };
 
 function rampVolume(v: Voice, target: number, ms: number, onDone?: () => void) {
@@ -48,12 +52,25 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
   let pendingMission: string | null = initialMissionId;
   let pressure = 0; // 0..1
 
-  // Heartbeat (WebAudio synth, no asset) ─ low sub-pulse that engages only at
-  // peak pressure. Kept very quiet so it reads as nerves, not as a UI cue.
+  // Shared WebAudio graph ─ used by heartbeat synth, the LFO-modulated low-pass
+  // filter on the music voice, and the sub-pad that swells with pressure.
   let ctx: AudioContext | null = null;
+  let masterGain: GainNode | null = null;
   let hbGain: GainNode | null = null;
   let hbTimer: number | null = null;
   let hbActive = false;
+
+  // LFO that drifts the music voice's filter cutoff — gives the bed a slow
+  // "breathing" quality without colouring the dialogue.
+  let lfo: OscillatorNode | null = null;
+  let lfoDepth: GainNode | null = null;
+
+  // Sub pad: two slightly detuned sines at ~55Hz. Always quiet, swells with
+  // pressure. Separate from the heartbeat (which is rhythmic).
+  let padOscA: OscillatorNode | null = null;
+  let padOscB: OscillatorNode | null = null;
+  let padGain: GainNode | null = null;
+
   function ensureCtx(): AudioContext | null {
     if (typeof window === "undefined") return null;
     if (!ctx) {
@@ -61,13 +78,72 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
         const AC: typeof AudioContext =
           window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
         ctx = new AC();
+        masterGain = ctx.createGain();
+        masterGain.gain.value = 1;
+        masterGain.connect(ctx.destination);
+
         hbGain = ctx.createGain();
         hbGain.gain.value = 0.0;
-        hbGain.connect(ctx.destination);
+        hbGain.connect(masterGain);
+
+        // Sub pad runs the entire time a mission is playing.
+        padGain = ctx.createGain();
+        padGain.gain.value = 0;
+        padGain.connect(masterGain);
+        padOscA = ctx.createOscillator();
+        padOscB = ctx.createOscillator();
+        padOscA.type = "sine";
+        padOscB.type = "sine";
+        padOscA.frequency.value = 55;
+        padOscB.frequency.value = 55 * 1.005; // gentle beating
+        padOscA.connect(padGain);
+        padOscB.connect(padGain);
+        padOscA.start();
+        padOscB.start();
+
+        // Shared LFO for filter cutoff modulation. ~0.05Hz = 20s cycle.
+        lfo = ctx.createOscillator();
+        lfo.type = "sine";
+        lfo.frequency.value = 0.05;
+        lfoDepth = ctx.createGain();
+        lfoDepth.gain.value = 800; // ±800Hz around the static cutoff
+        lfo.connect(lfoDepth);
+        lfo.start();
       } catch { return null; }
     }
     return ctx;
   }
+
+  function wireVoiceToGraph(v: Voice) {
+    if (!ctx || !masterGain || !lfoDepth) return;
+    try {
+      const src = ctx.createMediaElementSource(v.audio);
+      const filt = ctx.createBiquadFilter();
+      filt.type = "lowpass";
+      filt.frequency.value = 1600;
+      filt.Q.value = 0.7;
+      lfoDepth.connect(filt.frequency); // LFO modulates cutoff
+      const g = ctx.createGain();
+      g.gain.value = 1;
+      src.connect(filt).connect(g).connect(masterGain);
+      v.source = src;
+      v.filter = filt;
+      v.gain = g;
+    } catch { /* already wired or context unavailable */ }
+  }
+
+  function padTarget(): number {
+    if (muted) return 0;
+    // Quiet floor + pressure swell. Caps well below the music bed.
+    return Math.min(0.09, 0.02 + pressure * 0.07);
+  }
+  function applyPadGain(fadeMs = 1200) {
+    if (!ctx || !padGain) return;
+    const now = ctx.currentTime;
+    padGain.gain.cancelScheduledValues(now);
+    padGain.gain.linearRampToValueAtTime(padTarget(), now + fadeMs / 1000);
+  }
+
   function thump(at: number, freq: number, vel: number) {
     if (!ctx || !hbGain) return;
     const o = ctx.createOscillator();
@@ -85,14 +161,11 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
   function scheduleHeartbeat() {
     if (!hbActive || !ctx || !hbGain) return;
     const now = ctx.currentTime;
-    // tempo rises with pressure: 60bpm → 92bpm
     const bpm = 60 + pressure * 32;
     const interval = 60 / bpm;
-    // Master gain envelopes the whole thing — very quiet.
     const target = muted ? 0 : Math.min(0.22, 0.05 + pressure * 0.20);
     hbGain.gain.cancelScheduledValues(now);
     hbGain.gain.linearRampToValueAtTime(target, now + 0.4);
-    // Lub-dub: two thumps per beat.
     thump(now + 0.02, 52, 0.9);
     thump(now + 0.14, 44, 0.55);
     hbTimer = window.setTimeout(scheduleHeartbeat, interval * 1000);
@@ -107,9 +180,6 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
   }
 
 
-  // Effective target volume for a track, accounting for pressure swell.
-  // We lift by up to +55% of the base volume — still well below 1.0 for the
-  // mission-01 ambient (base 0.35 → max ~0.54) so it never crowds dialogue.
   function targetVolume(track: Soundtrack): number {
     if (muted) return 0;
     const lift = 1 + pressure * 0.55;
@@ -118,10 +188,10 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
 
   function applyPressure(v: Voice, fadeMs = 4000) {
     rampVolume(v, targetVolume(v.track), fadeMs);
-    // Subtle detune downward — feels heavier without being noticeable as pitch.
     try {
       v.audio.playbackRate = 1 - pressure * 0.04;
     } catch { /* noop */ }
+    applyPadGain(fadeMs);
   }
 
   async function playMission(missionId: string, fadeInMs: number): Promise<Voice | null> {
@@ -141,6 +211,14 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
       return null;
     }
     const v: Voice = { audio, track, missionId, fadeRaf: null };
+    // Try to wire WebAudio FX. If the context can't be created yet (no user
+    // gesture), this is a no-op and the audio still plays through the element.
+    const c = ensureCtx();
+    if (c) {
+      if (c.state === "suspended") c.resume().catch(() => {});
+      wireVoiceToGraph(v);
+      applyPadGain(fadeInMs);
+    }
     rampVolume(v, targetVolume(track), fadeInMs);
     return v;
   }
@@ -155,6 +233,9 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
       } catch {
         /* noop */
       }
+      try { v.source?.disconnect(); } catch { /* noop */ }
+      try { v.filter?.disconnect(); } catch { /* noop */ }
+      try { v.gain?.disconnect(); } catch { /* noop */ }
     });
   }
 
@@ -176,7 +257,6 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
 
     async switchTo(missionId: string | null, fadeMs = 1400) {
       if (stopped) {
-        // Remember the desired track for whenever audio is unlocked.
         pendingMission = missionId;
         return;
       }
@@ -187,16 +267,19 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
           current = null;
           disposeVoice(c, fadeMs);
         }
+        if (ctx && padGain) {
+          const now = ctx.currentTime;
+          padGain.gain.cancelScheduledValues(now);
+          padGain.gain.linearRampToValueAtTime(0, now + fadeMs / 1000);
+        }
         return;
       }
       if (current?.missionId === missionId) {
-        // already playing this track — just ensure volume is up
         if (!muted) rampVolume(current, current.track.volume, fadeMs);
         return;
       }
       const next = await playMission(missionId, fadeMs);
       if (!next) return;
-      // If during the await we switched again, dispose the just-created voice.
       if (pendingMission !== missionId) {
         disposeVoice(next, 300);
         return;
@@ -209,6 +292,11 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
       stopped = true;
       stopHeartbeat(400);
       hbActive = false;
+      if (ctx && padGain) {
+        const now = ctx.currentTime;
+        padGain.gain.cancelScheduledValues(now);
+        padGain.gain.linearRampToValueAtTime(0, now + 0.6);
+      }
       if (current) {
         disposeVoice(current, 600);
         current = null;
@@ -218,6 +306,7 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
     setMuted(m: boolean) {
       muted = m;
       if (current) rampVolume(current, targetVolume(current.track), 500);
+      applyPadGain(500);
       if (hbGain && ctx) {
         const now = ctx.currentTime;
         hbGain.gain.cancelScheduledValues(now);
@@ -230,6 +319,7 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
       if (Math.abs(next - pressure) < 0.01) return;
       pressure = next;
       if (current) applyPressure(current);
+      else applyPadGain();
     },
 
     setHeartbeat(active: boolean) {
