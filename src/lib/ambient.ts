@@ -1,11 +1,12 @@
 import { getSoundtrack, type Soundtrack } from "./soundtracks";
 
-// HTMLAudio-based ambient player with smooth crossfades between mission
-// scores. Falls back gracefully if no track exists for a mission.
+// Seamless ambient player. Each mission's score is decoded once into an
+// AudioBuffer and looped via AudioBufferSourceNode (no HTMLAudio loop gap).
+// A shared WebAudio graph adds a low-pass filter with gentle LFO, a quiet
+// sub-pad that swells with pressure, and a sub-pulse heartbeat for peak stakes.
 
 export type AudioProfile = {
   padFrequency?: number;
-  padDetune?: number;
   filterBaseHz?: number;
   filterLfoDepthHz?: number;
   lfoRateHz?: number;
@@ -16,44 +17,37 @@ export type Ambient = {
   stop: () => void;
   switchTo: (missionId: string | null, fadeMs?: number) => Promise<void>;
   setMuted: (m: boolean) => void;
-  /** 0..1 — drives subtle volume swell + slight detune as mission stakes rise. */
   setPressure: (p: number) => void;
-  /** Toggle a low synthesized sub-pulse heartbeat as stakes peak. */
   setHeartbeat: (active: boolean) => void;
-  /** Per-mission tuning of the WebAudio bed (pad freq, filter cutoff, LFO rate). */
   setAudioProfile: (profile: AudioProfile) => void;
   isRunning: () => boolean;
   currentMission: () => string | null;
 };
 
-
-
 type Voice = {
-  audio: HTMLAudioElement;
-  track: Soundtrack;
   missionId: string;
-  fadeRaf: number | null;
-  // WebAudio chain (optional — only present if the AudioContext was unlocked).
-  source?: MediaElementAudioSourceNode;
-  filter?: BiquadFilterNode;
-  gain?: GainNode;
+  track: Soundtrack;
+  source: AudioBufferSourceNode;
+  filter: BiquadFilterNode;
+  gain: GainNode;
+  startedAt: number;
 };
 
-function rampVolume(v: Voice, target: number, ms: number, onDone?: () => void) {
-  if (v.fadeRaf) cancelAnimationFrame(v.fadeRaf);
-  const start = performance.now();
-  const from = v.audio.volume;
-  const step = (now: number) => {
-    const t = Math.min(1, (now - start) / ms);
-    v.audio.volume = from + (target - from) * t;
-    if (t < 1) {
-      v.fadeRaf = requestAnimationFrame(step);
-    } else {
-      v.fadeRaf = null;
-      onDone?.();
-    }
-  };
-  v.fadeRaf = requestAnimationFrame(step);
+// Decoded-buffer cache, shared across createAmbient instances and remounts.
+const bufferCache = new Map<string, Promise<AudioBuffer>>();
+
+async function loadBuffer(ctx: AudioContext, url: string): Promise<AudioBuffer> {
+  const cached = bufferCache.get(url);
+  if (cached) return cached;
+  const p = (async () => {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`ambient fetch failed: ${res.status}`);
+    const data = await res.arrayBuffer();
+    return await ctx.decodeAudioData(data);
+  })();
+  bufferCache.set(url, p);
+  p.catch(() => bufferCache.delete(url));
+  return p;
 }
 
 export function createAmbient(initialMissionId: string | null = null): Ambient {
@@ -61,36 +55,29 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
   let muted = false;
   let stopped = true;
   let pendingMission: string | null = initialMissionId;
-  let pressure = 0; // 0..1
+  let pressure = 0;
 
-  // Live audio profile — defaults match the original mission-03 bed; can be
-  // overridden per-mission via setAudioProfile().
   const profile: Required<AudioProfile> = {
     padFrequency: 55,
-    padDetune: 1.005,
     filterBaseHz: 1600,
-    filterLfoDepthHz: 800,
+    filterLfoDepthHz: 280, // gentle — too much depth reads as "pumping" / choppy
     lfoRateHz: 0.05,
   };
 
-
-  // Shared WebAudio graph ─ used by heartbeat synth, the LFO-modulated low-pass
-  // filter on the music voice, and the sub-pad that swells with pressure.
   let ctx: AudioContext | null = null;
   let masterGain: GainNode | null = null;
+
+  // Heartbeat
   let hbGain: GainNode | null = null;
   let hbTimer: number | null = null;
   let hbActive = false;
 
-  // LFO that drifts the music voice's filter cutoff — gives the bed a slow
-  // "breathing" quality without colouring the dialogue.
+  // Shared LFO routed into every voice's filter.frequency
   let lfo: OscillatorNode | null = null;
   let lfoDepth: GainNode | null = null;
 
-  // Sub pad: two slightly detuned sines at ~55Hz. Always quiet, swells with
-  // pressure. Separate from the heartbeat (which is rhythmic).
-  let padOscA: OscillatorNode | null = null;
-  let padOscB: OscillatorNode | null = null;
+  // Sub pad — single oscillator (was two detuned; the beating read as choppy)
+  let padOsc: OscillatorNode | null = null;
   let padGain: GainNode | null = null;
 
   function ensureCtx(): AudioContext | null {
@@ -98,32 +85,26 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
     if (!ctx) {
       try {
         const AC: typeof AudioContext =
-          window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+          window.AudioContext ??
+          (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
         ctx = new AC();
         masterGain = ctx.createGain();
         masterGain.gain.value = 1;
         masterGain.connect(ctx.destination);
 
         hbGain = ctx.createGain();
-        hbGain.gain.value = 0.0;
+        hbGain.gain.value = 0;
         hbGain.connect(masterGain);
 
-        // Sub pad runs the entire time a mission is playing.
         padGain = ctx.createGain();
         padGain.gain.value = 0;
         padGain.connect(masterGain);
-        padOscA = ctx.createOscillator();
-        padOscB = ctx.createOscillator();
-        padOscA.type = "sine";
-        padOscB.type = "sine";
-        padOscA.frequency.value = profile.padFrequency;
-        padOscB.frequency.value = profile.padFrequency * profile.padDetune;
-        padOscA.connect(padGain);
-        padOscB.connect(padGain);
-        padOscA.start();
-        padOscB.start();
+        padOsc = ctx.createOscillator();
+        padOsc.type = "sine";
+        padOsc.frequency.value = profile.padFrequency;
+        padOsc.connect(padGain);
+        padOsc.start();
 
-        // Shared LFO for filter cutoff modulation.
         lfo = ctx.createOscillator();
         lfo.type = "sine";
         lfo.frequency.value = profile.lfoRateHz;
@@ -131,40 +112,35 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
         lfoDepth.gain.value = profile.filterLfoDepthHz;
         lfo.connect(lfoDepth);
         lfo.start();
-
-      } catch { return null; }
+      } catch {
+        return null;
+      }
     }
     return ctx;
   }
 
-  function wireVoiceToGraph(v: Voice) {
-    if (!ctx || !masterGain || !lfoDepth) return;
-    try {
-      const src = ctx.createMediaElementSource(v.audio);
-      const filt = ctx.createBiquadFilter();
-      filt.type = "lowpass";
-      filt.frequency.value = profile.filterBaseHz;
-      filt.Q.value = 0.7;
-      lfoDepth.connect(filt.frequency); // LFO modulates cutoff
-      const g = ctx.createGain();
-      g.gain.value = 1;
-      src.connect(filt).connect(g).connect(masterGain);
-      v.source = src;
-      v.filter = filt;
-      v.gain = g;
-    } catch { /* already wired or context unavailable */ }
+  function targetMusicGain(track: Soundtrack): number {
+    if (muted) return 0;
+    const lift = 1 + pressure * 0.45;
+    return Math.min(1, track.volume * lift);
   }
 
   function padTarget(): number {
     if (muted) return 0;
-    // Quiet floor + pressure swell. Caps well below the music bed.
-    return Math.min(0.09, 0.02 + pressure * 0.07);
+    return Math.min(0.06, 0.012 + pressure * 0.05);
   }
-  function applyPadGain(fadeMs = 1200) {
-    if (!ctx || !padGain) return;
+
+  function rampParam(p: AudioParam, target: number, ms: number) {
+    if (!ctx) return;
     const now = ctx.currentTime;
-    padGain.gain.cancelScheduledValues(now);
-    padGain.gain.linearRampToValueAtTime(padTarget(), now + fadeMs / 1000);
+    p.cancelScheduledValues(now);
+    p.setValueAtTime(p.value, now);
+    p.linearRampToValueAtTime(target, now + ms / 1000);
+  }
+
+  function applyPadGain(ms = 1500) {
+    if (!padGain) return;
+    rampParam(padGain.gain, padTarget(), ms);
   }
 
   function thump(at: number, freq: number, vel: number) {
@@ -174,7 +150,7 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
     o.type = "sine";
     o.frequency.setValueAtTime(freq * 1.6, at);
     o.frequency.exponentialRampToValueAtTime(freq, at + 0.08);
-    g.gain.setValueAtTime(0.0, at);
+    g.gain.setValueAtTime(0, at);
     g.gain.linearRampToValueAtTime(vel, at + 0.012);
     g.gain.exponentialRampToValueAtTime(0.0001, at + 0.28);
     o.connect(g).connect(hbGain);
@@ -186,80 +162,60 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
     const now = ctx.currentTime;
     const bpm = 60 + pressure * 32;
     const interval = 60 / bpm;
-    const target = muted ? 0 : Math.min(0.22, 0.05 + pressure * 0.20);
-    hbGain.gain.cancelScheduledValues(now);
-    hbGain.gain.linearRampToValueAtTime(target, now + 0.4);
-    thump(now + 0.02, 52, 0.9);
-    thump(now + 0.14, 44, 0.55);
+    const target = muted ? 0 : Math.min(0.2, 0.05 + pressure * 0.18);
+    rampParam(hbGain.gain, target, 400);
+    thump(now + 0.02, 52, 0.85);
+    thump(now + 0.14, 44, 0.5);
     hbTimer = window.setTimeout(scheduleHeartbeat, interval * 1000);
   }
-  function stopHeartbeat(fadeMs = 600) {
+  function stopHeartbeat(ms = 600) {
     if (hbTimer) { clearTimeout(hbTimer); hbTimer = null; }
-    if (ctx && hbGain) {
-      const now = ctx.currentTime;
-      hbGain.gain.cancelScheduledValues(now);
-      hbGain.gain.linearRampToValueAtTime(0, now + fadeMs / 1000);
-    }
-  }
-
-
-  function targetVolume(track: Soundtrack): number {
-    if (muted) return 0;
-    const lift = 1 + pressure * 0.55;
-    return Math.min(1, track.volume * lift);
-  }
-
-  function applyPressure(v: Voice, fadeMs = 4000) {
-    rampVolume(v, targetVolume(v.track), fadeMs);
-    try {
-      v.audio.playbackRate = 1 - pressure * 0.04;
-    } catch { /* noop */ }
-    applyPadGain(fadeMs);
+    if (hbGain) rampParam(hbGain.gain, 0, ms);
   }
 
   async function playMission(missionId: string, fadeInMs: number): Promise<Voice | null> {
     const track = getSoundtrack(missionId);
     if (!track) return null;
-    const audio = new Audio(track.url);
-    audio.loop = true;
-    audio.preload = "auto";
-    audio.crossOrigin = "anonymous";
-    audio.volume = 0;
+    const c = ensureCtx();
+    if (!c || !masterGain || !lfoDepth) return null;
+    if (c.state === "suspended") {
+      try { await c.resume(); } catch { /* noop */ }
+    }
+    let buffer: AudioBuffer;
     try {
-      audio.playbackRate = 1 - pressure * 0.04;
-    } catch { /* noop */ }
-    try {
-      await audio.play();
+      buffer = await loadBuffer(c, track.url);
     } catch {
       return null;
     }
-    const v: Voice = { audio, track, missionId, fadeRaf: null };
-    // Try to wire WebAudio FX. If the context can't be created yet (no user
-    // gesture), this is a no-op and the audio still plays through the element.
-    const c = ensureCtx();
-    if (c) {
-      if (c.state === "suspended") c.resume().catch(() => {});
-      wireVoiceToGraph(v);
-      applyPadGain(fadeInMs);
-    }
-    rampVolume(v, targetVolume(track), fadeInMs);
+    const source = c.createBufferSource();
+    source.buffer = buffer;
+    source.loop = true;
+    // Loop the entire decoded buffer (avoids the HTMLAudio seam pop).
+    const filter = c.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.value = profile.filterBaseHz;
+    filter.Q.value = 0.6;
+    lfoDepth.connect(filter.frequency);
+    const gain = c.createGain();
+    gain.gain.value = 0;
+    source.connect(filter).connect(gain).connect(masterGain);
+    source.start();
+    const v: Voice = { missionId, track, source, filter, gain, startedAt: c.currentTime };
+    rampParam(gain.gain, targetMusicGain(track), fadeInMs);
+    applyPadGain(fadeInMs);
     return v;
   }
 
-
-  function disposeVoice(v: Voice, fadeMs: number) {
-    rampVolume(v, 0, fadeMs, () => {
-      try {
-        v.audio.pause();
-        v.audio.src = "";
-        v.audio.load();
-      } catch {
-        /* noop */
-      }
-      try { v.source?.disconnect(); } catch { /* noop */ }
-      try { v.filter?.disconnect(); } catch { /* noop */ }
-      try { v.gain?.disconnect(); } catch { /* noop */ }
-    });
+  function disposeVoice(v: Voice, ms: number) {
+    if (!ctx) return;
+    rampParam(v.gain.gain, 0, ms);
+    const stopAt = ctx.currentTime + ms / 1000 + 0.05;
+    try { v.source.stop(stopAt); } catch { /* already stopped */ }
+    window.setTimeout(() => {
+      try { v.source.disconnect(); } catch { /* noop */ }
+      try { v.filter.disconnect(); } catch { /* noop */ }
+      try { v.gain.disconnect(); } catch { /* noop */ }
+    }, ms + 200);
   }
 
   return {
@@ -290,15 +246,11 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
           current = null;
           disposeVoice(c, fadeMs);
         }
-        if (ctx && padGain) {
-          const now = ctx.currentTime;
-          padGain.gain.cancelScheduledValues(now);
-          padGain.gain.linearRampToValueAtTime(0, now + fadeMs / 1000);
-        }
+        if (padGain) rampParam(padGain.gain, 0, fadeMs);
         return;
       }
       if (current?.missionId === missionId) {
-        if (!muted) rampVolume(current, current.track.volume, fadeMs);
+        if (!muted) rampParam(current.gain.gain, targetMusicGain(current.track), fadeMs);
         return;
       }
       const next = await playMission(missionId, fadeMs);
@@ -315,11 +267,7 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
       stopped = true;
       stopHeartbeat(400);
       hbActive = false;
-      if (ctx && padGain) {
-        const now = ctx.currentTime;
-        padGain.gain.cancelScheduledValues(now);
-        padGain.gain.linearRampToValueAtTime(0, now + 0.6);
-      }
+      if (padGain) rampParam(padGain.gain, 0, 600);
       if (current) {
         disposeVoice(current, 600);
         current = null;
@@ -328,12 +276,10 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
 
     setMuted(m: boolean) {
       muted = m;
-      if (current) rampVolume(current, targetVolume(current.track), 500);
+      if (current) rampParam(current.gain.gain, targetMusicGain(current.track), 500);
       applyPadGain(500);
       if (hbGain && ctx) {
-        const now = ctx.currentTime;
-        hbGain.gain.cancelScheduledValues(now);
-        hbGain.gain.linearRampToValueAtTime(m ? 0 : Math.min(0.22, 0.05 + pressure * 0.20), now + 0.4);
+        rampParam(hbGain.gain, m ? 0 : Math.min(0.2, 0.05 + pressure * 0.18), 400);
       }
     },
 
@@ -341,8 +287,8 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
       const next = Math.min(1, Math.max(0, p));
       if (Math.abs(next - pressure) < 0.01) return;
       pressure = next;
-      if (current) applyPressure(current);
-      else applyPadGain();
+      if (current) rampParam(current.gain.gain, targetMusicGain(current.track), 4000);
+      applyPadGain(4000);
     },
 
     setHeartbeat(active: boolean) {
@@ -360,24 +306,15 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
 
     setAudioProfile(next: AudioProfile) {
       if (next.padFrequency !== undefined) profile.padFrequency = next.padFrequency;
-      if (next.padDetune !== undefined) profile.padDetune = next.padDetune;
       if (next.filterBaseHz !== undefined) profile.filterBaseHz = next.filterBaseHz;
       if (next.filterLfoDepthHz !== undefined) profile.filterLfoDepthHz = next.filterLfoDepthHz;
       if (next.lfoRateHz !== undefined) profile.lfoRateHz = next.lfoRateHz;
-      // Apply live, with short ramps so the change is inaudible.
-      if (ctx) {
-        const now = ctx.currentTime;
-        const ramp = 1.5;
-        if (padOscA) padOscA.frequency.linearRampToValueAtTime(profile.padFrequency, now + ramp);
-        if (padOscB)
-          padOscB.frequency.linearRampToValueAtTime(profile.padFrequency * profile.padDetune, now + ramp);
-        if (lfo) lfo.frequency.linearRampToValueAtTime(profile.lfoRateHz, now + ramp);
-        if (lfoDepth) lfoDepth.gain.linearRampToValueAtTime(profile.filterLfoDepthHz, now + ramp);
-        if (current?.filter)
-          current.filter.frequency.linearRampToValueAtTime(profile.filterBaseHz, now + ramp);
-      }
+      if (!ctx) return;
+      const ramp = 2.0;
+      if (padOsc) rampParam(padOsc.frequency, profile.padFrequency, ramp * 1000);
+      if (lfo) rampParam(lfo.frequency, profile.lfoRateHz, ramp * 1000);
+      if (lfoDepth) rampParam(lfoDepth.gain, profile.filterLfoDepthHz, ramp * 1000);
+      if (current) rampParam(current.filter.frequency, profile.filterBaseHz, ramp * 1000);
     },
-
-
   };
 }
