@@ -55,6 +55,19 @@ const AnalysisSchema = z.object({
     calibration: z.string(),
     luckVsSkill: z.string(),
   }),
+  beliefTrajectory: z
+    .array(
+      z.object({
+        marker: z.string(),
+        hypothesis: z.string(),
+        confidence: z.enum(["low", "medium", "high"]),
+        trigger: z.string(),
+        update: z.enum(["formed", "reinforced", "revised", "abandoned", "held"]),
+        note: z.string(),
+      }),
+    )
+    .max(8),
+
 });
 
 
