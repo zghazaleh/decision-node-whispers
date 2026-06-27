@@ -110,6 +110,8 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
   });
   useEffect(() => {
     if (!ambientRef.current) ambientRef.current = createAmbient(MISSION_ID);
+    if (ENGINE.atmosphere) ambientRef.current.setAudioProfile(ENGINE.atmosphere);
+
     const a = ambientRef.current;
     const onGesture = async () => {
       if (!a.isRunning() && soundOn) {
