@@ -5,6 +5,7 @@ import type { DecisionAnalysis } from "@/lib/analysis.functions";
 import { readMission, useMission, type SavedMission } from "@/lib/mission-store";
 import { readProfile, type DecisionProfile } from "@/lib/decision-profile";
 import { DecisionProfileCard } from "@/components/DecisionProfileCard";
+import { NoticedRail } from "@/components/NoticedRail";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { getMissionPercentile, type MissionPercentile } from "@/lib/mission-stats.functions";
 import sceneCosmos from "@/assets/scene-cosmos.jpg";
@@ -233,6 +234,16 @@ function Analysis() {
             </div>
           </section>
         )}
+
+        {/* Player-built "What I've noticed" rail — self-claims mirrored
+            against the Analyzer's per-axis notes. Renders only when the
+            Analyzer emitted dimensionNotes (older sessions skip it). */}
+        {a.dimensionNotes && (
+          <section className="animate-fade-up" style={{ animationDelay: "0.32s" }}>
+            <NoticedRail missionId={mission.missionId} dimensionNotes={a.dimensionNotes} />
+          </section>
+        )}
+
 
         {/* Interactive Timeline */}
         <section className="animate-fade-up" style={{ animationDelay: "0.4s" }}>
