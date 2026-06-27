@@ -27,7 +27,7 @@ const OPENING: UIMessage = {
   parts: [
     {
       type: "text",
-      text: `*Sarah Kwon*\n"Dr. Vasquez?"\n\n"They're seated. Jonas asked if you wanted coffee before. I said you didn't. Was that right?"`,
+      text: `*Sarah Kwon*\n"Dr. Vasquez?"\n\n"They're seated. Jonas asked if you wanted coffee before. I said you didn't. Was that right?"\n\n<<chips: "Sarah, who exactly is seated?" | "I look around the room" | "Give me a minute, Sarah">>`,
     },
   ],
 };
@@ -247,14 +247,19 @@ function Mission() {
           className="flex-1 overflow-y-auto px-6 sm:px-10 pt-12 pb-6"
         >
           <div className="mx-auto max-w-2xl space-y-12">
-            {messages.map((m, i) => (
-              <MessageBubble
-                key={m.id}
-                role={m.role}
-                text={partsToText(m)}
-                isLatest={i === messages.length - 1}
-              />
-            ))}
+            {messages.map((m, i) => {
+              const isLatest = i === messages.length - 1;
+              const raw = partsToText(m);
+              const { text, chips } = m.role === "assistant" ? extractChips(raw) : { text: raw, chips: [] };
+              return (
+                <div key={m.id}>
+                  <MessageBubble role={m.role} text={text} isLatest={isLatest} />
+                  {isLatest && !busy && chips.length > 0 && (
+                    <ChipRow chips={chips} onPick={submit} />
+                  )}
+                </div>
+              );
+            })}
             {status === "submitted" && <ThinkingIndicator />}
             {error && (
               <p className="text-center text-xs text-destructive-foreground/80 italic">
@@ -263,6 +268,7 @@ function Mission() {
             )}
           </div>
         </div>
+
 
         {/* Composer */}
         <div className="px-6 sm:px-10 pb-8 sm:pb-10">
@@ -433,6 +439,43 @@ function ThinkingIndicator() {
     </div>
   );
 }
+
+// Extract `<<chips: "a" | "b" | "c">>` (also tolerant during streaming).
+function extractChips(text: string): { text: string; chips: string[] } {
+  const re = /<<\s*chips\s*:\s*([\s\S]*?)>>/i;
+  const m = text.match(re);
+  if (!m) {
+    // Hide a partial, still-streaming chips marker from view.
+    const partial = text.search(/<<\s*chips\s*:?/i);
+    if (partial >= 0) return { text: text.slice(0, partial).trimEnd(), chips: [] };
+    return { text, chips: [] };
+  }
+  const inner = m[1];
+  const chips = Array.from(inner.matchAll(/"([^"]+)"/g))
+    .map((x) => x[1].trim())
+    .filter(Boolean)
+    .slice(0, 4);
+  return { text: text.replace(re, "").trimEnd(), chips };
+}
+
+function ChipRow({ chips, onPick }: { chips: string[]; onPick: (text: string) => void }) {
+  return (
+    <div className="mt-5 flex flex-wrap gap-2 animate-fade-up">
+      {chips.map((c, i) => (
+        <button
+          key={`${c}-${i}`}
+          type="button"
+          onClick={() => onPick(c)}
+          className="group rounded-full border border-foreground/20 bg-background/30 backdrop-blur-sm px-3.5 py-1.5 text-xs sm:text-[0.8rem] text-foreground/75 hover:text-foreground hover:border-accent/60 hover:bg-accent/10 transition-colors text-left"
+        >
+          <span className="text-accent/70 mr-2 group-hover:text-accent">›</span>
+          {c}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 
 function QuickActions({
   disabled,
