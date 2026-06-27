@@ -189,6 +189,7 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
   function openDecideWith(prefill: string) {
     setDecidePrefill(prefill);
     setDecideOpen(true);
+    decideOpenedAtRef.current = Date.now();
   }
 
   async function submit(text: string) {
