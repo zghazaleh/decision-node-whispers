@@ -54,14 +54,14 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
 
   // Seed once (lazy): use saved messages or the canonical opening.
   const [initialMessages] = useState<UIMessage[]>(() => {
-    const saved = readMission();
+    const saved = readMission(MISSION_ID);
     if (saved.messages && saved.messages.length > 0) return saved.messages;
     return [OPENING];
   });
 
   // Persist the opening on first mount if nothing was saved yet.
   useEffect(() => {
-    const saved = readMission();
+    const saved = readMission(MISSION_ID);
     if (!saved.messages || saved.messages.length === 0) {
       update({ messages: initialMessages });
     }
@@ -74,11 +74,11 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
         api: "/api/chat",
         body: { missionId: MISSION_ID },
       }),
-    []
+    [MISSION_ID]
   );
 
   const { messages, sendMessage, status, error } = useChat({
-    id: "mission-01",
+    id: MISSION_ID,
     messages: initialMessages,
     transport,
   });
@@ -96,16 +96,17 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
   const analyzeFn = useServerFn(analyzeDecision);
 
   // Ambient score — starts on the first user gesture (browsers require it).
+  // Missions without a registered soundtrack play silently.
   const ambientRef = useRef<ReturnType<typeof createAmbient> | null>(null);
   const [soundOn, setSoundOn] = useState<boolean>(() => {
     try { return localStorage.getItem("dn:sound") !== "off"; } catch { return true; }
   });
   useEffect(() => {
-    if (!ambientRef.current) ambientRef.current = createAmbient("mission-01");
+    if (!ambientRef.current) ambientRef.current = createAmbient(MISSION_ID);
     const a = ambientRef.current;
     const onGesture = async () => {
       if (!a.isRunning() && soundOn) {
-        try { await a.start("mission-01"); } catch { /* noop */ }
+        try { await a.start(MISSION_ID); } catch { /* noop */ }
       }
       window.removeEventListener("pointerdown", onGesture);
       window.removeEventListener("keydown", onGesture);
@@ -118,7 +119,7 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
       a.stop();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [MISSION_ID]);
   useEffect(() => {
     ambientRef.current?.setMuted(!soundOn);
     try { localStorage.setItem("dn:sound", soundOn ? "on" : "off"); } catch { /* noop */ }
@@ -129,7 +130,7 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
     setSoundOn(next);
     const a = ambientRef.current;
     if (next && a && !a.isRunning()) {
-      try { await a.start("mission-01"); } catch { /* noop */ }
+      try { await a.start(MISSION_ID); } catch { /* noop */ }
     }
   }
 
