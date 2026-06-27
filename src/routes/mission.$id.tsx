@@ -169,17 +169,15 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
   function detectDecisionIntent(text: string): string | null {
     const t = text.trim();
     const patterns = [
-      // Explicit decision verbs with subject
-      /^(?:i\s+(?:decide|choose|commit|will|am\s+going\s+to|'?ll|am\s+choosing|pick|want|should|have\s+decided|ought\s+to|'ll\s+(?:take|pick|choose|go\s+with))\s+(?:to\s+)?)(.+)$/i,
-      // "I'm …ing" forms
-      /^(?:i'?m\s+(?:going\s+to|picking|selecting)\s+)(.+)$/i,
+      // Explicit decision verbs only — bare "pick/want/should/will" are too
+      // common in normal investigative talk ("I pick up the memo…") to count.
+      /^(?:i\s+(?:decide|commit|have\s+decided|choose|am\s+choosing|'?ll\s+(?:go\s+with|commit\s+to))\s+(?:to\s+)?)(.+)$/i,
       // Possessive declaration
-      /^(?:my\s+(?:decision|choice|pick|selection)\s+(?:is|:)\s*)(.+)$/i,
-      // Collaborative
-      /^(?:let's\s+(?:go\s+with|pick|choose)?\s*)(.+)$/i,
-      /^(?:we\s+should\s+)(.+)$/i,
-      // Standalone imperative (decision context)
-      /^(?:go\s+with|pick|select)\s+(.+)$/i,
+      /^(?:my\s+(?:decision|choice|final\s+answer)\s+(?:is|:)\s*)(.+)$/i,
+      // Collaborative explicit
+      /^(?:let's\s+go\s+with\s+)(.+)$/i,
+      // Imperative "go with X" (not "pick X up")
+      /^(?:go\s+with\s+)(.+)$/i,
     ];
     for (const re of patterns) {
       const m = t.match(re);
@@ -198,20 +196,20 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
     const trimmed = text.trim();
     if (!trimmed || busy) return;
     const intent = detectDecisionIntent(trimmed);
-    if (intent) {
-      if (decideReady) {
-        setInput("");
-        openDecideWith(intent);
-        return;
-      } else {
-        const turnsToGo = Math.max(0, 4 - userTurnsCount);
-        toast("Stay in the room a little longer.", {
-          description: turnsToGo > 0
-            ? `${turnsToGo} more exchange${turnsToGo === 1 ? "" : "s"} before this decision is yours to make.`
-            : "Give the moment a little more time.",
-        });
-        return;
-      }
+    if (intent && decideReady) {
+      setInput("");
+      openDecideWith(intent);
+      return;
+    }
+    if (intent && !decideReady) {
+      // Advisory only — never swallow the player's message.
+      const turnsToGo = Math.max(0, 4 - userTurnsCount);
+      toast("Stay in the room a little longer.", {
+        id: "decide-gate",
+        description: turnsToGo > 0
+          ? `${turnsToGo} more exchange${turnsToGo === 1 ? "" : "s"} before the decision opens. Sending as dialogue.`
+          : "The decision opens shortly. Sending as dialogue.",
+      });
     }
     setInput("");
     await sendMessage({ text: trimmed });
@@ -569,6 +567,9 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
                 onClick={() => decideReady && openDecideWith("")}
                 disabled={!decideReady}
                 aria-disabled={!decideReady}
+                title={decideReady
+                  ? "Commit to a decision"
+                  : "Stay in the moment — the decision opens as the pressure builds."}
                 style={{ opacity: 0.15 + pressureForDecide * 0.85 }}
                 className={`group inline-flex items-center gap-2 rounded-full border px-5 py-2.5 text-[0.65rem] font-medium tracking-[0.32em] uppercase transition-all duration-700 ${
                   decideReady
@@ -589,6 +590,7 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
       {decideOpen && (
         <DecideModal
           presets={ENGINE.decisionPresets}
+          freeWritePlaceholder={ENGINE.decideFreeWritePlaceholder ?? "In your own words…"}
           analyzing={analyzing}
           initialDecision={decidePrefill}
           onClose={() => !analyzing && setDecideOpen(false)}
@@ -751,12 +753,14 @@ function ChipRow({ chips, onPick }: { chips: string[]; onPick: (text: string) =>
 
 function DecideModal({
   presets,
+  freeWritePlaceholder,
   analyzing,
   initialDecision,
   onClose,
   onSubmit,
 }: {
   presets: MissionEngine["decisionPresets"];
+  freeWritePlaceholder: string;
   analyzing: boolean;
   initialDecision?: string;
   onClose: () => void;
@@ -876,7 +880,7 @@ function DecideModal({
                   value={decision}
                   onChange={(e) => { setDecision(e.target.value); setArchetypeId(undefined); }}
                   rows={3}
-                  placeholder="I walk into the boardroom and…"
+                  placeholder={freeWritePlaceholder}
                   className="w-full resize-none rounded-sm border border-foreground/15 bg-background/45 px-3 py-3 text-foreground/95 outline-none transition-colors placeholder:text-foreground/25 focus:border-foreground/60"
                 />
               </div>

@@ -74,7 +74,12 @@ function writeProfile(p: DecisionProfile) {
   window.localStorage.setItem(KEY, JSON.stringify(p));
 }
 
-const clamp = (n: number, lo = 0, hi = 100) => Math.max(lo, Math.min(hi, n));
+const clamp = (n: number, lo = 0, hi = 100) =>
+  Math.round(Math.max(lo, Math.min(hi, n)));
+
+/** Word-boundary regex test. Avoids substring false-positives like
+ *  "uncertain" matching "certain" or "not luck" matching "luck". */
+const has = (s: string, re: RegExp) => re.test(s);
 
 /** Deterministic score in 0–100 from analysis content. */
 function scoreFromAnalysis(a: DecisionAnalysis): {
@@ -84,7 +89,14 @@ function scoreFromAnalysis(a: DecisionAnalysis): {
   const r = a.reasoningAssessment;
   const strengths = r?.strengths?.length ?? 0;
   const blindSpots = r?.blindSpots?.length ?? 0;
-  const biases = r?.possibleBiases?.length ?? 0;
+  const biasList = r?.possibleBiases ?? [];
+  // Hedged biases ("possibly/may/might/tendency") count at half weight —
+  // the Analyzer's own confidence should drive the penalty.
+  const hedgeRe = /\b(possibly|possible|may|might|tendency|tendencies|appears|appeared|seems|seemed|perhaps)\b/i;
+  const biasWeight = biasList.reduce((sum, b) => {
+    const text = `${b?.name ?? ""} ${b?.evidence ?? ""} ${b?.gentleExplanation ?? ""}`;
+    return sum + (hedgeRe.test(text) ? 0.5 : 1);
+  }, 0);
   const traj = a.beliefTrajectory ?? [];
   const revised = traj.filter((t) => t.update === "revised").length;
   const held = traj.filter((t) => t.update === "held").length;
@@ -97,48 +109,56 @@ function scoreFromAnalysis(a: DecisionAnalysis): {
   const alt = (a.alternatives ?? "").toLowerCase();
   const closing = (a.closing ?? "").toLowerCase();
 
-  const hasAny = (s: string, words: string[]) => words.some((w) => s.includes(w));
-
   const curiosity = clamp(
-    50 + strengths * 6 - blindSpots * 4 + (hasAny(calText, ["asked", "question", "probed"]) ? 8 : 0),
+    50 + strengths * 6 - blindSpots * 4 +
+      (has(calText, /\b(asked|question(?:ed|s)?|probed)\b/) ? 8 : 0),
   );
   const strategicThinking = clamp(
     50 +
-      (hasAny(alt, ["leverage", "long", "second-order", "downstream", "cascade"]) ? 14 : 0) +
-      (hasAny(closing, ["strategic", "structural", "systemic"]) ? 8 : 0) -
+      (has(alt, /\b(leverage|long[- ]term|second[- ]order|downstream|cascade)\b/) ? 14 : 0) +
+      (has(closing, /\b(strategic|structural|systemic)\b/) ? 8 : 0) -
       blindSpots * 3,
   );
   const adaptability = clamp(
     50 + revised * 10 - held * 12 + (traj.length >= 4 ? 5 : 0),
   );
+  // Word-boundary + negation-aware. "uncertain"/"uncertainty" no longer
+  // trigger the overconfidence penalty; "not luck"/"no luck" no longer
+  // trigger the luck penalty.
+  const calibratedRe = /\b(well[- ]calibrated|calibrated|appropriately\s+\w+|measured|matched\s+the\s+evidence|proportional)\b/;
+  const overconfidentRe = /\b(overconfiden\w*|overstated|overclaim\w*|unwarranted\s+certainty|absolute\s+certainty|certainty\s+(?:was|is)\s+(?:not\s+)?warranted)\b/;
+  const underconfidentRe = /\b(underconfiden\w*|understated|hedged\s+too\s+much)\b/;
+  const luckyRe = /(?<!\bno\s)(?<!\bnot\s)\b(lucky|fortunate|got\s+away|luck\s+rather\s+than)\b/;
   const confidenceCalibration = clamp(
     50 +
-      (hasAny(calText, ["calibrat", "matched", "appropriate", "measured"]) ? 18 : 0) -
-      (hasAny(calText, ["overconfid", "overstated", "certain", "absolute"]) ? 22 : 0) -
-      (hasAny(luckText, ["lucky", "fortunate", "got away"]) ? 10 : 0),
+      (has(calText, calibratedRe) ? 18 : 0) -
+      (has(calText, overconfidentRe) ? 22 : 0) -
+      (has(calText, underconfidentRe) ? 10 : 0) -
+      (has(luckText, luckyRe) ? 10 : 0),
   );
   const informationGathering = clamp(
     50 + Math.min(20, used / 20) - Math.min(25, ignored / 18) + strengths * 4,
   );
   const longTermThinking = clamp(
     50 +
-      (hasAny(alt + closing, ["long-term", "long term", "future", "downstream", "second-order"]) ? 18 : 0) -
-      (hasAny(closing, ["short-term", "immediate", "reactive"]) ? 10 : 0),
+      (has(alt + " " + closing, /\b(long[- ]term|future|downstream|second[- ]order)\b/) ? 18 : 0) -
+      (has(closing, /\b(short[- ]term|immediate|reactive)\b/) ? 10 : 0),
   );
   const biasResistance = clamp(
-    70 - biases * 14 - (held > revised ? 8 : 0),
+    // Baseline aligned with the other axes at 50; hedged biases half-weight.
+    60 - biasWeight * 10 - (held > revised ? 8 : 0),
   );
-  // Negotiation: signals of acknowledging counterparts' incentives, asking,
-  // and not steamrolling. Proxy: strengths present, biases low, and revising
-  // on the other side's evidence rather than holding.
+  // Negotiation: acknowledging counterparts' incentives and updating rather
+  // than steamrolling. Hedged biases count at half weight here too.
   const negotiation = clamp(
-    50 + strengths * 4 + revised * 5 - held * 8 - biases * 4,
+    50 + strengths * 4 + revised * 5 - held * 8 - biasWeight * 3,
   );
+
 
   const signals: string[] = [];
   if (held > revised) signals.push("anchored-after-confidence-rose");
   if (revised >= 2) signals.push("updates-on-evidence");
-  if (biases >= 2) signals.push("multiple-bias-textures");
+  if (biasWeight >= 2) signals.push("multiple-bias-textures");
   if (ignored > used) signals.push("reachable-evidence-skipped");
   if (strengths >= 3 && blindSpots === 0) signals.push("strong-process");
 
@@ -235,18 +255,31 @@ export function useDecisionProfile() {
   return profile;
 }
 
-/** Per-dimension delta from previous mission to latest, or null if <2 contributions. */
+/** Per-dimension delta in the *displayed* rolling-average score from the
+ *  previous mission to the latest. Matches the number on screen, so the
+ *  arrow and the value tell the same story. Null if <2 contributions. */
 export function dimensionTrends(
   profile: DecisionProfile,
 ): Record<Dimension, number | null> {
   const out = {} as Record<Dimension, number | null>;
   const n = profile.contributions.length;
+  if (n < 2) {
+    for (const d of DIMENSIONS) out[d] = null;
+    return out;
+  }
+  // Rolling weighted average over contributions[0..n-2] (state before the
+  // latest mission). Mirrors the weighting in updateProfileWithAnalysis.
+  const prev = profile.contributions.slice(0, -1);
   for (const d of DIMENSIONS) {
-    if (n < 2) out[d] = null;
-    else
-      out[d] =
-        profile.contributions[n - 1].scores[d] -
-        profile.contributions[n - 2].scores[d];
+    let num = 0;
+    let den = 0;
+    prev.forEach((c, i) => {
+      const w = 1 + i * 0.25;
+      num += c.scores[d] * w;
+      den += w;
+    });
+    const prevAvg = Math.round(den > 0 ? num / den : 50);
+    out[d] = profile.scores[d] - prevAvg;
   }
   return out;
 }

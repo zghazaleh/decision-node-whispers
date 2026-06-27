@@ -95,6 +95,9 @@ export type MissionEngine = {
   getArchetype: (id: string) => Archetype | null;
   /** Preset stances surfaced in the Decide modal. */
   decisionPresets: DecisionPreset[];
+  /** Optional placeholder for the Decide modal's free-write textarea.
+   *  Defaults to a neutral prompt when not provided. */
+  decideFreeWritePlaceholder?: string;
   /** Deterministic ground-truth facts for this mission. Shape is mission-specific. */
   canon: MissionCanon;
 };
