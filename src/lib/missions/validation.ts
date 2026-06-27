@@ -50,6 +50,12 @@ const MissionEngineSchema = z.object({
   id: NonEmpty,
   systemPrompt: NonEmpty,
   opening: z.object({ text: NonEmpty }),
+  scene: z.object({
+    src: NonEmpty,
+    filter: z.string().optional(),
+    mood: z.string().optional(),
+  }),
+
   archetypes: z.record(z.string(), ArchetypeSchema).refine(
     (a) => Object.keys(a).length >= 1,
     { message: "engine must define at least one archetype" },

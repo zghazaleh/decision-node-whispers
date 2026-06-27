@@ -6,6 +6,8 @@
  */
 
 import type { MissionEngine, DecisionPreset } from "@/lib/missions/types";
+import sceneImg from "@/assets/scene-office.jpg";
+
 import { canonGroundTruthBlock, CANON } from "./canon";
 import {
   ARCHETYPES,
@@ -124,6 +126,12 @@ export const missionOneEngine: MissionEngine = {
   id: "mission-01",
   systemPrompt: SYSTEM_PROMPT,
   opening: { text: OPENING_TEXT },
+  scene: {
+    src: sceneImg,
+    filter: "saturate(0.88) contrast(1.06)",
+    mood: "Tense, suspended. The room before the decision.",
+  },
+
   archetypes: ARCHETYPES,
   archetypeIds: [...ARCHETYPE_IDS],
   archetypeMenuForClassifier,
