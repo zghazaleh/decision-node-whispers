@@ -614,10 +614,11 @@ function DecideModal({
 }: {
   analyzing: boolean;
   onClose: () => void;
-  onSubmit: (decision: string, reasoning: string) => void;
+  onSubmit: (decision: string, reasoning: string, archetypeId?: ArchetypeId) => void;
 }) {
   const [decision, setDecision] = useState("");
   const [reasoning, setReasoning] = useState("");
+  const [archetypeId, setArchetypeId] = useState<ArchetypeId | undefined>();
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md px-4 animate-fade-in-slow">
@@ -656,7 +657,7 @@ function DecideModal({
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                onSubmit(decision, reasoning);
+                onSubmit(decision, reasoning, archetypeId);
               }}
               className="space-y-6"
             >
@@ -671,7 +672,7 @@ function DecideModal({
                       <button
                         key={p.label}
                         type="button"
-                        onClick={() => setDecision(p.text)}
+                        onClick={() => { setDecision(p.text); setArchetypeId(p.archetypeId); }}
                         className={`w-full text-left rounded-sm border px-4 py-3 transition-colors ${
                           active
                             ? "border-accent/70 bg-accent/10 text-foreground"
@@ -693,7 +694,7 @@ function DecideModal({
                 </label>
                 <textarea
                   value={decision}
-                  onChange={(e) => setDecision(e.target.value)}
+                  onChange={(e) => { setDecision(e.target.value); setArchetypeId(undefined); }}
                   rows={3}
                   placeholder="I walk into the boardroom and…"
                   className="w-full resize-none bg-transparent border-b border-foreground/20 focus:border-foreground/60 outline-none py-2 text-foreground/95 placeholder:text-foreground/25 transition-colors"
