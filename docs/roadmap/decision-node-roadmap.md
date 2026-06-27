@@ -32,20 +32,28 @@ work begins.
 
 ## Next batches (committed direction)
 
-### Batch 4 — Player-built "what I've noticed" rail
+### Batch 4 — Player-built "what I've noticed" rail — ✅ shipped
 
-### Batch 4 — Player-built "what I've noticed" rail
+Lives on the **analysis page**, not in-mission (the in-mission "clue rail"
+variant from earlier scoping is parked as a bigger bet, since the
+constitution forbids tutorialized clue-marking inside a session).
 
-**Why.** Late-mission transcripts are long. The constitution forbids
-tutorialized clue-marking — so the rail must be **derived from what the player
-asked**, not from authored hints.
+**What shipped.**
 
-**Shape.**
+- `src/components/NoticedRail.tsx` — picker of 16 short self-reflection
+  prompts, two per Analyzer axis ("did do" / "could have done").
+- Each pick reveals the Analyzer's own one-sentence `dimensionNote` for
+  that axis underneath — self-claim mirrored against observation.
+- Selections persist per `missionId` in `localStorage`
+  (`decision-node:noticed:<missionId>`).
+- Renders on `/analysis` only when `dimensionNotes` is present, so older
+  sessions degrade silently.
+- No new schema, no extra model call — pure UI on top of Batch 2 output.
 
-- Collapsible side rail on `mission.$id.tsx`, closed by default.
-- Lists assistant turns that answered a direct player question, grouped by
-  the NPC/object named. No highlighting, no "key clue" affordance.
-- Pure transcript projection; no extra LLM call.
+**Parked as a bigger bet.** The in-mission collapsible transcript-projection
+rail (grouping assistant answers by NPC/object) is still a sound idea but
+slipped scope; revisit alongside the bigger constitution work below.
+
 
 ---
 
