@@ -478,6 +478,21 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
         }`}
         style={{ transitionDelay: awakening ? "0s" : "1.4s" }}
       >
+        {/* Reading scrim — an always-on soft dark band behind the text column,
+            independent of the pressure gradient. Guarantees text contrast over
+            bright regions of the scene photo (foggy windows, desk lamps, monitors)
+            without darkening the cinematic frame. Centered on the dialogue
+            column; falls off to transparent at the screen edges so the scene
+            still breathes. Behind transcript/chips, above background layers. */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(ellipse 55% 75% at 50% 52%, oklch(0 0 0 / 0.42) 0%, oklch(0 0 0 / 0.28) 45%, oklch(0 0 0 / 0.10) 72%, transparent 88%)",
+          }}
+        />
+
         {/* Top bar — minimal */}
         <header
           className="flex items-center justify-between px-6 sm:px-10"
