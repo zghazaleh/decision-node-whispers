@@ -648,7 +648,7 @@ function DecideModal({
                   Choose a stance
                 </label>
                 <div className="space-y-2 mb-4">
-                  {DECISION_PRESETS.map((p) => {
+                  {presets.map((p) => {
                     const active = decision.trim() === p.text.trim();
                     return (
                       <button
