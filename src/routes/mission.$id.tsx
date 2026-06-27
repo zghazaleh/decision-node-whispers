@@ -9,6 +9,7 @@ import { toast } from "sonner";
 
 import { partsToText, readMission, useMission } from "@/lib/mission-store";
 import { analyzeDecision } from "@/lib/analysis.functions";
+import { updateProfileWithAnalysis } from "@/lib/decision-profile";
 import { startRecording, type Recorder } from "@/lib/record-wav";
 import { createAmbient } from "@/lib/ambient";
 import { getMissionEngine } from "@/lib/missions/registry";
@@ -180,6 +181,11 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
         analysis,
         decidedAt: Date.now(),
       });
+      try {
+        updateProfileWithAnalysis(MISSION_ID, analysis);
+      } catch (err) {
+        console.error("profile update failed", err);
+      }
       setDecideOpen(false);
       // Small dramatic pause before transition.
       setTimeout(() => navigate({ to: "/analysis" }), 600);
