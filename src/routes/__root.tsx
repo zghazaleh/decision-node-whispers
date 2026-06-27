@@ -132,6 +132,9 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
+      <div className="fixed top-3 right-3 z-50">
+        <ConstitutionStatusBadge />
+      </div>
       <Outlet />
       <Toaster />
     </QueryClientProvider>
