@@ -84,7 +84,7 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
   }
   function scheduleHeartbeat() {
     if (!hbActive || !ctx || !hbGain) return;
-    const now = ctx.currentColumn ? ctx.currentTime : ctx.currentTime;
+    const now = ctx.currentTime;
     // tempo rises with pressure: 60bpm → 92bpm
     const bpm = 60 + pressure * 32;
     const interval = 60 / bpm;
@@ -207,6 +207,8 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
 
     stop() {
       stopped = true;
+      stopHeartbeat(400);
+      hbActive = false;
       if (current) {
         disposeVoice(current, 600);
         current = null;
@@ -215,8 +217,12 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
 
     setMuted(m: boolean) {
       muted = m;
-      if (!current) return;
-      rampVolume(current, targetVolume(current.track), 500);
+      if (current) rampVolume(current, targetVolume(current.track), 500);
+      if (hbGain && ctx) {
+        const now = ctx.currentTime;
+        hbGain.gain.cancelScheduledValues(now);
+        hbGain.gain.linearRampToValueAtTime(m ? 0 : Math.min(0.22, 0.05 + pressure * 0.20), now + 0.4);
+      }
     },
 
     setPressure(p: number) {
@@ -224,6 +230,19 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
       if (Math.abs(next - pressure) < 0.01) return;
       pressure = next;
       if (current) applyPressure(current);
+    },
+
+    setHeartbeat(active: boolean) {
+      if (active === hbActive) return;
+      hbActive = active;
+      if (active) {
+        const c = ensureCtx();
+        if (!c) return;
+        if (c.state === "suspended") c.resume().catch(() => {});
+        scheduleHeartbeat();
+      } else {
+        stopHeartbeat();
+      }
     },
 
   };
