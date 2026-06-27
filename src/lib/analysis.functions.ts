@@ -17,6 +17,8 @@ const AnalysisInput = z.object({
     .min(1),
 });
 
+const DimensionScore = z.number().min(0).max(100);
+
 const AnalysisSchema = z.object({
   headline: z.string(),
   archetypeId: z.string().optional(),
@@ -52,10 +54,18 @@ const AnalysisSchema = z.object({
           name: z.string(),
           evidence: z.string(),
           gentleExplanation: z.string(),
+          // NEW: model's own confidence in the bias claim. Half-weighted
+          // against the bias-resistance axis when "low" or "medium".
+          confidence: z.enum(["low", "medium", "high"]).optional(),
         }),
       )
       .max(3),
     calibration: z.string(),
+    // NEW: structured calibration verdict. Drives the Confidence-Calibration
+    // axis directly, replacing the brittle keyword-sniffing path.
+    calibrationVerdict: z
+      .enum(["under", "calibrated", "over"])
+      .optional(),
     luckVsSkill: z.string(),
   }),
   beliefTrajectory: z
@@ -71,6 +81,33 @@ const AnalysisSchema = z.object({
     )
     .max(8),
 
+  // NEW: per-dimension sub-scores emitted by the Analyzer, with a short
+  // justification per axis. The Decision Profile scorer prefers these over
+  // the legacy keyword inference whenever they are present.
+  dimensionScores: z
+    .object({
+      strategicThinking: DimensionScore,
+      curiosity: DimensionScore,
+      informationGathering: DimensionScore,
+      confidenceCalibration: DimensionScore,
+      adaptability: DimensionScore,
+      negotiation: DimensionScore,
+      longTermThinking: DimensionScore,
+      biasResistance: DimensionScore,
+    })
+    .optional(),
+  dimensionNotes: z
+    .object({
+      strategicThinking: z.string(),
+      curiosity: z.string(),
+      informationGathering: z.string(),
+      confidenceCalibration: z.string(),
+      adaptability: z.string(),
+      negotiation: z.string(),
+      longTermThinking: z.string(),
+      biasResistance: z.string(),
+    })
+    .optional(),
 });
 
 
