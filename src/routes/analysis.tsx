@@ -227,9 +227,94 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
-function ExpandableBlock({ label, body }: { label: string; body: string }) {
+type SectionsCtx = {
+  open: Set<string>;
+  register: (id: string) => void;
+  isOpen: (id: string) => boolean;
+  setOpen: (id: string, open: boolean) => void;
+  collapseAll: () => void;
+  expandAll: () => void;
+  anyOpen: boolean;
+};
+
+const SectionsContext = createContext<SectionsCtx | null>(null);
+
+function SectionsProvider({ children }: { children: React.ReactNode }) {
+  const [open, setOpenState] = useState<Set<string>>(new Set());
+  const idsRef = useRef<Set<string>>(new Set());
+
+  const register = useCallback((id: string) => {
+    idsRef.current.add(id);
+  }, []);
+
+  const setOpen = useCallback((id: string, next: boolean) => {
+    setOpenState((prev) => {
+      const n = new Set(prev);
+      if (next) n.add(id);
+      else n.delete(id);
+      return n;
+    });
+  }, []);
+
+  const collapseAll = useCallback(() => setOpenState(new Set()), []);
+  const expandAll = useCallback(
+    () => setOpenState(new Set(idsRef.current)),
+    [],
+  );
+
+  const value = useMemo<SectionsCtx>(
+    () => ({
+      open,
+      register,
+      isOpen: (id) => open.has(id),
+      setOpen,
+      collapseAll,
+      expandAll,
+      anyOpen: open.size > 0,
+    }),
+    [open, register, setOpen, collapseAll, expandAll],
+  );
+
   return (
-    <ExpandableSection label={label}>
+    <SectionsContext.Provider value={value}>{children}</SectionsContext.Provider>
+  );
+}
+
+function useSections() {
+  const ctx = useContext(SectionsContext);
+  if (!ctx) throw new Error("Sections components must be used within SectionsProvider");
+  return ctx;
+}
+
+function SectionsToolbar() {
+  const { anyOpen, collapseAll, expandAll } = useSections();
+  return (
+    <div className="flex justify-end pb-3">
+      <button
+        type="button"
+        onClick={anyOpen ? collapseAll : expandAll}
+        className="group inline-flex items-center gap-2 text-[0.55rem] tracking-[0.4em] uppercase text-foreground/45 hover:text-foreground/85 transition-colors"
+      >
+        <span className="h-px w-4 bg-foreground/30 group-hover:bg-foreground/70 group-hover:w-6 transition-all" />
+        {anyOpen ? "Collapse all" : "Expand all"}
+      </button>
+    </div>
+  );
+}
+
+function ExpandableBlock({
+  id,
+  label,
+  hint,
+  body,
+}: {
+  id: string;
+  label: string;
+  hint?: string;
+  body: string;
+}) {
+  return (
+    <ExpandableSection id={id} label={label} hint={hint}>
       <p className="font-display text-lg sm:text-xl leading-relaxed text-foreground/85 text-pretty">
         {body}
       </p>
@@ -238,28 +323,43 @@ function ExpandableBlock({ label, body }: { label: string; body: string }) {
 }
 
 function ExpandableSection({
+  id,
   label,
+  hint,
   children,
 }: {
+  id: string;
   label: string;
+  hint?: string;
   children: React.ReactNode;
 }) {
-  const [open, setOpen] = useState(false);
+  const { register, isOpen, setOpen } = useSections();
+  useEffect(() => {
+    register(id);
+  }, [id, register]);
+  const open = isOpen(id);
   return (
-    <Collapsible open={open} onOpenChange={setOpen}>
-      <CollapsibleTrigger className="group flex w-full items-center justify-between gap-6 py-5 text-left transition-colors hover:text-foreground">
-        <span className="text-[0.65rem] tracking-[0.4em] uppercase text-foreground/60 group-hover:text-foreground/90">
-          {label}
+    <Collapsible open={open} onOpenChange={(v) => setOpen(id, v)}>
+      <CollapsibleTrigger className="group flex w-full items-start justify-between gap-6 py-5 text-left transition-colors hover:text-foreground">
+        <span className="flex-1 min-w-0">
+          <span className="block text-[0.65rem] tracking-[0.4em] uppercase text-foreground/60 group-hover:text-foreground/90 transition-colors">
+            {label}
+          </span>
+          {hint && (
+            <span className="mt-1.5 block text-[0.78rem] leading-snug text-foreground/40 group-hover:text-foreground/55 transition-colors normal-case tracking-normal">
+              {hint}
+            </span>
+          )}
         </span>
         <span
-          className={`text-foreground/40 transition-transform duration-300 ${open ? "rotate-45" : ""}`}
+          className={`mt-1 text-foreground/40 transition-transform duration-300 ${open ? "rotate-45" : ""}`}
           aria-hidden
         >
           +
         </span>
       </CollapsibleTrigger>
-      <CollapsibleContent>
-        <div className="pb-8 pt-1 animate-fade-in">{children}</div>
+      <CollapsibleContent className="overflow-hidden data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up">
+        <div className="pb-8 pt-1">{children}</div>
       </CollapsibleContent>
     </Collapsible>
   );
