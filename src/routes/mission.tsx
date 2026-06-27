@@ -3,13 +3,15 @@ import { DefaultChatTransport, type UIMessage } from "ai";
 import { useServerFn } from "@tanstack/react-start";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Eye, BookOpen, Phone, MessageCircle, Send, Scale, X, Mic, Square } from "lucide-react";
+import { Eye, BookOpen, Phone, MessageCircle, Send, Scale, X, Mic, Square, Volume2, VolumeX } from "lucide-react";
 import { toast } from "sonner";
 
 import sceneOffice from "@/assets/scene-office.jpg";
 import { partsToText, readMission, useMission } from "@/lib/mission-store";
 import { analyzeDecision } from "@/lib/analysis.functions";
 import { startRecording, type Recorder } from "@/lib/record-wav";
+import { createAmbient } from "@/lib/ambient";
+
 
 
 
