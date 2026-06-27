@@ -457,17 +457,19 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
 
 
         {/* Composer */}
-        <div className="px-6 sm:px-10 pb-8 sm:pb-10">
+        <div className="px-6 sm:px-10 pb-6 sm:pb-8">
           <div className="mx-auto max-w-2xl">
-
-
             <form
               onSubmit={(e) => {
                 e.preventDefault();
                 submit(input);
               }}
-              className="mt-4 flex items-end gap-3 border-b border-foreground/20 focus-within:border-foreground/60 transition-colors py-2"
+              className="flex items-end gap-2 border-b border-foreground/20 focus-within:border-foreground/60 transition-colors py-2"
             >
+              <MicButton
+                disabled={busy}
+                onTranscribed={(t) => setInput((prev) => (prev ? prev + " " + t : t))}
+              />
               <textarea
                 ref={inputRef}
                 value={input}
@@ -481,7 +483,7 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
                 rows={1}
                 placeholder="Speak or act."
                 disabled={busy}
-                className="flex-1 resize-none bg-transparent text-foreground/95 placeholder:text-foreground/30 outline-none text-base font-sans leading-relaxed max-h-40"
+                className="flex-1 resize-none bg-transparent text-foreground/95 placeholder:text-foreground/30 outline-none text-base font-sans leading-relaxed max-h-40 py-2"
               />
               <button
                 type="submit"
@@ -491,10 +493,29 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
               >
                 <Send className="h-4 w-4" />
               </button>
-
             </form>
+
+            {/* Decide pill — fades in as the moment ripens */}
+            <div className="mt-5 flex justify-center" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
+              <button
+                type="button"
+                onClick={() => decideReady && openDecideWith("")}
+                disabled={!decideReady}
+                aria-disabled={!decideReady}
+                style={{ opacity: 0.15 + pressureForDecide * 0.85 }}
+                className={`group inline-flex items-center gap-2 rounded-full border px-5 py-2.5 text-[0.65rem] font-medium tracking-[0.32em] uppercase transition-all duration-700 ${
+                  decideReady
+                    ? "border-accent/70 bg-accent/10 text-accent hover:bg-accent/20 hover:border-accent shadow-[0_0_24px_-8px_var(--color-accent)] cursor-pointer"
+                    : "border-foreground/20 bg-transparent text-foreground/60 cursor-not-allowed"
+                }`}
+              >
+                <span className={`h-1.5 w-1.5 rounded-full transition-colors ${decideReady ? "bg-accent animate-pulse-soft" : "bg-foreground/30"}`} />
+                Decide
+              </button>
+            </div>
           </div>
         </div>
+
       </div>
 
       {/* Decide modal */}
