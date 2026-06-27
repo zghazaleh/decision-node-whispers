@@ -88,6 +88,45 @@ function Mission() {
   const [analyzing, setAnalyzing] = useState(false);
   const analyzeFn = useServerFn(analyzeDecision);
 
+  // Ambient score — starts on the first user gesture (browsers require it).
+  const ambientRef = useRef<ReturnType<typeof createAmbient> | null>(null);
+  const [soundOn, setSoundOn] = useState<boolean>(() => {
+    try { return localStorage.getItem("dn:sound") !== "off"; } catch { return true; }
+  });
+  useEffect(() => {
+    if (!ambientRef.current) ambientRef.current = createAmbient();
+    const a = ambientRef.current;
+    const onGesture = async () => {
+      if (!a.isRunning() && soundOn) {
+        try { await a.start(); } catch { /* noop */ }
+      }
+      window.removeEventListener("pointerdown", onGesture);
+      window.removeEventListener("keydown", onGesture);
+    };
+    window.addEventListener("pointerdown", onGesture, { once: true });
+    window.addEventListener("keydown", onGesture, { once: true });
+    return () => {
+      window.removeEventListener("pointerdown", onGesture);
+      window.removeEventListener("keydown", onGesture);
+      a.stop();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => {
+    ambientRef.current?.setMuted(!soundOn);
+    try { localStorage.setItem("dn:sound", soundOn ? "on" : "off"); } catch { /* noop */ }
+  }, [soundOn]);
+
+  async function toggleSound() {
+    const next = !soundOn;
+    setSoundOn(next);
+    const a = ambientRef.current;
+    if (next && a && !a.isRunning()) {
+      try { await a.start(); } catch { /* noop */ }
+    }
+  }
+
+
   const transcriptRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     transcriptRef.current?.scrollTo({
