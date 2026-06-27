@@ -235,6 +235,16 @@ function Analysis() {
           </section>
         )}
 
+        {/* Player-built "What I've noticed" rail — self-claims mirrored
+            against the Analyzer's per-axis notes. Renders only when the
+            Analyzer emitted dimensionNotes (older sessions skip it). */}
+        {a.dimensionNotes && (
+          <section className="animate-fade-up" style={{ animationDelay: "0.32s" }}>
+            <NoticedRail missionId={mission.missionId} dimensionNotes={a.dimensionNotes} />
+          </section>
+        )}
+
+
         {/* Interactive Timeline */}
         <section className="animate-fade-up" style={{ animationDelay: "0.4s" }}>
           <SectionLabel>Consequence timeline</SectionLabel>
