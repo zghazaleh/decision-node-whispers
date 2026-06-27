@@ -423,56 +423,6 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
           >
             Decision Node
           </button>
-          <div className="flex items-center gap-5">
-            <button
-              onClick={toggleSound}
-              aria-label={soundOn ? "Mute ambient" : "Unmute ambient"}
-              title={soundOn ? "Mute ambient" : "Unmute ambient"}
-              className="text-foreground/40 hover:text-foreground/90 transition-colors"
-            >
-              {soundOn ? <Volume2 className="h-3.5 w-3.5" /> : <VolumeX className="h-3.5 w-3.5" />}
-            </button>
-            {(() => {
-              // Unlock the decision once the player has actually had a few
-              // exchanges with the scene. Tied to the same pressure curve
-              // that darkens the room, so it never feels arbitrary.
-              // Roughly: 4+ user turns (≈ messages.length >= 9).
-              const decideReady = !busy && pressure >= 0.45;
-              const userTurns = messages.filter((m) => m.role === "user").length;
-              const turnsToGo = Math.max(0, 4 - userTurns);
-              const lockedHint =
-                turnsToGo > 0
-                  ? `Continue the conversation — ${turnsToGo} more exchange${turnsToGo === 1 ? "" : "s"}.`
-                  : "Thinking…";
-              return (
-                <button
-                  onClick={() => setDecideOpen(true)}
-                  disabled={!decideReady}
-                  title={decideReady ? "Make your decision" : lockedHint}
-                  aria-label={decideReady ? "Decide" : `Decide — locked. ${lockedHint}`}
-                  className={`group inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 sm:px-4 sm:py-2 text-[0.65rem] sm:text-[0.7rem] tracking-[0.3em] uppercase transition-all disabled:cursor-not-allowed ${
-                    decideReady
-                      ? "border-accent/70 bg-accent/15 text-accent hover:bg-accent/25 hover:border-accent shadow-[0_0_18px_-4px_var(--color-accent)]"
-                      : "border-foreground/20 bg-foreground/5 text-foreground/50"
-                  }`}
-                >
-                  <span className="relative flex h-2 w-2 items-center justify-center">
-                    {decideReady ? (
-                      <>
-                        <span className="absolute inline-flex h-full w-full rounded-full bg-accent/60 animate-ping" />
-                        <span className="relative inline-flex h-2 w-2 rounded-full bg-accent" />
-                      </>
-                    ) : (
-                      <span className="inline-flex h-1.5 w-1.5 rounded-full border border-foreground/40" />
-                    )}
-                  </span>
-                  <Scale className="h-3.5 w-3.5" />
-                  <span>{decideReady ? "Decide" : "Locked"}</span>
-                </button>
-              );
-            })()}
-
-          </div>
 
         </header>
 
