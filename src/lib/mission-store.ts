@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import type { UIMessage } from "ai";
 import type { DecisionAnalysis } from "@/lib/analysis.functions";
 
-const KEY = "decision-node:mission-01";
+const KEY_PREFIX = "decision-node:mission:";
+const ACTIVE_KEY = "decision-node:active-mission";
 
 export type SavedMission = {
+  missionId: string;
   messages: UIMessage[];
   startedAt: number;
   decision?: string;
@@ -13,43 +15,66 @@ export type SavedMission = {
   decidedAt?: number;
 };
 
-const empty = (): SavedMission => ({ messages: [], startedAt: Date.now() });
+const empty = (missionId: string): SavedMission => ({
+  missionId,
+  messages: [],
+  startedAt: Date.now(),
+});
 
-export function readMission(): SavedMission {
-  if (typeof window === "undefined") return empty();
+function keyFor(missionId: string) {
+  return `${KEY_PREFIX}${missionId}`;
+}
+
+export function readMission(missionId?: string): SavedMission {
+  if (typeof window === "undefined") return empty(missionId ?? "mission-01");
+  const id = missionId ?? window.localStorage.getItem(ACTIVE_KEY) ?? "mission-01";
   try {
-    const raw = window.localStorage.getItem(KEY);
-    if (!raw) return empty();
+    const raw = window.localStorage.getItem(keyFor(id));
+    if (!raw) return empty(id);
     const parsed = JSON.parse(raw) as SavedMission;
-    return { ...empty(), ...parsed };
+    return { ...empty(id), ...parsed, missionId: id };
   } catch {
-    return empty();
+    return empty(id);
   }
 }
 
 export function writeMission(m: SavedMission) {
   if (typeof window === "undefined") return;
-  window.localStorage.setItem(KEY, JSON.stringify(m));
+  window.localStorage.setItem(keyFor(m.missionId), JSON.stringify(m));
+  window.localStorage.setItem(ACTIVE_KEY, m.missionId);
 }
 
-export function clearMission() {
+export function clearMission(missionId: string) {
   if (typeof window === "undefined") return;
-  window.localStorage.removeItem(KEY);
+  window.localStorage.removeItem(keyFor(missionId));
 }
 
-export function useMission() {
-  const [mission, setMission] = useState<SavedMission>(empty);
-  useEffect(() => { setMission(readMission()); }, []);
+export function getActiveMissionId(): string | null {
+  if (typeof window === "undefined") return null;
+  return window.localStorage.getItem(ACTIVE_KEY);
+}
+
+export function useMission(missionId: string) {
+  const [mission, setMission] = useState<SavedMission>(() => empty(missionId));
+  useEffect(() => {
+    setMission(readMission(missionId));
+  }, [missionId]);
   return {
     mission,
     update: (patch: Partial<SavedMission> | ((prev: SavedMission) => SavedMission)) => {
       setMission((prev) => {
-        const next = typeof patch === "function" ? patch(prev) : { ...prev, ...patch };
+        const next =
+          typeof patch === "function"
+            ? patch(prev)
+            : { ...prev, ...patch, missionId: prev.missionId };
         writeMission(next);
         return next;
       });
     },
-    reset: () => { clearMission(); setMission(empty()); },
+    reset: () => {
+      clearMission(missionId);
+      setMission(empty(missionId));
+    },
   };
 }
 

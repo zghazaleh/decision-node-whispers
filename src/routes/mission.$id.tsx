@@ -11,42 +11,39 @@ import { partsToText, readMission, useMission } from "@/lib/mission-store";
 import { analyzeDecision } from "@/lib/analysis.functions";
 import { startRecording, type Recorder } from "@/lib/record-wav";
 import { createAmbient } from "@/lib/ambient";
-import { requireMissionEngine } from "@/lib/missions/registry";
+import { getMissionEngine } from "@/lib/missions/registry";
+import type { MissionEngine } from "@/lib/missions/types";
 
-// The mission this route runs. To add more missions, create a new route
-// (or accept a route param) and pass a different id here.
-const MISSION_ID = "mission-01";
-const ENGINE = requireMissionEngine(MISSION_ID);
-
-
-
-
-export const Route = createFileRoute("/mission")({
+export const Route = createFileRoute("/mission/$id")({
   head: () => ({
     meta: [
       { title: "Decision Node — Mission" },
       { name: "robots", content: "noindex" },
     ],
   }),
-  component: Mission,
+  component: MissionRoute,
   ssr: false,
 });
 
-// The canonical opening — deterministic per the system prompt.
-const OPENING: UIMessage = {
-  id: "opening",
-  role: "assistant",
-  parts: [
-    {
-      type: "text",
-      text: `*Sarah Kwon*\n"Dr. Vasquez?"\n\n"They're seated. Jonas asked if you wanted coffee before. I said you didn't. Was that right?"\n\n<<chips: "Sarah, who exactly is seated?" | "I look around the room" | "Give me a minute, Sarah">>`,
-    },
-  ],
-};
-
-function Mission() {
+function MissionRoute() {
+  const { id } = Route.useParams();
   const navigate = useNavigate();
-  const { mission, update } = useMission();
+  const engine = getMissionEngine(id);
+  useEffect(() => {
+    if (!engine) navigate({ to: "/missions" });
+  }, [engine, navigate]);
+  if (!engine) return null;
+  return <Mission key={id} missionId={id} engine={engine} />;
+}
+
+function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string; engine: MissionEngine }) {
+  const navigate = useNavigate();
+  const OPENING: UIMessage = {
+    id: "opening",
+    role: "assistant",
+    parts: [{ type: "text", text: ENGINE.opening.text }],
+  };
+  const { mission, update } = useMission(MISSION_ID);
   const [awakening, setAwakening] = useState(true);
 
   // Awakening: 3.6s of darkness with slow fade-in of the scene.
@@ -57,14 +54,14 @@ function Mission() {
 
   // Seed once (lazy): use saved messages or the canonical opening.
   const [initialMessages] = useState<UIMessage[]>(() => {
-    const saved = readMission();
+    const saved = readMission(MISSION_ID);
     if (saved.messages && saved.messages.length > 0) return saved.messages;
     return [OPENING];
   });
 
   // Persist the opening on first mount if nothing was saved yet.
   useEffect(() => {
-    const saved = readMission();
+    const saved = readMission(MISSION_ID);
     if (!saved.messages || saved.messages.length === 0) {
       update({ messages: initialMessages });
     }
@@ -77,11 +74,11 @@ function Mission() {
         api: "/api/chat",
         body: { missionId: MISSION_ID },
       }),
-    []
+    [MISSION_ID]
   );
 
   const { messages, sendMessage, status, error } = useChat({
-    id: "mission-01",
+    id: MISSION_ID,
     messages: initialMessages,
     transport,
   });
@@ -99,16 +96,17 @@ function Mission() {
   const analyzeFn = useServerFn(analyzeDecision);
 
   // Ambient score — starts on the first user gesture (browsers require it).
+  // Missions without a registered soundtrack play silently.
   const ambientRef = useRef<ReturnType<typeof createAmbient> | null>(null);
   const [soundOn, setSoundOn] = useState<boolean>(() => {
     try { return localStorage.getItem("dn:sound") !== "off"; } catch { return true; }
   });
   useEffect(() => {
-    if (!ambientRef.current) ambientRef.current = createAmbient("mission-01");
+    if (!ambientRef.current) ambientRef.current = createAmbient(MISSION_ID);
     const a = ambientRef.current;
     const onGesture = async () => {
       if (!a.isRunning() && soundOn) {
-        try { await a.start("mission-01"); } catch { /* noop */ }
+        try { await a.start(MISSION_ID); } catch { /* noop */ }
       }
       window.removeEventListener("pointerdown", onGesture);
       window.removeEventListener("keydown", onGesture);
@@ -121,7 +119,7 @@ function Mission() {
       a.stop();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [MISSION_ID]);
   useEffect(() => {
     ambientRef.current?.setMuted(!soundOn);
     try { localStorage.setItem("dn:sound", soundOn ? "on" : "off"); } catch { /* noop */ }
@@ -132,7 +130,7 @@ function Mission() {
     setSoundOn(next);
     const a = ambientRef.current;
     if (next && a && !a.isRunning()) {
-      try { await a.start("mission-01"); } catch { /* noop */ }
+      try { await a.start(MISSION_ID); } catch { /* noop */ }
     }
   }
 
@@ -399,6 +397,7 @@ function Mission() {
       {/* Decide modal */}
       {decideOpen && (
         <DecideModal
+          presets={ENGINE.decisionPresets}
           analyzing={analyzing}
           onClose={() => !analyzing && setDecideOpen(false)}
           onSubmit={handleDecide}
@@ -588,15 +587,13 @@ function QuickActions({
   );
 }
 
-// Decision presets come from the mission engine so adding a new mission
-// only requires defining presets in its module — no UI changes here.
-const DECISION_PRESETS = ENGINE.decisionPresets;
-
 function DecideModal({
+  presets,
   analyzing,
   onClose,
   onSubmit,
 }: {
+  presets: MissionEngine["decisionPresets"];
   analyzing: boolean;
   onClose: () => void;
   onSubmit: (decision: string, reasoning: string, archetypeId?: string) => void;
@@ -651,7 +648,7 @@ function DecideModal({
                   Choose a stance
                 </label>
                 <div className="space-y-2 mb-4">
-                  {DECISION_PRESETS.map((p) => {
+                  {presets.map((p) => {
                     const active = decision.trim() === p.text.trim();
                     return (
                       <button

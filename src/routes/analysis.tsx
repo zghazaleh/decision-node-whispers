@@ -17,8 +17,8 @@ export const Route = createFileRoute("/analysis")({
 
 function Analysis() {
   const navigate = useNavigate();
-  const { reset } = useMission();
   const [mission, setMission] = useState<SavedMission | null>(null);
+  const { reset } = useMission(mission?.missionId ?? "mission-01");
 
   useEffect(() => {
     const m = readMission();
@@ -136,7 +136,8 @@ function Analysis() {
             <button
               onClick={() => {
                 reset();
-                navigate({ to: "/mission" });
+                const id = mission?.missionId ?? "mission-01";
+                navigate({ to: "/mission/$id", params: { id } });
               }}
               className="group flex items-center gap-3 text-[0.65rem] tracking-[0.4em] uppercase text-foreground/70 hover:text-foreground transition-colors"
             >

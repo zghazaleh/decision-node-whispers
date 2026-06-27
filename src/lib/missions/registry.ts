@@ -13,6 +13,9 @@
 
 import type { MissionEngine } from "./types";
 import { missionOneEngine } from "./mission-01";
+import { missionTwoEngine } from "./mission-02";
+import { missionThreeEngine } from "./mission-03";
+import { missionFourEngine } from "./mission-04";
 import {
   formatMissionEngineErrors,
   validateMissionEngine,
@@ -36,6 +39,9 @@ function register(engine: MissionEngine): void {
 }
 
 register(missionOneEngine);
+register(missionTwoEngine);
+register(missionThreeEngine);
+register(missionFourEngine);
 
 export function getMissionEngine(missionId: string): MissionEngine | null {
   return REGISTRY[missionId] ?? null;

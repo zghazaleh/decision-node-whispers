@@ -49,6 +49,7 @@ const CanonSchema = z
 const MissionEngineSchema = z.object({
   id: NonEmpty,
   systemPrompt: NonEmpty,
+  opening: z.object({ text: NonEmpty }),
   archetypes: z.record(z.string(), ArchetypeSchema).refine(
     (a) => Object.keys(a).length >= 1,
     { message: "engine must define at least one archetype" },

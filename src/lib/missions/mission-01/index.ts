@@ -113,9 +113,17 @@ const DECISION_PRESETS: DecisionPreset[] = [
   },
 ];
 
+const OPENING_TEXT = `*Sarah Kwon*
+"Dr. Vasquez?"
+
+"They're seated. Jonas asked if you wanted coffee before. I said you didn't. Was that right?"
+
+<<chips: "Sarah, who exactly is seated?" | "I look around the room" | "Give me a minute, Sarah">>`;
+
 export const missionOneEngine: MissionEngine = {
   id: "mission-01",
   systemPrompt: SYSTEM_PROMPT,
+  opening: { text: OPENING_TEXT },
   archetypes: ARCHETYPES,
   archetypeIds: [...ARCHETYPE_IDS],
   archetypeMenuForClassifier,

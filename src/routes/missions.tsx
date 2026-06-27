@@ -79,12 +79,12 @@ function MissionsPage() {
   }, [hovered, selected, armed]);
 
   function open(m: MissionMeta) {
-    if (m.status !== "available" || !m.route) return;
+    if (m.status !== "available") return;
     if (entering) return;
     setSelected(m.id);
     setEntering(true);
     // Let the selected track swell, then leave it playing on the mission page.
-    setTimeout(() => navigate({ to: m.route! }), 900);
+    setTimeout(() => navigate({ to: "/mission/$id", params: { id: m.id } }), 900);
   }
 
   return (
