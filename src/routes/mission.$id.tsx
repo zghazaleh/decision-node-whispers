@@ -363,7 +363,10 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
         style={{ transitionDelay: awakening ? "0s" : "1.4s" }}
       >
         {/* Top bar — minimal */}
-        <header className="flex items-center justify-between px-6 pt-6 sm:px-10 sm:pt-8">
+        <header
+          className="flex items-center justify-between px-6 sm:px-10"
+          style={{ paddingTop: `calc(5vh + 1.25rem + env(safe-area-inset-top))` }}
+        >
           <button
             onClick={() => navigate({ to: "/" })}
             className="text-[0.6rem] tracking-[0.4em] uppercase text-foreground/50 hover:text-foreground/90 transition-colors"
