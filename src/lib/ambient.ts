@@ -155,7 +155,15 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
     setMuted(m: boolean) {
       muted = m;
       if (!current) return;
-      rampVolume(current, m ? 0 : current.track.volume, 500);
+      rampVolume(current, targetVolume(current.track), 500);
     },
+
+    setPressure(p: number) {
+      const next = Math.min(1, Math.max(0, p));
+      if (Math.abs(next - pressure) < 0.01) return;
+      pressure = next;
+      if (current) applyPressure(current);
+    },
+
   };
 }
