@@ -106,4 +106,21 @@ export const MISSIONS: MissionMeta[] = [
     creator: "House Edition",
     version: "v1.0",
   },
+  {
+    id: "mission-06",
+    number: "06",
+    codename: "Recant",
+    title: "Recant",
+    logline:
+      "The front page is being held. The accusation that started a reckoning was a lie. You have until midnight.",
+    status: "available",
+    duration: "20–40 min",
+    tone: "Moral · After hours",
+    location: "Newsroom, investigations desk",
+    year: "Present day",
+    category: "Ethics",
+    difficulty: 5,
+    creator: "House Edition",
+    version: "v1.0",
+  },
 ];
