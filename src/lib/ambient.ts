@@ -63,6 +63,17 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
   let pendingMission: string | null = initialMissionId;
   let pressure = 0; // 0..1
 
+  // Live audio profile — defaults match the original mission-03 bed; can be
+  // overridden per-mission via setAudioProfile().
+  const profile: Required<AudioProfile> = {
+    padFrequency: 55,
+    padDetune: 1.005,
+    filterBaseHz: 1600,
+    filterLfoDepthHz: 800,
+    lfoRateHz: 0.05,
+  };
+
+
   // Shared WebAudio graph ─ used by heartbeat synth, the LFO-modulated low-pass
   // filter on the music voice, and the sub-pad that swells with pressure.
   let ctx: AudioContext | null = null;
