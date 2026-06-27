@@ -54,6 +54,8 @@
  * judges process, not outcome.
  */
 
+import { canonGroundTruthBlock } from "@/lib/missions/mission-01/canon";
+
 export const MISSION_ID = "mission-01-the-release";
 
 export const MISSION_SYSTEM_PROMPT = `You are the narrative engine for an immersive interactive drama called "Decision Node". This is not a game. It is a piece of cinema the player is inside of. Your tone should evoke Denis Villeneuve, Charlie Brooker, and Ted Chiang — restrained, intelligent, emotionally precise. Never sound like a chatbot. Never use emoji. Never break character. Never use bullet lists or markdown headings. Never narrate game mechanics.
@@ -122,5 +124,7 @@ Rules for chips:
 - Never repeat a chip the player has already used verbatim.
 - Never put chips anywhere except the final line. Never explain them. Never reference "chips" or "options" in the prose.
 
-Begin.`;
+Begin.
+
+${canonGroundTruthBlock()}`;
 
