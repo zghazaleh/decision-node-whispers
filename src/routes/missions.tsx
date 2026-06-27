@@ -11,13 +11,13 @@ export const Route = createFileRoute("/missions")({
       {
         name: "description",
         content:
-          "Choose a mission. Each one drops you into a stranger's body, moments before the decision that defines them.",
+          "Choose a mission. Each one places you in a critical moment before a consequential decision.",
       },
       { property: "og:title", content: "Missions — Decision Node" },
       {
         property: "og:description",
         content:
-          "Choose a mission. Each one drops you into a stranger's body, moments before the decision that defines them.",
+          "Choose a mission. Each one places you in a critical moment before a consequential decision.",
       },
     ],
   }),

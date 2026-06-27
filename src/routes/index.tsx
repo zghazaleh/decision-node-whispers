@@ -13,7 +13,7 @@ export const Route = createFileRoute("/")({
       {
         property: "og:description",
         content:
-          "You wake up in someone else's body moments before the most important decision of their life.",
+          "An interactive drama about consequential decisions.",
       },
     ],
   }),
