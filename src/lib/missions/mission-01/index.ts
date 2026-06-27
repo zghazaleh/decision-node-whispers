@@ -121,4 +121,5 @@ export const missionOneEngine: MissionEngine = {
   archetypeMenuForClassifier,
   getArchetype: (id) => getArchetype(id as ArchetypeId),
   decisionPresets: DECISION_PRESETS,
+  canon: CANON as unknown as Record<string, unknown>,
 };
