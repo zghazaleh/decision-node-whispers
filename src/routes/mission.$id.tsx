@@ -790,15 +790,17 @@ function QuickActions({
 function DecideModal({
   presets,
   analyzing,
+  initialDecision,
   onClose,
   onSubmit,
 }: {
   presets: MissionEngine["decisionPresets"];
   analyzing: boolean;
+  initialDecision?: string;
   onClose: () => void;
   onSubmit: (decision: string, reasoning: string, archetypeId?: string, confidence?: number) => void;
 }) {
-  const [decision, setDecision] = useState("");
+  const [decision, setDecision] = useState(initialDecision ?? "");
   const [reasoning, setReasoning] = useState("");
   const [archetypeId, setArchetypeId] = useState<string | undefined>();
   const [confidence, setConfidence] = useState<number>(60);
