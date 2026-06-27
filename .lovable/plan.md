@@ -1,76 +1,41 @@
 
 ## Goal
 
-Produce a single source-of-truth documentation set describing how the game's AI systems actually work today. Reading-only pass over the codebase. No application code, prompts, routes, components, or behavior change.
+Make the `/mission/mission-03` scene feel alive instead of a still photo, and give the audio more presence and depth — without competing with the dialogue.
 
-## Deliverables
+## Current state
 
-All new files under `docs/architecture/`. Markdown only.
+- The image already has ken-burns, scene-sway, a light layer, dust, grain, vignette, mood wash, edge-darkening, and a heartbeat vignette.
+- Ambient audio: only `mission-01` has a registered soundtrack. Mission-03 currently plays silently — the heartbeat synth is the *only* sound there.
+- That is the root cause of "feels static": no track, and no scene-level animated atmosphere beyond slow pans.
 
-```text
-docs/architecture/
-  README.md                  # index + glossary + how the pieces connect
-  director-model.md          # the narrative chat engine
-  decision-analysis-model.md # the post-decision analyzer
-  prompt-logic.md            # every prompt, assembled and annotated
-  case-structure.md          # mission engine + canon + outcomes schema
-  ai-behavior.md             # cross-cutting rules, guarantees, failure modes
-```
+## Visual: subtle dynamic layers (in `mission.$id.tsx` + `src/styles.css`)
 
-## What each file covers
+Add three new low-opacity layers behind the existing gradients, all CSS-driven so they cost nothing:
 
-**README.md** — one-page map.
-- The two LLM surfaces (Director chat vs. Decision Analysis) and where they live in `src/`.
-- End-to-end request flow for a turn of play and for a decision commit, with file references.
-- Glossary: Case / Archetype / Canon / Preset / Second-order / Belief trajectory.
+1. **Atmospheric haze drift** — a very soft, large-radius radial cloud that slowly translates and scales (40–60s loop). Reads as air moving through the room.
+2. **Slow chromatic breathing** — a barely-visible hue/brightness oscillation on the `<img>` filter (±3% brightness, ±2° hue, 18s sine). Pairs with ken-burns to break the "frozen frame" feel.
+3. **Occasional light pulse** — a single soft warm highlight that sweeps across once every ~22s at low opacity (think distant lightning / passing headlight). Uses the mission accent token so it stays palette-correct.
 
-**director-model.md** — the live narrative engine.
-- Source: `src/routes/api/chat.ts` (server route, gateway, model `google/gemini-3-flash-preview`, temperature 0.85).
-- Inputs: `messages`, `missionId`; resolution via `getMissionEngine`.
-- Output contract: streamed UI messages, the chips-on-last-line convention.
-- Per-mission opening message + scene metadata from `MissionEngine.opening` / `scene`.
-- Narration rules surfaced from the system prompt (in-world voice, italic name prefix, sensory beats, no markdown, no meta).
-- How CANON is injected as ground truth and what the model is forbidden to invent.
+Bonus: tiny pointer-driven parallax on the existing `--px/--py` vars (≤6px) on desktop only, so the scene reacts faintly to mouse movement.
 
-**decision-analysis-model.md** — the post-commit analyzer.
-- Source: `src/lib/analysis.functions.ts` (`createServerFn`, two-stage pipeline).
-- Stage A (classification): schema, model, temperature, when it is skipped (preset path supplies `archetypeId`).
-- Stage B (narration): schema (`AnalysisSchema`) field-by-field — `headline`, `timeline`, `assumptions`, `evidenceUsed`, `evidenceIgnored`, `alternatives`, `closing`, `reasoningAssessment.{summary,strengths,blindSpots,possibleBiases,calibration,luckVsSkill}`, `beliefTrajectory`.
-- Hard guarantee: canonical timeline + archetype label always overwrite model output when an archetype matched.
-- Inputs: decision text, optional reasoning, optional confidence, transcript.
-- Style constraints lifted from the system prompt (no "right/wrong", process over outcome, evidence-grounded).
+All new layers respect `prefers-reduced-motion` (extend the existing `@media` block).
 
-**prompt-logic.md** — every prompt the app ships, annotated.
-- Director system prompt (Mission 01 quoted in full as the canonical example) with section-by-section commentary: situation, character roster, observables, opening, narration rules, decision handling, chips spec.
-- `canonGroundTruthBlock()` — what gets appended and why.
-- Analyzer Stage A classification prompt — role, archetype menu format, what the rationale is for.
-- Analyzer Stage B narration prompt — coaching persona, observation checklist, bias list, strength list, schema field instructions, canon-timeline block injection.
-- Where temperatures, models, and SDK live (`src/lib/ai-gateway.server.ts`).
+## Audio: register a mission-03 track and enrich the ambient bed
 
-**case-structure.md** — the mission engine.
-- `MissionEngine` type (`src/lib/missions/types.ts`) field by field.
-- Registry (`src/lib/missions/registry.ts`): registration, validation-at-load, safe lookups, `requireMissionEngine` error path.
-- `validateMissionEngine` (`src/lib/missions/validation.ts`): schema rules, cross-field checks (archetypeIds ↔ archetypes ↔ presets).
-- Per-case folder layout: `index.ts` (engine assembly + system prompt + presets + opening + scene), `canon.ts` (deterministic ground truth + injection helper), `outcomes.ts` (archetypes, timeline beats, second-order pillars, tone).
-- Player-facing metadata: `MISSIONS` in `src/lib/missions.ts` — id, codename, logline, tone, duration, location, year, category, difficulty, creator, version, status.
-- How to add a new case (file checklist, validation contract, registry edit).
+1. **Add a mission-03 soundtrack** in `src/lib/soundtracks.ts` — generate via ElevenLabs Music (long, slow, sub-heavy drone matching the mission's tone) and upload through `lovable-assets`. Volume around 0.30 so dialogue stays primary. This alone is the single biggest "feels less static" win.
+2. **Enrich `src/lib/ambient.ts`** with a WebAudio sub-layer that's always on (very quiet) while a mission is active:
+   - A slow LFO-modulated low-pass filter on the music voice (via `MediaElementAudioSourceNode` → `BiquadFilterNode`) — cutoff drifts between 800–2400 Hz on a 20s sine. Adds gentle "breathing" to the bed.
+   - A second oscillator pad (two detuned sines, ~55 Hz) at very low gain that swells with `pressure`, separate from the heartbeat. Provides body without melody.
+3. Both new audio elements honor mute and clean up in `stop()`.
 
-**ai-behavior.md** — cross-cutting guarantees and failure modes.
-- Determinism boundary: canon timeline is authored, not generated; analyzer is forbidden to reorder or invent beats.
-- Voice guarantees: no markdown, no emoji, no meta, no congratulating/scolding, no "right/wrong" language.
-- Classification fallback: if Stage A fails or returns "unclassified", analyzer narrates without a canon timeline.
-- Preset path vs free-text path through `decisionPresets`.
-- Belief trajectory semantics: `formed | reinforced | revised | abandoned | held` and what each reveals.
-- Where the model is allowed to be creative (closing, alternatives, evidence narration) vs. constrained (timeline, archetype label, opening line).
-- Known failure modes worth documenting: missing `LOVABLE_API_KEY`, unknown mission id, malformed engine surfaced via registry validation.
+## Technical notes
 
-## Approach
+- New CSS utilities: `scene-haze`, `scene-pulse`, plus a `@keyframes chroma-breathe` applied via a new utility on the `<img>`.
+- `ambient.ts` gains `ensureCtx()` usage outside the heartbeat path — wire the `<audio>` element into the graph the first time a voice is created. Guard for autoplay restrictions (already handled via `start()`).
+- No changes to mission engine, prompts, or dialogue flow. Pressure curve drives the new pad gain the same way it already drives `targetVolume`.
+- Files touched: `src/routes/mission.$id.tsx`, `src/styles.css`, `src/lib/ambient.ts`, `src/lib/soundtracks.ts`, `src/assets/audio/<new>.mp3.asset.json`.
 
-1. Read every file referenced above end-to-end (most already in context; remaining: missions 02–04 engines, `src/lib/mission-store.ts`, `src/routes/analysis.tsx` only for output rendering shape).
-2. Write the six docs in one pass, cross-linking by relative path and citing `file:line` for every claim.
-3. Quote prompts verbatim from source (no paraphrasing into instructions).
-4. No edits to any `src/`, `supabase/`, prompt, or config file. Docs only.
+## Open question
 
-## Out of scope
-
-Roadmap, refactor proposals, evaluation methodology, prompt rewrites, new features, UI copy. If gaps or inconsistencies surface during reading, they are noted in a short "Observations" section at the end of `ai-behavior.md` — not fixed.
+The ElevenLabs music generation needs a mood prompt. Want me to match it to mission-03's specific subject/tone (I'll read the engine file and infer), or do you have a directional cue — e.g. "cold cathedral hum", "warm rain on glass", "subterranean wind"?
