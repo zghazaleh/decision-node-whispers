@@ -22,10 +22,18 @@ export type DecisionPreset = {
 
 export type MissionCanon = Record<string, unknown>;
 
+export type MissionOpening = {
+  /** Canonical first assistant message for this mission, in the same format
+   * the chat narrative uses (italic character labels, chips on last line). */
+  text: string;
+};
+
 export type MissionEngine = {
   id: string;
   /** Full system prompt used by the narrative chat for this mission. */
   systemPrompt: string;
+  /** Canonical opening message rendered as the first assistant turn. */
+  opening: MissionOpening;
   /** All archetypes for this mission, keyed by id. */
   archetypes: Record<string, Archetype>;
   /** Stable list of archetype ids (excluding the "unclassified" fallback). */
