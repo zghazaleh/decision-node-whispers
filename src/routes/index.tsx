@@ -53,7 +53,7 @@ function Landing() {
           className="animate-fade-up mt-10 sm:mt-12 space-y-3 text-foreground/85"
           style={{ animationDelay: "0.9s" }}
         >
-          <p className="font-display text-lg sm:text-xl md:text-2xl tracking-wide">Wake up.</p>
+          <p className="font-display text-lg sm:text-xl md:text-2xl tracking-wide">{"\n"}</p>
           <p className="font-display text-lg sm:text-xl md:text-2xl tracking-wide text-foreground/70">
             Someone else's life.
           </p>
