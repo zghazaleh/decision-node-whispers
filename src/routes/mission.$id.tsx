@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { partsToText, readMission, useMission } from "@/lib/mission-store";
 import { analyzeDecision } from "@/lib/analysis.functions";
 import { updateProfileWithAnalysis } from "@/lib/decision-profile";
-import { startRecording, type Recorder } from "@/lib/record-wav";
+
 import { createAmbient } from "@/lib/ambient";
 import { getMissionEngine } from "@/lib/missions/registry";
 import type { MissionEngine } from "@/lib/missions/types";
