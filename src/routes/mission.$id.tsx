@@ -158,7 +158,12 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
     await sendMessage({ text: trimmed });
   }
 
-  async function handleDecide(decision: string, reasoning: string, archetypeId?: string) {
+  async function handleDecide(
+    decision: string,
+    reasoning: string,
+    archetypeId?: string,
+    confidence?: number,
+  ) {
     if (!decision.trim()) return;
     setAnalyzing(true);
     try {
@@ -173,6 +178,7 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
           reasoning: reasoning.trim(),
           transcript,
           ...(archetypeId ? { archetypeId } : {}),
+          ...(typeof confidence === "number" ? { confidence } : {}),
         },
       });
       update({
@@ -180,6 +186,8 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
         reasoning: reasoning.trim(),
         analysis,
         decidedAt: Date.now(),
+        ...(archetypeId ? { archetypeId } : {}),
+        ...(typeof confidence === "number" ? { confidence } : {}),
       });
       try {
         updateProfileWithAnalysis(MISSION_ID, analysis);
@@ -226,9 +234,10 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
   // 1 = deep in the decision. Used to drive slow, low-contrast lighting drift.
   // Capped softly so it never goes harsh.
   const pressure = Math.min(1, Math.max(0, (messages.length - 1) / 18));
-  // Slow audio swell that tracks the visual pressure curve.
+  // Slow audio swell + low heartbeat synth that tracks the visual pressure curve.
   useEffect(() => {
     ambientRef.current?.setPressure(pressure);
+    ambientRef.current?.setHeartbeat(pressure >= 0.6);
   }, [pressure]);
 
   const dusk = (0.35 + pressure * 0.55).toFixed(3);          // bottom gradient depth
