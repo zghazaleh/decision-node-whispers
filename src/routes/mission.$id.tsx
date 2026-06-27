@@ -11,15 +11,8 @@ import { partsToText, readMission, useMission } from "@/lib/mission-store";
 import { analyzeDecision } from "@/lib/analysis.functions";
 import { startRecording, type Recorder } from "@/lib/record-wav";
 import { createAmbient } from "@/lib/ambient";
-import { requireMissionEngine } from "@/lib/missions/registry";
-
-// The mission this route runs. To add more missions, create a new route
-// (or accept a route param) and pass a different id here.
-const MISSION_ID = "mission-01";
-const ENGINE = requireMissionEngine(MISSION_ID);
-
-
-
+import { getMissionEngine } from "@/lib/missions/registry";
+import type { MissionEngine } from "@/lib/missions/types";
 
 export const Route = createFileRoute("/mission/$id")({
   head: () => ({
@@ -28,25 +21,29 @@ export const Route = createFileRoute("/mission/$id")({
       { name: "robots", content: "noindex" },
     ],
   }),
-  component: Mission,
+  component: MissionRoute,
   ssr: false,
 });
 
-// The canonical opening — deterministic per the system prompt.
-const OPENING: UIMessage = {
-  id: "opening",
-  role: "assistant",
-  parts: [
-    {
-      type: "text",
-      text: `*Sarah Kwon*\n"Dr. Vasquez?"\n\n"They're seated. Jonas asked if you wanted coffee before. I said you didn't. Was that right?"\n\n<<chips: "Sarah, who exactly is seated?" | "I look around the room" | "Give me a minute, Sarah">>`,
-    },
-  ],
-};
-
-function Mission() {
+function MissionRoute() {
+  const { id } = Route.useParams();
   const navigate = useNavigate();
-  const { mission, update } = useMission();
+  const engine = getMissionEngine(id);
+  useEffect(() => {
+    if (!engine) navigate({ to: "/missions" });
+  }, [engine, navigate]);
+  if (!engine) return null;
+  return <Mission key={id} missionId={id} engine={engine} />;
+}
+
+function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string; engine: MissionEngine }) {
+  const navigate = useNavigate();
+  const OPENING: UIMessage = {
+    id: "opening",
+    role: "assistant",
+    parts: [{ type: "text", text: ENGINE.opening.text }],
+  };
+  const { mission, update } = useMission(MISSION_ID);
   const [awakening, setAwakening] = useState(true);
 
   // Awakening: 3.6s of darkness with slow fade-in of the scene.
