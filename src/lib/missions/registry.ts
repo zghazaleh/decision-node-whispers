@@ -19,6 +19,7 @@ import { missionFourEngine } from "./mission-04";
 import { missionFiveEngine } from "./mission-05";
 import { missionSixEngine } from "./mission-06";
 import { missionSevenEngine } from "./mission-07";
+import { missionEightEngine } from "./mission-08";
 import {
   formatMissionEngineErrors,
   validateMissionEngine,
@@ -48,6 +49,7 @@ register(missionFourEngine);
 register(missionFiveEngine);
 register(missionSixEngine);
 register(missionSevenEngine);
+register(missionEightEngine);
 
 export function getMissionEngine(missionId: string): MissionEngine | null {
   return REGISTRY[missionId] ?? null;
