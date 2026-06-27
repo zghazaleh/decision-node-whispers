@@ -877,7 +877,7 @@ function DecideModal({
                   value={decision}
                   onChange={(e) => { setDecision(e.target.value); setArchetypeId(undefined); }}
                   rows={3}
-                  placeholder="I walk into the boardroom and…"
+                  placeholder={freeWritePlaceholder}
                   className="w-full resize-none rounded-sm border border-foreground/15 bg-background/45 px-3 py-3 text-foreground/95 outline-none transition-colors placeholder:text-foreground/25 focus:border-foreground/60"
                 />
               </div>
