@@ -60,20 +60,20 @@ function Analysis() {
         {/* Headline */}
         <section className="animate-fade-up text-center">
           <p className="text-[0.6rem] tracking-[0.5em] uppercase text-accent/80 mb-6">
-            The decision is made
+            Decision recorded
           </p>
           <h1 className="font-display text-4xl sm:text-5xl md:text-6xl leading-tight text-foreground/95 text-balance">
             {a.headline}
           </h1>
           {a.archetypeLabel && (
             <p className="mt-8 text-sm sm:text-base text-foreground/55 leading-relaxed">
-              You played this as{" "}
+              Your approach:{" "}
               <span className="font-display italic text-accent text-lg sm:text-xl">
-                The {a.archetypeLabel}
+                {a.archetypeLabel}
               </span>
               {typeof mission.confidence === "number" && (
                 <span className="block mt-2 text-[0.6rem] tracking-[0.35em] uppercase text-foreground/40 tabular-nums">
-                  Committed at {mission.confidence}/100 confidence
+                  Confidence: {mission.confidence}/100
                 </span>
               )}
             </p>
@@ -82,9 +82,9 @@ function Analysis() {
 
         {/* Interactive Timeline */}
         <section className="animate-fade-up" style={{ animationDelay: "0.4s" }}>
-          <SectionLabel>Consequence Timeline</SectionLabel>
+          <SectionLabel>Consequence timeline</SectionLabel>
           <p className="mt-4 text-center text-xs text-foreground/45 tracking-wide">
-            Scrub through the turning points. Watch how the outcome assembled itself.
+            Review the key moments and how the outcome developed.
           </p>
           <TimelineScrubber timeline={a.timeline} />
         </section>
@@ -93,30 +93,30 @@ function Analysis() {
         <section className="space-y-16">
           <div className="animate-fade-up text-center" style={{ animationDelay: "1.4s" }}>
             <p className="text-[0.6rem] tracking-[0.5em] uppercase text-accent/80 mb-4">
-              Decision Analysis
+              Analysis
             </p>
             <p className="text-sm text-foreground/55 max-w-md mx-auto leading-relaxed">
-              Not right or wrong. A look at how the choice was made.
+              An examination of the decision process, not the outcome.
             </p>
           </div>
 
           <AnalysisBlock
-            label="Assumptions you carried in"
+            label="Assumptions"
             body={a.assumptions}
             delay={1.7}
           />
           <AnalysisBlock
-            label="Evidence you leaned on"
+            label="Evidence considered"
             body={a.evidenceUsed}
             delay={1.95}
           />
           <AnalysisBlock
-            label="What you didn't look at"
+            label="Evidence overlooked"
             body={a.evidenceIgnored}
             delay={2.2}
           />
           <AnalysisBlock
-            label="Other paths through this"
+            label="Alternatives"
             body={a.alternatives}
             delay={2.45}
           />
@@ -161,7 +161,7 @@ function Analysis() {
               className="group flex items-center gap-3 text-[0.65rem] tracking-[0.4em] uppercase text-foreground/70 hover:text-foreground transition-colors"
             >
               <span className="h-px w-8 bg-foreground/30 group-hover:bg-foreground/70 group-hover:w-12 transition-all" />
-              Wake again
+              Replay
             </button>
             <button
               onClick={() => navigate({ to: "/" })}
