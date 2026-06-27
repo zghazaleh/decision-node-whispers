@@ -283,3 +283,45 @@ export function dimensionTrends(
   }
   return out;
 }
+
+/** Half-width of the displayed confidence band for a dimension.
+ *  Wider when the sample is small or the per-mission scores are volatile;
+ *  narrows as missions accumulate and the estimate stabilizes. */
+export type DimensionBand = {
+  value: number;       // displayed rolling-average score (matches profile.scores)
+  lo: number;          // clamped value - halfWidth
+  hi: number;          // clamped value + halfWidth
+  halfWidth: number;   // width of the uncertainty band, in score units
+  samples: number;     // number of contributions backing this band
+};
+
+export function dimensionBands(
+  profile: DecisionProfile,
+): Record<Dimension, DimensionBand> {
+  const n = profile.contributions.length;
+  const out = {} as Record<Dimension, DimensionBand>;
+  for (const d of DIMENSIONS) {
+    const value = profile.scores[d];
+    if (n === 0) {
+      out[d] = { value, lo: value, hi: value, halfWidth: 0, samples: 0 };
+      continue;
+    }
+    const xs = profile.contributions.map((c) => c.scores[d]);
+    const mean = xs.reduce((s, x) => s + x, 0) / xs.length;
+    const variance = xs.reduce((s, x) => s + (x - mean) ** 2, 0) / xs.length;
+    const stdev = Math.sqrt(variance);
+    // Prior dominates with few samples; observed volatility takes over later.
+    const prior = 25 / Math.sqrt(n);
+    const raw = prior + stdev * 0.55;
+    const halfWidth = Math.max(4, Math.min(32, Math.round(raw)));
+    out[d] = {
+      value,
+      lo: Math.max(0, value - halfWidth),
+      hi: Math.min(100, value + halfWidth),
+      halfWidth,
+      samples: n,
+    };
+  }
+  return out;
+}
+
