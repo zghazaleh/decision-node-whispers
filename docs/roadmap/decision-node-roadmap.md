@@ -10,34 +10,35 @@ work begins.
 ## Shipped recently
 
 - **Confidence bands on the Decision Profile.** Each axis renders as a band
-  that narrows as missions accumulate. (`src/components/DecisionProfileCard.tsx`,
-  `dimensionBands()` in `src/lib/decision-profile.ts`.)
+  that narrows as missions accumulate.
 - **Per-trait drill-down.** Tapping a dimension reveals which missions formed
-  that score and the per-mission value.
+  that score and the per-mission value, with the Analyzer's one-sentence
+  justification when available.
+- **Structured Analyzer sub-scores (Batch 2).** The Analyzer now emits
+  `dimensionScores` (0–100 per axis), `dimensionNotes` (one sentence each),
+  `calibrationVerdict` (under/calibrated/over), and per-bias `confidence`.
+  The Decision Profile scorer prefers these whenever present and falls back
+  to the legacy keyword path only when the model omits them.
+  Contributions are tagged with `source: "model" | "heuristic"` so drift is
+  observable.
 
 ---
 
 ## Next batches (committed direction)
 
-### Batch 2 — Structured Analyzer sub-scores (replaces keyword-sniffing)
+### Batch 3 — Reasoning-aware epilogue beat
 
-**Why.** `scoreFromAnalysis` infers per-axis scores by string-matching the
-Analyzer's prose. That is the root cause behind the calibration false-negatives
-and most volatility. Move the source of truth into the model output.
+**Why.** The canon timeline is authored per archetype; players who write a
+thoughtful WHY currently see a default beat that can softly contradict their
+stated intent.
 
 **Shape.**
 
-- Extend the `DecisionAnalysis` schema with:
-  - `dimensionScores: Record<Dimension, number>` (0–100, model-emitted)
-  - `calibrationVerdict: "under" | "calibrated" | "over"`
-  - `biasConfidence: Record<biasName, "low" | "medium" | "high">` on each
-    entry in `possibleBiases`.
-- `scoreFromAnalysis` reads `dimensionScores` directly when present, falls
-  back to the current keyword path only when missing or out of range.
-- Show *why* a score moved on the drill-down (the Analyzer's one-sentence
-  justification per dimension, cached on the contribution).
-
-### Batch 3 — Reasoning-aware epilogue beat
+- Add a `reasoningEcho: string` field to `DecisionAnalysis` (1–2 sentences,
+  grounded in the player's reasoning text, never canon-violating).
+- Render above the canon timeline on the analysis page in a quieter voice.
+- Hard rule: `reasoningEcho` may rephrase but may not invent consequences.
+  Canon remains the only source of consequence text.
 
 **Why.** The canon timeline is authored per archetype; players who write a
 thoughtful WHY currently see a default beat that can softly contradict their
