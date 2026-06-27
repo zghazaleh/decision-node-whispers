@@ -215,6 +215,16 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
     };
   }, []);
 
+  // Mission pressure: derived from how far into the conversation we are.
+  // Acts as a proxy for time elapsed + stakes accumulating. 0 = just woke up,
+  // 1 = deep in the decision. Used to drive slow, low-contrast lighting drift.
+  // Capped softly so it never goes harsh.
+  const pressure = Math.min(1, Math.max(0, (messages.length - 1) / 18));
+  const dusk = (0.35 + pressure * 0.55).toFixed(3);          // bottom gradient depth
+  const ringDark = (pressure * 0.45).toFixed(3);             // edge encroachment
+  const warmWash = (pressure * 0.18).toFixed(3);             // creeping color cast
+  const filterShift = `saturate(${(1 - pressure * 0.18).toFixed(3)}) contrast(${(1 + pressure * 0.08).toFixed(3)}) brightness(${(1 - pressure * 0.12).toFixed(3)})`;
+
   return (
     <main className="relative h-[100dvh] w-screen overflow-hidden bg-black text-foreground">
       {/* Cinematic background */}
@@ -234,22 +244,49 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
             alt=""
             aria-hidden
             className="h-full w-full object-cover animate-ken-burns"
-            style={{ filter: ENGINE.scene.filter ?? "saturate(0.88) contrast(1.06)" }}
+            style={{
+              filter: `${ENGINE.scene.filter ?? "saturate(0.88) contrast(1.06)"} ${filterShift}`,
+              transition: "filter 8000ms linear",
+            }}
           />
 
         </div>
         <div className="scene-light" aria-hidden />
         <div className="scene-dust" aria-hidden />
+        {/* Base bottom-weighted shadow — deepens with pressure */}
         <div
           className="absolute inset-0"
           style={{
-            background:
-              "linear-gradient(to bottom, oklch(0 0 0 / 0.55) 0%, oklch(0 0 0 / 0.2) 35%, oklch(0 0 0 / 0.6) 75%, oklch(0 0 0 / 0.92) 100%)",
+            background: `linear-gradient(to bottom, oklch(0 0 0 / 0.55) 0%, oklch(0 0 0 / 0.2) 35%, oklch(0 0 0 / ${dusk}) 75%, oklch(0 0 0 / 0.92) 100%)`,
+            transition: "background 8000ms linear",
+          }}
+        />
+        {/* Encroaching darkness from the edges — closes in slowly as stakes rise */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          aria-hidden
+          style={{
+            background: `radial-gradient(ellipse 75% 60% at 50% 50%, transparent 40%, oklch(0 0 0 / ${ringDark}) 100%)`,
+            transition: "background 9000ms linear",
+          }}
+        />
+        {/* Mood wash — a low-saturation color cast that bleeds in over time.
+            Uses the accent token so it inherits each mission's palette without
+            ever competing with the dialogue. */}
+        <div
+          className="absolute inset-0 pointer-events-none mix-blend-soft-light"
+          aria-hidden
+          style={{
+            background: `radial-gradient(ellipse 90% 70% at 50% 70%, oklch(0.35 0.12 25 / ${warmWash}), transparent 70%)`,
+            opacity: pressure.toFixed(3),
+            transition: "opacity 9000ms linear, background 9000ms linear",
           }}
         />
         <div className="film-grain" aria-hidden />
         <div className="vignette" aria-hidden />
       </div>
+
+
 
 
       {/* Awakening overlay — pure black with subtle horizontal slits "eyelids opening" */}
