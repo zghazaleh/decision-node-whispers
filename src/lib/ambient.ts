@@ -143,7 +143,7 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
       const src = ctx.createMediaElementSource(v.audio);
       const filt = ctx.createBiquadFilter();
       filt.type = "lowpass";
-      filt.frequency.value = 1600;
+      filt.frequency.value = profile.filterBaseHz;
       filt.Q.value = 0.7;
       lfoDepth.connect(filt.frequency); // LFO modulates cutoff
       const g = ctx.createGain();
