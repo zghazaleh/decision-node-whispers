@@ -32,6 +32,13 @@ export type MissionContribution = {
   at: number;
   scores: Record<Dimension, number>;
   signals: string[]; // short tags (e.g. "anchored-early", "revised-on-evidence")
+  /** Optional: one-sentence per-axis justification from the Analyzer.
+   *  Surfaces under each dimension's drill-down. Missing for legacy
+   *  contributions scored before structured sub-scores existed. */
+  notes?: Partial<Record<Dimension, string>>;
+  /** "model" when the Analyzer emitted dimensionScores; "heuristic" when
+   *  scoring fell back to the legacy keyword path. */
+  source?: "model" | "heuristic";
 };
 
 export type DecisionProfile = {
