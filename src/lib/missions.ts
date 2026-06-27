@@ -3,13 +3,21 @@ export type MissionStatus = "available" | "classified" | "locked";
 export type MissionMeta = {
   id: string;
   number: string; // displayed as "01", "02"...
-  codename: string; // short codename / project name
+  codename: string;
   title: string;
-  logline: string; // one-line hook (player-facing)
+  logline: string; // narrative hook — first line of the scene
   status: MissionStatus;
-  route?: string; // route to navigate to if available
-  duration?: string; // estimated time
-  tone?: string; // mood descriptor
+  route?: string;
+  duration?: string;
+  tone?: string;
+  // Archival metadata — feels like a case file
+  location?: string;
+  year?: string;
+  category?: string;
+  difficulty?: 1 | 2 | 3 | 4 | 5;
+  // Reserved for future creator-published cases
+  creator?: string;
+  version?: string;
 };
 
 export const MISSIONS: MissionMeta[] = [
@@ -19,10 +27,16 @@ export const MISSIONS: MissionMeta[] = [
     codename: "The Release",
     title: "The Release",
     logline:
-      "Twelve minutes until the boardroom. The model is ready. The memo is not.",
+      "Twelve minutes before the boardroom. The model is ready. The memo is not.",
     status: "available",
     duration: "20–40 min",
     tone: "Tense · Suspended",
+    location: "San Francisco",
+    year: "2024",
+    category: "Corporate",
+    difficulty: 3,
+    creator: "House Edition",
+    version: "v1.0",
   },
   {
     id: "mission-02",
@@ -34,6 +48,12 @@ export const MISSIONS: MissionMeta[] = [
     status: "available",
     duration: "20–40 min",
     tone: "Claustrophobic · Cold",
+    location: "Undisclosed",
+    year: "2019",
+    category: "Legal",
+    difficulty: 4,
+    creator: "House Edition",
+    version: "v1.0",
   },
   {
     id: "mission-03",
@@ -45,6 +65,12 @@ export const MISSIONS: MissionMeta[] = [
     status: "available",
     duration: "20–40 min",
     tone: "Vast · Quiet",
+    location: "Low Earth Orbit",
+    year: "2031",
+    category: "Aerospace",
+    difficulty: 5,
+    creator: "House Edition",
+    version: "v1.0",
   },
   {
     id: "mission-04",
@@ -56,5 +82,11 @@ export const MISSIONS: MissionMeta[] = [
     status: "available",
     duration: "20–40 min",
     tone: "Civic · Heavy",
+    location: "Washington, D.C.",
+    year: "2003",
+    category: "Civic",
+    difficulty: 4,
+    creator: "House Edition",
+    version: "v1.0",
   },
 ];
