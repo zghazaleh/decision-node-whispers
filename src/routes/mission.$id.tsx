@@ -587,6 +587,7 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
       {decideOpen && (
         <DecideModal
           presets={ENGINE.decisionPresets}
+          freeWritePlaceholder={ENGINE.decideFreeWritePlaceholder ?? "In your own words…"}
           analyzing={analyzing}
           initialDecision={decidePrefill}
           onClose={() => !analyzing && setDecideOpen(false)}
