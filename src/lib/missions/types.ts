@@ -82,6 +82,9 @@ export type MissionEngine = {
   opening: MissionOpening;
   /** Cinematic background scene shown behind the dialogue. */
   scene: MissionScene;
+  /** Optional per-mission tuning of the shared scene FX + audio bed. */
+  atmosphere?: MissionAtmosphere;
+
 
   /** All archetypes for this mission, keyed by id. */
   archetypes: Record<string, Archetype>;
