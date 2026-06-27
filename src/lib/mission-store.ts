@@ -13,6 +13,10 @@ export type SavedMission = {
   reasoning?: string;
   analysis?: DecisionAnalysis;
   decidedAt?: number;
+  /** Archetype id classified for the decision (preset or LLM-classified). */
+  archetypeId?: string;
+  /** Player-reported confidence 0..100 at commit time. */
+  confidence?: number;
 };
 
 const empty = (missionId: string): SavedMission => ({
