@@ -1,4 +1,6 @@
 import type { MissionEngine, DecisionPreset } from "@/lib/missions/types";
+import sceneImg from "@/assets/scene-senate.jpg";
+
 import { canonGroundTruthBlock, CANON } from "./canon";
 import {
   ARCHETYPES,
@@ -121,6 +123,12 @@ export const missionFourEngine: MissionEngine = {
   id: "mission-04",
   systemPrompt: SYSTEM_PROMPT,
   opening: { text: OPENING_TEXT },
+  scene: {
+    src: sceneImg,
+    filter: "saturate(0.8) contrast(1.08)",
+    mood: "Civic, heavy. History waiting in an empty chamber.",
+  },
+
   archetypes: ARCHETYPES,
   archetypeIds: [...ARCHETYPE_IDS],
   archetypeMenuForClassifier,
