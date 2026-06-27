@@ -28,6 +28,17 @@ export type MissionOpening = {
   text: string;
 };
 
+export type MissionScene = {
+  /** Imported image URL used as the cinematic background for this mission. */
+  src: string;
+  /** Optional CSS filter applied to the image (saturation / contrast / hue tint). */
+  filter?: string;
+  /** Optional semantic mood label — useful for debugging / future variants. */
+  mood?: string;
+};
+
+
+
 export type MissionEngine = {
   id: string;
   /** Full system prompt used by the narrative chat for this mission. */
