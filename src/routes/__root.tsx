@@ -80,7 +80,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "You wake up in someone else's body moments before the most important decision of their life.",
       },
-      { property: "og:title", content: "Decision Node" },
+      { property: "og:title", content: "Decision Node — An Interactive Drama" },
       {
         property: "og:description",
         content:
@@ -88,6 +88,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Decision Node — An Interactive Drama" },
+      { name: "description", content: "Decision Node is an AI-powered interactive narrative where you inhabit a stranger's body and must make a critical decision." },
+      { property: "og:description", content: "Decision Node is an AI-powered interactive narrative where you inhabit a stranger's body and must make a critical decision." },
+      { name: "twitter:description", content: "Decision Node is an AI-powered interactive narrative where you inhabit a stranger's body and must make a critical decision." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/5d91de4e-9d1c-4edf-863c-3d63866fc4fd/id-preview-29db16bb--5c0a2ea2-d89d-46f4-9789-6a6867e7e361.lovable.app-1782529685980.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/5d91de4e-9d1c-4edf-863c-3d63866fc4fd/id-preview-29db16bb--5c0a2ea2-d89d-46f4-9789-6a6867e7e361.lovable.app-1782529685980.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
