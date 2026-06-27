@@ -1,6 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MISSIONS, type MissionMeta } from "@/lib/missions";
+import { createAmbient } from "@/lib/ambient";
+import { getSoundtrack } from "@/lib/soundtracks";
 
 export const Route = createFileRoute("/missions")({
   head: () => ({
@@ -27,18 +29,61 @@ function MissionsPage() {
   const [hovered, setHovered] = useState<string | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [entering, setEntering] = useState(false);
+  const [armed, setArmed] = useState(false);
 
-  // Subtle entrance: don't show the grid until the page has mounted a beat.
+  // Respect the global mute pref set on the mission screen.
+  const soundOn = (() => {
+    try { return localStorage.getItem("dn:sound") !== "off"; } catch { return true; }
+  })();
+
+  // Single ambient instance for this page. Browsers gate autoplay behind a
+  // user gesture, so we arm on first pointerdown/keydown and then let hover
+  // previews crossfade between tracks.
+  const ambientRef = useRef<ReturnType<typeof createAmbient> | null>(null);
   useEffect(() => {
-    const t = setTimeout(() => {}, 0);
-    return () => clearTimeout(t);
+    if (!ambientRef.current) ambientRef.current = createAmbient(null);
+    const a = ambientRef.current;
+    a.setMuted(!soundOn);
+    const arm = async () => {
+      if (armed) return;
+      try {
+        // Start silent (no mission), then let hover decide what to play.
+        // We need to call start() in the gesture; pass a known track so the
+        // <audio> element is allowed to play. If nothing is hovered, we
+        // immediately fade it back out.
+        await a.start("mission-01");
+        if (!hovered) await a.switchTo(null, 600);
+        setArmed(true);
+      } catch { /* noop */ }
+    };
+    window.addEventListener("pointerdown", arm, { once: true });
+    window.addEventListener("keydown", arm, { once: true });
+    return () => {
+      window.removeEventListener("pointerdown", arm);
+      window.removeEventListener("keydown", arm);
+      a.stop();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Crossfade ambient to whichever card is hovered/selected.
+  useEffect(() => {
+    const a = ambientRef.current;
+    if (!a || !armed) return;
+    const target = selected ?? hovered;
+    if (target && getSoundtrack(target)) {
+      void a.switchTo(target, 1400);
+    } else {
+      void a.switchTo(null, 1200);
+    }
+  }, [hovered, selected, armed]);
 
   function open(m: MissionMeta) {
     if (m.status !== "available" || !m.route) return;
     if (entering) return;
     setSelected(m.id);
     setEntering(true);
+    // Let the selected track swell, then leave it playing on the mission page.
     setTimeout(() => navigate({ to: m.route! }), 900);
   }
 
