@@ -100,7 +100,12 @@ const AnalysisSchema = z.object({
 
 // ─── CLI ─────────────────────────────────────────────────────────────────────
 
-type Args = { only?: "director" | "analysis"; mission: string; updateSnapshots: boolean };
+type Args = {
+  only?: "director" | "analysis";
+  mission: string;
+  updateSnapshots: boolean;
+  fixture?: string;
+};
 
 function parseArgs(argv: string[]): Args {
   const args: Args = { mission: "mission-01", updateSnapshots: false };
@@ -115,6 +120,8 @@ function parseArgs(argv: string[]): Args {
       args.mission = a.slice("--mission=".length);
     } else if (a === "--update-snapshots" || a === "-u") {
       args.updateSnapshots = true;
+    } else if (a.startsWith("--fixture=")) {
+      args.fixture = a.slice("--fixture=".length);
     }
   }
   return args;
@@ -181,11 +188,15 @@ async function runDirector(
   gateway: ReturnType<typeof createLovableAiGatewayProvider>,
   missionId: string,
   updateSnapshots: boolean,
+  fixtureFilter?: string,
 ) {
   const engine = getMissionEngine(missionId);
   if (!engine) throw new Error(`Unknown mission: ${missionId}`);
 
-  for (const fx of DIRECTOR_FIXTURES) {
+  const fixtures = fixtureFilter
+    ? DIRECTOR_FIXTURES.filter((f) => f.id === fixtureFilter)
+    : DIRECTOR_FIXTURES;
+  for (const fx of fixtures) {
     const name = `director / ${missionId} / ${fx.id}`;
     try {
       const messages = [
@@ -230,11 +241,15 @@ async function runAnalysis(
   gateway: ReturnType<typeof createLovableAiGatewayProvider>,
   missionId: string,
   updateSnapshots: boolean,
+  fixtureFilter?: string,
 ) {
   const engine = getMissionEngine(missionId);
   if (!engine) throw new Error(`Unknown mission: ${missionId}`);
 
-  for (const fx of ANALYSIS_FIXTURES) {
+  const fixtures = fixtureFilter
+    ? ANALYSIS_FIXTURES.filter((f) => f.id === fixtureFilter)
+    : ANALYSIS_FIXTURES;
+  for (const fx of fixtures) {
     const name = `analysis / ${missionId} / ${fx.id}`;
     try {
       // ── Stage A (classify) unless a valid preset id was provided
@@ -381,8 +396,8 @@ async function main() {
     `▶ Prompt test harness — mission=${args.mission} only=${args.only ?? "(all)"} update=${args.updateSnapshots}`,
   );
 
-  if (args.only !== "analysis") await runDirector(gateway, args.mission, args.updateSnapshots);
-  if (args.only !== "director") await runAnalysis(gateway, args.mission, args.updateSnapshots);
+  if (args.only !== "analysis") await runDirector(gateway, args.mission, args.updateSnapshots, args.fixture);
+  if (args.only !== "director") await runAnalysis(gateway, args.mission, args.updateSnapshots, args.fixture);
 
   const failed = results.filter((r) => !r.ok);
   // eslint-disable-next-line no-console
