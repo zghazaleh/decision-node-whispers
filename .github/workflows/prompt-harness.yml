@@ -1,0 +1,64 @@
+name: Prompt harness
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  scaffold-integration-test:
+    name: Scaffolder ↔ harness integration
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Typecheck
+        run: bunx tsgo --noEmit
+
+      # Stub mode if no key (no live gateway calls), live mode if the secret
+      # is present. Either way the integration test must exit 0.
+      - name: Scaffold integration test
+        env:
+          LOVABLE_API_KEY: ${{ secrets.LOVABLE_API_KEY }}
+        run: bun run scripts/scaffold-integration-test.ts
+
+  harness-snapshots:
+    name: Harness snapshot checks
+    runs-on: ubuntu-latest
+    # Live gateway calls — only run when the API key is configured on the
+    # repo. PRs from forks (which can't read repo secrets) are skipped.
+    if: ${{ github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'push' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Check LOVABLE_API_KEY presence
+        id: keycheck
+        env:
+          LOVABLE_API_KEY: ${{ secrets.LOVABLE_API_KEY }}
+        run: |
+          if [ -z "$LOVABLE_API_KEY" ]; then
+            echo "has_key=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::LOVABLE_API_KEY not configured — skipping live harness run."
+          else
+            echo "has_key=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run harness (Director + Analysis, mission-01)
+        if: steps.keycheck.outputs.has_key == 'true'
+        env:
+          LOVABLE_API_KEY: ${{ secrets.LOVABLE_API_KEY }}
+        run: bun run scripts/prompt-test-harness.ts --mission=mission-01
