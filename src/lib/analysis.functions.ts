@@ -193,6 +193,9 @@ FINAL DECISION: ${data.decision}
 
 PLAYER REASONING: ${data.reasoning || "(none provided)"}
 
+PLAYER SELF-REPORTED CONFIDENCE AT COMMIT: ${typeof data.confidence === "number" ? `${data.confidence}/100` : "(not reported)"}
+(Use this for the 'calibration' field — compare it to the strength of the evidence the player actually gathered.)
+
 FULL TRANSCRIPT:
 ${transcriptText}`,
     });
