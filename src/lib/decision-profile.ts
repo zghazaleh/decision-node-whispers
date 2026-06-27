@@ -60,6 +60,9 @@ export function readProfile(): DecisionProfile {
     if (!raw) return empty();
     const parsed = JSON.parse(raw) as DecisionProfile;
     if (parsed.version !== 1) return empty();
+    // Backfill any missing dimensions (e.g. older stored profiles).
+    const base = empty().scores;
+    parsed.scores = { ...base, ...(parsed.scores ?? {}) };
     return parsed;
   } catch {
     return empty();
