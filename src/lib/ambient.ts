@@ -116,21 +116,22 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
         padOscB = ctx.createOscillator();
         padOscA.type = "sine";
         padOscB.type = "sine";
-        padOscA.frequency.value = 55;
-        padOscB.frequency.value = 55 * 1.005; // gentle beating
+        padOscA.frequency.value = profile.padFrequency;
+        padOscB.frequency.value = profile.padFrequency * profile.padDetune;
         padOscA.connect(padGain);
         padOscB.connect(padGain);
         padOscA.start();
         padOscB.start();
 
-        // Shared LFO for filter cutoff modulation. ~0.05Hz = 20s cycle.
+        // Shared LFO for filter cutoff modulation.
         lfo = ctx.createOscillator();
         lfo.type = "sine";
-        lfo.frequency.value = 0.05;
+        lfo.frequency.value = profile.lfoRateHz;
         lfoDepth = ctx.createGain();
-        lfoDepth.gain.value = 800; // ±800Hz around the static cutoff
+        lfoDepth.gain.value = profile.filterLfoDepthHz;
         lfo.connect(lfoDepth);
         lfo.start();
+
       } catch { return null; }
     }
     return ctx;
