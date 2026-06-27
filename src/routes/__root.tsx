@@ -78,7 +78,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         name: "description",
         content:
-          "You wake up in someone else's body moments before the most important decision of their life.",
+          "An interactive drama about consequential decisions.",
       },
       { property: "og:title", content: "Decision Node — An Interactive Drama" },
       {
