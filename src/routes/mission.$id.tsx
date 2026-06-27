@@ -565,6 +565,7 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
         <DecideModal
           presets={ENGINE.decisionPresets}
           analyzing={analyzing}
+          initialDecision={decidePrefill}
           onClose={() => !analyzing && setDecideOpen(false)}
           onSubmit={handleDecide}
         />
