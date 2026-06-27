@@ -89,61 +89,36 @@ function Analysis() {
           <TimelineScrubber timeline={a.timeline} />
         </section>
 
-        {/* Decision Analysis */}
-        <section className="space-y-16">
+        {/* Executive Summary */}
+        <section className="space-y-12">
           <div className="animate-fade-up text-center" style={{ animationDelay: "1.4s" }}>
             <p className="text-[0.6rem] tracking-[0.5em] uppercase text-accent/80 mb-4">
-              Analysis
+              Executive summary
             </p>
-            <p className="text-sm text-foreground/55 max-w-md mx-auto leading-relaxed">
-              An examination of the decision process, not the outcome.
-            </p>
-          </div>
-
-          <AnalysisBlock
-            label="Assumptions"
-            body={a.assumptions}
-            delay={1.7}
-          />
-          <AnalysisBlock
-            label="Evidence considered"
-            body={a.evidenceUsed}
-            delay={1.95}
-          />
-          <AnalysisBlock
-            label="Evidence overlooked"
-            body={a.evidenceIgnored}
-            delay={2.2}
-          />
-          <AnalysisBlock
-            label="Alternatives"
-            body={a.alternatives}
-            delay={2.45}
-          />
-
-          {a.beliefTrajectory && a.beliefTrajectory.length > 0 && (
-            <BeliefTrajectory trajectory={a.beliefTrajectory} />
-          )}
-
-          {a.reasoningAssessment && (
-            <ReasoningAssessment data={a.reasoningAssessment} />
-          )}
-
-
-          <div
-            className="animate-fade-up border-t border-foreground/15 pt-12"
-            style={{ animationDelay: "2.7s" }}
-          >
-            <p className="text-[0.6rem] tracking-[0.35em] uppercase text-accent/80 mb-4">
-              Closing
-            </p>
-            <p className="font-display text-2xl sm:text-3xl leading-snug text-foreground/95 text-pretty">
+            <p className="font-display text-2xl sm:text-3xl leading-snug text-foreground/95 text-pretty max-w-2xl mx-auto">
               {a.closing}
             </p>
           </div>
 
-          {profile && <DecisionProfileCard profile={profile} delay={2.9} />}
+          {/* Expandable details */}
+          <div className="animate-fade-up divide-y divide-foreground/10 border-y border-foreground/10" style={{ animationDelay: "1.7s" }}>
+            <ExpandableBlock label="Assumptions" body={a.assumptions} />
+            <ExpandableBlock label="Evidence considered" body={a.evidenceUsed} />
+            <ExpandableBlock label="Evidence overlooked" body={a.evidenceIgnored} />
+            <ExpandableBlock label="Alternatives" body={a.alternatives} />
+            {a.beliefTrajectory && a.beliefTrajectory.length > 0 && (
+              <ExpandableSection label="Belief trajectory">
+                <BeliefTrajectory trajectory={a.beliefTrajectory} />
+              </ExpandableSection>
+            )}
+            {a.reasoningAssessment && (
+              <ExpandableSection label="Reasoning assessment">
+                <ReasoningAssessment data={a.reasoningAssessment} />
+              </ExpandableSection>
+            )}
+          </div>
 
+          {profile && <DecisionProfileCard profile={profile} delay={2.4} />}
         </section>
 
         {/* Coda */}
