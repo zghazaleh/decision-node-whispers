@@ -20,12 +20,12 @@ export function DecisionProfileCard({
       style={{ animationDelay: `${delay}s` }}
     >
       <p className="text-[0.6rem] tracking-[0.5em] uppercase text-accent/80 mb-2 text-center">
-        Decision DNA
+        Decision Profile
       </p>
       <p className="text-center text-xs text-foreground/45 max-w-md mx-auto leading-relaxed mb-10">
         {profile.missionsCompleted <= 1
-          ? "Your profile begins here. Every mission re-shapes it."
-          : `Updated across ${profile.contributions.length} mission${profile.contributions.length === 1 ? "" : "s"}. Recency-weighted.`}
+          ? "Your profile begins here. It will develop with each mission."
+          : `Based on ${profile.contributions.length} mission${profile.contributions.length === 1 ? "" : "s"}. Recent missions weighted more heavily.`}
       </p>
 
       <div className="max-w-xl mx-auto">
@@ -48,7 +48,7 @@ export function DecisionProfileCard({
 
       <div className="mt-12 border-t border-foreground/10 pt-8 max-w-xl mx-auto">
         <p className="text-[0.6rem] tracking-[0.35em] uppercase text-foreground/45 mb-3">
-          Emerging pattern
+          Summary
         </p>
         <p className="font-display text-lg sm:text-xl leading-relaxed text-foreground/90 text-pretty">
           {profile.emergingPattern}

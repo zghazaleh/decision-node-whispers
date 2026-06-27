@@ -11,13 +11,13 @@ export const Route = createFileRoute("/missions")({
       {
         name: "description",
         content:
-          "Choose a mission. Each one drops you into a stranger's body, moments before the decision that defines them.",
+          "Choose a mission. Each one places you in a critical moment before a consequential decision.",
       },
       { property: "og:title", content: "Missions — Decision Node" },
       {
         property: "og:description",
         content:
-          "Choose a mission. Each one drops you into a stranger's body, moments before the decision that defines them.",
+          "Choose a mission. Each one places you in a critical moment before a consequential decision.",
       },
     ],
   }),
@@ -128,23 +128,20 @@ function MissionsPage() {
             ← Decision Node
           </Link>
           <p className="text-[0.6rem] tracking-[0.4em] uppercase text-muted-foreground/70">
-            Dossier · {MISSIONS.length} Files
+            {MISSIONS.length} Missions
           </p>
         </header>
 
         <div className="mb-16 max-w-2xl animate-fade-up">
           <p className="text-[0.65rem] tracking-[0.5em] uppercase text-muted-foreground mb-6">
-            Select a Mission
+            Missions
           </p>
           <h1 className="font-display text-5xl sm:text-6xl md:text-7xl leading-[0.95] text-foreground/95 text-balance">
-            Whose decision
-            <br />
-            do you want to live inside?
+            Choose a mission
           </h1>
           <p className="mt-8 max-w-lg text-base leading-relaxed text-muted-foreground text-pretty">
-            Each mission drops you into a stranger's body, moments before the
-            choice that will define their life. You will not know who you are.
-            You will have to find out.
+            Each mission places you in a critical moment. The context is
+            incomplete. The stakes are real. You still have to choose.
           </p>
         </div>
 
@@ -170,7 +167,7 @@ function MissionsPage() {
 
         <footer className="mt-20 flex items-center justify-between text-[0.6rem] tracking-[0.4em] uppercase text-muted-foreground/60">
           <span>Headphones recommended</span>
-          <span>More files inbound</span>
+          <span>More missions coming</span>
         </footer>
       </section>
     </main>
@@ -250,7 +247,7 @@ function MissionCard({
       {/* Title */}
       <div className="mt-10">
         <p className="text-[0.6rem] tracking-[0.4em] uppercase text-muted-foreground/70">
-          Codename
+          Mission
         </p>
         <h2 className="mt-2 font-display text-3xl sm:text-4xl text-foreground/95 leading-tight">
           {mission.codename}

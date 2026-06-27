@@ -52,7 +52,7 @@ export const MISSIONS: MissionMeta[] = [
     codename: "The Vote",
     title: "The Vote",
     logline:
-      "You wake in the body of a senator on the night of a war authorization.",
+      "A senator on the night of a war authorization.",
     status: "available",
     duration: "20–40 min",
     tone: "Civic · Heavy",
