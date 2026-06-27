@@ -4,27 +4,27 @@ import type { DecisionAnalysis } from "@/lib/analysis.functions";
 const KEY = "decision-node:profile";
 
 export const DIMENSIONS = [
-  "curiosity",
   "strategicThinking",
-  "adaptability",
-  "confidenceCalibration",
+  "curiosity",
   "informationGathering",
+  "confidenceCalibration",
+  "adaptability",
+  "negotiation",
   "longTermThinking",
   "biasResistance",
-  "patternRecognition",
 ] as const;
 
 export type Dimension = (typeof DIMENSIONS)[number];
 
 export const DIMENSION_LABELS: Record<Dimension, string> = {
-  curiosity: "Curiosity",
   strategicThinking: "Strategic Thinking",
-  adaptability: "Adaptability",
-  confidenceCalibration: "Confidence Calibration",
+  curiosity: "Curiosity",
   informationGathering: "Information Gathering",
-  longTermThinking: "Long-term Thinking",
+  confidenceCalibration: "Confidence Calibration",
+  adaptability: "Adaptability",
+  negotiation: "Negotiation",
+  longTermThinking: "Second-Order Thinking",
   biasResistance: "Bias Resistance",
-  patternRecognition: "Pattern Recognition",
 };
 
 export type MissionContribution = {
@@ -60,6 +60,9 @@ export function readProfile(): DecisionProfile {
     if (!raw) return empty();
     const parsed = JSON.parse(raw) as DecisionProfile;
     if (parsed.version !== 1) return empty();
+    // Backfill any missing dimensions (e.g. older stored profiles).
+    const base = empty().scores;
+    parsed.scores = { ...base, ...(parsed.scores ?? {}) };
     return parsed;
   } catch {
     return empty();
@@ -125,8 +128,11 @@ function scoreFromAnalysis(a: DecisionAnalysis): {
   const biasResistance = clamp(
     70 - biases * 14 - (held > revised ? 8 : 0),
   );
-  const patternRecognition = clamp(
-    50 + strengths * 5 + reinforced * 4 - (held > 1 ? 8 : 0),
+  // Negotiation: signals of acknowledging counterparts' incentives, asking,
+  // and not steamrolling. Proxy: strengths present, biases low, and revising
+  // on the other side's evidence rather than holding.
+  const negotiation = clamp(
+    50 + strengths * 4 + revised * 5 - held * 8 - biases * 4,
   );
 
   const signals: string[] = [];
@@ -145,7 +151,7 @@ function scoreFromAnalysis(a: DecisionAnalysis): {
       informationGathering,
       longTermThinking,
       biasResistance,
-      patternRecognition,
+      negotiation,
     },
     signals,
   };

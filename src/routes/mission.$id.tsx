@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { partsToText, readMission, useMission } from "@/lib/mission-store";
 import { analyzeDecision } from "@/lib/analysis.functions";
 import { updateProfileWithAnalysis } from "@/lib/decision-profile";
+import { recordMissionPlay } from "@/lib/mission-stats.functions";
 
 import { createAmbient } from "@/lib/ambient";
 import { getMissionEngine } from "@/lib/missions/registry";
@@ -96,6 +97,10 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
   const [decideOpen, setDecideOpen] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const analyzeFn = useServerFn(analyzeDecision);
+  const recordPlayFn = useServerFn(recordMissionPlay);
+  // Track when the decide modal first opens, so we can measure decision time
+  // (deliberation inside the modal) separately from total investigation time.
+  const decideOpenedAtRef = useRef<number | null>(null);
 
   // Ambient score — starts on the first user gesture (browsers require it).
   // Missions without a registered soundtrack play silently.
@@ -184,6 +189,7 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
   function openDecideWith(prefill: string) {
     setDecidePrefill(prefill);
     setDecideOpen(true);
+    decideOpenedAtRef.current = Date.now();
   }
 
   async function submit(text: string) {
@@ -197,10 +203,10 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
         return;
       } else {
         const turnsToGo = Math.max(0, 4 - userTurnsCount);
-        toast("Not yet.", {
+        toast("Stay in the room a little longer.", {
           description: turnsToGo > 0
-            ? `${turnsToGo} more exchange${turnsToGo === 1 ? "" : "s"} before you can commit.`
-            : "The moment hasn't arrived.",
+            ? `${turnsToGo} more exchange${turnsToGo === 1 ? "" : "s"} before this decision is yours to make.`
+            : "Give the moment a little more time.",
         });
         return;
       }
@@ -245,6 +251,29 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
       } catch (err) {
         console.error("profile update failed", err);
       }
+
+      // Fire-and-forget community telemetry — no PII, only timings + counts.
+      try {
+        const now = Date.now();
+        const investigationSeconds = mission.startedAt
+          ? Math.max(0, Math.round((now - mission.startedAt) / 1000))
+          : undefined;
+        const decisionSeconds = decideOpenedAtRef.current
+          ? Math.max(0, Math.round((now - decideOpenedAtRef.current) / 1000))
+          : undefined;
+        void recordPlayFn({
+          data: {
+            missionId: MISSION_ID,
+            investigationSeconds,
+            decisionSeconds,
+            messageCount: messages.length,
+            completed: true,
+          },
+        });
+      } catch (err) {
+        console.error("play telemetry failed", err);
+      }
+
       setDecideOpen(false);
       // Small dramatic pause before transition.
       setTimeout(() => navigate({ to: "/analysis" }), 600);

@@ -1,10 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import type { DecisionAnalysis } from "@/lib/analysis.functions";
 import { readMission, useMission, type SavedMission } from "@/lib/mission-store";
 import { readProfile, type DecisionProfile } from "@/lib/decision-profile";
 import { DecisionProfileCard } from "@/components/DecisionProfileCard";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { getMissionPercentile, type MissionPercentile } from "@/lib/mission-stats.functions";
 import sceneCosmos from "@/assets/scene-cosmos.jpg";
 
 export const Route = createFileRoute("/analysis")({
@@ -22,7 +24,9 @@ function Analysis() {
   const navigate = useNavigate();
   const [mission, setMission] = useState<SavedMission | null>(null);
   const [profile, setProfile] = useState<DecisionProfile | null>(null);
+  const [percentile, setPercentile] = useState<MissionPercentile | null>(null);
   const { reset } = useMission(mission?.missionId ?? "mission-01");
+  const fetchPercentile = useServerFn(getMissionPercentile);
 
   useEffect(() => {
     const m = readMission();
@@ -32,7 +36,17 @@ function Analysis() {
     }
     setMission(m);
     setProfile(readProfile());
-  }, [navigate]);
+
+    // Pull community percentile if we tracked investigation time.
+    const invSeconds = m.startedAt && m.decidedAt
+      ? Math.max(0, Math.round((m.decidedAt - m.startedAt) / 1000))
+      : null;
+    if (invSeconds !== null) {
+      fetchPercentile({ data: { missionId: m.missionId, investigationSeconds: invSeconds } })
+        .then(setPercentile)
+        .catch(() => {});
+    }
+  }, [navigate, fetchPercentile]);
 
   if (!mission?.analysis) return null;
   const a = mission.analysis;
@@ -90,34 +104,46 @@ function Analysis() {
           <TimelineScrubber timeline={a.timeline} />
         </section>
 
-        {/* Executive Summary */}
+        {/* Verdict + expandable detail drawers */}
         <section className="space-y-12">
           <div className="animate-fade-up text-center" style={{ animationDelay: "1.4s" }}>
             <p className="text-[0.6rem] tracking-[0.5em] uppercase text-accent/80 mb-4">
-              Executive summary
+              Verdict
             </p>
             <p className="font-display text-2xl sm:text-3xl leading-snug text-foreground/95 text-pretty max-w-2xl mx-auto">
               {a.closing}
             </p>
           </div>
 
-          {/* Expandable details */}
+          {/* Expandable details — ordered per spec */}
           <div className="animate-fade-up divide-y divide-foreground/10 border-y border-foreground/10" style={{ animationDelay: "1.7s" }}>
-            <ExpandableBlock label="Assumptions" body={a.assumptions} />
-            <ExpandableBlock label="Evidence considered" body={a.evidenceUsed} />
-            <ExpandableBlock label="Evidence overlooked" body={a.evidenceIgnored} />
-            <ExpandableBlock label="Alternatives" body={a.alternatives} />
-            {a.beliefTrajectory && a.beliefTrajectory.length > 0 && (
-              <ExpandableSection label="Belief trajectory">
-                <BeliefTrajectory trajectory={a.beliefTrajectory} />
-              </ExpandableSection>
-            )}
             {a.reasoningAssessment && (
               <ExpandableSection label="Reasoning assessment">
                 <ReasoningAssessment data={a.reasoningAssessment} />
               </ExpandableSection>
             )}
+            <ExpandableBlock label="Evidence considered" body={a.evidenceUsed} />
+            <ExpandableBlock label="Evidence ignored" body={a.evidenceIgnored} />
+            <ExpandableBlock label="Assumptions made" body={a.assumptions} />
+            <ExpandableBlock label="Alternative paths" body={a.alternatives} />
+            {a.reasoningAssessment && a.reasoningAssessment.possibleBiases.length > 0 && (
+              <ExpandableSection label="Potential cognitive biases">
+                <PossibleBiasesList biases={a.reasoningAssessment.possibleBiases} />
+              </ExpandableSection>
+            )}
+            <ExpandableSection label="Long-term consequences">
+              <LongTermConsequences timeline={a.timeline} />
+            </ExpandableSection>
+            {a.beliefTrajectory && a.beliefTrajectory.length > 0 && (
+              <ExpandableSection label="Belief trajectory">
+                <BeliefTrajectory trajectory={a.beliefTrajectory} />
+              </ExpandableSection>
+            )}
           </div>
+
+          {percentile && percentile.plays >= 3 && (
+            <CommunityComparison percentile={percentile} />
+          )}
 
           {profile && <DecisionProfileCard profile={profile} delay={2.4} />}
         </section>
@@ -565,6 +591,97 @@ function TimelineScrubber({ timeline }: { timeline: DecisionAnalysis["timeline"]
         </p>
       </div>
 
+    </div>
+  );
+}
+
+function PossibleBiasesList({
+  biases,
+}: {
+  biases: NonNullable<DecisionAnalysis["reasoningAssessment"]>["possibleBiases"];
+}) {
+  return (
+    <ul className="space-y-6">
+      {biases.map((b, i) => (
+        <li key={i} className="border-l-2 border-foreground/20 pl-5">
+          <p className="text-[0.6rem] tracking-[0.3em] uppercase text-accent/70 mb-2">
+            Possibly {b.name}
+          </p>
+          <p className="font-display text-base sm:text-lg leading-snug text-foreground/95 text-pretty">
+            {b.gentleExplanation}
+          </p>
+          <p className="mt-2 text-xs text-foreground/55 leading-relaxed text-pretty">
+            {b.evidence}
+          </p>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function LongTermConsequences({
+  timeline,
+}: {
+  timeline: DecisionAnalysis["timeline"];
+}) {
+  // The later half of the timeline reads as second-order effects.
+  const tail = timeline.slice(Math.ceil(timeline.length / 2));
+  const shown = tail.length > 0 ? tail : timeline;
+  return (
+    <div className="space-y-6">
+      <p className="text-sm text-foreground/55 leading-relaxed">
+        What unfolds downstream of this choice — beyond the immediate aftermath.
+      </p>
+      <ol className="space-y-5">
+        {shown.map((t, i) => (
+          <li key={i} className="border-l-2 border-accent/30 pl-5">
+            <p className="text-[0.6rem] tracking-[0.35em] uppercase text-foreground/55 mb-1.5">
+              {t.beat}
+            </p>
+            <p className="font-display text-lg leading-snug text-foreground/95 text-pretty">
+              {t.consequence}
+            </p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
+
+function CommunityComparison({ percentile }: { percentile: MissionPercentile }) {
+  const fmt = (s: number | null) => {
+    if (s === null) return "—";
+    if (s < 60) return `${s}s`;
+    const m = Math.floor(s / 60);
+    const r = s % 60;
+    return r ? `${m}m ${r}s` : `${m}m`;
+  };
+  return (
+    <div
+      className="animate-fade-up border-t border-foreground/15 pt-12 text-center"
+      style={{ animationDelay: "2.7s" }}
+    >
+      <p className="text-[0.6rem] tracking-[0.5em] uppercase text-accent/80 mb-4">
+        Community context
+      </p>
+      <p className="text-xs text-foreground/45 max-w-md mx-auto leading-relaxed mb-6">
+        How your preparation compared to others who opened this file.
+        Not a ranking — a mirror.
+      </p>
+      {typeof percentile.investigationPercentile === "number" && (
+        <p className="font-display text-xl sm:text-2xl text-foreground/95 leading-snug max-w-xl mx-auto text-pretty">
+          You investigated longer than{" "}
+          <span className="text-accent tabular-nums">
+            {percentile.investigationPercentile}%
+          </span>{" "}
+          of players.
+        </p>
+      )}
+      <p className="mt-4 text-[0.6rem] tracking-[0.35em] uppercase text-foreground/40">
+        Community avg investigation: {fmt(percentile.avgInvestigationSeconds)}
+        {" · "}
+        {percentile.plays.toLocaleString()} plays
+      </p>
     </div>
   );
 }
