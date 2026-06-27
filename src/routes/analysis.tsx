@@ -129,6 +129,8 @@ function Analysis() {
             </p>
           </div>
 
+          {profile && <DecisionProfileCard profile={profile} delay={2.9} />}
+
         </section>
 
         {/* Coda */}
