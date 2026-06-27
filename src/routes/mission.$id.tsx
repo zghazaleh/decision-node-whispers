@@ -196,10 +196,10 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
         return;
       } else {
         const turnsToGo = Math.max(0, 4 - userTurnsCount);
-        toast("Not yet — stay in the room a little longer.", {
+        toast("Not yet.", {
           description: turnsToGo > 0
             ? `${turnsToGo} more exchange${turnsToGo === 1 ? "" : "s"} before you can commit.`
-            : "The moment hasn't ripened.",
+            : "The moment hasn't arrived.",
         });
         return;
       }
@@ -442,13 +442,13 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
               const turnsToGo = Math.max(0, 4 - userTurns);
               const lockedHint =
                 turnsToGo > 0
-                  ? `Stay in the room a little longer — ${turnsToGo} more exchange${turnsToGo === 1 ? "" : "s"}.`
+                  ? `Continue the conversation — ${turnsToGo} more exchange${turnsToGo === 1 ? "" : "s"}.`
                   : "Thinking…";
               return (
                 <button
                   onClick={() => setDecideOpen(true)}
                   disabled={!decideReady}
-                  title={decideReady ? "Commit to a decision" : lockedHint}
+                  title={decideReady ? "Make your decision" : lockedHint}
                   aria-label={decideReady ? "Decide" : `Decide — locked. ${lockedHint}`}
                   className={`group inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 sm:px-4 sm:py-2 text-[0.65rem] sm:text-[0.7rem] tracking-[0.3em] uppercase transition-all disabled:cursor-not-allowed ${
                     decideReady
@@ -523,8 +523,8 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
                   const turnsToGo = Math.max(0, 4 - userTurnsCount);
                   toast("Not yet.", {
                     description: turnsToGo > 0
-                      ? `Stay in the room — ${turnsToGo} more exchange${turnsToGo === 1 ? "" : "s"}.`
-                      : "The moment hasn't ripened.",
+                      ? `Continue the conversation — ${turnsToGo} more exchange${turnsToGo === 1 ? "" : "s"}.`
+                      : "The moment hasn't arrived.",
                   });
                 }
               }}
@@ -549,7 +549,7 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
                   }
                 }}
                 rows={1}
-                placeholder="Say something. Or do something."
+                placeholder="Speak or act."
                 disabled={busy}
                 className="flex-1 resize-none bg-transparent text-foreground/95 placeholder:text-foreground/30 outline-none text-base font-sans leading-relaxed max-h-40"
               />
