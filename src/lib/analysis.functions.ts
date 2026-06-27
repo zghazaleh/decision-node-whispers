@@ -29,7 +29,34 @@ const AnalysisSchema = z.object({
   evidenceIgnored: z.string(),
   alternatives: z.string(),
   closing: z.string(),
+  reasoningAssessment: z.object({
+    summary: z.string(),
+    strengths: z
+      .array(z.object({ behavior: z.string(), evidence: z.string() }))
+      .max(4),
+    blindSpots: z
+      .array(
+        z.object({
+          pattern: z.string(),
+          evidence: z.string(),
+          gentleReframe: z.string(),
+        }),
+      )
+      .max(4),
+    possibleBiases: z
+      .array(
+        z.object({
+          name: z.string(),
+          evidence: z.string(),
+          gentleExplanation: z.string(),
+        }),
+      )
+      .max(3),
+    calibration: z.string(),
+    luckVsSkill: z.string(),
+  }),
 });
+
 
 export type DecisionAnalysis = z.infer<typeof AnalysisSchema>;
 
