@@ -360,10 +360,10 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
                   disabled={!decideReady}
                   title={decideReady ? "Commit to a decision" : lockedHint}
                   aria-label={decideReady ? "Decide" : `Decide — locked. ${lockedHint}`}
-                  className={`group flex items-center gap-3 text-[0.65rem] tracking-[0.35em] uppercase transition-colors disabled:cursor-not-allowed ${
+                  className={`group inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 sm:px-4 sm:py-2 text-[0.65rem] sm:text-[0.7rem] tracking-[0.3em] uppercase transition-all disabled:cursor-not-allowed ${
                     decideReady
-                      ? "text-accent hover:text-accent-foreground"
-                      : "text-foreground/25"
+                      ? "border-accent/70 bg-accent/15 text-accent hover:bg-accent/25 hover:border-accent shadow-[0_0_18px_-4px_var(--color-accent)]"
+                      : "border-foreground/20 bg-foreground/5 text-foreground/50"
                   }`}
                 >
                   <span className="relative flex h-2 w-2 items-center justify-center">
@@ -373,11 +373,11 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
                         <span className="relative inline-flex h-2 w-2 rounded-full bg-accent" />
                       </>
                     ) : (
-                      <span className="inline-flex h-1.5 w-1.5 rounded-full border border-foreground/30" />
+                      <span className="inline-flex h-1.5 w-1.5 rounded-full border border-foreground/40" />
                     )}
                   </span>
                   <Scale className="h-3.5 w-3.5" />
-                  <span>{decideReady ? "Decide" : "Decide · locked"}</span>
+                  <span>{decideReady ? "Decide" : "Locked"}</span>
                 </button>
               );
             })()}
