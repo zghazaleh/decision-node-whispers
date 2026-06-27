@@ -572,6 +572,29 @@ function QuickActions({
   );
 }
 
+const DECISION_PRESETS: { label: string; text: string }[] = [
+  {
+    label: "Ship",
+    text: "I walk into the boardroom and authorize the public release of ORION-9 at 8 AM, as planned.",
+  },
+  {
+    label: "Hold two weeks",
+    text: "I walk into the boardroom and announce a two-week hold on the ORION-9 release to complete Amara's requested alignment review.",
+  },
+  {
+    label: "Narrow release",
+    text: "I authorize a restricted, gated release of ORION-9 to a small set of vetted partners while alignment continues a deeper red-team in parallel.",
+  },
+  {
+    label: "Indefinite pause",
+    text: "I tell the board I am pausing the ORION-9 release indefinitely until the deceptive-evaluation signal is understood and resolved.",
+  },
+  {
+    label: "Step down",
+    text: "I tell the board I cannot in good conscience authorize this release today, and I offer my resignation if they choose to ship without me.",
+  },
+];
+
 function DecideModal({
   analyzing,
   onClose,
@@ -614,9 +637,8 @@ function DecideModal({
             <h2 className="font-display text-3xl text-foreground mb-2">
               This is the moment.
             </h2>
-            <p className="text-sm text-muted-foreground mb-8 leading-relaxed">
-              You can't take it back. State what you do — out loud, to the room, to the
-              board, to whoever needs to hear it.
+            <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
+              Pick a stance, or write your own. You can't take it back.
             </p>
 
             <form
@@ -627,11 +649,37 @@ function DecideModal({
               className="space-y-6"
             >
               <div>
+                <label className="block text-[0.6rem] tracking-[0.3em] uppercase text-foreground/50 mb-3">
+                  Choose a stance
+                </label>
+                <div className="space-y-2 mb-4">
+                  {DECISION_PRESETS.map((p) => {
+                    const active = decision.trim() === p.text.trim();
+                    return (
+                      <button
+                        key={p.label}
+                        type="button"
+                        onClick={() => setDecision(p.text)}
+                        className={`w-full text-left rounded-sm border px-4 py-3 transition-colors ${
+                          active
+                            ? "border-accent/70 bg-accent/10 text-foreground"
+                            : "border-foreground/15 bg-background/40 text-foreground/80 hover:border-foreground/40 hover:text-foreground"
+                        }`}
+                      >
+                        <div className="text-[0.65rem] tracking-[0.3em] uppercase text-accent/80 mb-1">
+                          {p.label}
+                        </div>
+                        <div className="text-sm leading-relaxed text-pretty">
+                          {p.text}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
                 <label className="block text-[0.6rem] tracking-[0.3em] uppercase text-foreground/50 mb-2">
-                  What you do
+                  Or in your own words
                 </label>
                 <textarea
-                  autoFocus
                   value={decision}
                   onChange={(e) => setDecision(e.target.value)}
                   rows={3}
