@@ -22,7 +22,7 @@ export const Route = createFileRoute("/")({
 
 function Landing() {
   return (
-    <main className="relative min-h-screen overflow-hidden bg-background">
+    <main className="relative min-h-[100svh] overflow-x-hidden bg-background">
       {/* Layered starfield */}
       <div className="starfield animate-drift" aria-hidden />
       <div
@@ -42,20 +42,20 @@ function Landing() {
       <div className="vignette" aria-hidden />
       <div className="film-grain" aria-hidden />
 
-      <section className="relative z-10 flex min-h-screen flex-col items-center justify-center px-6 text-center">
-        <p className="animate-fade-in-slow text-[0.65rem] tracking-[0.5em] uppercase text-muted-foreground mb-10">
+      <section className="relative z-10 flex min-h-[100svh] flex-col items-center justify-center px-6 pt-20 pb-28 text-center">
+        <p className="animate-fade-in-slow text-[0.65rem] tracking-[0.5em] uppercase text-muted-foreground mb-8 sm:mb-10">
           Mission One
         </p>
 
         <h1
-          className="animate-fade-up font-display text-6xl sm:text-7xl md:text-8xl lg:text-9xl leading-[0.95] text-foreground/95 text-balance"
+          className="animate-fade-up font-display text-5xl sm:text-7xl md:text-8xl lg:text-9xl leading-[0.95] text-foreground/95 text-balance"
           style={{ animationDelay: "0.2s" }}
         >
           Decision Node
         </h1>
 
         <p
-          className="animate-fade-up mt-10 max-w-xl text-base md:text-lg leading-relaxed text-muted-foreground text-pretty"
+          className="animate-fade-up mt-8 sm:mt-10 max-w-xl text-sm sm:text-base md:text-lg leading-relaxed text-muted-foreground text-pretty"
           style={{ animationDelay: "0.9s" }}
         >
           You wake up in someone else's body,
@@ -64,7 +64,7 @@ function Landing() {
         </p>
 
         <div
-          className="animate-fade-up mt-16"
+          className="animate-fade-up mt-12 sm:mt-16"
           style={{ animationDelay: "1.6s" }}
         >
           <Link
@@ -78,12 +78,13 @@ function Landing() {
         </div>
 
         <p
-          className="animate-fade-in-slow absolute bottom-8 left-1/2 -translate-x-1/2 text-[0.6rem] tracking-[0.4em] uppercase text-muted-foreground/60"
+          className="animate-fade-in-slow absolute bottom-[max(1.5rem,env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 text-[0.6rem] tracking-[0.4em] uppercase text-muted-foreground/60"
           style={{ animationDelay: "2.4s" }}
         >
           Headphones recommended
         </p>
       </section>
     </main>
+
   );
 }
