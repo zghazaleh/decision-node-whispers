@@ -92,10 +92,10 @@ const AnalysisSchema = z.object({
 
 // ─── CLI ─────────────────────────────────────────────────────────────────────
 
-type Args = { only?: "director" | "analysis"; mission: string };
+type Args = { only?: "director" | "analysis"; mission: string; updateSnapshots: boolean };
 
 function parseArgs(argv: string[]): Args {
-  const args: Args = { mission: "mission-01" };
+  const args: Args = { mission: "mission-01", updateSnapshots: false };
   for (const a of argv.slice(2)) {
     if (a.startsWith("--only=")) {
       const v = a.slice("--only=".length);
@@ -105,9 +105,39 @@ function parseArgs(argv: string[]): Args {
       args.only = v;
     } else if (a.startsWith("--mission=")) {
       args.mission = a.slice("--mission=".length);
+    } else if (a === "--update-snapshots" || a === "-u") {
+      args.updateSnapshots = true;
     }
   }
   return args;
+}
+
+// ─── Snapshot comparison ─────────────────────────────────────────────────────
+
+type SnapshotOutcome = "match" | "written" | "updated" | "drift" | "new";
+
+function compareOrBless(
+  id: string,
+  shape: string,
+  critical: Snapshot["critical"],
+  updateSnapshots: boolean,
+): { outcome: SnapshotOutcome; detail: string } {
+  const existing = loadSnapshot(id);
+  const candidate: Omit<Snapshot, "blessedAt"> = { id, shape, critical };
+  if (!existing) {
+    if (updateSnapshots) {
+      writeSnapshot({ ...candidate, blessedAt: new Date().toISOString() });
+      return { outcome: "written", detail: "snapshot written (new)" };
+    }
+    return { outcome: "new", detail: "no golden snapshot on disk (run with --update-snapshots to bless)" };
+  }
+  const diffs = diffSnapshot(existing, candidate);
+  if (diffs.length === 0) return { outcome: "match", detail: "snapshot matched" };
+  if (updateSnapshots) {
+    writeSnapshot({ ...candidate, blessedAt: new Date().toISOString() });
+    return { outcome: "updated", detail: `snapshot updated (${diffs.length} field(s) changed)` };
+  }
+  return { outcome: "drift", detail: `snapshot drift:\n${formatDiff(diffs)}` };
 }
 
 // ─── Chips parser ────────────────────────────────────────────────────────────
