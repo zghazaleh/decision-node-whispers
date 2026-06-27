@@ -137,7 +137,6 @@ export const missionTwoEngine: MissionEngine = {
     chromaBreatheDuration: 13,
     dustOpacityScale: 0.25,
     padFrequency: 48,
-    padDetune: 1.008,
     filterBaseHz: 1200,
     filterLfoDepthHz: 500,
     lfoRateHz: 0.07,
