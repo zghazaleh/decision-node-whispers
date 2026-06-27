@@ -8,9 +8,12 @@ export type Ambient = {
   stop: () => void;
   switchTo: (missionId: string | null, fadeMs?: number) => Promise<void>;
   setMuted: (m: boolean) => void;
+  /** 0..1 — drives subtle volume swell + slight detune as mission stakes rise. */
+  setPressure: (p: number) => void;
   isRunning: () => boolean;
   currentMission: () => string | null;
 };
+
 
 type Voice = {
   audio: HTMLAudioElement;
@@ -41,6 +44,24 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
   let muted = false;
   let stopped = true;
   let pendingMission: string | null = initialMissionId;
+  let pressure = 0; // 0..1
+
+  // Effective target volume for a track, accounting for pressure swell.
+  // We lift by up to +55% of the base volume — still well below 1.0 for the
+  // mission-01 ambient (base 0.35 → max ~0.54) so it never crowds dialogue.
+  function targetVolume(track: Soundtrack): number {
+    if (muted) return 0;
+    const lift = 1 + pressure * 0.55;
+    return Math.min(1, track.volume * lift);
+  }
+
+  function applyPressure(v: Voice, fadeMs = 4000) {
+    rampVolume(v, targetVolume(v.track), fadeMs);
+    // Subtle detune downward — feels heavier without being noticeable as pitch.
+    try {
+      v.audio.playbackRate = 1 - pressure * 0.04;
+    } catch { /* noop */ }
+  }
 
   async function playMission(missionId: string, fadeInMs: number): Promise<Voice | null> {
     const track = getSoundtrack(missionId);
@@ -51,14 +72,18 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
     audio.crossOrigin = "anonymous";
     audio.volume = 0;
     try {
+      audio.playbackRate = 1 - pressure * 0.04;
+    } catch { /* noop */ }
+    try {
       await audio.play();
     } catch {
       return null;
     }
     const v: Voice = { audio, track, missionId, fadeRaf: null };
-    rampVolume(v, muted ? 0 : track.volume, fadeInMs);
+    rampVolume(v, targetVolume(track), fadeInMs);
     return v;
   }
+
 
   function disposeVoice(v: Voice, fadeMs: number) {
     rampVolume(v, 0, fadeMs, () => {
@@ -130,7 +155,15 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
     setMuted(m: boolean) {
       muted = m;
       if (!current) return;
-      rampVolume(current, m ? 0 : current.track.volume, 500);
+      rampVolume(current, targetVolume(current.track), 500);
     },
+
+    setPressure(p: number) {
+      const next = Math.min(1, Math.max(0, p));
+      if (Math.abs(next - pressure) < 0.01) return;
+      pressure = next;
+      if (current) applyPressure(current);
+    },
+
   };
 }
