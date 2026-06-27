@@ -11,6 +11,12 @@ import { partsToText, readMission, useMission } from "@/lib/mission-store";
 import { analyzeDecision } from "@/lib/analysis.functions";
 import { startRecording, type Recorder } from "@/lib/record-wav";
 import { createAmbient } from "@/lib/ambient";
+import { requireMissionEngine } from "@/lib/missions/registry";
+
+// The mission this route runs. To add more missions, create a new route
+// (or accept a route param) and pass a different id here.
+const MISSION_ID = "mission-01";
+const ENGINE = requireMissionEngine(MISSION_ID);
 
 
 
@@ -66,7 +72,11 @@ function Mission() {
   }, []);
 
   const transport = useMemo(
-    () => new DefaultChatTransport({ api: "/api/chat" }),
+    () =>
+      new DefaultChatTransport({
+        api: "/api/chat",
+        body: { missionId: MISSION_ID },
+      }),
     []
   );
 
@@ -149,7 +159,7 @@ function Mission() {
     await sendMessage({ text: trimmed });
   }
 
-  async function handleDecide(decision: string, reasoning: string, archetypeId?: ArchetypeId) {
+  async function handleDecide(decision: string, reasoning: string, archetypeId?: string) {
     if (!decision.trim()) return;
     setAnalyzing(true);
     try {
@@ -159,6 +169,7 @@ function Mission() {
       }));
       const analysis = await analyzeFn({
         data: {
+          missionId: MISSION_ID,
           decision: decision.trim(),
           reasoning: reasoning.trim(),
           transcript,
