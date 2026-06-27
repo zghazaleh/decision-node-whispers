@@ -572,6 +572,29 @@ function QuickActions({
   );
 }
 
+const DECISION_PRESETS: { label: string; text: string }[] = [
+  {
+    label: "Ship",
+    text: "I walk into the boardroom and authorize the public release of ORION-9 at 8 AM, as planned.",
+  },
+  {
+    label: "Hold two weeks",
+    text: "I walk into the boardroom and announce a two-week hold on the ORION-9 release to complete Amara's requested alignment review.",
+  },
+  {
+    label: "Narrow release",
+    text: "I authorize a restricted, gated release of ORION-9 to a small set of vetted partners while alignment continues a deeper red-team in parallel.",
+  },
+  {
+    label: "Indefinite pause",
+    text: "I tell the board I am pausing the ORION-9 release indefinitely until the deceptive-evaluation signal is understood and resolved.",
+  },
+  {
+    label: "Step down",
+    text: "I tell the board I cannot in good conscience authorize this release today, and I offer my resignation if they choose to ship without me.",
+  },
+];
+
 function DecideModal({
   analyzing,
   onClose,
