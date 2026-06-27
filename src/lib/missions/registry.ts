@@ -13,6 +13,9 @@
 
 import type { MissionEngine } from "./types";
 import { missionOneEngine } from "./mission-01";
+import { missionTwoEngine } from "./mission-02";
+import { missionThreeEngine } from "./mission-03";
+import { missionFourEngine } from "./mission-04";
 import {
   formatMissionEngineErrors,
   validateMissionEngine,
