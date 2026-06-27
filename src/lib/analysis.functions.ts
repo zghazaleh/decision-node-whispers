@@ -11,6 +11,7 @@ const AnalysisInput = z.object({
   decision: z.string().min(1),
   reasoning: z.string().default(""),
   archetypeId: z.string().optional(), // preset path: skip classification
+  confidence: z.number().min(0).max(100).optional(), // player self-reported at commit
   transcript: z
     .array(z.object({ role: z.string(), text: z.string() }))
     .min(1),
@@ -18,6 +19,8 @@ const AnalysisInput = z.object({
 
 const AnalysisSchema = z.object({
   headline: z.string(),
+  archetypeId: z.string().optional(),
+  archetypeLabel: z.string().optional(),
   timeline: z.array(
     z.object({
       beat: z.string(),
@@ -194,9 +197,15 @@ FULL TRANSCRIPT:
 ${transcriptText}`,
     });
 
-    // Hard-guarantee: overwrite the model's timeline with canon if we have one.
+    // Hard-guarantee: overwrite the model's timeline with canon if we have one,
+    // and stamp the archetype id/label so the analysis screen can name it.
     const finalAnalysis: DecisionAnalysis = archetype
-      ? { ...object, timeline: archetype.timeline.map((t) => ({ ...t })) }
+      ? {
+          ...object,
+          timeline: archetype.timeline.map((t) => ({ ...t })),
+          archetypeId: archetype.id,
+          archetypeLabel: archetype.label,
+        }
       : object;
 
     return finalAnalysis;
