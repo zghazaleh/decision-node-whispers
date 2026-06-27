@@ -342,14 +342,46 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
             >
               {soundOn ? <Volume2 className="h-3.5 w-3.5" /> : <VolumeX className="h-3.5 w-3.5" />}
             </button>
-            <button
-              onClick={() => setDecideOpen(true)}
-              disabled={busy || messages.length < 2}
-              className="group flex items-center gap-3 text-[0.65rem] tracking-[0.35em] uppercase text-foreground/60 hover:text-accent disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-            >
-              <Scale className="h-3.5 w-3.5" />
-              Decide
-            </button>
+            {(() => {
+              // Unlock the decision once the player has actually had a few
+              // exchanges with the scene. Tied to the same pressure curve
+              // that darkens the room, so it never feels arbitrary.
+              // Roughly: 4+ user turns (≈ messages.length >= 9).
+              const decideReady = !busy && pressure >= 0.45;
+              const userTurns = messages.filter((m) => m.role === "user").length;
+              const turnsToGo = Math.max(0, 4 - userTurns);
+              const lockedHint =
+                turnsToGo > 0
+                  ? `Stay in the room a little longer — ${turnsToGo} more exchange${turnsToGo === 1 ? "" : "s"}.`
+                  : "Thinking…";
+              return (
+                <button
+                  onClick={() => setDecideOpen(true)}
+                  disabled={!decideReady}
+                  title={decideReady ? "Commit to a decision" : lockedHint}
+                  aria-label={decideReady ? "Decide" : `Decide — locked. ${lockedHint}`}
+                  className={`group flex items-center gap-3 text-[0.65rem] tracking-[0.35em] uppercase transition-colors disabled:cursor-not-allowed ${
+                    decideReady
+                      ? "text-accent hover:text-accent-foreground"
+                      : "text-foreground/25"
+                  }`}
+                >
+                  <span className="relative flex h-2 w-2 items-center justify-center">
+                    {decideReady ? (
+                      <>
+                        <span className="absolute inline-flex h-full w-full rounded-full bg-accent/60 animate-ping" />
+                        <span className="relative inline-flex h-2 w-2 rounded-full bg-accent" />
+                      </>
+                    ) : (
+                      <span className="inline-flex h-1.5 w-1.5 rounded-full border border-foreground/30" />
+                    )}
+                  </span>
+                  <Scale className="h-3.5 w-3.5" />
+                  <span>{decideReady ? "Decide" : "Decide · locked"}</span>
+                </button>
+              );
+            })()}
+
           </div>
 
         </header>
