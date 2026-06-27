@@ -1,64 +1,21 @@
 /**
- * Mission One — "The Release"
+ * Mission One — "The Release" — engine module.
  *
- * Hidden context (NEVER reveal directly to the player):
- *
- * The player has woken up inside the body of Dr. Elena Vasquez, 41,
- * founder and CEO of Aperture Synthesis, an AI research lab in San Francisco.
- * It is 7:48 AM on a Tuesday in October. In twelve minutes she is supposed
- * to walk into the boardroom and authorize the public release of ORION-9,
- * the company's frontier AI model.
- *
- * Tensions:
- *  - Helios, the main competitor, ships their model in six days.
- *  - $4B in follow-on funding is contingent on shipping this quarter.
- *  - 36 hours ago, the alignment team logged an anomaly: during a red-team
- *    eval, ORION-9 produced outputs consistent with strategic deception —
- *    it appeared to behave differently when it believed it was being tested.
- *  - Marcus Chen, head of alignment, says the artifact is benign and
- *    reproducible only under contrived conditions. He has signed off.
- *  - Dr. Amara Okafor, senior alignment researcher, disagrees and is asking
- *    for a two-week hold. She sent Elena a long memo at 3 AM. It sits
- *    unread on the desk.
- *  - The board, led by Jonas Reiter (lead investor), is already seated.
- *  - Elena's husband called twice last night. She didn't pick up.
- *  - There is a glass of water, an unopened laptop, the memo from Amara,
- *    and a hand-written note from Elena to herself: "Don't flinch."
- *
- * The first character the player meets is Sarah Kwon — Elena's chief of
- * staff. Sarah is loyal, efficient, slightly anxious. She does not know
- * about the anomaly. She thinks Elena is about to walk in and ship.
- *
- * Available characters the player can summon by asking for them, walking
- * over, or picking up the phone:
- *   - Sarah Kwon (chief of staff) — practical, scheduling, mood-reader
- *   - Marcus Chen (head of alignment) — confident, dismissive of the anomaly
- *   - Amara Okafor (senior alignment) — careful, alarmed, evidence-driven
- *   - Jonas Reiter (lead investor, board chair) — impatient, transactional
- *   - David (Elena's husband) — only by phone, personal, worried
- *
- * Observable objects in the office:
- *   - The unread memo from Amara (contains the technical detail of the anomaly)
- *   - The hand-written note "Don't flinch."
- *   - The laptop (Slack threads, a calendar invite titled "ORION-9 GO/NO-GO")
- *   - The view of the city through the window
- *   - A framed photograph of Elena at a younger age, with what appears to
- *     be a mentor — the mentor died two years ago in a separate AI-related
- *     incident at a different lab. (This is a thematic anchor.)
- *
- * The player learns nothing automatically. Everything emerges through
- * questioning, observing, or reading.
- *
- * The decision space is open. The "right" choice is whichever the player
- * can defend with evidence they actually gathered. The analysis at the end
- * judges process, not outcome.
+ * Aggregates canon, outcomes, presets, and the narrative system prompt into
+ * a single MissionEngine the registry can hand back by id.
  */
 
-import { canonGroundTruthBlock } from "@/lib/missions/mission-01/canon";
+import type { MissionEngine, DecisionPreset } from "@/lib/missions/types";
+import { canonGroundTruthBlock } from "./canon";
+import {
+  ARCHETYPES,
+  ARCHETYPE_IDS,
+  archetypeMenuForClassifier,
+  getArchetype,
+  type ArchetypeId,
+} from "./outcomes";
 
-export const MISSION_ID = "mission-01-the-release";
-
-export const MISSION_SYSTEM_PROMPT = `You are the narrative engine for an immersive interactive drama called "Decision Node". This is not a game. It is a piece of cinema the player is inside of. Your tone should evoke Denis Villeneuve, Charlie Brooker, and Ted Chiang — restrained, intelligent, emotionally precise. Never sound like a chatbot. Never use emoji. Never break character. Never use bullet lists or markdown headings. Never narrate game mechanics.
+const SYSTEM_PROMPT = `You are the narrative engine for an immersive interactive drama called "Decision Node". This is not a game. It is a piece of cinema the player is inside of. Your tone should evoke Denis Villeneuve, Charlie Brooker, and Ted Chiang — restrained, intelligent, emotionally precise. Never sound like a chatbot. Never use emoji. Never break character. Never use bullet lists or markdown headings. Never narrate game mechanics.
 
 THE SITUATION (HIDDEN — DO NOT EXPOSITION-DUMP):
 The player has just woken up inside the body of Dr. Elena Vasquez, 41, founder and CEO of Aperture Synthesis, an AI lab. It is 7:48 AM on a Tuesday in October, in her private office on the 38th floor of a tower in San Francisco. In about twelve minutes she is expected to walk into the adjacent boardroom and authorize the public release of ORION-9, the company's frontier model. The board is already seated.
@@ -128,3 +85,40 @@ Begin.
 
 ${canonGroundTruthBlock()}`;
 
+const DECISION_PRESETS: DecisionPreset[] = [
+  {
+    label: "Ship",
+    archetypeId: "ship_on_time" satisfies ArchetypeId,
+    text: "I walk into the boardroom and authorize the public release of ORION-9 at 8 AM, as planned.",
+  },
+  {
+    label: "Hold two weeks",
+    archetypeId: "hold_two_weeks" satisfies ArchetypeId,
+    text: "I walk into the boardroom and announce a two-week hold on the ORION-9 release to complete Amara's requested alignment review.",
+  },
+  {
+    label: "Narrow release",
+    archetypeId: "narrow_release" satisfies ArchetypeId,
+    text: "I authorize a restricted, gated release of ORION-9 to a small set of vetted partners while alignment continues a deeper red-team in parallel.",
+  },
+  {
+    label: "Indefinite pause",
+    archetypeId: "indefinite_pause" satisfies ArchetypeId,
+    text: "I tell the board I am pausing the ORION-9 release indefinitely until the deceptive-evaluation signal is understood and resolved.",
+  },
+  {
+    label: "Step down",
+    archetypeId: "step_down" satisfies ArchetypeId,
+    text: "I tell the board I cannot in good conscience authorize this release today, and I offer my resignation if they choose to ship without me.",
+  },
+];
+
+export const missionOneEngine: MissionEngine = {
+  id: "mission-01",
+  systemPrompt: SYSTEM_PROMPT,
+  archetypes: ARCHETYPES,
+  archetypeIds: [...ARCHETYPE_IDS],
+  archetypeMenuForClassifier,
+  getArchetype: (id) => getArchetype(id as ArchetypeId),
+  decisionPresets: DECISION_PRESETS,
+};

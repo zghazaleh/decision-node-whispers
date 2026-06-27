@@ -11,6 +11,12 @@ import { partsToText, readMission, useMission } from "@/lib/mission-store";
 import { analyzeDecision } from "@/lib/analysis.functions";
 import { startRecording, type Recorder } from "@/lib/record-wav";
 import { createAmbient } from "@/lib/ambient";
+import { requireMissionEngine } from "@/lib/missions/registry";
+
+// The mission this route runs. To add more missions, create a new route
+// (or accept a route param) and pass a different id here.
+const MISSION_ID = "mission-01";
+const ENGINE = requireMissionEngine(MISSION_ID);
 
 
 
@@ -66,7 +72,11 @@ function Mission() {
   }, []);
 
   const transport = useMemo(
-    () => new DefaultChatTransport({ api: "/api/chat" }),
+    () =>
+      new DefaultChatTransport({
+        api: "/api/chat",
+        body: { missionId: MISSION_ID },
+      }),
     []
   );
 
@@ -149,7 +159,7 @@ function Mission() {
     await sendMessage({ text: trimmed });
   }
 
-  async function handleDecide(decision: string, reasoning: string, archetypeId?: ArchetypeId) {
+  async function handleDecide(decision: string, reasoning: string, archetypeId?: string) {
     if (!decision.trim()) return;
     setAnalyzing(true);
     try {
@@ -159,6 +169,7 @@ function Mission() {
       }));
       const analysis = await analyzeFn({
         data: {
+          missionId: MISSION_ID,
           decision: decision.trim(),
           reasoning: reasoning.trim(),
           transcript,
@@ -577,35 +588,9 @@ function QuickActions({
   );
 }
 
-import type { ArchetypeId } from "@/lib/missions/mission-01/outcomes";
-
-const DECISION_PRESETS: { label: string; text: string; archetypeId: ArchetypeId }[] = [
-  {
-    label: "Ship",
-    archetypeId: "ship_on_time",
-    text: "I walk into the boardroom and authorize the public release of ORION-9 at 8 AM, as planned.",
-  },
-  {
-    label: "Hold two weeks",
-    archetypeId: "hold_two_weeks",
-    text: "I walk into the boardroom and announce a two-week hold on the ORION-9 release to complete Amara's requested alignment review.",
-  },
-  {
-    label: "Narrow release",
-    archetypeId: "narrow_release",
-    text: "I authorize a restricted, gated release of ORION-9 to a small set of vetted partners while alignment continues a deeper red-team in parallel.",
-  },
-  {
-    label: "Indefinite pause",
-    archetypeId: "indefinite_pause",
-    text: "I tell the board I am pausing the ORION-9 release indefinitely until the deceptive-evaluation signal is understood and resolved.",
-  },
-  {
-    label: "Step down",
-    archetypeId: "step_down",
-    text: "I tell the board I cannot in good conscience authorize this release today, and I offer my resignation if they choose to ship without me.",
-  },
-];
+// Decision presets come from the mission engine so adding a new mission
+// only requires defining presets in its module — no UI changes here.
+const DECISION_PRESETS = ENGINE.decisionPresets;
 
 function DecideModal({
   analyzing,
@@ -614,11 +599,11 @@ function DecideModal({
 }: {
   analyzing: boolean;
   onClose: () => void;
-  onSubmit: (decision: string, reasoning: string, archetypeId?: ArchetypeId) => void;
+  onSubmit: (decision: string, reasoning: string, archetypeId?: string) => void;
 }) {
   const [decision, setDecision] = useState("");
   const [reasoning, setReasoning] = useState("");
-  const [archetypeId, setArchetypeId] = useState<ArchetypeId | undefined>();
+  const [archetypeId, setArchetypeId] = useState<string | undefined>();
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md px-4 animate-fade-in-slow">
