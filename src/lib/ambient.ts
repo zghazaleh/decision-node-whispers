@@ -3,6 +3,14 @@ import { getSoundtrack, type Soundtrack } from "./soundtracks";
 // HTMLAudio-based ambient player with smooth crossfades between mission
 // scores. Falls back gracefully if no track exists for a mission.
 
+export type AudioProfile = {
+  padFrequency?: number;
+  padDetune?: number;
+  filterBaseHz?: number;
+  filterLfoDepthHz?: number;
+  lfoRateHz?: number;
+};
+
 export type Ambient = {
   start: (missionId?: string) => Promise<void>;
   stop: () => void;
@@ -12,9 +20,12 @@ export type Ambient = {
   setPressure: (p: number) => void;
   /** Toggle a low synthesized sub-pulse heartbeat as stakes peak. */
   setHeartbeat: (active: boolean) => void;
+  /** Per-mission tuning of the WebAudio bed (pad freq, filter cutoff, LFO rate). */
+  setAudioProfile: (profile: AudioProfile) => void;
   isRunning: () => boolean;
   currentMission: () => string | null;
 };
+
 
 
 type Voice = {
