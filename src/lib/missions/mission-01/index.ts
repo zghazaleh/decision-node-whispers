@@ -6,7 +6,7 @@
  */
 
 import type { MissionEngine, DecisionPreset } from "@/lib/missions/types";
-import { canonGroundTruthBlock } from "./canon";
+import { canonGroundTruthBlock, CANON } from "./canon";
 import {
   ARCHETYPES,
   ARCHETYPE_IDS,
@@ -121,4 +121,5 @@ export const missionOneEngine: MissionEngine = {
   archetypeMenuForClassifier,
   getArchetype: (id) => getArchetype(id as ArchetypeId),
   decisionPresets: DECISION_PRESETS,
+  canon: CANON as unknown as Record<string, unknown>,
 };
