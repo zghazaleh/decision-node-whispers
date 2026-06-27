@@ -104,6 +104,10 @@ function Analysis() {
             delay={2.45}
           />
 
+          {a.reasoningAssessment && (
+            <ReasoningAssessment data={a.reasoningAssessment} />
+          )}
+
           <div
             className="animate-fade-up border-t border-foreground/15 pt-12"
             style={{ animationDelay: "2.7s" }}
@@ -115,6 +119,7 @@ function Analysis() {
               {a.closing}
             </p>
           </div>
+
         </section>
 
         {/* Coda */}
