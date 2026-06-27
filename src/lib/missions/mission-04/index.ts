@@ -140,7 +140,7 @@ export const missionFourEngine: MissionEngine = {
     dustOpacityScale: 1.2,
     padFrequency: 44,
     filterBaseHz: 1300,
-    filterLfoDepthHz: 1100,
+    filterLfoDepthHz: 400,
     lfoRateHz: 0.035,
   },
 
