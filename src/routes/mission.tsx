@@ -131,21 +131,55 @@ function Mission() {
     }
   }
 
+  // Pointer-driven parallax: subtle camera drift toward the cursor.
+  const sceneRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = sceneRef.current;
+    if (!el) return;
+    let raf = 0;
+    let tx = 0, ty = 0;
+    const onMove = (e: PointerEvent) => {
+      const nx = (e.clientX / window.innerWidth - 0.5) * 2;  // -1..1
+      const ny = (e.clientY / window.innerHeight - 0.5) * 2;
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        tx += (nx * 14 - tx) * 0.08;
+        ty += (ny * 10 - ty) * 0.08;
+        el.style.setProperty("--px", `${tx.toFixed(2)}px`);
+        el.style.setProperty("--py", `${ty.toFixed(2)}px`);
+      });
+    };
+    window.addEventListener("pointermove", onMove, { passive: true });
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      cancelAnimationFrame(raf);
+    };
+  }, []);
+
   return (
     <main className="relative h-[100dvh] w-screen overflow-hidden bg-black text-foreground">
       {/* Cinematic background */}
       <div
+        ref={sceneRef}
         className={`absolute inset-0 transition-opacity duration-[3000ms] ease-out ${
           awakening ? "opacity-0" : "opacity-100"
         }`}
+        style={{ ["--px" as never]: "0px", ["--py" as never]: "0px" }}
       >
-        <img
-          src={sceneOffice}
-          alt=""
-          aria-hidden
-          className="h-full w-full object-cover"
-          style={{ filter: "saturate(0.85) contrast(1.05)" }}
-        />
+        <div
+          className="absolute inset-0 animate-scene-sway"
+          style={{ transform: "translate3d(var(--px), var(--py), 0)" }}
+        >
+          <img
+            src={sceneOffice}
+            alt=""
+            aria-hidden
+            className="h-full w-full object-cover animate-ken-burns"
+            style={{ filter: "saturate(0.88) contrast(1.06)" }}
+          />
+        </div>
+        <div className="scene-light" aria-hidden />
+        <div className="scene-dust" aria-hidden />
         <div
           className="absolute inset-0"
           style={{
@@ -156,6 +190,7 @@ function Mission() {
         <div className="film-grain" aria-hidden />
         <div className="vignette" aria-hidden />
       </div>
+
 
       {/* Awakening overlay — pure black with subtle horizontal slits "eyelids opening" */}
       {awakening && (
