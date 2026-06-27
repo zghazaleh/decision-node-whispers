@@ -397,6 +397,7 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
       {/* Decide modal */}
       {decideOpen && (
         <DecideModal
+          presets={ENGINE.decisionPresets}
           analyzing={analyzing}
           onClose={() => !analyzing && setDecideOpen(false)}
           onSubmit={handleDecide}
