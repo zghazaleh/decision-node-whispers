@@ -5,6 +5,7 @@ import type { DecisionAnalysis } from "@/lib/analysis.functions";
 import { readMission, useMission, type SavedMission } from "@/lib/mission-store";
 import { readProfile, type DecisionProfile } from "@/lib/decision-profile";
 import { DecisionProfileCard } from "@/components/DecisionProfileCard";
+import { NoticedRail } from "@/components/NoticedRail";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { getMissionPercentile, type MissionPercentile } from "@/lib/mission-stats.functions";
 import sceneCosmos from "@/assets/scene-cosmos.jpg";
