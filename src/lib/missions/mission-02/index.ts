@@ -126,6 +126,23 @@ export const missionTwoEngine: MissionEngine = {
     filter: "saturate(0.65) contrast(1.12) hue-rotate(-8deg)",
     mood: "Claustrophobic, cold. The room interrogates you back.",
   },
+  atmosphere: {
+    // Fluorescent green-cyan hum. Tight, motionless. Pulse is a brief flicker.
+    hazeBackground:
+      "radial-gradient(45% 35% at 50% 40%, oklch(0.78 0.06 170 / 0.16), transparent 75%), radial-gradient(35% 28% at 70% 65%, oklch(0.70 0.05 200 / 0.12), transparent 75%)",
+    pulseBackground:
+      "linear-gradient(95deg, transparent 42%, oklch(0.90 0.05 170 / 0.18) 50%, transparent 58%)",
+    pulseDuration: 17,
+    kenBurnsDuration: 56, // barely moves — feels nailed-down
+    chromaBreatheDuration: 13,
+    dustOpacityScale: 0.25,
+    padFrequency: 48,
+    padDetune: 1.008,
+    filterBaseHz: 1200,
+    filterLfoDepthHz: 500,
+    lfoRateHz: 0.07,
+  },
+
 
   archetypes: ARCHETYPES,
   archetypeIds: [...ARCHETYPE_IDS],

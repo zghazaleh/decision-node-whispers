@@ -37,6 +37,41 @@ export type MissionScene = {
   mood?: string;
 };
 
+/**
+ * Per-mission tuning for the shared scene effects + ambient audio bed.
+ * Every field is optional; sensible defaults live in mission.$id.tsx and ambient.ts.
+ * Values are applied on top of the shared layers so missions feel distinct
+ * without forking the rendering code.
+ */
+export type MissionAtmosphere = {
+  /** CSS background for the .scene-haze layer (radial-gradients, low alpha). */
+  hazeBackground?: string;
+  /** CSS background for the .scene-pulse sweep (linear-gradient). */
+  pulseBackground?: string;
+  /** Seconds between pulse sweeps. Default 22. */
+  pulseDuration?: number;
+  /** Ken-Burns loop duration in seconds. Default 38. */
+  kenBurnsDuration?: number;
+  /** Multiplier on the scene-dust layer opacity (0..1.5). Default 1. */
+  dustOpacityScale?: number;
+  /** Chromatic-breathe loop duration in seconds. Default 18. */
+  chromaBreatheDuration?: number;
+
+  // ── Audio bed ────────────────────────────────────────────────────────
+  /** Sub-pad fundamental in Hz. Default 55. */
+  padFrequency?: number;
+  /** Detune ratio for the second pad oscillator. Default 1.005. */
+  padDetune?: number;
+  /** Low-pass cutoff centre in Hz. Default 1600. */
+  filterBaseHz?: number;
+  /** LFO modulation depth in Hz. Default 800. */
+  filterLfoDepthHz?: number;
+  /** LFO rate in Hz. Default 0.05 (20s period). */
+  lfoRateHz?: number;
+};
+
+
+
 
 
 export type MissionEngine = {
@@ -47,6 +82,9 @@ export type MissionEngine = {
   opening: MissionOpening;
   /** Cinematic background scene shown behind the dialogue. */
   scene: MissionScene;
+  /** Optional per-mission tuning of the shared scene FX + audio bed. */
+  atmosphere?: MissionAtmosphere;
+
 
   /** All archetypes for this mission, keyed by id. */
   archetypes: Record<string, Archetype>;

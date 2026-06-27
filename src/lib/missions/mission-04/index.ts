@@ -128,6 +128,23 @@ export const missionFourEngine: MissionEngine = {
     filter: "saturate(0.8) contrast(1.08)",
     mood: "Civic, heavy. History waiting in an empty chamber.",
   },
+  atmosphere: {
+    // Warm amber lamp + cold thunderstorm. Pulse is a distant lightning flash.
+    hazeBackground:
+      "radial-gradient(55% 45% at 30% 60%, oklch(0.55 0.10 60 / 0.22), transparent 70%), radial-gradient(45% 40% at 80% 25%, oklch(0.50 0.08 250 / 0.18), transparent 70%)",
+    pulseBackground:
+      "linear-gradient(90deg, transparent 30%, oklch(0.95 0.04 250 / 0.45) 48%, oklch(0.92 0.06 80 / 0.30) 52%, transparent 70%)",
+    pulseDuration: 14, // lightning more frequent than other missions
+    kenBurnsDuration: 42,
+    chromaBreatheDuration: 20,
+    dustOpacityScale: 1.2,
+    padFrequency: 44,
+    padDetune: 1.003,
+    filterBaseHz: 1300,
+    filterLfoDepthHz: 1100,
+    lfoRateHz: 0.035,
+  },
+
 
   archetypes: ARCHETYPES,
   archetypeIds: [...ARCHETYPE_IDS],

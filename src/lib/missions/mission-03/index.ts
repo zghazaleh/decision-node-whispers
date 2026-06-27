@@ -121,6 +121,21 @@ export const missionThreeEngine: MissionEngine = {
     filter: "saturate(0.95) contrast(1.05)",
     mood: "Vast, quiet. A planet watching a small machine fall.",
   },
+  atmosphere: {
+    // Mission Control blue with warm amber console-glow pulse.
+    hazeBackground:
+      "radial-gradient(50% 40% at 30% 55%, oklch(0.55 0.08 250 / 0.22), transparent 70%), radial-gradient(45% 35% at 75% 40%, oklch(0.60 0.06 30 / 0.14), transparent 70%)",
+    pulseBackground:
+      "linear-gradient(100deg, transparent 35%, oklch(0.85 0.10 75 / 0.32) 50%, transparent 65%)",
+    pulseDuration: 22,
+    kenBurnsDuration: 38,
+    chromaBreatheDuration: 18,
+    dustOpacityScale: 1.0,
+    padFrequency: 55,
+    filterBaseHz: 1600,
+    lfoRateHz: 0.05,
+  },
+
 
   archetypes: ARCHETYPES,
   archetypeIds: [...ARCHETYPE_IDS],

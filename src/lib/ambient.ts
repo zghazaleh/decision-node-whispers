@@ -3,6 +3,14 @@ import { getSoundtrack, type Soundtrack } from "./soundtracks";
 // HTMLAudio-based ambient player with smooth crossfades between mission
 // scores. Falls back gracefully if no track exists for a mission.
 
+export type AudioProfile = {
+  padFrequency?: number;
+  padDetune?: number;
+  filterBaseHz?: number;
+  filterLfoDepthHz?: number;
+  lfoRateHz?: number;
+};
+
 export type Ambient = {
   start: (missionId?: string) => Promise<void>;
   stop: () => void;
@@ -12,9 +20,12 @@ export type Ambient = {
   setPressure: (p: number) => void;
   /** Toggle a low synthesized sub-pulse heartbeat as stakes peak. */
   setHeartbeat: (active: boolean) => void;
+  /** Per-mission tuning of the WebAudio bed (pad freq, filter cutoff, LFO rate). */
+  setAudioProfile: (profile: AudioProfile) => void;
   isRunning: () => boolean;
   currentMission: () => string | null;
 };
+
 
 
 type Voice = {
@@ -51,6 +62,17 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
   let stopped = true;
   let pendingMission: string | null = initialMissionId;
   let pressure = 0; // 0..1
+
+  // Live audio profile — defaults match the original mission-03 bed; can be
+  // overridden per-mission via setAudioProfile().
+  const profile: Required<AudioProfile> = {
+    padFrequency: 55,
+    padDetune: 1.005,
+    filterBaseHz: 1600,
+    filterLfoDepthHz: 800,
+    lfoRateHz: 0.05,
+  };
+
 
   // Shared WebAudio graph ─ used by heartbeat synth, the LFO-modulated low-pass
   // filter on the music voice, and the sub-pad that swells with pressure.
@@ -94,21 +116,22 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
         padOscB = ctx.createOscillator();
         padOscA.type = "sine";
         padOscB.type = "sine";
-        padOscA.frequency.value = 55;
-        padOscB.frequency.value = 55 * 1.005; // gentle beating
+        padOscA.frequency.value = profile.padFrequency;
+        padOscB.frequency.value = profile.padFrequency * profile.padDetune;
         padOscA.connect(padGain);
         padOscB.connect(padGain);
         padOscA.start();
         padOscB.start();
 
-        // Shared LFO for filter cutoff modulation. ~0.05Hz = 20s cycle.
+        // Shared LFO for filter cutoff modulation.
         lfo = ctx.createOscillator();
         lfo.type = "sine";
-        lfo.frequency.value = 0.05;
+        lfo.frequency.value = profile.lfoRateHz;
         lfoDepth = ctx.createGain();
-        lfoDepth.gain.value = 800; // ±800Hz around the static cutoff
+        lfoDepth.gain.value = profile.filterLfoDepthHz;
         lfo.connect(lfoDepth);
         lfo.start();
+
       } catch { return null; }
     }
     return ctx;
@@ -120,7 +143,7 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
       const src = ctx.createMediaElementSource(v.audio);
       const filt = ctx.createBiquadFilter();
       filt.type = "lowpass";
-      filt.frequency.value = 1600;
+      filt.frequency.value = profile.filterBaseHz;
       filt.Q.value = 0.7;
       lfoDepth.connect(filt.frequency); // LFO modulates cutoff
       const g = ctx.createGain();
@@ -334,6 +357,27 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
         stopHeartbeat();
       }
     },
+
+    setAudioProfile(next: AudioProfile) {
+      if (next.padFrequency !== undefined) profile.padFrequency = next.padFrequency;
+      if (next.padDetune !== undefined) profile.padDetune = next.padDetune;
+      if (next.filterBaseHz !== undefined) profile.filterBaseHz = next.filterBaseHz;
+      if (next.filterLfoDepthHz !== undefined) profile.filterLfoDepthHz = next.filterLfoDepthHz;
+      if (next.lfoRateHz !== undefined) profile.lfoRateHz = next.lfoRateHz;
+      // Apply live, with short ramps so the change is inaudible.
+      if (ctx) {
+        const now = ctx.currentTime;
+        const ramp = 1.5;
+        if (padOscA) padOscA.frequency.linearRampToValueAtTime(profile.padFrequency, now + ramp);
+        if (padOscB)
+          padOscB.frequency.linearRampToValueAtTime(profile.padFrequency * profile.padDetune, now + ramp);
+        if (lfo) lfo.frequency.linearRampToValueAtTime(profile.lfoRateHz, now + ramp);
+        if (lfoDepth) lfoDepth.gain.linearRampToValueAtTime(profile.filterLfoDepthHz, now + ramp);
+        if (current?.filter)
+          current.filter.frequency.linearRampToValueAtTime(profile.filterBaseHz, now + ramp);
+      }
+    },
+
 
   };
 }

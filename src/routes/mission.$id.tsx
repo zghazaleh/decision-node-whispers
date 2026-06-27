@@ -110,6 +110,8 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
   });
   useEffect(() => {
     if (!ambientRef.current) ambientRef.current = createAmbient(MISSION_ID);
+    if (ENGINE.atmosphere) ambientRef.current.setAudioProfile(ENGINE.atmosphere);
+
     const a = ambientRef.current;
     const onGesture = async () => {
       if (!a.isRunning() && soundOn) {
@@ -337,7 +339,12 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
       >
         <div
           className="absolute inset-0 animate-scene-sway animate-chroma-breathe"
-          style={{ transform: "translate3d(var(--px), var(--py), 0)" }}
+          style={{
+            transform: "translate3d(var(--px), var(--py), 0)",
+            animationDuration: ENGINE.atmosphere?.chromaBreatheDuration
+              ? `${ENGINE.atmosphere.chromaBreatheDuration}s`
+              : undefined,
+          }}
 
         >
           <img
@@ -348,14 +355,41 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
             style={{
               filter: `${ENGINE.scene.filter ?? "saturate(0.88) contrast(1.06)"} ${filterShift}`,
               transition: "filter 8000ms linear",
+              animationDuration: ENGINE.atmosphere?.kenBurnsDuration
+                ? `${ENGINE.atmosphere.kenBurnsDuration}s`
+                : undefined,
             }}
           />
 
         </div>
-        <div className="scene-haze" aria-hidden />
+        <div
+          className="scene-haze"
+          aria-hidden
+          style={{ background: ENGINE.atmosphere?.hazeBackground }}
+        />
         <div className="scene-light" aria-hidden />
-        <div className="scene-dust" aria-hidden />
-        <div className="scene-pulse" aria-hidden />
+        <div
+          className="scene-dust"
+          aria-hidden
+          style={{
+            opacity:
+              ENGINE.atmosphere?.dustOpacityScale !== undefined
+                ? 0.5 * ENGINE.atmosphere.dustOpacityScale
+                : undefined,
+          }}
+        />
+        <div
+          className="scene-pulse"
+          aria-hidden
+          style={{
+            background: ENGINE.atmosphere?.pulseBackground,
+            animationDuration: ENGINE.atmosphere?.pulseDuration
+              ? `${ENGINE.atmosphere.pulseDuration}s`
+              : undefined,
+          }}
+        />
+
+
 
         {/* Base bottom-weighted shadow — deepens with pressure */}
         <div
