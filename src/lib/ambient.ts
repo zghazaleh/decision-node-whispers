@@ -1,70 +1,136 @@
-import { getSoundtrack } from "./soundtracks";
+import { getSoundtrack, type Soundtrack } from "./soundtracks";
 
-// HTMLAudio-based ambient player: loops a mission-specific score and
-// crossfades in/out. Falls back gracefully if the asset can't load.
+// HTMLAudio-based ambient player with smooth crossfades between mission
+// scores. Falls back gracefully if no track exists for a mission.
 
 export type Ambient = {
-  start: () => Promise<void>;
+  start: (missionId?: string) => Promise<void>;
   stop: () => void;
+  switchTo: (missionId: string | null, fadeMs?: number) => Promise<void>;
   setMuted: (m: boolean) => void;
   isRunning: () => boolean;
+  currentMission: () => string | null;
 };
 
-export function createAmbient(missionId = "mission-01"): Ambient {
-  const track = getSoundtrack(missionId);
-  let audio: HTMLAudioElement | null = null;
+type Voice = {
+  audio: HTMLAudioElement;
+  track: Soundtrack;
+  missionId: string;
+  fadeRaf: number | null;
+};
+
+function rampVolume(v: Voice, target: number, ms: number, onDone?: () => void) {
+  if (v.fadeRaf) cancelAnimationFrame(v.fadeRaf);
+  const start = performance.now();
+  const from = v.audio.volume;
+  const step = (now: number) => {
+    const t = Math.min(1, (now - start) / ms);
+    v.audio.volume = from + (target - from) * t;
+    if (t < 1) {
+      v.fadeRaf = requestAnimationFrame(step);
+    } else {
+      v.fadeRaf = null;
+      onDone?.();
+    }
+  };
+  v.fadeRaf = requestAnimationFrame(step);
+}
+
+export function createAmbient(initialMissionId: string | null = null): Ambient {
+  let current: Voice | null = null;
   let muted = false;
   let stopped = true;
-  let fadeRaf: number | null = null;
+  let pendingMission: string | null = initialMissionId;
 
-  function rampTo(target: number, ms: number) {
-    if (!audio) return;
-    if (fadeRaf) cancelAnimationFrame(fadeRaf);
-    const start = performance.now();
-    const from = audio.volume;
-    const step = (now: number) => {
-      if (!audio) return;
-      const t = Math.min(1, (now - start) / ms);
-      audio.volume = from + (target - from) * t;
-      if (t < 1) fadeRaf = requestAnimationFrame(step);
-    };
-    fadeRaf = requestAnimationFrame(step);
+  async function playMission(missionId: string, fadeInMs: number): Promise<Voice | null> {
+    const track = getSoundtrack(missionId);
+    if (!track) return null;
+    const audio = new Audio(track.url);
+    audio.loop = true;
+    audio.preload = "auto";
+    audio.crossOrigin = "anonymous";
+    audio.volume = 0;
+    try {
+      await audio.play();
+    } catch {
+      return null;
+    }
+    const v: Voice = { audio, track, missionId, fadeRaf: null };
+    rampVolume(v, muted ? 0 : track.volume, fadeInMs);
+    return v;
+  }
+
+  function disposeVoice(v: Voice, fadeMs: number) {
+    rampVolume(v, 0, fadeMs, () => {
+      try {
+        v.audio.pause();
+        v.audio.src = "";
+        v.audio.load();
+      } catch {
+        /* noop */
+      }
+    });
   }
 
   return {
     isRunning: () => !stopped,
-    async start() {
-      if (!stopped || !track) return;
+    currentMission: () => current?.missionId ?? null,
+
+    async start(missionId?: string) {
       stopped = false;
-      audio = new Audio(track.url);
-      audio.loop = true;
-      audio.preload = "auto";
-      audio.crossOrigin = "anonymous";
-      audio.volume = 0;
-      try {
-        await audio.play();
-      } catch (e) {
-        // autoplay blocked — caller must start from a user gesture
-        stopped = true;
-        audio = null;
-        throw e;
+      const target = missionId ?? pendingMission;
+      if (!target) return;
+      if (current?.missionId === target) return;
+      const next = await playMission(target, 3500);
+      if (!next) return;
+      if (current) disposeVoice(current, 1200);
+      current = next;
+      pendingMission = target;
+    },
+
+    async switchTo(missionId: string | null, fadeMs = 1400) {
+      if (stopped) {
+        // Remember the desired track for whenever audio is unlocked.
+        pendingMission = missionId;
+        return;
       }
-      rampTo(muted ? 0 : track.volume, 4000);
+      pendingMission = missionId;
+      if (missionId === null) {
+        if (current) {
+          const c = current;
+          current = null;
+          disposeVoice(c, fadeMs);
+        }
+        return;
+      }
+      if (current?.missionId === missionId) {
+        // already playing this track — just ensure volume is up
+        if (!muted) rampVolume(current, current.track.volume, fadeMs);
+        return;
+      }
+      const next = await playMission(missionId, fadeMs);
+      if (!next) return;
+      // If during the await we switched again, dispose the just-created voice.
+      if (pendingMission !== missionId) {
+        disposeVoice(next, 300);
+        return;
+      }
+      if (current) disposeVoice(current, fadeMs);
+      current = next;
     },
+
     stop() {
-      if (stopped || !audio) return;
       stopped = true;
-      const a = audio;
-      rampTo(0, 800);
-      setTimeout(() => {
-        try { a.pause(); a.src = ""; a.load(); } catch { /* noop */ }
-      }, 900);
-      audio = null;
+      if (current) {
+        disposeVoice(current, 600);
+        current = null;
+      }
     },
+
     setMuted(m: boolean) {
       muted = m;
-      if (!audio || !track) return;
-      rampTo(m ? 0 : track.volume, 600);
+      if (!current) return;
+      rampVolume(current, m ? 0 : current.track.volume, 500);
     },
   };
 }
