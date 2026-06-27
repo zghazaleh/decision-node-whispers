@@ -2,6 +2,8 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { DecisionAnalysis } from "@/lib/analysis.functions";
 import { readMission, useMission, type SavedMission } from "@/lib/mission-store";
+import { readProfile, type DecisionProfile } from "@/lib/decision-profile";
+import { DecisionProfileCard } from "@/components/DecisionProfileCard";
 import sceneCosmos from "@/assets/scene-cosmos.jpg";
 
 export const Route = createFileRoute("/analysis")({
@@ -18,6 +20,7 @@ export const Route = createFileRoute("/analysis")({
 function Analysis() {
   const navigate = useNavigate();
   const [mission, setMission] = useState<SavedMission | null>(null);
+  const [profile, setProfile] = useState<DecisionProfile | null>(null);
   const { reset } = useMission(mission?.missionId ?? "mission-01");
 
   useEffect(() => {
@@ -27,6 +30,7 @@ function Analysis() {
       return;
     }
     setMission(m);
+    setProfile(readProfile());
   }, [navigate]);
 
   if (!mission?.analysis) return null;
@@ -124,6 +128,8 @@ function Analysis() {
               {a.closing}
             </p>
           </div>
+
+          {profile && <DecisionProfileCard profile={profile} delay={2.9} />}
 
         </section>
 
