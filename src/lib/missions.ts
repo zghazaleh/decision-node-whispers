@@ -140,4 +140,21 @@ export const MISSIONS: MissionMeta[] = [
     creator: "House Edition",
     version: "v1.0",
   },
+  {
+    id: "mission-08",
+    number: "08",
+    codename: "Eighty Names",
+    title: "Eighty Names",
+    logline:
+      "Your oldest friend softened the number. The device is in the field. The records request is pending.",
+    status: "available",
+    duration: "20–40 min",
+    tone: "Intimate · Late-night thriller",
+    location: "Veyra Medical, empty office",
+    year: "Present day",
+    category: "Ethics",
+    difficulty: 5,
+    creator: "House Edition",
+    version: "v1.0",
+  },
 ];
