@@ -876,5 +876,68 @@ function DecideModal({
   );
 }
 
+function MicButton({
+  disabled,
+  onTranscribed,
+}: {
+  disabled?: boolean;
+  onTranscribed: (text: string) => void;
+}) {
+  const [recording, setRecording] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const recRef = useRef<Recorder | null>(null);
+
+  async function start() {
+    if (disabled || busy) return;
+    try {
+      const rec = await startRecording();
+      recRef.current = rec;
+      setRecording(true);
+    } catch (e) {
+      console.error("mic error", e);
+      toast("Microphone unavailable.", { description: "Check browser permissions." });
+    }
+  }
+
+  async function stop() {
+    const rec = recRef.current;
+    if (!rec) return;
+    recRef.current = null;
+    setRecording(false);
+    setBusy(true);
+    try {
+      const blob = await rec.stop();
+      if (blob.size < 1024) return;
+      const fd = new FormData();
+      fd.append("file", blob, "recording.wav");
+      const res = await fetch("/api/transcribe", { method: "POST", body: fd });
+      if (!res.ok) throw new Error(await res.text());
+      const data = await res.json();
+      const text = (data?.text ?? "").trim();
+      if (text) onTranscribed(text);
+    } catch (e) {
+      console.error("transcribe error", e);
+      toast("Couldn't catch that.", { description: "Try again." });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={recording ? stop : start}
+      disabled={disabled || busy}
+      aria-label={recording ? "Stop recording" : "Record"}
+      className={`shrink-0 p-2 transition-colors disabled:opacity-20 disabled:cursor-not-allowed ${
+        recording ? "text-accent animate-pulse-soft" : "text-foreground/50 hover:text-foreground"
+      }`}
+    >
+      {recording ? <Square className="h-4 w-4 fill-current" /> : <Mic className="h-4 w-4" />}
+    </button>
+  );
+}
+
+
 
 
