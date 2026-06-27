@@ -594,3 +594,94 @@ function TimelineScrubber({ timeline }: { timeline: DecisionAnalysis["timeline"]
     </div>
   );
 }
+
+function PossibleBiasesList({
+  biases,
+}: {
+  biases: NonNullable<DecisionAnalysis["reasoningAssessment"]>["possibleBiases"];
+}) {
+  return (
+    <ul className="space-y-6">
+      {biases.map((b, i) => (
+        <li key={i} className="border-l-2 border-foreground/20 pl-5">
+          <p className="text-[0.6rem] tracking-[0.3em] uppercase text-accent/70 mb-2">
+            Possibly {b.name}
+          </p>
+          <p className="font-display text-base sm:text-lg leading-snug text-foreground/95 text-pretty">
+            {b.gentleExplanation}
+          </p>
+          <p className="mt-2 text-xs text-foreground/55 leading-relaxed text-pretty">
+            {b.evidence}
+          </p>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function LongTermConsequences({
+  timeline,
+}: {
+  timeline: DecisionAnalysis["timeline"];
+}) {
+  // The later half of the timeline reads as second-order effects.
+  const tail = timeline.slice(Math.ceil(timeline.length / 2));
+  const shown = tail.length > 0 ? tail : timeline;
+  return (
+    <div className="space-y-6">
+      <p className="text-sm text-foreground/55 leading-relaxed">
+        What unfolds downstream of this choice — beyond the immediate aftermath.
+      </p>
+      <ol className="space-y-5">
+        {shown.map((t, i) => (
+          <li key={i} className="border-l-2 border-accent/30 pl-5">
+            <p className="text-[0.6rem] tracking-[0.35em] uppercase text-foreground/55 mb-1.5">
+              {t.beat}
+            </p>
+            <p className="font-display text-lg leading-snug text-foreground/95 text-pretty">
+              {t.consequence}
+            </p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
+
+function CommunityComparison({ percentile }: { percentile: MissionPercentile }) {
+  const fmt = (s: number | null) => {
+    if (s === null) return "—";
+    if (s < 60) return `${s}s`;
+    const m = Math.floor(s / 60);
+    const r = s % 60;
+    return r ? `${m}m ${r}s` : `${m}m`;
+  };
+  return (
+    <div
+      className="animate-fade-up border-t border-foreground/15 pt-12 text-center"
+      style={{ animationDelay: "2.7s" }}
+    >
+      <p className="text-[0.6rem] tracking-[0.5em] uppercase text-accent/80 mb-4">
+        Community context
+      </p>
+      <p className="text-xs text-foreground/45 max-w-md mx-auto leading-relaxed mb-6">
+        How your preparation compared to others who opened this file.
+        Not a ranking — a mirror.
+      </p>
+      {typeof percentile.investigationPercentile === "number" && (
+        <p className="font-display text-xl sm:text-2xl text-foreground/95 leading-snug max-w-xl mx-auto text-pretty">
+          You investigated longer than{" "}
+          <span className="text-accent tabular-nums">
+            {percentile.investigationPercentile}%
+          </span>{" "}
+          of players.
+        </p>
+      )}
+      <p className="mt-4 text-[0.6rem] tracking-[0.35em] uppercase text-foreground/40">
+        Community avg investigation: {fmt(percentile.avgInvestigationSeconds)}
+        {" · "}
+        {percentile.plays.toLocaleString()} plays
+      </p>
+    </div>
+  );
+}
