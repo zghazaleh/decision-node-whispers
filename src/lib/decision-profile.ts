@@ -4,27 +4,27 @@ import type { DecisionAnalysis } from "@/lib/analysis.functions";
 const KEY = "decision-node:profile";
 
 export const DIMENSIONS = [
-  "curiosity",
   "strategicThinking",
-  "adaptability",
-  "confidenceCalibration",
+  "curiosity",
   "informationGathering",
+  "confidenceCalibration",
+  "adaptability",
+  "negotiation",
   "longTermThinking",
   "biasResistance",
-  "patternRecognition",
 ] as const;
 
 export type Dimension = (typeof DIMENSIONS)[number];
 
 export const DIMENSION_LABELS: Record<Dimension, string> = {
-  curiosity: "Curiosity",
   strategicThinking: "Strategic Thinking",
-  adaptability: "Adaptability",
-  confidenceCalibration: "Confidence Calibration",
+  curiosity: "Curiosity",
   informationGathering: "Information Gathering",
-  longTermThinking: "Long-term Thinking",
+  confidenceCalibration: "Confidence Calibration",
+  adaptability: "Adaptability",
+  negotiation: "Negotiation",
+  longTermThinking: "Second-Order Thinking",
   biasResistance: "Bias Resistance",
-  patternRecognition: "Pattern Recognition",
 };
 
 export type MissionContribution = {

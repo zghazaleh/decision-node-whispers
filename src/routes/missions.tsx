@@ -1,23 +1,26 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
 import { MISSIONS, type MissionMeta } from "@/lib/missions";
 import { createAmbient } from "@/lib/ambient";
 import { getSoundtrack } from "@/lib/soundtracks";
+import { getAllMissionStats, type MissionStats } from "@/lib/mission-stats.functions";
 
 export const Route = createFileRoute("/missions")({
   head: () => ({
     meta: [
-      { title: "Missions — Decision Node" },
+      { title: "Case Files — Decision Node" },
       {
         name: "description",
         content:
-          "Choose a mission. Each one places you in a critical moment before a consequential decision.",
+          "Browse the archive of cases. Each one drops you into a single moment before an irreversible decision.",
       },
-      { property: "og:title", content: "Missions — Decision Node" },
+      { property: "og:title", content: "Case Files — Decision Node" },
       {
         property: "og:description",
         content:
-          "Choose a mission. Each one places you in a critical moment before a consequential decision.",
+          "Browse the archive of cases. Each one drops you into a single moment before an irreversible decision.",
       },
     ],
   }),
@@ -31,14 +34,17 @@ function MissionsPage() {
   const [entering, setEntering] = useState(false);
   const [armed, setArmed] = useState(false);
 
-  // Respect the global mute pref set on the mission screen.
+  const fetchStats = useServerFn(getAllMissionStats);
+  const { data: stats } = useQuery({
+    queryKey: ["mission-stats"],
+    queryFn: () => fetchStats(),
+    staleTime: 60_000,
+  });
+
   const soundOn = (() => {
     try { return localStorage.getItem("dn:sound") !== "off"; } catch { return true; }
   })();
 
-  // Single ambient instance for this page. Browsers gate autoplay behind a
-  // user gesture, so we arm on first pointerdown/keydown and then let hover
-  // previews crossfade between tracks.
   const ambientRef = useRef<ReturnType<typeof createAmbient> | null>(null);
   useEffect(() => {
     if (!ambientRef.current) ambientRef.current = createAmbient(null);
@@ -47,10 +53,6 @@ function MissionsPage() {
     const arm = async () => {
       if (armed) return;
       try {
-        // Start silent (no mission), then let hover decide what to play.
-        // We need to call start() in the gesture; pass a known track so the
-        // <audio> element is allowed to play. If nothing is hovered, we
-        // immediately fade it back out.
         await a.start("mission-01");
         if (!hovered) await a.switchTo(null, 600);
         setArmed(true);
@@ -66,7 +68,6 @@ function MissionsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Crossfade ambient to whichever card is hovered/selected.
   useEffect(() => {
     const a = ambientRef.current;
     if (!a || !armed) return;
@@ -83,7 +84,6 @@ function MissionsPage() {
     if (entering) return;
     setSelected(m.id);
     setEntering(true);
-    // Let the selected track swell, then leave it playing on the mission page.
     setTimeout(() => navigate({ to: "/mission/$id", params: { id: m.id } }), 900);
   }
 
@@ -110,7 +110,6 @@ function MissionsPage() {
       <div className="vignette" aria-hidden />
       <div className="film-grain" aria-hidden />
 
-      {/* Cinematic "entering" curtain when launching a mission */}
       <div
         className={`pointer-events-none fixed inset-0 z-40 bg-black transition-opacity duration-700 ${
           entering ? "opacity-100" : "opacity-0"
@@ -119,7 +118,6 @@ function MissionsPage() {
       />
 
       <section className="relative z-10 mx-auto flex min-h-screen w-full max-w-6xl flex-col px-6 py-16 sm:px-10 sm:py-24">
-        {/* Header */}
         <header className="mb-16 flex items-start justify-between">
           <Link
             to="/"
@@ -128,24 +126,23 @@ function MissionsPage() {
             ← Decision Node
           </Link>
           <p className="text-[0.6rem] tracking-[0.4em] uppercase text-muted-foreground/70">
-            {MISSIONS.length} Missions
+            Archive · {MISSIONS.length} Case Files
           </p>
         </header>
 
         <div className="mb-16 max-w-2xl animate-fade-up">
           <p className="text-[0.65rem] tracking-[0.5em] uppercase text-muted-foreground mb-6">
-            Missions
+            Case Files
           </p>
           <h1 className="font-display text-5xl sm:text-6xl md:text-7xl leading-[0.95] text-foreground/95 text-balance">
-            Choose a mission
+            Open a case
           </h1>
           <p className="mt-8 max-w-lg text-base leading-relaxed text-muted-foreground text-pretty">
-            Each mission places you in a critical moment. The context is
-            incomplete. The stakes are real. You still have to choose.
+            Each file places you in a single moment. The context is incomplete.
+            The stakes are real. You still have to choose.
           </p>
         </div>
 
-        {/* Mission grid */}
         <ul className="grid gap-6 sm:grid-cols-2">
           {MISSIONS.map((m, i) => (
             <li
@@ -155,6 +152,7 @@ function MissionsPage() {
             >
               <MissionCard
                 mission={m}
+                stats={stats?.[m.id]}
                 hovered={hovered === m.id}
                 dimmed={selected !== null && selected !== m.id}
                 selected={selected === m.id}
@@ -167,7 +165,7 @@ function MissionsPage() {
 
         <footer className="mt-20 flex items-center justify-between text-[0.6rem] tracking-[0.4em] uppercase text-muted-foreground/60">
           <span>Headphones recommended</span>
-          <span>More missions coming</span>
+          <span>Community archive · open to contributors soon</span>
         </footer>
       </section>
     </main>
@@ -176,6 +174,7 @@ function MissionsPage() {
 
 function MissionCard({
   mission,
+  stats,
   hovered,
   dimmed,
   selected,
@@ -183,6 +182,7 @@ function MissionCard({
   onSelect,
 }: {
   mission: MissionMeta;
+  stats?: MissionStats;
   hovered: boolean;
   dimmed: boolean;
   selected: boolean;
@@ -192,10 +192,10 @@ function MissionCard({
   const available = mission.status === "available";
   const statusLabel =
     mission.status === "available"
-      ? "Available"
+      ? "Open"
       : mission.status === "classified"
       ? "Classified"
-      : "Locked";
+      : "Sealed";
 
   return (
     <button
@@ -210,9 +210,8 @@ function MissionCard({
           ? "hover:border-foreground/45 hover:bg-foreground/[0.04] cursor-pointer"
           : "cursor-not-allowed opacity-60"
       } ${dimmed ? "opacity-30" : ""} ${selected ? "border-accent/70" : ""}`}
-      style={{ minHeight: "16rem" }}
+      style={{ minHeight: "20rem" }}
     >
-      {/* Faint scan line that grows on hover */}
       <div
         aria-hidden
         className={`pointer-events-none absolute left-0 top-0 h-px bg-accent/70 transition-all duration-700 ${
@@ -226,11 +225,16 @@ function MissionCard({
         }`}
       />
 
-      {/* Header row */}
+      {/* Header — case number + status */}
       <div className="flex items-start justify-between">
-        <span className="font-display text-5xl text-foreground/30 leading-none">
-          {mission.number}
-        </span>
+        <div>
+          <p className="text-[0.55rem] tracking-[0.4em] uppercase text-muted-foreground/60 mb-1">
+            Case File
+          </p>
+          <span className="font-display text-5xl text-foreground/30 leading-none">
+            {mission.number}
+          </span>
+        </div>
         <span
           className={`text-[0.55rem] tracking-[0.4em] uppercase ${
             available
@@ -244,14 +248,16 @@ function MissionCard({
         </span>
       </div>
 
-      {/* Title */}
-      <div className="mt-10">
-        <p className="text-[0.6rem] tracking-[0.4em] uppercase text-muted-foreground/70">
-          Mission
-        </p>
-        <h2 className="mt-2 font-display text-3xl sm:text-4xl text-foreground/95 leading-tight">
+      {/* Title block */}
+      <div className="mt-8">
+        <h2 className="font-display text-3xl sm:text-4xl text-foreground/95 leading-tight">
           {mission.codename}
         </h2>
+        {(mission.location || mission.year) && (
+          <p className="mt-2 text-[0.6rem] tracking-[0.35em] uppercase text-muted-foreground/70">
+            {[mission.location, mission.year].filter(Boolean).join(" · ")}
+          </p>
+        )}
       </div>
 
       {/* Logline */}
@@ -263,24 +269,88 @@ function MissionCard({
         {mission.logline}
       </p>
 
-      {/* Footer row */}
-      <div className="mt-8 flex items-center justify-between text-[0.55rem] tracking-[0.35em] uppercase text-muted-foreground/70">
-        <span>{mission.tone ?? "—"}</span>
-        <span>{mission.duration ?? ""}</span>
-      </div>
+      {/* Neutral case-file stats — no decision distribution */}
+      <dl className="mt-6 grid grid-cols-2 gap-y-2.5 gap-x-4 text-[0.6rem] tracking-[0.28em] uppercase">
+        <Stat label="Duration" value={mission.duration ?? "—"} />
+        <Stat
+          label="Difficulty"
+          value={<DifficultyDots level={stats?.difficultyRating ?? mission.difficulty ?? null} />}
+        />
+        <Stat label="Category" value={mission.category ?? "—"} />
+        <Stat
+          label="Plays"
+          value={typeof stats?.plays === "number" ? stats.plays.toLocaleString() : "—"}
+        />
+        <Stat
+          label="Avg Decision"
+          value={formatSeconds(stats?.avgDecisionSeconds)}
+        />
+        <Stat
+          label="Avg Investigation"
+          value={formatSeconds(stats?.avgInvestigationSeconds)}
+        />
+      </dl>
 
-      {/* CTA appears on hover for available missions */}
-      {available && (
-        <div
-          className={`mt-6 flex items-center gap-3 text-[0.6rem] tracking-[0.4em] uppercase transition-all duration-500 ${
-            hovered ? "text-foreground/90 translate-x-0" : "text-foreground/40 -translate-x-1"
-          }`}
-        >
-          <span className="h-px w-6 bg-current" />
-          {selected ? "Entering" : "Begin"}
-          <span className="h-px w-6 bg-current" />
+      {/* Footer — creator metadata + CTA */}
+      <div className="mt-7 flex items-end justify-between gap-4">
+        <div className="text-[0.55rem] tracking-[0.35em] uppercase text-muted-foreground/55 leading-relaxed">
+          <div>{mission.creator ?? "—"}</div>
+          <div className="text-muted-foreground/40">
+            {mission.version ?? ""}
+            {typeof stats?.completionRate === "number"
+              ? ` · ${Math.round(stats.completionRate * 100)}% completion`
+              : ""}
+          </div>
         </div>
-      )}
+        {available && (
+          <div
+            className={`flex items-center gap-3 text-[0.6rem] tracking-[0.4em] uppercase transition-all duration-500 ${
+              hovered ? "text-foreground/90 translate-x-0" : "text-foreground/40 -translate-x-1"
+            }`}
+          >
+            <span className="h-px w-6 bg-current" />
+            {selected ? "Opening" : "Open File"}
+          </div>
+        )}
+      </div>
     </button>
   );
+}
+
+function Stat({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div className="min-w-0">
+      <dt className="text-muted-foreground/55 text-[0.5rem] tracking-[0.35em] mb-0.5">
+        {label}
+      </dt>
+      <dd className="text-foreground/80 tabular-nums truncate">{value}</dd>
+    </div>
+  );
+}
+
+function DifficultyDots({ level }: { level: number | null }) {
+  if (!level) return <span className="text-foreground/40">—</span>;
+  const rounded = Math.round(level);
+  return (
+    <span className="inline-flex items-center gap-1 align-middle">
+      {[1, 2, 3, 4, 5].map((n) => (
+        <span
+          key={n}
+          className={`block h-1.5 w-1.5 rounded-full ${
+            n <= rounded ? "bg-accent/85" : "bg-foreground/15"
+          }`}
+          aria-hidden
+        />
+      ))}
+      <span className="sr-only">{rounded} of 5</span>
+    </span>
+  );
+}
+
+function formatSeconds(s: number | null | undefined): string {
+  if (typeof s !== "number") return "—";
+  if (s < 60) return `${s}s`;
+  const m = Math.floor(s / 60);
+  const rest = s % 60;
+  return rest ? `${m}m ${rest}s` : `${m}m`;
 }
