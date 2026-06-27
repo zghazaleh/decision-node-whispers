@@ -102,16 +102,46 @@ overwrite itself lives in `analysis.functions.ts`.)
 
 ## Adding fixtures
 
-Append entries to `scripts/prompt-test-fixtures.ts`:
+Use the scaffolder CLI — it appends to `prompt-test-fixtures.ts`, seeds a
+placeholder snapshot stub under `scripts/snapshots/`, and refreshes the
+fixture index below.
 
-- `DIRECTOR_FIXTURES` items carry an `id` and a `turns` array. The turns are
-  appended after `engine.opening.text`. Use this to probe a specific edge
-  (meta-break attempts, observation requests, canon-violating questions).
-- `ANALYSIS_FIXTURES` items carry an `id`, `decision`, `reasoning`,
-  optional `archetypeId` (simulating a Decide preset), optional
-  `confidence`, and a `transcript` array of `{role, text}`.
+```sh
+# Director fixture (each --turn is "role:text", role ∈ user|assistant)
+bun run scripts/scaffold-fixture.ts director ask-jonas-pressure \
+  --mission=mission-01 \
+  --turn="user:Jonas, what happens if we delay?"
 
-Keep fixtures small and focused — every fixture is one live gateway call.
+# Analysis fixture (--turn repeatable; --archetype + --confidence optional)
+bun run scripts/scaffold-fixture.ts analysis escalate-to-board \
+  --mission=mission-01 \
+  --decision="I escalate to the full board before deciding." \
+  --reasoning="Single-point-of-failure on Marcus's read." \
+  --archetype=delay --confidence=55 \
+  --turn="assistant:Sarah: They're seated." \
+  --turn="user:Who is in the room?"
+```
+
+Flags:
+
+- `--dry-run` prints the planned edits without writing.
+- `--no-snapshot` skips creating the snapshot stub (the next harness run
+  will create it on first `--update-snapshots`).
+- `--no-docs` skips refreshing the fixture index below.
+
+After scaffolding, run the harness once with `--update-snapshots` to bless
+the new golden file, then commit fixture + snapshot + docs together.
+
+You can also hand-edit `scripts/prompt-test-fixtures.ts` directly — keep
+the `// <scaffold:director>` / `// <scaffold:analysis>` marker comments at
+the end of each array so the scaffolder keeps working. Every fixture is
+one live gateway call, so keep them small and focused.
+
+### Registered fixtures
+
+<!-- fixtures:start -->
+<!-- fixtures:end -->
+
 
 ## Caveats
 
