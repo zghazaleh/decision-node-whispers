@@ -10,20 +10,15 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as MissionsRouteImport } from './routes/missions'
-import { Route as MissionRouteImport } from './routes/mission'
 import { Route as AnalysisRouteImport } from './routes/analysis'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as MissionIdRouteImport } from './routes/mission.$id'
 import { Route as ApiTranscribeRouteImport } from './routes/api/transcribe'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 
 const MissionsRoute = MissionsRouteImport.update({
   id: '/missions',
   path: '/missions',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MissionRoute = MissionRouteImport.update({
-  id: '/mission',
-  path: '/mission',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AnalysisRoute = AnalysisRouteImport.update({
@@ -34,6 +29,11 @@ const AnalysisRoute = AnalysisRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MissionIdRoute = MissionIdRouteImport.update({
+  id: '/mission/$id',
+  path: '/mission/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiTranscribeRoute = ApiTranscribeRouteImport.update({
@@ -50,62 +50,62 @@ const ApiChatRoute = ApiChatRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/analysis': typeof AnalysisRoute
-  '/mission': typeof MissionRoute
   '/missions': typeof MissionsRoute
   '/api/chat': typeof ApiChatRoute
   '/api/transcribe': typeof ApiTranscribeRoute
+  '/mission/$id': typeof MissionIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/analysis': typeof AnalysisRoute
-  '/mission': typeof MissionRoute
   '/missions': typeof MissionsRoute
   '/api/chat': typeof ApiChatRoute
   '/api/transcribe': typeof ApiTranscribeRoute
+  '/mission/$id': typeof MissionIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/analysis': typeof AnalysisRoute
-  '/mission': typeof MissionRoute
   '/missions': typeof MissionsRoute
   '/api/chat': typeof ApiChatRoute
   '/api/transcribe': typeof ApiTranscribeRoute
+  '/mission/$id': typeof MissionIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/analysis'
-    | '/mission'
     | '/missions'
     | '/api/chat'
     | '/api/transcribe'
+    | '/mission/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/analysis'
-    | '/mission'
     | '/missions'
     | '/api/chat'
     | '/api/transcribe'
+    | '/mission/$id'
   id:
     | '__root__'
     | '/'
     | '/analysis'
-    | '/mission'
     | '/missions'
     | '/api/chat'
     | '/api/transcribe'
+    | '/mission/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AnalysisRoute: typeof AnalysisRoute
-  MissionRoute: typeof MissionRoute
   MissionsRoute: typeof MissionsRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiTranscribeRoute: typeof ApiTranscribeRoute
+  MissionIdRoute: typeof MissionIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -115,13 +115,6 @@ declare module '@tanstack/react-router' {
       path: '/missions'
       fullPath: '/missions'
       preLoaderRoute: typeof MissionsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mission': {
-      id: '/mission'
-      path: '/mission'
-      fullPath: '/mission'
-      preLoaderRoute: typeof MissionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/analysis': {
@@ -136,6 +129,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mission/$id': {
+      id: '/mission/$id'
+      path: '/mission/$id'
+      fullPath: '/mission/$id'
+      preLoaderRoute: typeof MissionIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/transcribe': {
@@ -158,10 +158,10 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AnalysisRoute: AnalysisRoute,
-  MissionRoute: MissionRoute,
   MissionsRoute: MissionsRoute,
   ApiChatRoute: ApiChatRoute,
   ApiTranscribeRoute: ApiTranscribeRoute,
+  MissionIdRoute: MissionIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

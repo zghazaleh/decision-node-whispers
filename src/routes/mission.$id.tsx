@@ -21,7 +21,7 @@ const ENGINE = requireMissionEngine(MISSION_ID);
 
 
 
-export const Route = createFileRoute("/mission")({
+export const Route = createFileRoute("/mission/$id")({
   head: () => ({
     meta: [
       { title: "Decision Node — Mission" },
