@@ -1,15 +1,13 @@
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
-import {
-  ARCHETYPE_IDS,
-  archetypeMenuForClassifier,
-  getArchetype,
-  type ArchetypeId,
-} from "@/lib/missions/mission-01/outcomes";
+import { getMissionEngine } from "@/lib/missions/registry";
 import { createServerFn } from "@tanstack/react-start";
 import { generateObject } from "ai";
 import { z } from "zod";
 
+const DEFAULT_MISSION_ID = "mission-01";
+
 const AnalysisInput = z.object({
+  missionId: z.string().default(DEFAULT_MISSION_ID),
   decision: z.string().min(1),
   reasoning: z.string().default(""),
   archetypeId: z.string().optional(), // preset path: skip classification
@@ -35,17 +33,14 @@ const AnalysisSchema = z.object({
 
 export type DecisionAnalysis = z.infer<typeof AnalysisSchema>;
 
-const ClassifySchema = z.object({
-  archetypeId: z.enum([...ARCHETYPE_IDS] as [string, ...string[]]),
-  confidence: z.number().min(0).max(1),
-  rationale: z.string(),
-});
-
 export const analyzeDecision = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => AnalysisInput.parse(input))
   .handler(async ({ data }) => {
     const key = process.env.LOVABLE_API_KEY;
     if (!key) throw new Error("Missing LOVABLE_API_KEY");
+
+    const engine = getMissionEngine(data.missionId);
+    if (!engine) throw new Error(`Unknown mission: ${data.missionId}`);
 
     const gateway = createLovableAiGatewayProvider(key);
 
@@ -54,30 +49,35 @@ export const analyzeDecision = createServerFn({ method: "POST" })
       .join("\n\n");
 
     // ─── Stage A: classify into an archetype (skipped if preset gave us one)
-    let archetypeId: ArchetypeId | null = null;
-    if (data.archetypeId && getArchetype(data.archetypeId as ArchetypeId)) {
-      archetypeId = data.archetypeId as ArchetypeId;
+    let archetypeId: string | null = null;
+    if (data.archetypeId && engine.getArchetype(data.archetypeId)) {
+      archetypeId = data.archetypeId;
     } else {
+      const ClassifySchema = z.object({
+        archetypeId: z.enum([...engine.archetypeIds] as [string, ...string[]]),
+        confidence: z.number().min(0).max(1),
+        rationale: z.string(),
+      });
       try {
         const { object: classification } = await generateObject({
           model: gateway("google/gemini-3-flash-preview"),
           temperature: 0.1,
           schema: ClassifySchema,
-          system: `You classify a player's final decision in an interactive drama about whether to authorize the release of a frontier AI model called ORION-9.
+          system: `You classify a player's final decision in an interactive drama.
 
 ARCHETYPES:
-${archetypeMenuForClassifier()}
+${engine.archetypeMenuForClassifier()}
 
 Pick the single archetype that best matches the SUBSTANCE of the player's decision. Ignore reasoning quality; classify the action.`,
           prompt: `DECISION: ${data.decision}\n\nREASONING: ${data.reasoning || "(none)"}`,
         });
-        archetypeId = classification.archetypeId as ArchetypeId;
+        archetypeId = classification.archetypeId;
       } catch {
         archetypeId = null;
       }
     }
 
-    const archetype = archetypeId ? getArchetype(archetypeId) : null;
+    const archetype = archetypeId ? engine.getArchetype(archetypeId) : null;
 
     // ─── Stage B: narrate, using canon timeline as the spine
     const canonTimelineBlock = archetype
@@ -86,13 +86,9 @@ Pick the single archetype that best matches the SUBSTANCE of the player's decisi
 ${archetype.timeline.map((t, i) => `${i + 1}. beat: "${t.beat}" | consequence: "${t.consequence}"`).join("\n")}
 
 SECOND-ORDER FACTS (weave into closing/alternatives, never as new timeline beats):
-- ORION-9: ${archetype.secondOrder.orion9}
-- Aperture: ${archetype.secondOrder.aperture}
-- Helios: ${archetype.secondOrder.helios}
-- Marcus: ${archetype.secondOrder.marcus}
-- Amara: ${archetype.secondOrder.amara}
-- Board: ${archetype.secondOrder.board}
-- Elena: ${archetype.secondOrder.elena}
+${Object.entries(archetype.secondOrder)
+  .map(([k, v]) => `- ${k}: ${v}`)
+  .join("\n")}
 
 CLOSING TONE: ${archetype.tone}`
       : `No canonical archetype matched. Write the timeline yourself, 4-6 beats, but stay grounded in the transcript.`;
@@ -101,9 +97,7 @@ CLOSING TONE: ${archetype.tone}`
       model: gateway("google/gemini-3-flash-preview"),
       temperature: 0.6,
       schema: AnalysisSchema,
-      system: `You are a senior executive coach reviewing a high-stakes decision an operator just made. The operator was placed inside the body of Dr. Elena Vasquez, CEO of Aperture Synthesis, and had 12 minutes to decide whether to authorize the public release of ORION-9 at 8 AM, against the backdrop of: a possible deceptive-evaluation signal flagged 36h earlier; Marcus Chen (head of alignment) signed off; Amara Okafor (senior alignment) requested a two-week hold via a 14-page memo; Helios ships in 6 days; $4B in funding contingent on shipping this quarter.
-
-The consequences of the chosen stance are FIXED CANON. Your job is to narrate them — not to invent them. The player's reasoning and what they did or did not gather from the transcript shape the assumptions/evidence/alternatives/closing fields. The timeline field MUST be the canon timeline verbatim.
+      system: `You are a senior executive coach reviewing a high-stakes decision an operator just made inside an immersive interactive drama. The consequences of the chosen stance are FIXED CANON. Your job is to narrate them — not to invent them. The player's reasoning and what they did or did not gather from the transcript shape the assumptions/evidence/alternatives/closing fields. The timeline field MUST be the canon timeline verbatim.
 
 Judge process, not outcome. Be precise. Be kind. Sound like a person, not a rubric. Never use the words "good", "bad", "right", "wrong", "correct", "incorrect". Never congratulate. Never scold.
 
@@ -126,7 +120,6 @@ ${transcriptText}`,
     });
 
     // Hard-guarantee: overwrite the model's timeline with canon if we have one.
-    // Even if the model drifted, the player sees the deterministic beats.
     const finalAnalysis: DecisionAnalysis = archetype
       ? { ...object, timeline: archetype.timeline.map((t) => ({ ...t })) }
       : object;
