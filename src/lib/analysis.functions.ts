@@ -55,6 +55,19 @@ const AnalysisSchema = z.object({
     calibration: z.string(),
     luckVsSkill: z.string(),
   }),
+  beliefTrajectory: z
+    .array(
+      z.object({
+        marker: z.string(),
+        hypothesis: z.string(),
+        confidence: z.enum(["low", "medium", "high"]),
+        trigger: z.string(),
+        update: z.enum(["formed", "reinforced", "revised", "abandoned", "held"]),
+        note: z.string(),
+      }),
+    )
+    .max(8),
+
 });
 
 
@@ -161,7 +174,15 @@ Return a JSON object with these fields:
    - blindSpots: 0-4 items. Each is {pattern, evidence, gentleReframe}. "pattern" describes a reasoning pattern (NOT a bias name) in plain language. "evidence" cites the specific moment. "gentleReframe" is one sentence offering the question they could have asked instead. Never accuse. Phrase as observation.
    - possibleBiases: 0-3 items, ONLY if the transcript shows clear behavioral evidence. Each is {name, evidence, gentleExplanation}. "name" is the bias from the list above. "evidence" is the specific behavior. "gentleExplanation" is 1-2 sentences explaining the pattern through their own actions, never as a diagnosis. Example phrasing: "You formed a hypothesis early and spent most of your remaining time looking for evidence that supported it." Empty array is preferred over a stretch.
    - calibration: 1-2 sentences on whether their confidence matched the strength of the evidence they had. Note over- or under-confidence by what they said, not by the outcome.
-   - luckVsSkill: 1-2 sentences explicitly separating the quality of the process from the quality of the outcome. If a poor process happened to land well, say so. If a sound process landed badly because of uncertainty, say so.`,
+   - luckVsSkill: 1-2 sentences explicitly separating the quality of the process from the quality of the outcome. If a poor process happened to land well, say so. If a sound process landed badly because of uncertainty, say so.
+- beliefTrajectory: 3-8 ordered snapshots reconstructing how the player's working theory of the situation evolved across the transcript. Walk the transcript chronologically and emit a snapshot whenever their stance plausibly shifted, hardened, or stayed put in the face of new information. Each snapshot:
+   - marker: short tag for WHEN in the session this is, drawn from the actual transcript (e.g. "After Sarah's first line", "On reading the memo", "After pressing Marcus", "Just before deciding"). No turn numbers.
+   - hypothesis: one sentence in plain language describing what the player APPEARED to believe about the situation at that moment (about the model, the anomaly, the people, the stakes). Infer from what they said, asked, or did — not from outcomes.
+   - confidence: "low" | "medium" | "high" — how strongly they were holding that belief, judged by tone and behavior.
+   - trigger: the specific piece of information, question, or silence that produced this snapshot. Quote or paraphrase from the transcript.
+   - update: "formed" (first time this belief appears), "reinforced" (new evidence strengthened an existing belief), "revised" (belief shifted in response to evidence), "abandoned" (belief was dropped), "held" (new contrary evidence appeared but belief did not move).
+   - note: one short sentence on what the update reveals about their reasoning — especially flag "held" entries where the player did not update on reachable evidence, and "revised" entries where they did. Neutral, observational.`,
+
 
       prompt: `${canonTimelineBlock}
 

@@ -104,9 +104,14 @@ function Analysis() {
             delay={2.45}
           />
 
+          {a.beliefTrajectory && a.beliefTrajectory.length > 0 && (
+            <BeliefTrajectory trajectory={a.beliefTrajectory} />
+          )}
+
           {a.reasoningAssessment && (
             <ReasoningAssessment data={a.reasoningAssessment} />
           )}
+
 
           <div
             className="animate-fade-up border-t border-foreground/15 pt-12"
@@ -179,6 +184,107 @@ function AnalysisBlock({
     </div>
   );
 }
+
+const UPDATE_STYLES: Record<
+  NonNullable<DecisionAnalysis["beliefTrajectory"]>[number]["update"],
+  { label: string; ring: string; dot: string }
+> = {
+  formed: { label: "Formed", ring: "border-accent/60", dot: "bg-accent" },
+  reinforced: {
+    label: "Reinforced",
+    ring: "border-accent/40",
+    dot: "bg-accent/70",
+  },
+  revised: {
+    label: "Revised",
+    ring: "border-emerald-400/60",
+    dot: "bg-emerald-400",
+  },
+  abandoned: {
+    label: "Abandoned",
+    ring: "border-foreground/40",
+    dot: "bg-foreground/60",
+  },
+  held: {
+    label: "Held despite evidence",
+    ring: "border-rose-400/50",
+    dot: "bg-rose-400/80",
+  },
+};
+
+const CONFIDENCE_BARS: Record<
+  NonNullable<DecisionAnalysis["beliefTrajectory"]>[number]["confidence"],
+  number
+> = { low: 1, medium: 2, high: 3 };
+
+function BeliefTrajectory({
+  trajectory,
+}: {
+  trajectory: NonNullable<DecisionAnalysis["beliefTrajectory"]>;
+}) {
+  return (
+    <div
+      className="animate-fade-up border-t border-foreground/15 pt-12"
+      style={{ animationDelay: "2.5s" }}
+    >
+      <p className="text-[0.6rem] tracking-[0.5em] uppercase text-accent/80 mb-4 text-center">
+        Belief trajectory
+      </p>
+      <p className="text-center text-xs text-foreground/45 max-w-md mx-auto leading-relaxed mb-10">
+        How your working theory moved — or didn't — as the room gave you more.
+      </p>
+
+      <ol className="relative space-y-8 border-l border-foreground/15 pl-6 ml-2">
+        {trajectory.map((snap, i) => {
+          const style = UPDATE_STYLES[snap.update] ?? UPDATE_STYLES.formed;
+          const bars = CONFIDENCE_BARS[snap.confidence] ?? 2;
+          return (
+            <li key={i} className="relative">
+              <span
+                className={`absolute -left-[31px] top-1 h-3 w-3 rounded-full border-2 ${style.ring} ${style.dot}`}
+                aria-hidden
+              />
+              <div className="flex items-baseline justify-between gap-4 mb-2">
+                <p className="text-[0.6rem] tracking-[0.35em] uppercase text-foreground/55">
+                  {snap.marker}
+                </p>
+                <span className="text-[0.55rem] tracking-[0.3em] uppercase text-accent/80 whitespace-nowrap">
+                  {style.label}
+                </span>
+              </div>
+              <p className="font-display text-lg leading-snug text-foreground/95 text-pretty">
+                {snap.hypothesis}
+              </p>
+              <div className="mt-3 flex items-center gap-3">
+                <span className="text-[0.55rem] tracking-[0.3em] uppercase text-foreground/40">
+                  Conviction
+                </span>
+                <span className="flex gap-1">
+                  {[1, 2, 3].map((n) => (
+                    <span
+                      key={n}
+                      className={`block h-[3px] w-5 ${
+                        n <= bars ? "bg-accent/80" : "bg-foreground/15"
+                      }`}
+                    />
+                  ))}
+                </span>
+              </div>
+              <p className="mt-3 text-sm text-foreground/65 leading-relaxed text-pretty">
+                <span className="text-foreground/45">Trigger — </span>
+                {snap.trigger}
+              </p>
+              <p className="mt-1 text-sm text-foreground/75 leading-relaxed italic text-pretty">
+                {snap.note}
+              </p>
+            </li>
+          );
+        })}
+      </ol>
+    </div>
+  );
+}
+
 
 function ReasoningAssessment({
   data,
