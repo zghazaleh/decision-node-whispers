@@ -282,12 +282,14 @@ export function updateProfileWithAnalysis(
   analysis: DecisionAnalysis,
 ): DecisionProfile {
   const prev = readProfile();
-  const { scores, signals } = scoreFromAnalysis(analysis);
+  const { scores, signals, notes, source } = scoreFromAnalysis(analysis);
   const contribution: MissionContribution = {
     missionId,
     at: Date.now(),
     scores,
     signals,
+    ...(notes ? { notes } : {}),
+    source,
   };
   // De-dupe: replace any earlier contribution for the same mission.
   const filtered = prev.contributions.filter((c) => c.missionId !== missionId);
