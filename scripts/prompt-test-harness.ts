@@ -221,6 +221,7 @@ async function runDirector(
 async function runAnalysis(
   gateway: ReturnType<typeof createLovableAiGatewayProvider>,
   missionId: string,
+  updateSnapshots: boolean,
 ) {
   const engine = getMissionEngine(missionId);
   if (!engine) throw new Error(`Unknown mission: ${missionId}`);
