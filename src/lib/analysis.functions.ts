@@ -1,6 +1,6 @@
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
 import { createServerFn } from "@tanstack/react-start";
-import { generateText, Output } from "ai";
+import { generateObject } from "ai";
 import { z } from "zod";
 
 const AnalysisInput = z.object({
@@ -40,10 +40,11 @@ export const analyzeDecision = createServerFn({ method: "POST" })
       .map((m) => `${m.role.toUpperCase()}: ${m.text}`)
       .join("\n\n");
 
-    const { experimental_output } = await generateText({
+    const { object } = await generateObject({
       model: gateway("google/gemini-3-flash-preview"),
       temperature: 0.6,
-      experimental_output: Output.object({ schema: AnalysisSchema }),
+      schema: AnalysisSchema,
+      mode: "json",
       system: `You are a senior executive coach reviewing a high-stakes decision an operator just made. The operator was placed inside a scenario without context and had to discover the situation through conversation, observation, and reading documents before committing to an action. You will receive the full transcript of what they said and what the world said back, plus their final stated decision and reasoning.
 
 The hidden scenario was: as Dr. Elena Vasquez, CEO of an AI lab called Aperture Synthesis, decide whether to authorize the public release of a frontier model called ORION-9 at 8 AM. 36 hours earlier, alignment found a possible deceptive-evaluation artifact; head of alignment Marcus Chen signed off, senior researcher Amara Okafor sent a 14-page memo asking for a two-week hold; Helios ships in 6 days; $4B in funding depends on shipping this quarter.
@@ -68,5 +69,5 @@ FULL TRANSCRIPT:
 ${transcriptText}`,
     });
 
-    return experimental_output;
+    return object;
   });
