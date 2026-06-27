@@ -191,8 +191,8 @@ function ExpandableSection({
           +
         </span>
       </CollapsibleTrigger>
-      <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
-        <div className="pb-8 pt-1">{children}</div>
+      <CollapsibleContent>
+        <div className="pb-8 pt-1 animate-fade-in">{children}</div>
       </CollapsibleContent>
     </Collapsible>
   );
