@@ -28,12 +28,26 @@ export type MissionOpening = {
   text: string;
 };
 
+export type MissionScene = {
+  /** Imported image URL used as the cinematic background for this mission. */
+  src: string;
+  /** Optional CSS filter applied to the image (saturation / contrast / hue tint). */
+  filter?: string;
+  /** Optional semantic mood label — useful for debugging / future variants. */
+  mood?: string;
+};
+
+
+
 export type MissionEngine = {
   id: string;
   /** Full system prompt used by the narrative chat for this mission. */
   systemPrompt: string;
   /** Canonical opening message rendered as the first assistant turn. */
   opening: MissionOpening;
+  /** Cinematic background scene shown behind the dialogue. */
+  scene: MissionScene;
+
   /** All archetypes for this mission, keyed by id. */
   archetypes: Record<string, Archetype>;
   /** Stable list of archetype ids (excluding the "unclassified" fallback). */

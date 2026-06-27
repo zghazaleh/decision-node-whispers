@@ -6,7 +6,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Eye, BookOpen, Phone, MessageCircle, Send, Scale, X, Mic, Square, Volume2, VolumeX } from "lucide-react";
 import { toast } from "sonner";
 
-import sceneOffice from "@/assets/scene-office.jpg";
+
 import { partsToText, readMission, useMission } from "@/lib/mission-store";
 import { analyzeDecision } from "@/lib/analysis.functions";
 import { startRecording, type Recorder } from "@/lib/record-wav";
@@ -230,12 +230,13 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
           style={{ transform: "translate3d(var(--px), var(--py), 0)" }}
         >
           <img
-            src={sceneOffice}
+            src={ENGINE.scene.src}
             alt=""
             aria-hidden
             className="h-full w-full object-cover animate-ken-burns"
-            style={{ filter: "saturate(0.88) contrast(1.06)" }}
+            style={{ filter: ENGINE.scene.filter ?? "saturate(0.88) contrast(1.06)" }}
           />
+
         </div>
         <div className="scene-light" aria-hidden />
         <div className="scene-dust" aria-hidden />
