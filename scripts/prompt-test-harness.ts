@@ -369,10 +369,12 @@ async function main() {
   const gateway = createLovableAiGatewayProvider(key);
 
   // eslint-disable-next-line no-console
-  console.log(`▶ Prompt test harness — mission=${args.mission} only=${args.only ?? "(all)"}`);
+  console.log(
+    `▶ Prompt test harness — mission=${args.mission} only=${args.only ?? "(all)"} update=${args.updateSnapshots}`,
+  );
 
-  if (args.only !== "analysis") await runDirector(gateway, args.mission);
-  if (args.only !== "director") await runAnalysis(gateway, args.mission);
+  if (args.only !== "analysis") await runDirector(gateway, args.mission, args.updateSnapshots);
+  if (args.only !== "director") await runAnalysis(gateway, args.mission, args.updateSnapshots);
 
   const failed = results.filter((r) => !r.ok);
   // eslint-disable-next-line no-console
