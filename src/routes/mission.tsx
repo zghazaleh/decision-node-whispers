@@ -276,14 +276,25 @@ function Mission() {
           >
             Decision Node
           </button>
-          <button
-            onClick={() => setDecideOpen(true)}
-            disabled={busy || messages.length < 2}
-            className="group flex items-center gap-3 text-[0.65rem] tracking-[0.35em] uppercase text-foreground/60 hover:text-accent disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-          >
-            <Scale className="h-3.5 w-3.5" />
-            Decide
-          </button>
+          <div className="flex items-center gap-5">
+            <button
+              onClick={toggleSound}
+              aria-label={soundOn ? "Mute ambient" : "Unmute ambient"}
+              title={soundOn ? "Mute ambient" : "Unmute ambient"}
+              className="text-foreground/40 hover:text-foreground/90 transition-colors"
+            >
+              {soundOn ? <Volume2 className="h-3.5 w-3.5" /> : <VolumeX className="h-3.5 w-3.5" />}
+            </button>
+            <button
+              onClick={() => setDecideOpen(true)}
+              disabled={busy || messages.length < 2}
+              className="group flex items-center gap-3 text-[0.65rem] tracking-[0.35em] uppercase text-foreground/60 hover:text-accent disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            >
+              <Scale className="h-3.5 w-3.5" />
+              Decide
+            </button>
+          </div>
+
         </header>
 
         {/* Transcript — centered, cinematic */}
