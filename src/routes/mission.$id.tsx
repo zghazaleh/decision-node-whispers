@@ -586,15 +586,13 @@ function QuickActions({
   );
 }
 
-// Decision presets come from the mission engine so adding a new mission
-// only requires defining presets in its module — no UI changes here.
-const DECISION_PRESETS = ENGINE.decisionPresets;
-
 function DecideModal({
+  presets,
   analyzing,
   onClose,
   onSubmit,
 }: {
+  presets: MissionEngine["decisionPresets"];
   analyzing: boolean;
   onClose: () => void;
   onSubmit: (decision: string, reasoning: string, archetypeId?: string) => void;
