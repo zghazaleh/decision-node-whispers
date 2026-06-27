@@ -239,7 +239,8 @@ Return a JSON object with these fields:
    - negotiation: did they recognize counterparts' incentives, hold space for their position, and update on their information — rather than steamroll?
    - longTermThinking: did they weigh second-order effects, long-term consequences, and reputational/structural costs?
    - biasResistance: were they free of the biases listed above, or did clear bias patterns drive the reasoning?
-- dimensionNotes: REQUIRED. For each of the eight axes above, one short sentence (max 25 words) grounded in a specific transcript moment that justifies the score. Same keys as dimensionScores.`,
+- dimensionNotes: REQUIRED. For each of the eight axes above, one short sentence (max 25 words) grounded in a specific transcript moment that justifies the score. Same keys as dimensionScores.
+- reasoningEcho: REQUIRED. 2–3 sentences in an executive-coach voice, addressed to "you", that mirror the player's reasoning back to them with precision. Use the player's own WHY text as the spine. Reference the calibrationVerdict explicitly in plain language (e.g. for "calibrated": "your confidence sat where the evidence actually was"; for "over": "you stated more certainty than the evidence carried"; for "under": "the evidence was stronger than your confidence suggested"). Quote or paraphrase one or two specific transcript moments that map to the highest- and lowest-scoring dimensions. Do NOT invent consequences, do NOT repeat the canon timeline, do NOT contradict it, do NOT use the forbidden vocabulary (good/bad/right/wrong/correct/incorrect). If the player provided no reasoning text, ground the echo entirely in their behavior. Tone: quiet, specific, respectful — never congratulatory, never scolding.`,
 
 
       prompt: `${canonTimelineBlock}
