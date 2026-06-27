@@ -358,5 +358,26 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
       }
     },
 
+    setAudioProfile(next: AudioProfile) {
+      if (next.padFrequency !== undefined) profile.padFrequency = next.padFrequency;
+      if (next.padDetune !== undefined) profile.padDetune = next.padDetune;
+      if (next.filterBaseHz !== undefined) profile.filterBaseHz = next.filterBaseHz;
+      if (next.filterLfoDepthHz !== undefined) profile.filterLfoDepthHz = next.filterLfoDepthHz;
+      if (next.lfoRateHz !== undefined) profile.lfoRateHz = next.lfoRateHz;
+      // Apply live, with short ramps so the change is inaudible.
+      if (ctx) {
+        const now = ctx.currentTime;
+        const ramp = 1.5;
+        if (padOscA) padOscA.frequency.linearRampToValueAtTime(profile.padFrequency, now + ramp);
+        if (padOscB)
+          padOscB.frequency.linearRampToValueAtTime(profile.padFrequency * profile.padDetune, now + ramp);
+        if (lfo) lfo.frequency.linearRampToValueAtTime(profile.lfoRateHz, now + ramp);
+        if (lfoDepth) lfoDepth.gain.linearRampToValueAtTime(profile.filterLfoDepthHz, now + ramp);
+        if (current?.filter)
+          current.filter.frequency.linearRampToValueAtTime(profile.filterBaseHz, now + ramp);
+      }
+    },
+
+
   };
 }
