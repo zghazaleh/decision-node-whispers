@@ -3,7 +3,7 @@ import { DefaultChatTransport, type UIMessage } from "ai";
 import { useServerFn } from "@tanstack/react-start";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Eye, BookOpen, Phone, MessageCircle, Send, Scale, X, Mic, Square, Volume2, VolumeX } from "lucide-react";
+import { Eye, BookOpen, Phone, MessageCircle, Send, Scale, X, Mic, Square, Volume2, VolumeX, Check } from "lucide-react";
 import { toast } from "sonner";
 
 
@@ -676,14 +676,21 @@ function DecideModal({
   const [decision, setDecision] = useState("");
   const [reasoning, setReasoning] = useState("");
   const [archetypeId, setArchetypeId] = useState<string | undefined>();
+  const selectedPreset = presets.find((p) => p.text.trim() === decision.trim());
+  const canCommit = decision.trim().length > 0 && !analyzing;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md px-4 animate-fade-in-slow">
-      <div className="relative w-full max-w-xl border border-foreground/15 bg-background/95 p-8 sm:p-12">
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/80 backdrop-blur-md px-4 py-4 animate-fade-in-slow">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="decision-title"
+        className="relative flex max-h-[calc(100dvh-2rem)] w-full max-w-xl flex-col overflow-hidden border border-foreground/15 bg-background/95 shadow-[0_24px_80px_-32px_oklch(0_0_0)]"
+      >
         {!analyzing && (
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 text-foreground/40 hover:text-foreground transition-colors"
+            className="absolute top-4 right-4 z-10 text-foreground/40 hover:text-foreground transition-colors"
             aria-label="Close"
           >
             <X className="h-4 w-4" />
@@ -691,7 +698,7 @@ function DecideModal({
         )}
 
         {analyzing ? (
-          <div className="py-12 text-center space-y-6">
+          <div className="p-8 py-16 text-center space-y-6 sm:p-12">
             <p className="font-display text-3xl text-foreground/95">
               The room holds its breath.
             </p>
@@ -700,11 +707,11 @@ function DecideModal({
             </p>
           </div>
         ) : (
-          <>
+          <div className="overflow-y-auto p-6 pb-0 sm:p-12 sm:pb-0">
             <p className="text-[0.6rem] tracking-[0.4em] uppercase text-accent/80 mb-3">
               Your decision
             </p>
-            <h2 className="font-display text-3xl text-foreground mb-2">
+            <h2 id="decision-title" className="font-display text-3xl text-foreground mb-2">
               This is the moment.
             </h2>
             <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
@@ -730,22 +737,42 @@ function DecideModal({
                         key={p.label}
                         type="button"
                         onClick={() => { setDecision(p.text); setArchetypeId(p.archetypeId); }}
-                        className={`w-full text-left rounded-sm border px-4 py-3 transition-colors ${
+                        aria-pressed={active}
+                        className={`group w-full rounded-sm border px-4 py-4 text-left transition-all ${
                           active
-                            ? "border-accent/70 bg-accent/10 text-foreground"
-                            : "border-foreground/15 bg-background/40 text-foreground/80 hover:border-foreground/40 hover:text-foreground"
+                            ? "border-accent/80 bg-accent/15 text-foreground shadow-[inset_3px_0_0_var(--color-accent)]"
+                            : "border-foreground/15 bg-background/40 text-foreground/80 hover:border-foreground/40 hover:bg-foreground/5 hover:text-foreground"
                         }`}
                       >
-                        <div className="text-[0.65rem] tracking-[0.3em] uppercase text-accent/80 mb-1">
-                          {p.label}
-                        </div>
-                        <div className="text-sm leading-relaxed text-pretty">
-                          {p.text}
+                        <div className="flex items-start gap-3">
+                          <span
+                            className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition-colors ${
+                              active
+                                ? "border-accent bg-accent text-accent-foreground"
+                                : "border-foreground/25 text-transparent group-hover:border-foreground/45"
+                            }`}
+                            aria-hidden
+                          >
+                            <Check className="h-3 w-3" />
+                          </span>
+                          <span className="min-w-0">
+                            <span className="block text-[0.65rem] tracking-[0.3em] uppercase text-accent/80 mb-1">
+                              {p.label}
+                            </span>
+                            <span className="block text-sm leading-relaxed text-pretty">
+                              {p.text}
+                            </span>
+                          </span>
                         </div>
                       </button>
                     );
                   })}
                 </div>
+                {selectedPreset && (
+                  <p className="mb-4 rounded-sm border border-accent/25 bg-accent/10 px-3 py-2 text-xs leading-relaxed text-accent">
+                    Selected: {selectedPreset.label}. You can commit below or edit the wording.
+                  </p>
+                )}
                 <label className="block text-[0.6rem] tracking-[0.3em] uppercase text-foreground/50 mb-2">
                   Or in your own words
                 </label>
@@ -754,7 +781,7 @@ function DecideModal({
                   onChange={(e) => { setDecision(e.target.value); setArchetypeId(undefined); }}
                   rows={3}
                   placeholder="I walk into the boardroom and…"
-                  className="w-full resize-none bg-transparent border-b border-foreground/20 focus:border-foreground/60 outline-none py-2 text-foreground/95 placeholder:text-foreground/25 transition-colors"
+                  className="w-full resize-none rounded-sm border border-foreground/15 bg-background/45 px-3 py-3 text-foreground/95 outline-none transition-colors placeholder:text-foreground/25 focus:border-foreground/60"
                 />
               </div>
               <div>
@@ -766,29 +793,28 @@ function DecideModal({
                   onChange={(e) => setReasoning(e.target.value)}
                   rows={3}
                   placeholder="Because…"
-                  className="w-full resize-none bg-transparent border-b border-foreground/20 focus:border-foreground/60 outline-none py-2 text-foreground/95 placeholder:text-foreground/25 transition-colors"
+                  className="w-full resize-none rounded-sm border border-foreground/15 bg-background/45 px-3 py-3 text-foreground/95 outline-none transition-colors placeholder:text-foreground/25 focus:border-foreground/60"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-6 pt-4">
+              <div className="sticky bottom-0 -mx-6 flex items-center justify-between gap-3 border-t border-foreground/10 bg-background/95 px-6 py-4 backdrop-blur sm:-mx-12 sm:px-12">
                 <button
                   type="button"
                   onClick={onClose}
-                  className="text-[0.65rem] tracking-[0.35em] uppercase text-foreground/40 hover:text-foreground/80 transition-colors"
+                  className="rounded-sm px-3 py-3 text-[0.65rem] tracking-[0.28em] uppercase text-foreground/50 transition-colors hover:text-foreground/80"
                 >
                   Wait
                 </button>
                 <button
                   type="submit"
-                  disabled={!decision.trim()}
-                  className="group flex items-center gap-3 text-[0.65rem] tracking-[0.35em] uppercase text-foreground/80 hover:text-accent disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  disabled={!canCommit}
+                  className="inline-flex min-h-11 items-center justify-center rounded-full border border-accent/70 bg-accent px-5 py-3 text-[0.65rem] font-medium tracking-[0.28em] uppercase text-accent-foreground shadow-[0_0_24px_-8px_var(--color-accent)] transition-all hover:border-accent hover:bg-accent/90 disabled:border-foreground/15 disabled:bg-foreground/10 disabled:text-foreground/35 disabled:shadow-none disabled:cursor-not-allowed"
                 >
                   Commit
-                  <span className="h-px w-8 bg-foreground/30 group-hover:bg-accent group-hover:w-12 transition-all" />
                 </button>
               </div>
             </form>
-          </>
+          </div>
         )}
       </div>
     </div>
