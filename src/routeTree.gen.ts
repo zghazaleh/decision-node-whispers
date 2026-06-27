@@ -14,6 +14,7 @@ import { Route as AnalysisRouteImport } from './routes/analysis'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiTranscribeRouteImport } from './routes/api/transcribe'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as ApiPublicAmbientGenRouteImport } from './routes/api/public/ambient-gen'
 
 const MissionRoute = MissionRouteImport.update({
   id: '/mission',
@@ -40,6 +41,11 @@ const ApiChatRoute = ApiChatRouteImport.update({
   path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicAmbientGenRoute = ApiPublicAmbientGenRouteImport.update({
+  id: '/api/public/ambient-gen',
+  path: '/api/public/ambient-gen',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -47,6 +53,7 @@ export interface FileRoutesByFullPath {
   '/mission': typeof MissionRoute
   '/api/chat': typeof ApiChatRoute
   '/api/transcribe': typeof ApiTranscribeRoute
+  '/api/public/ambient-gen': typeof ApiPublicAmbientGenRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -54,6 +61,7 @@ export interface FileRoutesByTo {
   '/mission': typeof MissionRoute
   '/api/chat': typeof ApiChatRoute
   '/api/transcribe': typeof ApiTranscribeRoute
+  '/api/public/ambient-gen': typeof ApiPublicAmbientGenRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -62,12 +70,25 @@ export interface FileRoutesById {
   '/mission': typeof MissionRoute
   '/api/chat': typeof ApiChatRoute
   '/api/transcribe': typeof ApiTranscribeRoute
+  '/api/public/ambient-gen': typeof ApiPublicAmbientGenRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/analysis' | '/mission' | '/api/chat' | '/api/transcribe'
+  fullPaths:
+    | '/'
+    | '/analysis'
+    | '/mission'
+    | '/api/chat'
+    | '/api/transcribe'
+    | '/api/public/ambient-gen'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/analysis' | '/mission' | '/api/chat' | '/api/transcribe'
+  to:
+    | '/'
+    | '/analysis'
+    | '/mission'
+    | '/api/chat'
+    | '/api/transcribe'
+    | '/api/public/ambient-gen'
   id:
     | '__root__'
     | '/'
@@ -75,6 +96,7 @@ export interface FileRouteTypes {
     | '/mission'
     | '/api/chat'
     | '/api/transcribe'
+    | '/api/public/ambient-gen'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -83,6 +105,7 @@ export interface RootRouteChildren {
   MissionRoute: typeof MissionRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiTranscribeRoute: typeof ApiTranscribeRoute
+  ApiPublicAmbientGenRoute: typeof ApiPublicAmbientGenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -122,6 +145,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/ambient-gen': {
+      id: '/api/public/ambient-gen'
+      path: '/api/public/ambient-gen'
+      fullPath: '/api/public/ambient-gen'
+      preLoaderRoute: typeof ApiPublicAmbientGenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -131,6 +161,7 @@ const rootRouteChildren: RootRouteChildren = {
   MissionRoute: MissionRoute,
   ApiChatRoute: ApiChatRoute,
   ApiTranscribeRoute: ApiTranscribeRoute,
+  ApiPublicAmbientGenRoute: ApiPublicAmbientGenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
