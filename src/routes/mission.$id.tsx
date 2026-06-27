@@ -160,9 +160,23 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
   // (reasoning, confidence) while letting the player initiate from the composer.
   function detectDecisionIntent(text: string): string | null {
     const t = text.trim();
-    const re = /^(?:i\s+(?:decide|choose|commit|will|am\s+going\s+to|'?ll|am\s+choosing)\s+(?:to\s+)?|my\s+(?:decision|choice)\s+(?:is|:)\s*|i'?m\s+going\s+to\s+|let's\s+|final\s+answer[:\s]+)(.+)$/i;
-    const m = t.match(re);
-    if (m && m[1].trim().length > 0) return m[1].trim();
+    const patterns = [
+      // Explicit decision verbs with subject
+      /^(?:i\s+(?:decide|choose|commit|will|am\s+going\s+to|'?ll|am\s+choosing|pick|want|should|have\s+decided|ought\s+to|'ll\s+(?:take|pick|choose|go\s+with))\s+(?:to\s+)?)(.+)$/i,
+      // "I'm …ing" forms
+      /^(?:i'?m\s+(?:going\s+to|picking|selecting)\s+)(.+)$/i,
+      // Possessive declaration
+      /^(?:my\s+(?:decision|choice|pick|selection)\s+(?:is|:)\s*)(.+)$/i,
+      // Collaborative
+      /^(?:let's\s+(?:go\s+with|pick|choose)?\s*)(.+)$/i,
+      /^(?:we\s+should\s+)(.+)$/i,
+      // Standalone imperative (decision context)
+      /^(?:go\s+with|pick|select)\s+(.+)$/i,
+    ];
+    for (const re of patterns) {
+      const m = t.match(re);
+      if (m && m[1].trim().length > 0) return m[1].trim();
+    }
     return null;
   }
 
