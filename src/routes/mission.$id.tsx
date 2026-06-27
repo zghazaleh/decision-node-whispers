@@ -758,7 +758,7 @@ function QuickActions({
   ];
   const turnsToGo = Math.max(0, 4 - userTurns);
   const decideTitle = decideReady
-    ? "Commit your decision"
+    ? "Make your decision"
     : turnsToGo > 0
     ? `Locked — ${turnsToGo} more exchange${turnsToGo === 1 ? "" : "s"}`
     : "Locked";
@@ -848,10 +848,10 @@ function DecideModal({
         {analyzing ? (
           <div className="p-8 py-16 text-center space-y-6 sm:p-12">
             <p className="font-display text-3xl text-foreground/95">
-              The room holds its breath.
+              Analyzing...
             </p>
             <p className="text-xs tracking-[0.3em] uppercase text-foreground/40 animate-pulse-soft">
-              Tracing the consequences…
+              Evaluating consequences...
             </p>
           </div>
         ) : (
@@ -863,7 +863,7 @@ function DecideModal({
               This is the moment.
             </h2>
             <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
-              Pick a stance, or write your own. You can't take it back.
+              Select a position or write your own. This decision is final.
             </p>
 
             <form
@@ -875,7 +875,7 @@ function DecideModal({
             >
               <div>
                 <label className="block text-[0.6rem] tracking-[0.3em] uppercase text-foreground/50 mb-3">
-                  Choose a stance
+                  Select a position
                 </label>
                 <div className="space-y-2 mb-4">
                   {presets.map((p) => {
@@ -918,7 +918,7 @@ function DecideModal({
                 </div>
                 {selectedPreset && (
                   <p className="mb-4 rounded-sm border border-accent/25 bg-accent/10 px-3 py-2 text-xs leading-relaxed text-accent">
-                    Selected: {selectedPreset.label}. You can commit below or edit the wording.
+                    Selected: {selectedPreset.label}. You may confirm or edit before committing.
                   </p>
                 )}
                 <label className="block text-[0.6rem] tracking-[0.3em] uppercase text-foreground/50 mb-2">
@@ -949,7 +949,7 @@ function DecideModal({
               <div>
                 <div className="flex items-baseline justify-between mb-2">
                   <label htmlFor="conf-slider" className="block text-[0.6rem] tracking-[0.3em] uppercase text-foreground/50">
-                    How sure are you?
+                    Confidence level
                   </label>
                   <span className="text-[0.6rem] tracking-[0.3em] uppercase text-accent/80 tabular-nums">
                     {confidence}/100 · {confLabel}
@@ -966,7 +966,7 @@ function DecideModal({
                   className="w-full accent-[var(--color-accent)] cursor-pointer"
                 />
                 <p className="mt-1.5 text-[0.65rem] text-foreground/40 leading-relaxed">
-                  Honest, not heroic. Calibration is part of the read.
+                  Honest assessment improves calibration.
                 </p>
               </div>
 
@@ -977,7 +977,7 @@ function DecideModal({
                   onClick={onClose}
                   className="rounded-sm px-3 py-3 text-[0.65rem] tracking-[0.28em] uppercase text-foreground/50 transition-colors hover:text-foreground/80"
                 >
-                  Wait
+                  Cancel
                 </button>
                 <button
                   type="submit"
@@ -1103,7 +1103,7 @@ function MicButton({
       const blob = await rec.stop();
       recRef.current = null;
       if (elapsed < 400 || blob.size < 2048) {
-        toast("That was too short", { description: "Hold on a beat longer and try again." });
+        toast("That was too short", { description: "Please speak longer and try again." });
         setState("idle");
         return;
       }
@@ -1126,7 +1126,7 @@ function MicButton({
       const data = (await res.json()) as { text?: string };
       const text = (data.text ?? "").trim();
       if (!text) {
-        toast("Didn't catch that", { description: "Try again, a little closer to the mic." });
+        toast("Didn't catch that", { description: "Try again, speaking closer to the microphone." });
         return;
       }
       onTranscript(text);
@@ -1183,10 +1183,10 @@ function MicButton({
             onClick={(e) => e.stopPropagation()}
           >
             <p className="text-[0.6rem] tracking-[0.4em] uppercase text-accent/80 mb-3">
-              Speak your move
+              Voice input
             </p>
             <h2 className="font-display text-2xl text-foreground mb-3">
-              We'd like to hear you.
+              Enable voice input.
             </h2>
             <p className="text-sm text-muted-foreground leading-relaxed mb-6">
               Your browser will ask for microphone access. Audio is sent only to
@@ -1207,7 +1207,7 @@ function MicButton({
                 }}
                 className="group flex items-center gap-3 text-xs tracking-[0.3em] uppercase text-foreground hover:text-accent transition-colors"
               >
-                Allow mic
+                Enable microphone
                 <span className="h-px w-8 bg-foreground/40 group-hover:bg-accent group-hover:w-12 transition-all" />
               </button>
             </div>
