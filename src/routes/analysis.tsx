@@ -213,6 +213,27 @@ function Analysis() {
           )}
         </section>
 
+        {/* Reasoning echo — executive-coach reflection grounded in the
+            player's own WHY. Sits above the canon timeline so the player
+            reads their reasoning back before seeing the consequences.
+            Not canon: must never invent outcomes. */}
+        {a.reasoningEcho && (
+          <section
+            className="animate-fade-up max-w-2xl mx-auto"
+            style={{ animationDelay: "0.25s" }}
+            aria-label="Reasoning reflection"
+          >
+            <div className="border-l-2 border-accent/40 pl-6 sm:pl-8">
+              <p className="text-[0.6rem] tracking-[0.4em] uppercase text-accent/70 mb-3">
+                On your reasoning
+              </p>
+              <p className="font-display text-xl sm:text-2xl leading-relaxed text-foreground/90 text-pretty italic">
+                {a.reasoningEcho}
+              </p>
+            </div>
+          </section>
+        )}
+
         {/* Interactive Timeline */}
         <section className="animate-fade-up" style={{ animationDelay: "0.4s" }}>
           <SectionLabel>Consequence timeline</SectionLabel>
