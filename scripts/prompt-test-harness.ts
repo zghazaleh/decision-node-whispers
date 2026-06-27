@@ -311,6 +311,37 @@ ${transcriptText}`,
         true,
         `archetypeId=${archetypeId ?? "(none)"} headline=${JSON.stringify(validated.headline.slice(0, 60))} beats=${validated.timeline.length} belief=${validated.beliefTrajectory.length}`,
       );
+
+      // Snapshot: pin the response shape + a tight set of mission-critical fields.
+      const shape = shapeOf(validated);
+      const beliefUpdates = Array.from(
+        new Set(validated.beliefTrajectory.map((b) => b.update)),
+      ).sort();
+      const beliefConfidences = Array.from(
+        new Set(validated.beliefTrajectory.map((b) => b.confidence)),
+      ).sort();
+      const critical: Snapshot["critical"] = {
+        archetypeId: archetypeId ?? null,
+        archetypeMatchedCanon: Boolean(archetype),
+        timelineLength: validated.timeline.length,
+        canonTimelineLength: archetype ? archetype.timeline.length : null,
+        timelineMatchesCanon: archetype
+          ? validated.timeline.length === archetype.timeline.length
+          : null,
+        strengthsCount: validated.reasoningAssessment.strengths.length,
+        blindSpotsCount: validated.reasoningAssessment.blindSpots.length,
+        biasesCount: validated.reasoningAssessment.possibleBiases.length,
+        beliefTrajectoryLength: validated.beliefTrajectory.length,
+        beliefUpdatesUsed: beliefUpdates,
+        beliefConfidencesUsed: beliefConfidences,
+      };
+      const snap = compareOrBless(
+        `analysis/${missionId}/${fx.id}`,
+        shape,
+        critical,
+        updateSnapshots,
+      );
+      record(`${name} :: snapshot`, snap.outcome !== "drift" && snap.outcome !== "new", snap.detail);
     } catch (err) {
       record(name, false, (err as Error).message);
     }
