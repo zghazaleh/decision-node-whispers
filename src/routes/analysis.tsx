@@ -135,7 +135,7 @@ function Analysis() {
             style={{ animationDelay: "2.7s" }}
           >
             <p className="text-[0.6rem] tracking-[0.35em] uppercase text-accent/80 mb-4">
-              In closing
+              Closing
             </p>
             <p className="font-display text-2xl sm:text-3xl leading-snug text-foreground/95 text-pretty">
               {a.closing}
@@ -250,9 +250,9 @@ function BeliefTrajectory({
       <p className="text-[0.6rem] tracking-[0.5em] uppercase text-accent/80 mb-4 text-center">
         Belief trajectory
       </p>
-      <p className="text-center text-xs text-foreground/45 max-w-md mx-auto leading-relaxed mb-10">
-        How your working theory moved — or didn't — as the room gave you more.
-      </p>
+        <p className="text-center text-xs text-foreground/45 max-w-md mx-auto leading-relaxed mb-10">
+          How your understanding evolved as information emerged.
+        </p>
 
       <ol className="relative space-y-8 border-l border-foreground/15 pl-6 ml-2">
         {trajectory.map((snap, i) => {
@@ -317,12 +317,12 @@ function ReasoningAssessment({
       style={{ animationDelay: "2.55s" }}
     >
       <div>
-        <p className="text-[0.6rem] tracking-[0.5em] uppercase text-accent/80 mb-4 text-center">
-          Reasoning under uncertainty
-        </p>
-        <p className="text-center text-xs text-foreground/45 max-w-md mx-auto leading-relaxed mb-8">
-          Process over outcome. How you arrived, not whether the world rewarded it.
-        </p>
+          <p className="text-[0.6rem] tracking-[0.5em] uppercase text-accent/80 mb-4 text-center">
+            Reasoning assessment
+          </p>
+          <p className="text-center text-xs text-foreground/45 max-w-md mx-auto leading-relaxed mb-8">
+            Evaluating the process, not the result.
+          </p>
         <p className="font-display text-xl sm:text-2xl leading-relaxed text-foreground/90 text-pretty">
           {data.summary}
         </p>
@@ -331,7 +331,7 @@ function ReasoningAssessment({
       {data.strengths.length > 0 && (
         <div>
           <p className="text-[0.6rem] tracking-[0.35em] uppercase text-foreground/45 mb-5">
-            What you did well
+            Strengths
           </p>
           <ul className="space-y-5">
             {data.strengths.map((s, i) => (
@@ -351,7 +351,7 @@ function ReasoningAssessment({
       {data.blindSpots.length > 0 && (
         <div>
           <p className="text-[0.6rem] tracking-[0.35em] uppercase text-foreground/45 mb-5">
-            Patterns to notice
+            Areas for attention
           </p>
           <ul className="space-y-5">
             {data.blindSpots.map((b, i) => (
@@ -374,7 +374,7 @@ function ReasoningAssessment({
       {data.possibleBiases.length > 0 && (
         <div>
           <p className="text-[0.6rem] tracking-[0.35em] uppercase text-foreground/45 mb-5">
-            Cognitive textures
+            Cognitive patterns
           </p>
           <ul className="space-y-5">
             {data.possibleBiases.map((b, i) => (
