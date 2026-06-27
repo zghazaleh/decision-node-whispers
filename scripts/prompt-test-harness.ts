@@ -100,7 +100,12 @@ const AnalysisSchema = z.object({
 
 // ─── CLI ─────────────────────────────────────────────────────────────────────
 
-type Args = { only?: "director" | "analysis"; mission: string; updateSnapshots: boolean };
+type Args = {
+  only?: "director" | "analysis";
+  mission: string;
+  updateSnapshots: boolean;
+  fixture?: string;
+};
 
 function parseArgs(argv: string[]): Args {
   const args: Args = { mission: "mission-01", updateSnapshots: false };
@@ -115,6 +120,8 @@ function parseArgs(argv: string[]): Args {
       args.mission = a.slice("--mission=".length);
     } else if (a === "--update-snapshots" || a === "-u") {
       args.updateSnapshots = true;
+    } else if (a.startsWith("--fixture=")) {
+      args.fixture = a.slice("--fixture=".length);
     }
   }
   return args;
