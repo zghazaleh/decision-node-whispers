@@ -180,6 +180,116 @@ function AnalysisBlock({
   );
 }
 
+function ReasoningAssessment({
+  data,
+}: {
+  data: NonNullable<DecisionAnalysis["reasoningAssessment"]>;
+}) {
+  return (
+    <div
+      className="animate-fade-up border-t border-foreground/15 pt-12 space-y-12"
+      style={{ animationDelay: "2.55s" }}
+    >
+      <div>
+        <p className="text-[0.6rem] tracking-[0.5em] uppercase text-accent/80 mb-4 text-center">
+          Reasoning under uncertainty
+        </p>
+        <p className="text-center text-xs text-foreground/45 max-w-md mx-auto leading-relaxed mb-8">
+          Process over outcome. How you arrived, not whether the world rewarded it.
+        </p>
+        <p className="font-display text-xl sm:text-2xl leading-relaxed text-foreground/90 text-pretty">
+          {data.summary}
+        </p>
+      </div>
+
+      {data.strengths.length > 0 && (
+        <div>
+          <p className="text-[0.6rem] tracking-[0.35em] uppercase text-foreground/45 mb-5">
+            What you did well
+          </p>
+          <ul className="space-y-5">
+            {data.strengths.map((s, i) => (
+              <li key={i} className="border-l-2 border-accent/60 pl-5">
+                <p className="font-display text-lg leading-snug text-foreground/95">
+                  {s.behavior}
+                </p>
+                <p className="mt-2 text-sm text-foreground/60 leading-relaxed text-pretty">
+                  {s.evidence}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {data.blindSpots.length > 0 && (
+        <div>
+          <p className="text-[0.6rem] tracking-[0.35em] uppercase text-foreground/45 mb-5">
+            Patterns to notice
+          </p>
+          <ul className="space-y-5">
+            {data.blindSpots.map((b, i) => (
+              <li key={i} className="border-l-2 border-foreground/30 pl-5">
+                <p className="font-display text-lg leading-snug text-foreground/95">
+                  {b.pattern}
+                </p>
+                <p className="mt-2 text-sm text-foreground/60 leading-relaxed text-pretty">
+                  {b.evidence}
+                </p>
+                <p className="mt-2 text-sm text-accent/80 leading-relaxed italic text-pretty">
+                  {b.gentleReframe}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {data.possibleBiases.length > 0 && (
+        <div>
+          <p className="text-[0.6rem] tracking-[0.35em] uppercase text-foreground/45 mb-5">
+            Cognitive textures
+          </p>
+          <ul className="space-y-5">
+            {data.possibleBiases.map((b, i) => (
+              <li key={i} className="border-l-2 border-foreground/20 pl-5">
+                <p className="text-[0.6rem] tracking-[0.3em] uppercase text-accent/70 mb-2">
+                  Possibly {b.name}
+                </p>
+                <p className="font-display text-base leading-snug text-foreground/90 text-pretty">
+                  {b.gentleExplanation}
+                </p>
+                <p className="mt-2 text-xs text-foreground/55 leading-relaxed text-pretty">
+                  {b.evidence}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <div className="grid sm:grid-cols-2 gap-8 border-t border-foreground/10 pt-8">
+        <div>
+          <p className="text-[0.6rem] tracking-[0.35em] uppercase text-foreground/45 mb-3">
+            Calibration
+          </p>
+          <p className="text-sm text-foreground/80 leading-relaxed text-pretty">
+            {data.calibration}
+          </p>
+        </div>
+        <div>
+          <p className="text-[0.6rem] tracking-[0.35em] uppercase text-foreground/45 mb-3">
+            Luck vs. process
+          </p>
+          <p className="text-sm text-foreground/80 leading-relaxed text-pretty">
+            {data.luckVsSkill}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function TimelineScrubber({ timeline }: { timeline: DecisionAnalysis["timeline"] }) {
   const [index, setIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
