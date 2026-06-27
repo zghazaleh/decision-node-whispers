@@ -157,4 +157,21 @@ export const MISSIONS: MissionMeta[] = [
     creator: "House Edition",
     version: "v1.0",
   },
+  {
+    id: "mission-09",
+    number: "09",
+    codename: "The Interpreter",
+    title: "The Interpreter",
+    logline:
+      "The other side's interpreter softened the clause. The convoy moves at first light. You alone heard it.",
+    status: "available",
+    duration: "20–40 min",
+    tone: "Hushed · Political thriller",
+    location: "Besieged city, ceasefire room",
+    year: "1995",
+    category: "Ethics",
+    difficulty: 5,
+    creator: "House Edition",
+    version: "v1.0",
+  },
 ];
