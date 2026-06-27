@@ -3,13 +3,15 @@ import { DefaultChatTransport, type UIMessage } from "ai";
 import { useServerFn } from "@tanstack/react-start";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Eye, BookOpen, Phone, MessageCircle, Send, Scale, X, Mic, Square } from "lucide-react";
+import { Eye, BookOpen, Phone, MessageCircle, Send, Scale, X, Mic, Square, Volume2, VolumeX } from "lucide-react";
 import { toast } from "sonner";
 
 import sceneOffice from "@/assets/scene-office.jpg";
 import { partsToText, readMission, useMission } from "@/lib/mission-store";
 import { analyzeDecision } from "@/lib/analysis.functions";
 import { startRecording, type Recorder } from "@/lib/record-wav";
+import { createAmbient } from "@/lib/ambient";
+
 
 
 
@@ -85,6 +87,45 @@ function Mission() {
   const [decideOpen, setDecideOpen] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const analyzeFn = useServerFn(analyzeDecision);
+
+  // Ambient score — starts on the first user gesture (browsers require it).
+  const ambientRef = useRef<ReturnType<typeof createAmbient> | null>(null);
+  const [soundOn, setSoundOn] = useState<boolean>(() => {
+    try { return localStorage.getItem("dn:sound") !== "off"; } catch { return true; }
+  });
+  useEffect(() => {
+    if (!ambientRef.current) ambientRef.current = createAmbient();
+    const a = ambientRef.current;
+    const onGesture = async () => {
+      if (!a.isRunning() && soundOn) {
+        try { await a.start(); } catch { /* noop */ }
+      }
+      window.removeEventListener("pointerdown", onGesture);
+      window.removeEventListener("keydown", onGesture);
+    };
+    window.addEventListener("pointerdown", onGesture, { once: true });
+    window.addEventListener("keydown", onGesture, { once: true });
+    return () => {
+      window.removeEventListener("pointerdown", onGesture);
+      window.removeEventListener("keydown", onGesture);
+      a.stop();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => {
+    ambientRef.current?.setMuted(!soundOn);
+    try { localStorage.setItem("dn:sound", soundOn ? "on" : "off"); } catch { /* noop */ }
+  }, [soundOn]);
+
+  async function toggleSound() {
+    const next = !soundOn;
+    setSoundOn(next);
+    const a = ambientRef.current;
+    if (next && a && !a.isRunning()) {
+      try { await a.start(); } catch { /* noop */ }
+    }
+  }
+
 
   const transcriptRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -235,14 +276,25 @@ function Mission() {
           >
             Decision Node
           </button>
-          <button
-            onClick={() => setDecideOpen(true)}
-            disabled={busy || messages.length < 2}
-            className="group flex items-center gap-3 text-[0.65rem] tracking-[0.35em] uppercase text-foreground/60 hover:text-accent disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-          >
-            <Scale className="h-3.5 w-3.5" />
-            Decide
-          </button>
+          <div className="flex items-center gap-5">
+            <button
+              onClick={toggleSound}
+              aria-label={soundOn ? "Mute ambient" : "Unmute ambient"}
+              title={soundOn ? "Mute ambient" : "Unmute ambient"}
+              className="text-foreground/40 hover:text-foreground/90 transition-colors"
+            >
+              {soundOn ? <Volume2 className="h-3.5 w-3.5" /> : <VolumeX className="h-3.5 w-3.5" />}
+            </button>
+            <button
+              onClick={() => setDecideOpen(true)}
+              disabled={busy || messages.length < 2}
+              className="group flex items-center gap-3 text-[0.65rem] tracking-[0.35em] uppercase text-foreground/60 hover:text-accent disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            >
+              <Scale className="h-3.5 w-3.5" />
+              Decide
+            </button>
+          </div>
+
         </header>
 
         {/* Transcript — centered, cinematic */}
