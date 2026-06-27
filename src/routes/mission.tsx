@@ -98,7 +98,7 @@ function Mission() {
     const a = ambientRef.current;
     const onGesture = async () => {
       if (!a.isRunning() && soundOn) {
-        try { await a.start(); } catch { /* noop */ }
+        try { await a.start("mission-01"); } catch { /* noop */ }
       }
       window.removeEventListener("pointerdown", onGesture);
       window.removeEventListener("keydown", onGesture);
