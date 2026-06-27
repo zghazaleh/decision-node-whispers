@@ -255,18 +255,31 @@ export function useDecisionProfile() {
   return profile;
 }
 
-/** Per-dimension delta from previous mission to latest, or null if <2 contributions. */
+/** Per-dimension delta in the *displayed* rolling-average score from the
+ *  previous mission to the latest. Matches the number on screen, so the
+ *  arrow and the value tell the same story. Null if <2 contributions. */
 export function dimensionTrends(
   profile: DecisionProfile,
 ): Record<Dimension, number | null> {
   const out = {} as Record<Dimension, number | null>;
   const n = profile.contributions.length;
+  if (n < 2) {
+    for (const d of DIMENSIONS) out[d] = null;
+    return out;
+  }
+  // Rolling weighted average over contributions[0..n-2] (state before the
+  // latest mission). Mirrors the weighting in updateProfileWithAnalysis.
+  const prev = profile.contributions.slice(0, -1);
   for (const d of DIMENSIONS) {
-    if (n < 2) out[d] = null;
-    else
-      out[d] =
-        profile.contributions[n - 1].scores[d] -
-        profile.contributions[n - 2].scores[d];
+    let num = 0;
+    let den = 0;
+    prev.forEach((c, i) => {
+      const w = 1 + i * 0.25;
+      num += c.scores[d] * w;
+      den += w;
+    });
+    const prevAvg = Math.round(den > 0 ? num / den : 50);
+    out[d] = profile.scores[d] - prevAvg;
   }
   return out;
 }
