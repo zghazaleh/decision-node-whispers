@@ -1,4 +1,5 @@
 import releaseTrack from "@/assets/audio/ambient-release.mp3.asset.json";
+import mission03Track from "@/assets/audio/mission-03-ambient.mp3.asset.json";
 
 export type Soundtrack = {
   url: string;
@@ -11,6 +12,11 @@ export const SOUNDTRACKS: Record<string, Soundtrack> = {
     url: releaseTrack.url,
     mood: "Tense, suspended. The room before the decision.",
     volume: 0.35,
+  },
+  "mission-03": {
+    url: mission03Track.url,
+    mood: "Mission Control at 2am. Sub-heavy drone, distant hum, dread held in stillness.",
+    volume: 0.3,
   },
 };
 
