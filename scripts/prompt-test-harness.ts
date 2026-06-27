@@ -15,8 +15,16 @@
  *   LOVABLE_API_KEY=... bun run scripts/prompt-test-harness.ts --only=director
  *   LOVABLE_API_KEY=... bun run scripts/prompt-test-harness.ts --only=analysis
  *   LOVABLE_API_KEY=... bun run scripts/prompt-test-harness.ts --mission=mission-02
+ *   LOVABLE_API_KEY=... bun run scripts/prompt-test-harness.ts --update-snapshots
  *
- * Exit code is non-zero if any sample fails schema validation.
+ * In addition to schema validation, each fixture is compared against a
+ * golden snapshot in `scripts/snapshots/` that pins the response SHAPE
+ * (recursive type signature) plus mission-critical fields (archetypeId,
+ * timeline length vs canon, belief-trajectory enum values used, etc.).
+ * Use `--update-snapshots` (or `-u`) to bless intentional contract changes.
+ *
+ * Exit code is non-zero if any sample fails schema validation OR snapshot
+ * comparison.
  */
 
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
