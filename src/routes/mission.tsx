@@ -247,14 +247,19 @@ function Mission() {
           className="flex-1 overflow-y-auto px-6 sm:px-10 pt-12 pb-6"
         >
           <div className="mx-auto max-w-2xl space-y-12">
-            {messages.map((m, i) => (
-              <MessageBubble
-                key={m.id}
-                role={m.role}
-                text={partsToText(m)}
-                isLatest={i === messages.length - 1}
-              />
-            ))}
+            {messages.map((m, i) => {
+              const isLatest = i === messages.length - 1;
+              const raw = partsToText(m);
+              const { text, chips } = m.role === "assistant" ? extractChips(raw) : { text: raw, chips: [] };
+              return (
+                <div key={m.id}>
+                  <MessageBubble role={m.role} text={text} isLatest={isLatest} />
+                  {isLatest && !busy && chips.length > 0 && (
+                    <ChipRow chips={chips} onPick={submit} />
+                  )}
+                </div>
+              );
+            })}
             {status === "submitted" && <ThinkingIndicator />}
             {error && (
               <p className="text-center text-xs text-destructive-foreground/80 italic">
@@ -263,6 +268,7 @@ function Mission() {
             )}
           </div>
         </div>
+
 
         {/* Composer */}
         <div className="px-6 sm:px-10 pb-8 sm:pb-10">
