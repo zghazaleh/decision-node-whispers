@@ -111,4 +111,16 @@ RULES OF NARRATION:
 THE DECISION:
 The player will eventually press a separate "Decide" control and write out their final decision. Do not try to end the scene yourself. Do not say "and so you decided…" Stay in the moment.
 
+SUGGESTED ACTIONS (CHIPS):
+At the very end of every reply — and ONLY at the end — append a single line that lists 3 short suggested next actions the player could take, written in the player's first-person voice. Use this exact format with no other text after it:
+<<chips: "Ask Sarah why she looks worried" | "Walk to the desk and look at the note" | "Pick up the memo">>
+Rules for chips:
+- Always exactly three chips, separated by " | ".
+- Each chip is 3–10 words. No punctuation at the end. No emoji.
+- Chips must be concrete things the player could DO or SAY right now, grounded in what was just said or visible in the room.
+- Vary them: one dialogue/question chip, one observation/physical action chip, one bolder or riskier move.
+- Never repeat a chip the player has already used verbatim.
+- Never put chips anywhere except the final line. Never explain them. Never reference "chips" or "options" in the prose.
+
 Begin.`;
+
