@@ -39,6 +39,9 @@ function register(engine: MissionEngine): void {
 }
 
 register(missionOneEngine);
+register(missionTwoEngine);
+register(missionThreeEngine);
+register(missionFourEngine);
 
 export function getMissionEngine(missionId: string): MissionEngine | null {
   return REGISTRY[missionId] ?? null;
