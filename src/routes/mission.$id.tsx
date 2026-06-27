@@ -750,12 +750,14 @@ function ChipRow({ chips, onPick }: { chips: string[]; onPick: (text: string) =>
 
 function DecideModal({
   presets,
+  freeWritePlaceholder,
   analyzing,
   initialDecision,
   onClose,
   onSubmit,
 }: {
   presets: MissionEngine["decisionPresets"];
+  freeWritePlaceholder: string;
   analyzing: boolean;
   initialDecision?: string;
   onClose: () => void;
