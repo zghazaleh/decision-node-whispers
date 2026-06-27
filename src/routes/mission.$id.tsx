@@ -708,13 +708,20 @@ function DecideModal({
   presets: MissionEngine["decisionPresets"];
   analyzing: boolean;
   onClose: () => void;
-  onSubmit: (decision: string, reasoning: string, archetypeId?: string) => void;
+  onSubmit: (decision: string, reasoning: string, archetypeId?: string, confidence?: number) => void;
 }) {
   const [decision, setDecision] = useState("");
   const [reasoning, setReasoning] = useState("");
   const [archetypeId, setArchetypeId] = useState<string | undefined>();
+  const [confidence, setConfidence] = useState<number>(60);
   const selectedPreset = presets.find((p) => p.text.trim() === decision.trim());
   const canCommit = decision.trim().length > 0 && !analyzing;
+  const confLabel =
+    confidence < 25 ? "Uncertain"
+    : confidence < 45 ? "Leaning"
+    : confidence < 65 ? "Considered"
+    : confidence < 85 ? "Confident"
+    : "Certain";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/80 backdrop-blur-md px-4 py-4 animate-fade-in-slow">
@@ -758,7 +765,7 @@ function DecideModal({
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                onSubmit(decision, reasoning, archetypeId);
+                onSubmit(decision, reasoning, archetypeId, confidence);
               }}
               className="space-y-6"
             >
@@ -833,6 +840,32 @@ function DecideModal({
                   className="w-full resize-none rounded-sm border border-foreground/15 bg-background/45 px-3 py-3 text-foreground/95 outline-none transition-colors placeholder:text-foreground/25 focus:border-foreground/60"
                 />
               </div>
+
+              {/* Confidence slider — captures calibration before commit. */}
+              <div>
+                <div className="flex items-baseline justify-between mb-2">
+                  <label htmlFor="conf-slider" className="block text-[0.6rem] tracking-[0.3em] uppercase text-foreground/50">
+                    How sure are you?
+                  </label>
+                  <span className="text-[0.6rem] tracking-[0.3em] uppercase text-accent/80 tabular-nums">
+                    {confidence}/100 · {confLabel}
+                  </span>
+                </div>
+                <input
+                  id="conf-slider"
+                  type="range"
+                  min={0}
+                  max={100}
+                  step={1}
+                  value={confidence}
+                  onChange={(e) => setConfidence(Number(e.target.value))}
+                  className="w-full accent-[var(--color-accent)] cursor-pointer"
+                />
+                <p className="mt-1.5 text-[0.65rem] text-foreground/40 leading-relaxed">
+                  Honest, not heroic. Calibration is part of the read.
+                </p>
+              </div>
+
 
               <div className="sticky bottom-0 -mx-6 flex items-center justify-between gap-3 border-t border-foreground/10 bg-background/95 px-6 py-4 backdrop-blur sm:-mx-12 sm:px-12">
                 <button
