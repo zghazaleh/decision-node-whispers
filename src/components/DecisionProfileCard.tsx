@@ -1,10 +1,29 @@
+import { useState } from "react";
 import {
   DIMENSIONS,
   DIMENSION_LABELS,
+  dimensionBands,
   dimensionTrends,
   type DecisionProfile,
   type Dimension,
+  type DimensionBand,
+  type MissionContribution,
 } from "@/lib/decision-profile";
+import { MISSIONS } from "@/lib/missions";
+
+function missionLabel(missionId: string): string {
+  const m = MISSIONS.find((x) => x.id === missionId);
+  return m ? `${m.number} · ${m.codename}` : missionId;
+}
+
+function bandPhrase(b: DimensionBand): string {
+  if (b.samples === 0) return "No data yet.";
+  if (b.samples === 1) return "Estimate is wide — one mission only.";
+  if (b.halfWidth >= 22) return "Still forming. The band will narrow with more missions.";
+  if (b.halfWidth >= 14) return "Taking shape. A few more missions will sharpen it.";
+  if (b.halfWidth >= 8) return "Reasonably settled.";
+  return "Well-grounded — the estimate is stable across missions.";
+}
 
 export function DecisionProfileCard({
   profile,
@@ -14,6 +33,7 @@ export function DecisionProfileCard({
   delay?: number;
 }) {
   const trends = dimensionTrends(profile);
+  const bands = dimensionBands(profile);
   return (
     <div
       className="animate-fade-up border-t border-foreground/15 pt-12"
@@ -24,13 +44,15 @@ export function DecisionProfileCard({
       </p>
       <p className="text-center text-xs text-foreground/45 max-w-md mx-auto leading-relaxed mb-10">
         {profile.missionsCompleted <= 1
-          ? "Your profile begins here. It will develop with each mission."
-          : `Based on ${profile.contributions.length} mission${profile.contributions.length === 1 ? "" : "s"}. Recent missions weighted more heavily.`}
+          ? "Your profile begins here. Each axis is shown as a band of uncertainty that narrows with every mission."
+          : `Based on ${profile.contributions.length} mission${profile.contributions.length === 1 ? "" : "s"}. Bands narrow as the estimate stabilizes; recent missions weighted more heavily.`}
       </p>
 
       <div className="max-w-xl mx-auto">
         <RadarPlot
           values={DIMENSIONS.map((d) => profile.scores[d])}
+          los={DIMENSIONS.map((d) => bands[d].lo)}
+          his={DIMENSIONS.map((d) => bands[d].hi)}
           labels={DIMENSIONS.map((d) => DIMENSION_LABELS[d])}
         />
       </div>
@@ -39,9 +61,11 @@ export function DecisionProfileCard({
         {DIMENSIONS.map((d) => (
           <DimensionRow
             key={d}
+            dim={d}
             label={DIMENSION_LABELS[d]}
-            value={profile.scores[d]}
+            band={bands[d]}
             delta={trends[d]}
+            contributions={profile.contributions}
           />
         ))}
       </ul>
@@ -58,7 +82,17 @@ export function DecisionProfileCard({
   );
 }
 
-function RadarPlot({ values, labels }: { values: number[]; labels: string[] }) {
+function RadarPlot({
+  values,
+  los,
+  his,
+  labels,
+}: {
+  values: number[];
+  los: number[];
+  his: number[];
+  labels: string[];
+}) {
   const n = values.length;
   const size = 380;
   const cx = size / 2;
@@ -70,13 +104,19 @@ function RadarPlot({ values, labels }: { values: number[]; labels: string[] }) {
     return { x: cx + Math.cos(angle) * r, y: cy + Math.sin(angle) * r };
   };
 
+  const clamp01 = (v: number) => Math.max(0, Math.min(100, v)) / 100;
+  const ptsAt = (vs: number[]) =>
+    vs
+      .map((v, i) => {
+        const p = pointAt(i, clamp01(v) * rMax);
+        return `${p.x.toFixed(2)},${p.y.toFixed(2)}`;
+      })
+      .join(" ");
+
   const rings = [0.25, 0.5, 0.75, 1.0];
-  const polygon = values
-    .map((v, i) => {
-      const p = pointAt(i, (Math.max(0, Math.min(100, v)) / 100) * rMax);
-      return `${p.x.toFixed(2)},${p.y.toFixed(2)}`;
-    })
-    .join(" ");
+  const polygon = ptsAt(values);
+  const hiPoly = ptsAt(his);
+  const loPoly = ptsAt(los);
 
   return (
     <div className="relative mx-auto" style={{ maxWidth: size }}>
@@ -119,19 +159,29 @@ function RadarPlot({ values, labels }: { values: number[]; labels: string[] }) {
             />
           );
         })}
+        {/* Confidence band: outer (hi) filled, inner (lo) punched out via even-odd */}
+        <path
+          d={`M ${hiPoly.replace(/ /g, " L ")} Z M ${loPoly.replace(/ /g, " L ")} Z`}
+          fill="var(--color-accent)"
+          fillOpacity={0.1}
+          fillRule="evenodd"
+          stroke="var(--color-accent)"
+          strokeOpacity={0.18}
+          strokeWidth={0.75}
+        />
         {/* Filled DNA polygon */}
         <polygon
           points={polygon}
           fill="var(--color-accent)"
-          fillOpacity={0.18}
+          fillOpacity={0.22}
           stroke="var(--color-accent)"
-          strokeOpacity={0.85}
+          strokeOpacity={0.9}
           strokeWidth={1.25}
           strokeLinejoin="round"
         />
         {/* Dot at each vertex */}
         {values.map((v, i) => {
-          const p = pointAt(i, (Math.max(0, Math.min(100, v)) / 100) * rMax);
+          const p = pointAt(i, clamp01(v) * rMax);
           return (
             <circle
               key={i}
@@ -146,7 +196,6 @@ function RadarPlot({ values, labels }: { values: number[]; labels: string[] }) {
         {/* Labels */}
         {labels.map((label, i) => {
           const p = pointAt(i, rMax + 22);
-          // Compact label — first word only for cramped axes
           const short = label.length > 12 ? label.split(" ")[0] : label;
           const anchor =
             Math.abs(p.x - cx) < 8
@@ -179,35 +228,97 @@ function RadarPlot({ values, labels }: { values: number[]; labels: string[] }) {
 }
 
 function DimensionRow({
+  dim,
   label,
-  value,
+  band,
   delta,
+  contributions,
 }: {
+  dim: Dimension;
   label: string;
-  value: number;
+  band: DimensionBand;
   delta: number | null;
+  contributions: MissionContribution[];
 }) {
+  const [open, setOpen] = useState(false);
+  const hasDetail = contributions.length > 0;
   return (
-    <li className="grid grid-cols-[1fr_auto] items-center gap-4">
-      <div className="min-w-0">
-        <div className="flex items-baseline justify-between gap-3 mb-1.5">
-          <span className="text-xs sm:text-sm text-foreground/80 truncate">
-            {label}
-          </span>
-          <span className="text-[0.6rem] tracking-[0.3em] uppercase text-foreground/40 tabular-nums">
-            {delta === null ? "new" : delta === 0 ? "—" : delta > 0 ? `▲ ${delta}` : `▼ ${Math.abs(delta)}`}
-          </span>
+    <li className="border-b border-foreground/5 pb-4 last:border-b-0">
+      <button
+        type="button"
+        onClick={() => hasDetail && setOpen((v) => !v)}
+        aria-expanded={open}
+        disabled={!hasDetail}
+        className="group grid w-full grid-cols-[1fr_auto] items-center gap-4 text-left disabled:cursor-default"
+      >
+        <div className="min-w-0">
+          <div className="flex items-baseline justify-between gap-3 mb-1.5">
+            <span className="text-xs sm:text-sm text-foreground/80 truncate">
+              {label}
+            </span>
+            <span className="text-[0.6rem] tracking-[0.3em] uppercase text-foreground/40 tabular-nums">
+              {delta === null
+                ? "new"
+                : delta === 0
+                  ? "—"
+                  : delta > 0
+                    ? `▲ ${delta}`
+                    : `▼ ${Math.abs(delta)}`}
+            </span>
+          </div>
+          {/* Confidence band track */}
+          <div className="relative h-[6px] bg-foreground/10 rounded-full overflow-hidden">
+            {/* Uncertainty band */}
+            <div
+              className="absolute inset-y-0 bg-accent/25"
+              style={{
+                left: `${band.lo}%`,
+                width: `${Math.max(0, band.hi - band.lo)}%`,
+              }}
+              aria-hidden
+            />
+            {/* Point estimate marker */}
+            <div
+              className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 h-[10px] w-[2px] bg-accent transition-[left] duration-700 ease-out"
+              style={{ left: `${band.value}%` }}
+              aria-hidden
+            />
+          </div>
+          <p className="mt-1.5 text-[0.6rem] tracking-[0.2em] uppercase text-foreground/35">
+            ±{band.halfWidth} · {bandPhrase(band)}
+          </p>
         </div>
-        <div className="relative h-[3px] bg-foreground/10 rounded-full overflow-hidden">
-          <div
-            className="absolute inset-y-0 left-0 bg-accent/80 transition-[width] duration-700 ease-out"
-            style={{ width: `${value}%` }}
-          />
+        <span className="font-display text-lg sm:text-xl tabular-nums text-foreground/95 w-10 text-right">
+          {band.value}
+        </span>
+      </button>
+
+      {open && hasDetail && (
+        <div className="mt-3 ml-0 sm:ml-1 border-l border-accent/30 pl-4 animate-fade-up">
+          <p className="text-[0.6rem] tracking-[0.3em] uppercase text-foreground/40 mb-2">
+            Missions that shaped this trait
+          </p>
+          <ul className="space-y-1.5">
+            {[...contributions]
+              .slice()
+              .reverse()
+              .map((c) => {
+                const s = c.scores[dim];
+                return (
+                  <li
+                    key={c.missionId + c.at}
+                    className="grid grid-cols-[1fr_auto] items-center gap-3 text-xs text-foreground/65"
+                  >
+                    <span className="truncate">{missionLabel(c.missionId)}</span>
+                    <span className="font-display tabular-nums text-foreground/85">
+                      {s}
+                    </span>
+                  </li>
+                );
+              })}
+          </ul>
         </div>
-      </div>
-      <span className="font-display text-lg sm:text-xl tabular-nums text-foreground/95 w-10 text-right">
-        {value}
-      </span>
+      )}
     </li>
   );
 }
