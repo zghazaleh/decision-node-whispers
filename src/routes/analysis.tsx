@@ -65,6 +65,19 @@ function Analysis() {
           <h1 className="font-display text-4xl sm:text-5xl md:text-6xl leading-tight text-foreground/95 text-balance">
             {a.headline}
           </h1>
+          {a.archetypeLabel && (
+            <p className="mt-8 text-sm sm:text-base text-foreground/55 leading-relaxed">
+              You played this as{" "}
+              <span className="font-display italic text-accent text-lg sm:text-xl">
+                The {a.archetypeLabel}
+              </span>
+              {typeof mission.confidence === "number" && (
+                <span className="block mt-2 text-[0.6rem] tracking-[0.35em] uppercase text-foreground/40 tabular-nums">
+                  Committed at {mission.confidence}/100 confidence
+                </span>
+              )}
+            </p>
+          )}
         </section>
 
         {/* Interactive Timeline */}
