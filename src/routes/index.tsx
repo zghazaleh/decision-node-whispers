@@ -56,7 +56,7 @@ function Landing() {
         >
           An interactive drama about
           <br className="hidden sm:inline" />
-          decisions that cannot be undone.
+          high-stakes decisions that cannot be undone.
         </p>
 
         <div
