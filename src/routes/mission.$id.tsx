@@ -307,6 +307,28 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
       </div>
 
 
+      {/* Cinematic letterbox bars — animate in after awakening, deepen at peak pressure */}
+      {!awakening && (
+        <>
+          <div
+            className="letterbox-top"
+            aria-hidden
+            style={{ height: `calc(5vh + ${(pressure * 12).toFixed(1)}px)` }}
+          />
+          <div
+            className="letterbox-bottom"
+            aria-hidden
+            style={{ height: `calc(5vh + ${(pressure * 12).toFixed(1)}px)` }}
+          />
+        </>
+      )}
+
+      {/* Heartbeat vignette — only at peak pressure */}
+      {!awakening && pressure >= 0.6 && (
+        <div className="heartbeat-vignette" aria-hidden style={{ opacity: Math.min(0.7, (pressure - 0.6) * 2.5) }} />
+      )}
+
+
 
 
       {/* Awakening overlay — pure black with subtle horizontal slits "eyelids opening" */}
