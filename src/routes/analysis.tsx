@@ -1,10 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import type { DecisionAnalysis } from "@/lib/analysis.functions";
 import { readMission, useMission, type SavedMission } from "@/lib/mission-store";
 import { readProfile, type DecisionProfile } from "@/lib/decision-profile";
 import { DecisionProfileCard } from "@/components/DecisionProfileCard";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { getMissionPercentile, type MissionPercentile } from "@/lib/mission-stats.functions";
 import sceneCosmos from "@/assets/scene-cosmos.jpg";
 
 export const Route = createFileRoute("/analysis")({
@@ -22,7 +24,9 @@ function Analysis() {
   const navigate = useNavigate();
   const [mission, setMission] = useState<SavedMission | null>(null);
   const [profile, setProfile] = useState<DecisionProfile | null>(null);
+  const [percentile, setPercentile] = useState<MissionPercentile | null>(null);
   const { reset } = useMission(mission?.missionId ?? "mission-01");
+  const fetchPercentile = useServerFn(getMissionPercentile);
 
   useEffect(() => {
     const m = readMission();
@@ -32,7 +36,17 @@ function Analysis() {
     }
     setMission(m);
     setProfile(readProfile());
-  }, [navigate]);
+
+    // Pull community percentile if we tracked investigation time.
+    const invSeconds = m.startedAt && m.decidedAt
+      ? Math.max(0, Math.round((m.decidedAt - m.startedAt) / 1000))
+      : null;
+    if (invSeconds !== null) {
+      fetchPercentile({ data: { missionId: m.missionId, investigationSeconds: invSeconds } })
+        .then(setPercentile)
+        .catch(() => {});
+    }
+  }, [navigate, fetchPercentile]);
 
   if (!mission?.analysis) return null;
   const a = mission.analysis;
