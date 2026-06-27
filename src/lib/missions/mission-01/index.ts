@@ -131,6 +131,21 @@ export const missionOneEngine: MissionEngine = {
     filter: "saturate(0.88) contrast(1.06)",
     mood: "Tense, suspended. The room before the decision.",
   },
+  atmosphere: {
+    // Cold gray SF fog. Calm pulse like a passing window reflection.
+    hazeBackground:
+      "radial-gradient(55% 45% at 25% 50%, oklch(0.78 0.03 230 / 0.20), transparent 70%), radial-gradient(40% 35% at 80% 35%, oklch(0.85 0.02 240 / 0.14), transparent 70%)",
+    pulseBackground:
+      "linear-gradient(100deg, transparent 35%, oklch(0.88 0.04 240 / 0.22) 50%, transparent 65%)",
+    pulseDuration: 34,
+    kenBurnsDuration: 44,
+    chromaBreatheDuration: 22,
+    dustOpacityScale: 0.6,
+    padFrequency: 60,
+    filterBaseHz: 1900,
+    lfoRateHz: 0.04,
+  },
+
 
   archetypes: ARCHETYPES,
   archetypeIds: [...ARCHETYPE_IDS],
