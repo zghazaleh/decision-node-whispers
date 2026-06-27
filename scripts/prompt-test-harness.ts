@@ -241,11 +241,15 @@ async function runAnalysis(
   gateway: ReturnType<typeof createLovableAiGatewayProvider>,
   missionId: string,
   updateSnapshots: boolean,
+  fixtureFilter?: string,
 ) {
   const engine = getMissionEngine(missionId);
   if (!engine) throw new Error(`Unknown mission: ${missionId}`);
 
-  for (const fx of ANALYSIS_FIXTURES) {
+  const fixtures = fixtureFilter
+    ? ANALYSIS_FIXTURES.filter((f) => f.id === fixtureFilter)
+    : ANALYSIS_FIXTURES;
+  for (const fx of fixtures) {
     const name = `analysis / ${missionId} / ${fx.id}`;
     try {
       // ── Stage A (classify) unless a valid preset id was provided
