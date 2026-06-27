@@ -188,11 +188,15 @@ async function runDirector(
   gateway: ReturnType<typeof createLovableAiGatewayProvider>,
   missionId: string,
   updateSnapshots: boolean,
+  fixtureFilter?: string,
 ) {
   const engine = getMissionEngine(missionId);
   if (!engine) throw new Error(`Unknown mission: ${missionId}`);
 
-  for (const fx of DIRECTOR_FIXTURES) {
+  const fixtures = fixtureFilter
+    ? DIRECTOR_FIXTURES.filter((f) => f.id === fixtureFilter)
+    : DIRECTOR_FIXTURES;
+  for (const fx of fixtures) {
     const name = `director / ${missionId} / ${fx.id}`;
     try {
       const messages = [
