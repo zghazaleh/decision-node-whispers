@@ -17,8 +17,8 @@ export const Route = createFileRoute("/analysis")({
 
 function Analysis() {
   const navigate = useNavigate();
-  const { reset } = useMission();
   const [mission, setMission] = useState<SavedMission | null>(null);
+  const { reset } = useMission(mission?.missionId ?? "mission-01");
 
   useEffect(() => {
     const m = readMission();
