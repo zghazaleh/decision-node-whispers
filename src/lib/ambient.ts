@@ -10,6 +10,8 @@ export type Ambient = {
   setMuted: (m: boolean) => void;
   /** 0..1 — drives subtle volume swell + slight detune as mission stakes rise. */
   setPressure: (p: number) => void;
+  /** Toggle a low synthesized sub-pulse heartbeat as stakes peak. */
+  setHeartbeat: (active: boolean) => void;
   isRunning: () => boolean;
   currentMission: () => string | null;
 };
