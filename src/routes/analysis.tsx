@@ -104,9 +104,14 @@ function Analysis() {
             delay={2.45}
           />
 
+          {a.beliefTrajectory && a.beliefTrajectory.length > 0 && (
+            <BeliefTrajectory trajectory={a.beliefTrajectory} />
+          )}
+
           {a.reasoningAssessment && (
             <ReasoningAssessment data={a.reasoningAssessment} />
           )}
+
 
           <div
             className="animate-fade-up border-t border-foreground/15 pt-12"
