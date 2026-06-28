@@ -8,7 +8,7 @@ import { startRecording, type Recorder } from "@/lib/record-wav";
 import { toast } from "sonner";
 
 
-import { partsToText, readMission, useMission } from "@/lib/mission-store";
+import { clearMission, partsToText, readMission, useMission } from "@/lib/mission-store";
 import { analyzeDecision } from "@/lib/analysis.functions";
 import { updateProfileWithAnalysis } from "@/lib/decision-profile";
 import { recordMissionPlay } from "@/lib/mission-stats.functions";
@@ -508,6 +508,20 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
             Decision Node
           </button>
 
+          <button
+            onClick={() => {
+              const ok = window.confirm(
+                "Reset this mission? Your conversation, decision, and analysis will be cleared. You'll start from the opening again.",
+              );
+              if (!ok) return;
+              clearMission(MISSION_ID);
+              window.location.reload();
+            }}
+            className="text-[0.6rem] tracking-[0.4em] uppercase text-foreground/40 hover:text-foreground/80 transition-colors"
+            title="Clear this mission and start over"
+          >
+            Reset
+          </button>
         </header>
 
         {/* Transcript — centered, cinematic */}
