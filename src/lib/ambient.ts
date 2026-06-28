@@ -466,36 +466,44 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
     },
 
     async playOneShot(url, opts) {
-      const c = ensureCtx(); if (!c) return;
-      if (muted) return;
+      const c = ensureCtx(); if (!c) return false;
+      if (muted) return false;
       if (c.state === "suspended") { try { await c.resume(); } catch { /* noop */ } }
       const bus = opts?.bus ?? "sfx";
       const target = bus === "motif" ? motifBus : sfxBus;
-      if (!target) return;
+      if (!target) return false;
       if (reduced && bus !== "motif" && opts?.bus !== "motif") {
         // In reduced mode, sfx are heavily attenuated via the bus; motif is muted.
       }
       let buffer: AudioBuffer;
-      try { buffer = await loadBuffer(c, url); } catch { return; }
-      const src = c.createBufferSource();
-      src.buffer = buffer;
-      const g = c.createGain();
-      const peak = opts?.gain ?? (bus === "motif" ? 0.55 : 0.5);
-      const fadeIn = (opts?.fadeInMs ?? 30) / 1000;
-      const fadeOut = (opts?.fadeOutMs ?? 400) / 1000;
-      const now = c.currentTime;
-      const dur = buffer.duration;
-      g.gain.setValueAtTime(0.0001, now);
-      g.gain.linearRampToValueAtTime(peak, now + Math.min(fadeIn, dur / 2));
-      g.gain.setValueAtTime(peak, now + Math.max(0, dur - fadeOut));
-      g.gain.linearRampToValueAtTime(0.0001, now + dur);
-      src.connect(g).connect(target);
-      src.start();
-      src.stop(now + dur + 0.1);
-      window.setTimeout(() => {
-        try { src.disconnect(); } catch { /* noop */ }
-        try { g.disconnect(); } catch { /* noop */ }
-      }, (dur + 0.3) * 1000);
+      // Asset failures here are silent by design — a missing sting must
+      // never interrupt the surrounding transition or moment.
+      try { buffer = await loadBuffer(c, url); } catch { return false; }
+      try {
+        const src = c.createBufferSource();
+        src.buffer = buffer;
+        const g = c.createGain();
+        const peak = opts?.gain ?? (bus === "motif" ? 0.55 : 0.5);
+        const fadeIn = (opts?.fadeInMs ?? 30) / 1000;
+        const fadeOut = (opts?.fadeOutMs ?? 400) / 1000;
+        const now = c.currentTime;
+        const dur = buffer.duration;
+        g.gain.setValueAtTime(0.0001, now);
+        g.gain.linearRampToValueAtTime(peak, now + Math.min(fadeIn, dur / 2));
+        g.gain.setValueAtTime(peak, now + Math.max(0, dur - fadeOut));
+        g.gain.linearRampToValueAtTime(0.0001, now + dur);
+        src.connect(g).connect(target);
+        src.start();
+        src.stop(now + dur + 0.1);
+        window.setTimeout(() => {
+          try { src.disconnect(); } catch { /* noop */ }
+          try { g.disconnect(); } catch { /* noop */ }
+        }, (dur + 0.3) * 1000);
+        return true;
+      } catch {
+        return false;
+      }
     },
+
   };
 }
