@@ -219,7 +219,6 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
     decision: string,
     reasoning: string,
     archetypeId?: string,
-    confidence?: number,
   ) {
     if (!decision.trim()) return;
     setAnalyzing(true);
@@ -234,7 +233,6 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
         reasoning: reasoning.trim(),
         transcript,
         ...(archetypeId ? { archetypeId } : {}),
-        ...(typeof confidence === "number" ? { confidence } : {}),
       };
       let analysis;
       try {
@@ -250,7 +248,6 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
         analysis,
         decidedAt: Date.now(),
         ...(archetypeId ? { archetypeId } : {}),
-        ...(typeof confidence === "number" ? { confidence } : {}),
       });
       try {
         updateProfileWithAnalysis(MISSION_ID, analysis);
