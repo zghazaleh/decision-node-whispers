@@ -151,7 +151,7 @@ export function GuildCarousel({
         >
           <ul
             ref={stripRef}
-            className="scrollbar-hide flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 sm:gap-4"
+            className="scrollbar-hide flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 sm:gap-5"
             style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch" }}
             aria-busy={loading || undefined}
           >
@@ -222,8 +222,8 @@ function CarouselTile({
       aria-pressed={open}
       aria-label={`${open ? "Close" : "Open"} ${mission.codename}`}
       className={[
-        "group relative block shrink-0 overflow-hidden rounded-[10px] text-left",
-        "w-[150px] sm:w-[168px]",
+        "group relative block shrink-0 overflow-hidden rounded-[12px] text-left",
+        "w-[172px] sm:w-[188px] md:w-[200px]",
         "border bg-[#0b0d10]",
         // Asymmetric cinematic easing on state changes — slower exhale than
         // attack, no hard snap between spotlit / dim.
@@ -282,14 +282,14 @@ function CarouselTile({
               "linear-gradient(180deg, rgba(6,8,12,0) 0%, rgba(6,8,12,0.7) 60%, rgba(6,8,12,0.95) 100%)",
           }}
         />
-        <p className="absolute left-2.5 top-2.5 text-[0.5rem] tracking-[0.35em] uppercase text-foreground/85">
+        <p className="absolute left-3 top-3 text-[0.5rem] tracking-[0.35em] uppercase text-foreground/85 sm:left-3.5 sm:top-3.5">
           {mission.theme ?? "Case File"}
         </p>
-        <div className="absolute bottom-2.5 left-2.5 right-2.5">
-          <h5 className="font-display text-[15px] leading-[1.1] text-foreground drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
+        <div className="absolute bottom-3 left-3 right-3 sm:bottom-3.5 sm:left-3.5 sm:right-3.5">
+          <h5 className="font-display text-[16px] leading-[1.1] text-foreground drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)] sm:text-[17px]">
             {mission.codename}
           </h5>
-          <p className="mt-1 text-[0.5rem] tracking-[0.3em] uppercase text-foreground/70">
+          <p className="mt-1.5 text-[0.5rem] tracking-[0.3em] uppercase text-foreground/70">
             {toneWord(mission.tone)} · {shortDuration(mission.duration)}
           </p>
         </div>
@@ -299,7 +299,7 @@ function CarouselTile({
         <span
           aria-hidden
           className={[
-            "absolute inset-x-2.5 bottom-1.5 h-px origin-left rounded-full bg-accent/85",
+            "absolute inset-x-3 bottom-2 h-px origin-left rounded-full bg-accent/85 sm:inset-x-3.5",
             "shadow-[0_0_10px_color-mix(in_oklab,var(--accent)_55%,transparent)]",
             spotlit
               ? "motion-safe:animate-[dn-rule-breathe_5200ms_cubic-bezier(0.4,0,0.2,1)_forwards]"
@@ -431,7 +431,7 @@ function CarouselSkeleton() {
       {Array.from({ length: 5 }).map((_, i) => (
         <li
           key={i}
-          className="relative w-[150px] shrink-0 overflow-hidden rounded-[10px] border border-foreground/10 bg-[#0b0d10] sm:w-[168px]"
+          className="relative w-[172px] shrink-0 overflow-hidden rounded-[12px] border border-foreground/10 bg-[#0b0d10] sm:w-[188px] md:w-[200px]"
         >
           <div className="relative aspect-[3/4] w-full overflow-hidden bg-foreground/[0.035]">
             <div
