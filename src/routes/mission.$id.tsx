@@ -1033,12 +1033,13 @@ function MicButton({
       onClick={recording ? stop : start}
       disabled={disabled || busy}
       aria-label={recording ? "Stop recording" : "Record"}
-      className={`shrink-0 p-2 transition-colors disabled:opacity-20 disabled:cursor-not-allowed ${
+      className={`shrink-0 inline-flex items-center justify-center min-h-11 min-w-11 p-2 rounded-full transition-colors disabled:opacity-20 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
         recording ? "text-accent animate-pulse-soft" : "text-foreground/50 hover:text-foreground"
       }`}
     >
       {recording ? <Square className="h-4 w-4 fill-current" /> : <Mic className="h-4 w-4" />}
     </button>
+
   );
 }
 
