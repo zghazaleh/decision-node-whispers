@@ -145,6 +145,7 @@ function MissionsPage() {
   const visible = useMemo(() => {
     let rows = MISSIONS.slice();
     if (theme !== "All") rows = rows.filter((m) => m.theme === theme);
+    if (domain !== "All") rows = rows.filter((m) => m.category === domain);
     if (difficulty !== "Any") rows = rows.filter((m) => m.difficulty === difficulty);
     switch (sort) {
       case "difficulty":
@@ -165,12 +166,13 @@ function MissionsPage() {
         break;
     }
     return rows;
-  }, [theme, difficulty, sort, stats]);
+  }, [theme, domain, difficulty, sort, stats]);
 
   // Closing the open row when filters change
   useEffect(() => {
     setOpenId(null);
-  }, [theme, difficulty, sort]);
+  }, [theme, domain, difficulty, sort]);
+
 
   // TODAY pick (stable per day)
   const today = useMemo(() => pickToday(MISSIONS), []);
