@@ -10,6 +10,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { getMissionPercentile, type MissionPercentile } from "@/lib/mission-stats.functions";
 import { logAnalysisRead } from "@/lib/discovery/signals";
 import sceneCosmos from "@/assets/scene-cosmos.jpg";
+import { audio } from "@/lib/audio/director";
 
 
 function AnalysisFallback({
@@ -160,6 +161,14 @@ function Analysis() {
     }
     setMission(m);
     setProfile(readProfile());
+
+    // After. Reflective, not triumphant — cross-fade into the analysis bed
+    // and let the Node motif return, transformed.
+    void (async () => {
+      await audio.enter("analysis", { fadeMs: 1800 });
+      audio.release(1200);
+      window.setTimeout(() => { void audio.playMotif("analysis"); }, 600);
+    })();
 
     const invSeconds = m.startedAt && m.decidedAt
       ? Math.max(0, Math.round((m.decidedAt - m.startedAt) / 1000))
