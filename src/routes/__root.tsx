@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
 import { ConstitutionStatusBadge } from "@/components/ConstitutionStatus";
+import { listMetaTokens } from "@/lib/gsc-verify.functions";
 
 
 function NotFoundComponent() {
@@ -70,7 +71,15 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  head: () => ({
+  loader: async () => {
+    try {
+      const tokens = await listMetaTokens();
+      return { gscTokens: tokens };
+    } catch {
+      return { gscTokens: [] };
+    }
+  },
+  head: ({ loaderData }) => ({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
@@ -97,6 +106,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/5d91de4e-9d1c-4edf-863c-3d63866fc4fd/id-preview-29db16bb--5c0a2ea2-d89d-46f4-9789-6a6867e7e361.lovable.app-1782529685980.png" },
       { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/5d91de4e-9d1c-4edf-863c-3d63866fc4fd/id-preview-29db16bb--5c0a2ea2-d89d-46f4-9789-6a6867e7e361.lovable.app-1782529685980.png" },
+      ...((loaderData?.gscTokens ?? []).map((t) => ({
+        name: "google-site-verification",
+        content: t.token,
+      }))),
     ],
     links: [
       { rel: "stylesheet", href: appCss },
