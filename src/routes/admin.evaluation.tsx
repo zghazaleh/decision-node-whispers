@@ -8,6 +8,15 @@ import {
   type EvaluationReport,
 } from "@/lib/evaluation.functions";
 
+type MissionEval = EvaluationReport["missions"][number];
+type FilterKey =
+  | "all"
+  | "failing"
+  | "passing"
+  | "framework"
+  | "constitution";
+type SortKey = "id" | "status" | "issues";
+
 const searchSchema = z.object({
   token: z.string().optional(),
 });
@@ -138,43 +147,7 @@ function ReportView({
         </ul>
       </section>
 
-      <section>
-        <SectionHeader title="Missions" />
-        <div className="border border-foreground/10">
-          <div className="grid grid-cols-[1fr_auto_auto_auto_auto_auto_auto] gap-4 px-4 py-3 text-[0.6rem] tracking-[0.3em] uppercase text-foreground/50 border-b border-foreground/10">
-            <span>Mission</span>
-            <span>Framework</span>
-            <span>Invariants</span>
-            <span>Chips</span>
-            <span>Archetypes</span>
-            <span>Presets</span>
-            <span>Mystery</span>
-          </div>
-          {missions.map((m) => (
-            <div
-              key={m.id}
-              className="grid grid-cols-[1fr_auto_auto_auto_auto_auto_auto] gap-4 px-4 py-3 text-sm border-b border-foreground/5 items-center"
-            >
-              <span className="font-mono text-xs">{m.id}</span>
-              <Cell ok={m.frameworkMissing.length === 0} note={m.frameworkMissing.join(", ")} />
-              <Cell ok={m.checks.invariantsInherited} />
-              <Cell ok={m.checks.chipTrailerOk} />
-              <Cell ok={m.checks.archetypeDepthOk} />
-              <Cell ok={m.checks.decisionPresetsWired} />
-              <Cell
-                ok={m.checks.hiddenTruthLeak === null && !m.checks.moralizingVocabulary}
-                note={
-                  m.checks.hiddenTruthLeak
-                    ? `leak: ${m.checks.hiddenTruthLeak}`
-                    : m.checks.moralizingVocabulary
-                      ? "moralizing vocab"
-                      : ""
-                }
-              />
-            </div>
-          ))}
-        </div>
-      </section>
+      <MissionsSection missions={missions} />
 
       <section>
         <SectionHeader title="Percentile-surface audit" />
@@ -267,5 +240,175 @@ function Cell({ ok, note }: { ok: boolean; note?: string }) {
     >
       {ok ? "✓" : note ? `✗ ${note}` : "✗"}
     </span>
+  );
+}
+
+function issueCount(m: MissionEval): number {
+  const c = m.checks;
+  let n = m.frameworkMissing.length;
+  if (!c.invariantsInherited) n++;
+  if (!c.chipTrailerOk) n++;
+  if (!c.archetypeDepthOk) n++;
+  if (!c.decisionPresetsWired) n++;
+  if (c.hiddenTruthLeak) n++;
+  if (c.moralizingVocabulary) n++;
+  return n;
+}
+
+function MissionsSection({ missions }: { missions: MissionEval[] }) {
+  const [filter, setFilter] = useState<FilterKey>("all");
+  const [sort, setSort] = useState<SortKey>("id");
+  const [query, setQuery] = useState("");
+
+  const filters: { key: FilterKey; label: string; count: number }[] = [
+    { key: "all", label: "All", count: missions.length },
+    { key: "failing", label: "Failing", count: missions.filter((m) => !m.pass).length },
+    { key: "passing", label: "Passing", count: missions.filter((m) => m.pass).length },
+    {
+      key: "framework",
+      label: "Framework gaps",
+      count: missions.filter((m) => m.frameworkMissing.length > 0).length,
+    },
+    {
+      key: "constitution",
+      label: "Constitution fails",
+      count: missions.filter((m) => {
+        const c = m.checks;
+        return (
+          !c.invariantsInherited ||
+          !c.chipTrailerOk ||
+          !c.archetypeDepthOk ||
+          !c.decisionPresetsWired ||
+          c.hiddenTruthLeak !== null ||
+          c.moralizingVocabulary
+        );
+      }).length,
+    },
+  ];
+
+  const filtered = missions.filter((m) => {
+    if (query && !m.id.toLowerCase().includes(query.toLowerCase())) return false;
+    const c = m.checks;
+    switch (filter) {
+      case "failing": return !m.pass;
+      case "passing": return m.pass;
+      case "framework": return m.frameworkMissing.length > 0;
+      case "constitution":
+        return (
+          !c.invariantsInherited ||
+          !c.chipTrailerOk ||
+          !c.archetypeDepthOk ||
+          !c.decisionPresetsWired ||
+          c.hiddenTruthLeak !== null ||
+          c.moralizingVocabulary
+        );
+      default: return true;
+    }
+  });
+
+  const sorted = [...filtered].sort((a, b) => {
+    switch (sort) {
+      case "status":
+        // failing first
+        return Number(a.pass) - Number(b.pass) || a.id.localeCompare(b.id);
+      case "issues":
+        return issueCount(b) - issueCount(a) || a.id.localeCompare(b.id);
+      default:
+        return a.id.localeCompare(b.id);
+    }
+  });
+
+  return (
+    <section>
+      <SectionHeader title="Missions" />
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap gap-1">
+          {filters.map((f) => (
+            <button
+              key={f.key}
+              onClick={() => setFilter(f.key)}
+              className={`px-3 py-1 text-[0.65rem] tracking-[0.25em] uppercase border transition-colors ${
+                filter === f.key
+                  ? "border-foreground/70 bg-foreground/10 text-foreground"
+                  : "border-foreground/15 text-foreground/55 hover:text-foreground hover:border-foreground/40"
+              }`}
+            >
+              {f.label} <span className="ml-1 text-foreground/40 tabular-nums">{f.count}</span>
+            </button>
+          ))}
+        </div>
+        <div className="flex items-center gap-2 ml-auto">
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Filter by id"
+            className="bg-transparent border border-foreground/20 px-2 py-1 text-xs focus:border-foreground/60 outline-none w-40"
+          />
+          <label className="text-[0.55rem] tracking-[0.3em] uppercase text-foreground/40">
+            Sort
+          </label>
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value as SortKey)}
+            className="bg-background border border-foreground/20 px-2 py-1 text-xs focus:border-foreground/60 outline-none"
+          >
+            <option value="id">Mission id</option>
+            <option value="status">Failing first</option>
+            <option value="issues">Issue count</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="border border-foreground/10">
+        <div className="grid grid-cols-[1fr_auto_auto_auto_auto_auto_auto_auto] gap-4 px-4 py-3 text-[0.6rem] tracking-[0.3em] uppercase text-foreground/50 border-b border-foreground/10">
+          <span>Mission</span>
+          <span>Issues</span>
+          <span>Framework</span>
+          <span>Invariants</span>
+          <span>Chips</span>
+          <span>Archetypes</span>
+          <span>Presets</span>
+          <span>Mystery</span>
+        </div>
+        {sorted.length === 0 ? (
+          <div className="px-4 py-8 text-center text-sm text-foreground/40">
+            No missions match.
+          </div>
+        ) : (
+          sorted.map((m) => {
+            const n = issueCount(m);
+            return (
+              <div
+                key={m.id}
+                className="grid grid-cols-[1fr_auto_auto_auto_auto_auto_auto_auto] gap-4 px-4 py-3 text-sm border-b border-foreground/5 items-center"
+              >
+                <span className="font-mono text-xs">{m.id}</span>
+                <span
+                  className={`text-center tabular-nums text-xs ${n === 0 ? "text-emerald-400" : "text-destructive"}`}
+                >
+                  {n}
+                </span>
+                <Cell ok={m.frameworkMissing.length === 0} note={m.frameworkMissing.join(", ")} />
+                <Cell ok={m.checks.invariantsInherited} />
+                <Cell ok={m.checks.chipTrailerOk} />
+                <Cell ok={m.checks.archetypeDepthOk} />
+                <Cell ok={m.checks.decisionPresetsWired} />
+                <Cell
+                  ok={m.checks.hiddenTruthLeak === null && !m.checks.moralizingVocabulary}
+                  note={
+                    m.checks.hiddenTruthLeak
+                      ? `leak: ${m.checks.hiddenTruthLeak}`
+                      : m.checks.moralizingVocabulary
+                        ? "moralizing vocab"
+                        : ""
+                  }
+                />
+              </div>
+            );
+          })
+        )}
+      </div>
+    </section>
   );
 }
