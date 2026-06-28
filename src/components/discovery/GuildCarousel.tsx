@@ -282,14 +282,14 @@ function CarouselTile({
               "linear-gradient(180deg, rgba(6,8,12,0) 0%, rgba(6,8,12,0.7) 60%, rgba(6,8,12,0.95) 100%)",
           }}
         />
-        <p className="absolute left-2.5 top-2.5 text-[0.5rem] tracking-[0.35em] uppercase text-foreground/85">
+        <p className="absolute left-3 top-3 text-[0.5rem] tracking-[0.35em] uppercase text-foreground/85 sm:left-3.5 sm:top-3.5">
           {mission.theme ?? "Case File"}
         </p>
-        <div className="absolute bottom-2.5 left-2.5 right-2.5">
-          <h5 className="font-display text-[15px] leading-[1.1] text-foreground drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
+        <div className="absolute bottom-3 left-3 right-3 sm:bottom-3.5 sm:left-3.5 sm:right-3.5">
+          <h5 className="font-display text-[16px] leading-[1.1] text-foreground drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)] sm:text-[17px]">
             {mission.codename}
           </h5>
-          <p className="mt-1 text-[0.5rem] tracking-[0.3em] uppercase text-foreground/70">
+          <p className="mt-1.5 text-[0.5rem] tracking-[0.3em] uppercase text-foreground/70">
             {toneWord(mission.tone)} · {shortDuration(mission.duration)}
           </p>
         </div>
@@ -299,7 +299,7 @@ function CarouselTile({
         <span
           aria-hidden
           className={[
-            "absolute inset-x-2.5 bottom-1.5 h-px origin-left rounded-full bg-accent/85",
+            "absolute inset-x-3 bottom-2 h-px origin-left rounded-full bg-accent/85 sm:inset-x-3.5",
             "shadow-[0_0_10px_color-mix(in_oklab,var(--accent)_55%,transparent)]",
             spotlit
               ? "motion-safe:animate-[dn-rule-breathe_5200ms_cubic-bezier(0.4,0,0.2,1)_forwards]"
