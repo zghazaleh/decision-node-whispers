@@ -8,7 +8,7 @@ import { startRecording, type Recorder } from "@/lib/record-wav";
 import { toast } from "sonner";
 
 
-import { partsToText, readMission, useMission } from "@/lib/mission-store";
+import { clearMission, partsToText, readMission, useMission } from "@/lib/mission-store";
 import { analyzeDecision } from "@/lib/analysis.functions";
 import { updateProfileWithAnalysis } from "@/lib/decision-profile";
 import { recordMissionPlay } from "@/lib/mission-stats.functions";
