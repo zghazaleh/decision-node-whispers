@@ -456,44 +456,44 @@ function MissionsPage() {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Facet chips                                                                 */
+/* Elegant filter select                                                       */
 /* -------------------------------------------------------------------------- */
 
-function FacetRow({
+function FilterSelect({
   label,
   values,
   active,
   onChange,
-  renderValue,
 }: {
   label: string;
   values: string[];
   active: string;
   onChange: (v: string) => void;
-  renderValue?: (v: string) => React.ReactNode;
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-      <span className="text-[0.55rem] tracking-[0.4em] uppercase text-muted-foreground/55 mr-1">
+    <div className="relative">
+      <label className="mb-1 block text-[0.55rem] tracking-[0.4em] uppercase text-muted-foreground/55">
         {label}
-      </span>
-      {values.map((v) => {
-        const isActive = active === v;
-        return (
-          <button
-            key={v}
-            type="button"
-            onClick={() => onChange(v)}
-            className={`inline-flex items-center min-h-[28px] px-2 text-[0.6rem] tracking-[0.3em] uppercase transition-colors ${
-              isActive
-                ? "text-accent"
-                : "text-foreground/55 hover:text-foreground/90"
-            }`}
-          >
-            {renderValue ? renderValue(v) : v}
-          </button>
-        );
-      })}
+      </label>
+      <div className="relative">
+        <select
+          value={active}
+          onChange={(e) => onChange(e.target.value)}
+          className="appearance-none rounded-md border border-foreground/10 bg-background/60 py-1.5 pl-3 pr-8 text-[0.65rem] tracking-[0.25em] uppercase text-foreground/90 outline-none transition-all hover:border-foreground/20 focus:border-accent/50 focus:ring-1 focus:ring-accent/30 cursor-pointer"
+        >
+          {values.map((v) => (
+            <option key={v} value={v}>
+              {v}
+            </option>
+          ))}
+        </select>
+        <span
+          className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[0.5rem] text-foreground/40"
+          aria-hidden
+        >
+          ▾
+        </span>
+      </div>
     </div>
   );
 }
