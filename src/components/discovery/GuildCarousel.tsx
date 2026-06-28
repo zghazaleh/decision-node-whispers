@@ -382,7 +382,7 @@ function ExpandedCase({
 }) {
   const resonance = resonanceCopy(getResonance(mission.id));
   return (
-    <div className="overflow-hidden rounded-[14px] border border-accent/40 bg-[#0b0d10] motion-safe:animate-fade-up">
+    <div id={`carousel-panel-${mission.id}`} role="region" aria-label={`${mission.codename} case file`} className="overflow-hidden rounded-[14px] border border-accent/40 bg-[#0b0d10] motion-safe:animate-fade-up">
       <div className="relative aspect-[16/9] sm:aspect-auto sm:h-[236px] w-full overflow-hidden bg-[#0b0d10]">
         <SceneArt src={getSceneSrc(mission.id)} theme={mission.theme} brighten />
         <div
