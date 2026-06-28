@@ -18,6 +18,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as MissionIdRouteImport } from './routes/mission.$id'
 import { Route as ApiTranscribeRouteImport } from './routes/api/transcribe'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as AdminGscRouteImport } from './routes/admin.gsc'
 import { Route as AdminEvaluationRouteImport } from './routes/admin.evaluation'
 
 const SoundTestRoute = SoundTestRouteImport.update({
@@ -65,6 +66,11 @@ const ApiChatRoute = ApiChatRouteImport.update({
   path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminGscRoute = AdminGscRouteImport.update({
+  id: '/admin/gsc',
+  path: '/admin/gsc',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminEvaluationRoute = AdminEvaluationRouteImport.update({
   id: '/admin/evaluation',
   path: '/admin/evaluation',
@@ -79,6 +85,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sound-test': typeof SoundTestRoute
   '/admin/evaluation': typeof AdminEvaluationRoute
+  '/admin/gsc': typeof AdminGscRoute
   '/api/chat': typeof ApiChatRoute
   '/api/transcribe': typeof ApiTranscribeRoute
   '/mission/$id': typeof MissionIdRoute
@@ -91,6 +98,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sound-test': typeof SoundTestRoute
   '/admin/evaluation': typeof AdminEvaluationRoute
+  '/admin/gsc': typeof AdminGscRoute
   '/api/chat': typeof ApiChatRoute
   '/api/transcribe': typeof ApiTranscribeRoute
   '/mission/$id': typeof MissionIdRoute
@@ -104,6 +112,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sound-test': typeof SoundTestRoute
   '/admin/evaluation': typeof AdminEvaluationRoute
+  '/admin/gsc': typeof AdminGscRoute
   '/api/chat': typeof ApiChatRoute
   '/api/transcribe': typeof ApiTranscribeRoute
   '/mission/$id': typeof MissionIdRoute
@@ -118,6 +127,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/sound-test'
     | '/admin/evaluation'
+    | '/admin/gsc'
     | '/api/chat'
     | '/api/transcribe'
     | '/mission/$id'
@@ -130,6 +140,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/sound-test'
     | '/admin/evaluation'
+    | '/admin/gsc'
     | '/api/chat'
     | '/api/transcribe'
     | '/mission/$id'
@@ -142,6 +153,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/sound-test'
     | '/admin/evaluation'
+    | '/admin/gsc'
     | '/api/chat'
     | '/api/transcribe'
     | '/mission/$id'
@@ -155,6 +167,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SoundTestRoute: typeof SoundTestRoute
   AdminEvaluationRoute: typeof AdminEvaluationRoute
+  AdminGscRoute: typeof AdminGscRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiTranscribeRoute: typeof ApiTranscribeRoute
   MissionIdRoute: typeof MissionIdRoute
@@ -225,6 +238,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/gsc': {
+      id: '/admin/gsc'
+      path: '/admin/gsc'
+      fullPath: '/admin/gsc'
+      preLoaderRoute: typeof AdminGscRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/evaluation': {
       id: '/admin/evaluation'
       path: '/admin/evaluation'
@@ -243,6 +263,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SoundTestRoute: SoundTestRoute,
   AdminEvaluationRoute: AdminEvaluationRoute,
+  AdminGscRoute: AdminGscRoute,
   ApiChatRoute: ApiChatRoute,
   ApiTranscribeRoute: ApiTranscribeRoute,
   MissionIdRoute: MissionIdRoute,
@@ -250,13 +271,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
