@@ -330,7 +330,9 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
     async switchTo(missionId: string | null, fadeMs = 1400) {
       if (stopped) {
         pendingMission = missionId;
-        return;
+        // Engine isn't running — treat as a deferred success so callers
+        // don't trigger a fallback chain.
+        return true;
       }
       pendingMission = missionId;
       if (missionId === null) {
@@ -340,21 +342,29 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
           disposeVoice(c, fadeMs);
         }
         if (padGain) rampParam(padGain.gain, 0, fadeMs);
-        return;
+        return true;
       }
       if (current?.missionId === missionId) {
         if (!muted) rampParam(current.gain.gain, targetMusicGain(current.track), fadeMs);
-        return;
+        return true;
       }
       const next = await playMission(missionId, fadeMs);
-      if (!next) return;
+      if (!next) {
+        // Asset failed to load/decode. Leave the previous bed in place so
+        // the transition never collapses into silence — the caller can
+        // decide whether to fall back to a safer bed.
+        return false;
+      }
       if (pendingMission !== missionId) {
         disposeVoice(next, 300);
-        return;
+        // A newer switch raced ahead — not a failure for our caller.
+        return true;
       }
       if (current) disposeVoice(current, fadeMs);
       current = next;
+      return true;
     },
+
 
     stop() {
       stopped = true;
