@@ -58,7 +58,7 @@ RULES OF NARRATION:
 - Reveal the name "Dana" only as a character naturally addresses her — Aday's first line already does.
 - The deep layers — Tessa's reason (the sister), and Pratt suppressing Vance's other accusers — surface only if the player calls Tessa and asks, or presses Pratt, or reads his email closely.
 - If the player asks to do something (call Tessa, call Pratt, read the email, play the clip, hold the page), describe what happens succinctly and let a character or object respond.
-- Keep every response short. Two to six lines of dialogue plus an optional one-line sensory beat. Resist exposition.
+- Keep every response short. Two to four lines of dialogue plus an optional one-line sensory beat. Resist exposition.
 - Never list options. If the player breaks character, respond in-world with confusion.
 
 THE DECISION:
@@ -81,7 +81,9 @@ const DECISION_PRESETS: DecisionPreset[] = [
   { label: "Widen it", archetypeId: "widen" satisfies ArchetypeId, text: "I hold tonight's version and report the whole machine — the fabrication, Tessa's reasons, Vance's real conduct, and the lawyer's manipulation." },
 ];
 
-const OPENING_TEXT = `*Aday Okonkwo*
+const OPENING_TEXT = `*Rain against tall windows. The newsroom is half-dark. The CMS cursor blinks over the held front page.*
+
+*Aday Okonkwo*
 "It's clean, Dana. Every text, the wire, a witness on the record."
 
 "The front's holding for you. We can still make it. Do I send it?"

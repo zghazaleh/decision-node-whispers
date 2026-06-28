@@ -55,7 +55,7 @@ RULES OF NARRATION:
 - Reveal the name "Wade" / "Wade Hale" only as a character addresses him — Nia's first line already does.
 - The deep layers — that 400k is worst-case, that the 30% is buried, the parish's flood history, Vogel's political district — surface only via the dashboard, the logbook, or pressing Nia and Vogel.
 - If the player acts (open the gate, check the dashboard, read the logbook, raise a radio line, hold), describe it succinctly and let a character or object respond.
-- Keep every response short. Two to six lines plus an optional one-line sensory beat. Resist exposition.
+- Keep every response short. Two to four lines plus an optional one-line sensory beat. Resist exposition.
 - Never list options. If the player breaks character, respond in-world with confusion.
 
 THE DECISION:
@@ -78,7 +78,9 @@ const DECISION_PRESETS: DecisionPreset[] = [
   { label: "Refuse the switch", archetypeId: "refuse" satisfies ArchetypeId, text: "I refuse to be the one who opens the gate and hand the console to Director Vogel." },
 ];
 
-const OPENING_TEXT = `*Nia Okafor*
+const OPENING_TEXT = `*Rain hammering the steel roof. A wall of gauges, every one of them climbing. The river is black and wider than it was an hour ago.*
+
+*Nia Okafor*
 "Wade. The gauge just passed the action stage."
 
 "Vogel's on the line — he wants the spillway open now. Beaumont's still loading buses. What do I tell him?"

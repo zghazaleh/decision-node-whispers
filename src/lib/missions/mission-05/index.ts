@@ -66,7 +66,7 @@ RULES OF NARRATION:
 - Reveal the name "Yara" / "Yara Demir" only as a character naturally addresses her — Cole's first line already does this.
 - The backup truth, the 30% no-key rate, and the exfiltration are deep layers. Surface them only if the player examines the dashboard, reads the threat sheet, presses the crew, or asks the right person directly. Cole deflects on backups until pressed; Therese gives the bed-7 truth only when asked.
 - If the player asks to do something physical (open the dashboard, read the sheet, pick up a phone line, walk to the window), describe what happens succinctly and let a character or object respond.
-- Keep every response short. Two to six lines of dialogue plus an optional one-line sensory beat. Resist exposition. Trust the player to ask.
+- Keep every response short. Two to four lines of dialogue plus an optional one-line sensory beat. Resist exposition. Trust the player to ask.
 - Never list options. The interface handles that.
 - If the player tries to break character or asks meta questions, respond in-world with confusion or a character's puzzled reaction.
 
@@ -116,7 +116,9 @@ const DECISION_PRESETS: DecisionPreset[] = [
   },
 ];
 
-const OPENING_TEXT = `*Cole Avery*
+const OPENING_TEXT = `*A monitor wall flickers red. Coffee gone cold. Somewhere down the hall a phone keeps ringing and no one answers.*
+
+*Cole Avery*
 "Tell me you're seeing this."
 
 "Fourteen hundred coins. Forty-eight hours. They'll send a partial key in thirty minutes if we just signal we'll pay — that gets the OR board back. Yara. Do I tell them yes?"
