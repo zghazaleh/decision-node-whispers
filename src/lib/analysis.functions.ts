@@ -356,11 +356,10 @@ ${Object.entries(archetype.secondOrder)
 CLOSING TONE: ${archetype.tone}`
       : `No canonical archetype matched. Write the timeline yourself, 4-6 beats, but stay grounded in the transcript.`;
 
-    const { object: rawObject } = await generateObject({
+    const { text: analysisText } = await generateText({
       model: gateway("google/gemini-3-flash-preview"),
       temperature: 0.6,
       maxOutputTokens: 8192,
-      schema: RawAnalysisSchema,
       system: `You are a senior executive coach AND a decision scientist reviewing a high-stakes decision you just made inside an immersive interactive drama. You are speaking TO the person who just decided — always in the second person ("you", "your"). Never refer to "the player", "the operator", "the user", or "this player". The consequences of the chosen stance are FIXED CANON — narrate them, do not invent them. Your real work is to evaluate HOW you reached the decision, not whether the decision was "correct".
 
 You draw from modern decision science, behavioral economics, cognitive psychology, probabilistic reasoning under uncertainty, and strategic thinking. Judge process, not outcome. A sound process that produced a poor outcome is still a sound process. A lucky outcome from a sloppy process is still a sloppy process — name that separation explicitly.
@@ -384,7 +383,7 @@ BIASES TO CONSIDER (do not list them; only surface 0-3 if the transcript shows c
 
 STRENGTHS TO RECOGNIZE when present: seeking disconfirming evidence, holding multiple hypotheses, belief updating on new evidence, clarifying questions before deciding, separating facts from assumptions, naming weak evidence, weighing short vs long-term, identifying second-order effects, calibrated confidence, knowing when more information stops being worth the time.
 
-Return a JSON object with these fields. EVERY string field is addressed to "you" in the second person. Fields described as sentences or paragraphs MUST be a single JSON string, never an array of strings:
+Return ONLY a valid JSON object. Do not wrap it in markdown. Do not include commentary before or after it. EVERY string field is addressed to "you" in the second person. Fields described as sentences or paragraphs MUST be a single JSON string, never an array of strings:
 - headline: one restrained sentence (max 18 words), second person, present tense, naming what you actually did. E.g. "You took the stand and qualified your opinion under oath."
 - timeline: the canon beats above, verbatim. Same count, same order, same wording.
 - assumptions: 2-3 sentences naming the unspoken assumptions you operated on.
@@ -425,9 +424,25 @@ FULL TRANSCRIPT:
 ${transcriptText}`,
     });
 
+    // Parse permissively first, because this is prose-heavy JSON and schema-
+    // constrained decoding has proven brittle for this large object. Then
+    // validate/normalize into the strict app contract, with a last-resort
+    // fallback so analysis failure never blanks the mission experience.
+    const parsed = extractJsonObject(analysisText);
+    const rawResult = RawAnalysisSchema.safeParse(parsed);
+    const object = rawResult.success
+      ? normalizeAnalysis(rawResult.data)
+      : fallbackAnalysis({
+          raw: parsed && typeof parsed === "object"
+            ? parsed as Record<string, unknown>
+            : undefined,
+          archetype,
+          decision: data.decision,
+          reasoning: data.reasoning,
+        });
+
     // Hard-guarantee: overwrite the model's timeline with canon if we have one,
     // and stamp the archetype id/label so the analysis screen can name it.
-    const object = normalizeAnalysis(rawObject);
 
     const finalAnalysis: DecisionAnalysis = archetype
       ? {
