@@ -757,7 +757,7 @@ function DifficultyDots({
         <span
           key={n}
           className={`block rounded-full ${size} ${
-            n <= rounded ? "bg-foreground/45" : "bg-foreground/12"
+            n <= rounded ? "bg-foreground/45" : "bg-foreground/25 ring-1 ring-inset ring-foreground/10"
           }`}
           aria-hidden
         />
