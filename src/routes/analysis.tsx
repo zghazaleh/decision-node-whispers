@@ -357,11 +357,10 @@ function AnalysisDebrief({
           Carry forward
         </p>
         {profile && <DecisionProfileCard profile={profile} delay={0.7} />}
-        {percentile && percentile.plays >= 3 && (
+        {percentile && percentile.plays >= 3 && percentile.investigationPercentile !== null && (
           <p className="text-center text-xs text-foreground/55 leading-relaxed">
-            You sit in the {Math.round(percentile.percentile)}
-            <sup>th</sup> percentile of choices on this case
-            <span className="text-foreground/35"> · {percentile.plays} sessions</span>
+            You investigated longer than {Math.round(percentile.investigationPercentile)}% of
+            <span className="text-foreground/35"> {percentile.plays} sessions on this case</span>
           </p>
         )}
       </section>
