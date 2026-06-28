@@ -151,7 +151,7 @@ export function GuildCarousel({
         >
           <ul
             ref={stripRef}
-            className="scrollbar-hide flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 sm:gap-4"
+            className="scrollbar-hide flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 sm:gap-5"
             style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch" }}
             aria-busy={loading || undefined}
           >
