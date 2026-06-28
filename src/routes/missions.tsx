@@ -363,6 +363,10 @@ function MissionsPage() {
           rightEyebrow="Fresh"
           items={guildRail}
           onSelect={commit}
+          loading={guildLoading}
+          error={guildError}
+          onRetry={() => setGuildNonce((n) => n + 1)}
+          emptyCopy="No fresh cases tonight. Check back when the Guild stirs."
         />
 
 
