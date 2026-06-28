@@ -15,21 +15,28 @@ export type AudioProfile = {
 export type Ambient = {
   start: (missionId?: string) => Promise<void>;
   stop: () => void;
-  switchTo: (missionId: string | null, fadeMs?: number) => Promise<void>;
+  /**
+   * Resolves to `true` once the requested bed is actually playing (or once
+   * silence is established for `null`). Resolves to `false` if the asset
+   * failed to load / decode — callers can use that to fall back to a
+   * safer bed instead of leaving the user in silence.
+   */
+  switchTo: (missionId: string | null, fadeMs?: number) => Promise<boolean>;
   setMuted: (m: boolean) => void;
   setPressure: (p: number) => void;
   setHeartbeat: (active: boolean) => void;
   setAudioProfile: (profile: AudioProfile) => void;
   setReducedAudio: (reduced: boolean) => void;
-  playOneShot: (url: string, opts?: { gain?: number; fadeInMs?: number; fadeOutMs?: number; bus?: "sfx" | "motif" }) => Promise<void>;
+  /** `true` when the sample played to completion, `false` on any failure. */
+  playOneShot: (url: string, opts?: { gain?: number; fadeInMs?: number; fadeOutMs?: number; bus?: "sfx" | "motif" }) => Promise<boolean>;
   prefetch: (url: string) => Promise<void>;
   duck: (amount?: number, ms?: number) => void;
   release: (ms?: number) => void;
   ignite: () => Promise<void>;
   isRunning: () => boolean;
   currentMission: () => string | null;
-
 };
+
 
 type Voice = {
   missionId: string;
@@ -45,14 +52,42 @@ const bufferCache = new Map<string, Promise<AudioBuffer>>();
 // Network-level cache: warm the HTTP cache and stash the ArrayBuffer before
 // the AudioContext exists so the first decode never has to round-trip.
 const arrayBufferCache = new Map<string, Promise<ArrayBuffer>>();
+// URLs that recently failed to fetch or decode. We back off for ~30s so a
+// broken bed/SFX doesn't get re-requested on every transition (which would
+// turn a transient CDN hiccup into a stream of 404s). The cooldown lets us
+// recover automatically once the asset is reachable again.
+const FAILED_URL_TTL_MS = 30_000;
+const failedUrls = new Map<string, number>();
+const warnedUrls = new Set<string>();
+function isFailing(url: string): boolean {
+  const t = failedUrls.get(url);
+  if (t === undefined) return false;
+  if (Date.now() - t > FAILED_URL_TTL_MS) {
+    failedUrls.delete(url);
+    return false;
+  }
+  return true;
+}
+function markFailed(url: string, why: unknown): void {
+  failedUrls.set(url, Date.now());
+  if (!warnedUrls.has(url)) {
+    warnedUrls.add(url);
+    // One-line, non-fatal: this is expected behavior for missing/blocked
+    // assets, not an application bug.
+    console.warn(`[ambient] audio asset unavailable — continuing without it: ${url}`, why);
+  }
+}
 
 /**
  * Fire-and-forget HTTP prefetch for a bed/sfx URL. Safe to call without an
  * AudioContext — buffers are kept until decode happens on first play.
+ * Always resolves (never rejects); a failed prefetch just marks the URL as
+ * cooling-down so later transitions can fall back instead of hitching.
  */
 export function prefetchAudio(url: string): Promise<void> {
   if (!url || typeof window === "undefined") return Promise.resolve();
   if (bufferCache.has(url)) return Promise.resolve();
+  if (isFailing(url)) return Promise.resolve();
   const cached = arrayBufferCache.get(url);
   if (cached) return cached.then(() => {}, () => {});
   const p = fetch(url).then((r) => {
@@ -60,13 +95,20 @@ export function prefetchAudio(url: string): Promise<void> {
     return r.arrayBuffer();
   });
   arrayBufferCache.set(url, p);
-  p.catch(() => arrayBufferCache.delete(url));
+  p.catch((err) => {
+    arrayBufferCache.delete(url);
+    markFailed(url, err);
+  });
   return p.then(() => {}, () => {});
 }
 
 async function loadBuffer(ctx: AudioContext, url: string): Promise<AudioBuffer> {
   const cached = bufferCache.get(url);
   if (cached) return cached;
+  if (isFailing(url)) {
+    // Fail fast — don't network/decode again until the cooldown elapses.
+    throw new Error(`ambient asset cooling down: ${url}`);
+  }
   const p = (async () => {
     const pre = arrayBufferCache.get(url);
     const data = pre
@@ -79,9 +121,13 @@ async function loadBuffer(ctx: AudioContext, url: string): Promise<AudioBuffer> 
     return await ctx.decodeAudioData(data);
   })();
   bufferCache.set(url, p);
-  p.catch(() => bufferCache.delete(url));
+  p.then(
+    () => { failedUrls.delete(url); warnedUrls.delete(url); },
+    (err) => { bufferCache.delete(url); markFailed(url, err); },
+  );
   return p;
 }
+
 
 
 export function createAmbient(initialMissionId: string | null = null): Ambient {
