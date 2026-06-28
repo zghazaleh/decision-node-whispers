@@ -1119,17 +1119,30 @@ function LongTermConsequences({
   const tail = timeline.slice(Math.ceil(timeline.length / 2));
   const shown = tail.length > 0 ? tail : timeline;
   return (
-    <div className="space-y-6">
-      <p className="text-sm text-foreground/55 leading-relaxed">
+    <div className="space-y-8">
+      <p className="text-sm text-foreground/55 leading-relaxed max-w-2xl">
         What unfolds downstream of this choice — beyond the immediate aftermath.
       </p>
-      <ol className="space-y-5">
+      <ol className="relative space-y-7 pl-8 sm:pl-10 before:absolute before:left-[7px] sm:before:left-[9px] before:top-2 before:bottom-2 before:w-px before:bg-gradient-to-b before:from-accent/40 before:via-accent/15 before:to-transparent">
         {shown.map((t, i) => (
-          <li key={i} className="border-l-2 border-accent/30 pl-5">
-            <p className="text-[0.6rem] tracking-[0.35em] uppercase text-foreground/55 mb-1.5">
+          <li
+            key={i}
+            className="relative animate-consequence-rise group"
+            style={{ animationDelay: `${i * 0.12}s` }}
+          >
+            {/* node marker */}
+            <span
+              className="absolute -left-8 sm:-left-10 top-1.5 flex h-[15px] w-[15px] items-center justify-center"
+              aria-hidden
+            >
+              <span className="absolute inset-0 rounded-full bg-accent/15 blur-[6px] group-hover:bg-accent/40 transition-colors duration-500" />
+              <span className="relative h-[7px] w-[7px] rounded-full bg-accent shadow-[0_0_10px_2px_rgba(224,179,113,0.5)]" />
+            </span>
+            <p className="text-[0.58rem] tracking-[0.4em] uppercase text-foreground/45 mb-1.5 tabular-nums">
+              <span className="text-accent/75 mr-2">{String(i + 1).padStart(2, "0")}</span>
               {t.beat}
             </p>
-            <p className="font-display text-lg leading-snug text-foreground/95 text-pretty">
+            <p className="font-display text-lg sm:text-xl leading-snug text-foreground/95 text-pretty">
               {t.consequence}
             </p>
           </li>
@@ -1138,6 +1151,7 @@ function LongTermConsequences({
     </div>
   );
 }
+
 
 function CommunityComparison({ percentile }: { percentile: MissionPercentile }) {
   const fmt = (s: number | null) => {
