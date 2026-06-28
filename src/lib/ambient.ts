@@ -394,6 +394,16 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
       rampParam(bedBus.gain, 1, ms);
     },
 
+    async prefetch(url) {
+      if (!url) return;
+      // Always warm the HTTP cache first — works before any user gesture.
+      await prefetchAudio(url);
+      // If a context already exists, decode now so first play is instant.
+      const c = ctx;
+      if (c) { try { await loadBuffer(c, url); } catch { /* noop */ } }
+    },
+
+
     async ignite() {
       const c = ensureCtx(); if (!c) return;
       if (c.state === "suspended") { try { await c.resume(); } catch { /* noop */ } }
