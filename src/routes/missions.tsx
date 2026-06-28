@@ -51,10 +51,14 @@ function usePriorDecisions(): Record<string, PriorDecision> {
     const out: Record<string, PriorDecision> = {};
     for (const m of MISSIONS) {
       const saved = readMission(m.id);
+      // Require a genuine committed decision: archetype id, a real timestamp,
+      // and the actual decision text the player wrote. Opening a mission alone
+      // must never produce a "you last chose" line.
       if (!saved.archetypeId || !saved.decidedAt) continue;
+      if (typeof saved.decision !== "string" || saved.decision.trim() === "") continue;
       const engine = getMissionEngine(m.id);
       const arche = engine?.getArchetype(saved.archetypeId);
-      if (!arche) continue;
+      if (!arche?.label) continue;
       out[m.id] = { archetypeLabel: arche.label, decidedAt: saved.decidedAt };
     }
     setPrior(out);
