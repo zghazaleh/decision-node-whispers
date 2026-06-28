@@ -20,6 +20,11 @@ export type Ambient = {
   setPressure: (p: number) => void;
   setHeartbeat: (active: boolean) => void;
   setAudioProfile: (profile: AudioProfile) => void;
+  setReducedAudio: (reduced: boolean) => void;
+  playOneShot: (url: string, opts?: { gain?: number; fadeInMs?: number; fadeOutMs?: number; bus?: "sfx" | "motif" }) => Promise<void>;
+  duck: (amount?: number, ms?: number) => void;
+  release: (ms?: number) => void;
+  ignite: () => Promise<void>;
   isRunning: () => boolean;
   currentMission: () => string | null;
 };
@@ -67,6 +72,13 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
   let ctx: AudioContext | null = null;
   let masterGain: GainNode | null = null;
 
+  // Buses — bed (mission/screen ambient + pad + heartbeat) can be ducked
+  // independently of stings (sfx) and the gold-thread motif.
+  let bedBus: GainNode | null = null;
+  let sfxBus: GainNode | null = null;
+  let motifBus: GainNode | null = null;
+  let duckTimer: number | null = null;
+
   // Heartbeat
   let hbGain: GainNode | null = null;
   let hbTimer: number | null = null;
@@ -80,6 +92,8 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
   let padOsc: OscillatorNode | null = null;
   let padGain: GainNode | null = null;
 
+  let reduced = false;
+
   function ensureCtx(): AudioContext | null {
     if (typeof window === "undefined") return null;
     if (!ctx) {
@@ -92,13 +106,17 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
         masterGain.gain.value = 1;
         masterGain.connect(ctx.destination);
 
+        bedBus = ctx.createGain(); bedBus.gain.value = 1; bedBus.connect(masterGain);
+        sfxBus = ctx.createGain(); sfxBus.gain.value = 1; sfxBus.connect(masterGain);
+        motifBus = ctx.createGain(); motifBus.gain.value = 1; motifBus.connect(masterGain);
+
         hbGain = ctx.createGain();
         hbGain.gain.value = 0;
-        hbGain.connect(masterGain);
+        hbGain.connect(bedBus);
 
         padGain = ctx.createGain();
         padGain.gain.value = 0;
-        padGain.connect(masterGain);
+        padGain.connect(bedBus);
         padOsc = ctx.createOscillator();
         padOsc.type = "sine";
         padOsc.frequency.value = profile.padFrequency;
@@ -198,7 +216,7 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
     lfoDepth.connect(filter.frequency);
     const gain = c.createGain();
     gain.gain.value = 0;
-    source.connect(filter).connect(gain).connect(masterGain);
+    source.connect(filter).connect(gain).connect(bedBus ?? masterGain);
     source.start();
     const v: Voice = { missionId, track, source, filter, gain, startedAt: c.currentTime };
     rampParam(gain.gain, targetMusicGain(track), fadeInMs);
@@ -276,6 +294,7 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
 
     setMuted(m: boolean) {
       muted = m;
+      if (masterGain) rampParam(masterGain.gain, m ? 0 : 1, 350);
       if (current) rampParam(current.gain.gain, targetMusicGain(current.track), 500);
       applyPadGain(500);
       if (hbGain && ctx) {
@@ -292,6 +311,7 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
     },
 
     setHeartbeat(active: boolean) {
+      if (reduced) active = false;
       if (active === hbActive) return;
       hbActive = active;
       if (active) {
@@ -315,6 +335,72 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
       if (lfo) rampParam(lfo.frequency, profile.lfoRateHz, ramp * 1000);
       if (lfoDepth) rampParam(lfoDepth.gain, profile.filterLfoDepthHz, ramp * 1000);
       if (current) rampParam(current.filter.frequency, profile.filterBaseHz, ramp * 1000);
+    },
+
+    setReducedAudio(next: boolean) {
+      if (next === reduced) return;
+      reduced = next;
+      if (next) {
+        // Stop heartbeat, kill pad and motif bus, dim sfx — keep a faint drone.
+        hbActive = false;
+        stopHeartbeat(600);
+        if (padGain) rampParam(padGain.gain, 0, 800);
+        if (motifBus) rampParam(motifBus.gain, 0, 600);
+        if (sfxBus) rampParam(sfxBus.gain, 0.25, 600);
+      } else {
+        applyPadGain(800);
+        if (motifBus) rampParam(motifBus.gain, 1, 600);
+        if (sfxBus) rampParam(sfxBus.gain, 1, 600);
+      }
+    },
+
+    duck(amount = 0.35, ms = 600) {
+      const c = ensureCtx(); if (!c || !bedBus) return;
+      rampParam(bedBus.gain, Math.max(0, Math.min(1, amount)), ms);
+      if (duckTimer) { clearTimeout(duckTimer); duckTimer = null; }
+    },
+
+    release(ms = 1200) {
+      const c = ensureCtx(); if (!c || !bedBus) return;
+      rampParam(bedBus.gain, 1, ms);
+    },
+
+    async ignite() {
+      const c = ensureCtx(); if (!c) return;
+      if (c.state === "suspended") { try { await c.resume(); } catch { /* noop */ } }
+    },
+
+    async playOneShot(url, opts) {
+      const c = ensureCtx(); if (!c) return;
+      if (muted) return;
+      if (c.state === "suspended") { try { await c.resume(); } catch { /* noop */ } }
+      const bus = opts?.bus ?? "sfx";
+      const target = bus === "motif" ? motifBus : sfxBus;
+      if (!target) return;
+      if (reduced && bus !== "motif" && opts?.bus !== "motif") {
+        // In reduced mode, sfx are heavily attenuated via the bus; motif is muted.
+      }
+      let buffer: AudioBuffer;
+      try { buffer = await loadBuffer(c, url); } catch { return; }
+      const src = c.createBufferSource();
+      src.buffer = buffer;
+      const g = c.createGain();
+      const peak = opts?.gain ?? (bus === "motif" ? 0.55 : 0.5);
+      const fadeIn = (opts?.fadeInMs ?? 30) / 1000;
+      const fadeOut = (opts?.fadeOutMs ?? 400) / 1000;
+      const now = c.currentTime;
+      const dur = buffer.duration;
+      g.gain.setValueAtTime(0.0001, now);
+      g.gain.linearRampToValueAtTime(peak, now + Math.min(fadeIn, dur / 2));
+      g.gain.setValueAtTime(peak, now + Math.max(0, dur - fadeOut));
+      g.gain.linearRampToValueAtTime(0.0001, now + dur);
+      src.connect(g).connect(target);
+      src.start();
+      src.stop(now + dur + 0.1);
+      window.setTimeout(() => {
+        try { src.disconnect(); } catch { /* noop */ }
+        try { g.disconnect(); } catch { /* noop */ }
+      }, (dur + 0.3) * 1000);
     },
   };
 }

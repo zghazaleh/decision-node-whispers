@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { audio } from "@/lib/audio/director";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -68,6 +69,15 @@ function Landing() {
         >
           <Link
             to="/missions"
+            onClick={() => {
+              // Ignition: the first gesture. Sub-drone fades in, then the Node
+              // motif sounds once. The Archive bed picks up on /missions.
+              void (async () => {
+                await audio.ignite();
+                await audio.enter("landing", { fadeMs: 2200 });
+                window.setTimeout(() => { void audio.playMotif("landing"); }, 1100);
+              })();
+            }}
             className="group inline-flex items-center gap-4 px-1 py-3 text-sm tracking-[0.4em] uppercase text-foreground/85 hover:text-foreground transition-colors"
           >
             <span className="h-px w-10 bg-foreground/30 group-hover:bg-foreground/70 group-hover:w-16 transition-all duration-500" />

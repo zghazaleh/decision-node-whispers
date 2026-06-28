@@ -9,7 +9,7 @@ import {
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { MISSIONS, type MissionMeta } from "@/lib/missions";
-import { createAmbient } from "@/lib/ambient";
+import { audio } from "@/lib/audio/director";
 import { getSoundtrack } from "@/lib/soundtracks";
 import { getAllMissionStats, type MissionStats } from "@/lib/mission-stats.functions";
 import { readMission } from "@/lib/mission-store";
@@ -213,38 +213,31 @@ function MissionsPage() {
     setOpenId(null);
   }, [theme, domain, difficulty, sort]);
 
-  /* ----- Ambient soundtrack: only switches when a row is OPENED, not on peek */
-  const soundOn = (() => {
-    try { return localStorage.getItem("dn:sound") !== "off"; } catch { return true; }
-  })();
-  const ambientRef = useRef<ReturnType<typeof createAmbient> | null>(null);
-  const armedRef = useRef(false);
+  /* ----- Ambient: the Archive bed is the hushed reading-room. Opening a
+     case card crossfades into that mission's score; closing returns to the
+     Archive — never hard silence between screens. */
   useEffect(() => {
-    if (!ambientRef.current) ambientRef.current = createAmbient(null);
-    const a = ambientRef.current;
-    a.setMuted(!soundOn);
     const arm = async () => {
-      if (armedRef.current) return;
-      try {
-        await a.start("mission-01");
-        await a.switchTo(null, 600);
-        armedRef.current = true;
-      } catch { /* noop */ }
+      await audio.ignite();
+      await audio.enter("archive");
     };
-    window.addEventListener("pointerdown", arm, { once: true });
-    window.addEventListener("keydown", arm, { once: true });
+    if (audio.isIgnited()) { void arm(); }
+    else {
+      window.addEventListener("pointerdown", arm, { once: true });
+      window.addEventListener("keydown", arm, { once: true });
+    }
     return () => {
       window.removeEventListener("pointerdown", arm);
       window.removeEventListener("keydown", arm);
-      a.stop();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => {
-    const a = ambientRef.current;
-    if (!a || !armedRef.current) return;
-    if (openId && getSoundtrack(openId)) void a.switchTo(openId, 1400);
-    else void a.switchTo(null, 1200);
+    if (!audio.isIgnited()) return;
+    if (openId && getSoundtrack(openId)) {
+      void audio.enter("mission", { missionId: openId });
+    } else {
+      void audio.enter("archive");
+    }
   }, [openId]);
 
   function commit(id: string) {

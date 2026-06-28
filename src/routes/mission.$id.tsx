@@ -13,7 +13,7 @@ import { analyzeDecision } from "@/lib/analysis.functions";
 import { updateProfileWithAnalysis } from "@/lib/decision-profile";
 import { recordMissionPlay } from "@/lib/mission-stats.functions";
 
-import { createAmbient } from "@/lib/ambient";
+import { audio } from "@/lib/audio/director";
 import { getMissionEngine } from "@/lib/missions/registry";
 import { MISSIONS } from "@/lib/missions";
 import type { MissionEngine } from "@/lib/missions/types";
@@ -106,43 +106,38 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
   const decideOpenedAtRef = useRef<number | null>(null);
 
   // Ambient score — starts on the first user gesture (browsers require it).
-  // Missions without a registered soundtrack play silently.
-  const ambientRef = useRef<ReturnType<typeof createAmbient> | null>(null);
+  // The AudioDirector singleton carries audio across screens; we just enter
+  // the mission bed here and forward soundOn / pressure / heartbeat to it.
   const [soundOn, setSoundOn] = useState<boolean>(() => {
     try { return localStorage.getItem("dn:sound") !== "off"; } catch { return true; }
   });
   useEffect(() => {
-    if (!ambientRef.current) ambientRef.current = createAmbient(MISSION_ID);
-    if (ENGINE.atmosphere) ambientRef.current.setAudioProfile(ENGINE.atmosphere);
-
-    const a = ambientRef.current;
-    const onGesture = async () => {
-      if (!a.isRunning() && soundOn) {
-        try { await a.start(MISSION_ID); } catch { /* noop */ }
-      }
-      window.removeEventListener("pointerdown", onGesture);
-      window.removeEventListener("keydown", onGesture);
+    const profile = ENGINE.atmosphere;
+    const enter = async () => {
+      await audio.ignite();
+      await audio.enter("mission", { missionId: MISSION_ID, profile });
     };
-    window.addEventListener("pointerdown", onGesture, { once: true });
-    window.addEventListener("keydown", onGesture, { once: true });
-    return () => {
-      window.removeEventListener("pointerdown", onGesture);
-      window.removeEventListener("keydown", onGesture);
-      a.stop();
-    };
+    if (audio.isIgnited()) {
+      void enter();
+    } else {
+      const onGesture = () => { void enter(); };
+      window.addEventListener("pointerdown", onGesture, { once: true });
+      window.addEventListener("keydown", onGesture, { once: true });
+      return () => {
+        window.removeEventListener("pointerdown", onGesture);
+        window.removeEventListener("keydown", onGesture);
+      };
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [MISSION_ID]);
-  useEffect(() => {
-    ambientRef.current?.setMuted(!soundOn);
-    try { localStorage.setItem("dn:sound", soundOn ? "on" : "off"); } catch { /* noop */ }
-  }, [soundOn]);
+  useEffect(() => { audio.setMuted(!soundOn); }, [soundOn]);
 
   async function toggleSound() {
     const next = !soundOn;
     setSoundOn(next);
-    const a = ambientRef.current;
-    if (next && a && !a.isRunning()) {
-      try { await a.start(MISSION_ID); } catch { /* noop */ }
+    if (next && !audio.isIgnited()) {
+      await audio.ignite();
+      await audio.enter("mission", { missionId: MISSION_ID, profile: ENGINE.atmosphere });
     }
   }
 
@@ -193,6 +188,8 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
     setDecidePrefill(prefill);
     setDecideOpen(true);
     decideOpenedAtRef.current = Date.now();
+    // The air leaves the room — duck the bed while the modal is open.
+    audio.duck(0.28, 500);
   }
 
   async function submit(text: string) {
@@ -225,6 +222,11 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
   ) {
     if (!decision.trim()) return;
     setAnalyzing(true);
+    // Commit ritual: lock the bed, drop a deep settle, then a rising shimmer
+    // that bridges into the analysis bed on /analysis.
+    void audio.playSfx("commit", { gain: 0.55 });
+    audio.duck(0.18, 400);
+    window.setTimeout(() => { void audio.playSfx("analyzing", { gain: 0.4 }); }, 700);
     try {
       const transcript = messages.map((m) => ({
         role: m.role,
@@ -331,8 +333,8 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
   const pressure = Math.min(1, Math.max(0, (messages.length - 1) / 18));
   // Slow audio swell + low heartbeat synth that tracks the visual pressure curve.
   useEffect(() => {
-    ambientRef.current?.setPressure(pressure);
-    ambientRef.current?.setHeartbeat(pressure >= 0.6);
+    audio.setPressure(pressure);
+    audio.setHeartbeat(pressure >= 0.6);
   }, [pressure]);
 
   const dusk = (0.35 + pressure * 0.55).toFixed(3);          // bottom gradient depth
@@ -645,7 +647,7 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
           freeWritePlaceholder={ENGINE.decideFreeWritePlaceholder ?? "In your own words…"}
           analyzing={analyzing}
           initialDecision={decidePrefill}
-          onClose={() => !analyzing && setDecideOpen(false)}
+          onClose={() => { if (!analyzing) { setDecideOpen(false); audio.release(900); } }}
           onSubmit={handleDecide}
         />
       )}
