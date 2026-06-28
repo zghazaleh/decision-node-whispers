@@ -275,7 +275,11 @@ function MissionsPage() {
             values={["Any", ...difficulties.map(String)]}
             active={difficulty === "Any" ? "Any" : String(difficulty)}
             onChange={(v) => setDifficulty(v === "Any" ? "Any" : Number(v))}
+            renderValue={(v) =>
+              v === "Any" ? <span>Any</span> : <DifficultyDots level={Number(v)} />
+            }
           />
+
 
 
           <div className="ml-auto flex items-center gap-4">
