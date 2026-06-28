@@ -15,6 +15,7 @@ import { recordMissionPlay } from "@/lib/mission-stats.functions";
 
 import { createAmbient } from "@/lib/ambient";
 import { getMissionEngine } from "@/lib/missions/registry";
+import { MISSIONS } from "@/lib/missions";
 import type { MissionEngine } from "@/lib/missions/types";
 
 export const Route = createFileRoute("/mission/$id")({
