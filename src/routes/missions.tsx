@@ -51,10 +51,14 @@ function usePriorDecisions(): Record<string, PriorDecision> {
     const out: Record<string, PriorDecision> = {};
     for (const m of MISSIONS) {
       const saved = readMission(m.id);
+      // Require a genuine committed decision: archetype id, a real timestamp,
+      // and the actual decision text the player wrote. Opening a mission alone
+      // must never produce a "you last chose" line.
       if (!saved.archetypeId || !saved.decidedAt) continue;
+      if (typeof saved.decision !== "string" || saved.decision.trim() === "") continue;
       const engine = getMissionEngine(m.id);
       const arche = engine?.getArchetype(saved.archetypeId);
-      if (!arche) continue;
+      if (!arche?.label) continue;
       out[m.id] = { archetypeLabel: arche.label, decidedAt: saved.decidedAt };
     }
     setPrior(out);
@@ -127,7 +131,7 @@ function MissionsPage() {
   const themes = useMemo(() => {
     const set = new Set<string>();
     for (const m of MISSIONS) if (m.theme) set.add(m.theme);
-    return ["All", ...Array.from(set)];
+    return ["All", ...Array.from(set).sort()];
   }, []);
   const domains = useMemo(() => {
     const set = new Set<string>();
@@ -144,10 +148,10 @@ function MissionsPage() {
   // TODAY pick (stable per day)
   const today = useMemo(() => pickToday(MISSIONS), []);
 
-  // Apply filters + sort (exclude today's case from the list)
+  // Apply filters + sort (today's case stays in the ledger AND in filter results;
+  // the hero card above is purely a feature, not an exclusion).
   const visible = useMemo(() => {
     let rows = MISSIONS.slice();
-    if (today) rows = rows.filter((m) => m.id !== today.id);
     if (theme !== "All") rows = rows.filter((m) => m.theme === theme);
     if (domain !== "All") rows = rows.filter((m) => m.category === domain);
     if (difficulty !== "Any") rows = rows.filter((m) => m.difficulty === difficulty);
@@ -170,7 +174,9 @@ function MissionsPage() {
         break;
     }
     return rows;
-  }, [theme, domain, difficulty, sort, stats, today]);
+  }, [theme, domain, difficulty, sort, stats]);
+
+  const filtersActive = theme !== "All" || domain !== "All" || difficulty !== "Any";
 
   // Closing the open row when filters change
   useEffect(() => {
@@ -248,7 +254,9 @@ function MissionsPage() {
             ← Decision Nodes
           </Link>
           <p className="text-[0.6rem] tracking-[0.4em] uppercase text-muted-foreground/70 tabular-nums">
-            The Archive · {MISSIONS.length} case files
+            {filtersActive
+              ? `Showing ${visible.length} of ${MISSIONS.length}`
+              : `The Archive · ${MISSIONS.length} case files`}
           </p>
         </header>
 
@@ -749,7 +757,7 @@ function DifficultyDots({
         <span
           key={n}
           className={`block rounded-full ${size} ${
-            n <= rounded ? "bg-foreground/45" : "bg-foreground/12"
+            n <= rounded ? "bg-foreground/45" : "bg-foreground/25 ring-1 ring-inset ring-foreground/10"
           }`}
           aria-hidden
         />
