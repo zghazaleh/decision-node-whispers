@@ -295,27 +295,72 @@ function MissionsPage() {
           </div>
         </div>
 
-        {/* ---------- TODAY pointer ---------- */}
+        {/* ---------- TODAY featured card ---------- */}
         {today && (
-          <button
-            type="button"
-            onClick={() => commit(today.id)}
-            className="group mb-8 flex w-full items-baseline gap-3 border-t border-foreground/10 py-4 text-left transition-colors hover:border-accent/40"
-          >
-            <span className="text-[0.55rem] tracking-[0.4em] uppercase text-accent/90">
-              Today
-            </span>
-            <span className="font-display text-base sm:text-lg text-foreground/95">
-              {today.codename}
-            </span>
-            <span className="hidden sm:inline text-sm italic text-muted-foreground/80 line-clamp-1">
-              {today.logline}
-            </span>
-            <span className="ml-auto text-[0.55rem] tracking-[0.4em] uppercase text-accent/70 group-hover:text-accent transition-colors">
-              Enter →
-            </span>
-          </button>
+          <div className="mb-10">
+            <div className="mb-3 flex items-center gap-3">
+              <span className="text-[0.55rem] tracking-[0.4em] uppercase text-accent">
+                Today
+              </span>
+              <span className="h-px flex-1 bg-accent/25" aria-hidden />
+              <span className="text-[0.55rem] tracking-[0.4em] uppercase text-muted-foreground/55">
+                Case of the day
+              </span>
+            </div>
+            <div className="overflow-hidden rounded-[14px] border border-accent/40 bg-[#0b0d10] motion-safe:animate-fade-up">
+              {/* Art region */}
+              <div className="relative aspect-[16/9] sm:aspect-auto sm:h-[260px] w-full overflow-hidden bg-[#0b0d10]">
+                <SceneArt src={getSceneSrc(today.id)} theme={today.theme} />
+                <div
+                  aria-hidden
+                  className="absolute inset-0"
+                  style={{
+                    background:
+                      "linear-gradient(180deg, rgba(6,8,12,0.05) 30%, rgba(6,8,12,0.78) 100%)",
+                  }}
+                />
+                <p className="absolute left-5 top-4 text-[0.55rem] tracking-[0.4em] uppercase text-foreground/85">
+                  Case File · {today.theme ?? "—"}
+                </p>
+                <div className="absolute bottom-4 left-5 right-5">
+                  <h4 className="font-display text-3xl sm:text-[40px] leading-[1.05] text-foreground">
+                    {today.codename}
+                  </h4>
+                  <p className="mt-1 text-[0.6rem] tracking-[0.35em] uppercase text-foreground/75">
+                    {[today.location, today.year].filter(Boolean).join(" · ")}
+                  </p>
+                </div>
+              </div>
+
+              {/* Info strip */}
+              <div className="px-5 py-5 sm:px-6 sm:py-6">
+                <p className="font-display text-base sm:text-lg leading-snug text-foreground/90 text-pretty">
+                  {today.logline}
+                </p>
+
+                <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-[0.6rem] tracking-[0.3em] uppercase text-muted-foreground/75">
+                  <span>{toneWord(today.tone)}</span>
+                  <DifficultyDots level={today.difficulty ?? null} />
+                  <span>{shortDuration(today.duration)}</span>
+                  {today.category && <span>{today.category}</span>}
+                </div>
+
+                <div className="mt-5 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => commit(today.id)}
+                    aria-label={`Enter ${today.codename}`}
+                    className="inline-flex min-h-[44px] items-center gap-3 rounded-full bg-accent px-6 py-2 text-[0.65rem] tracking-[0.4em] uppercase text-background hover:bg-accent/90 transition-colors w-full sm:w-auto justify-center"
+                  >
+                    Enter
+                    <span aria-hidden>→</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         )}
+
 
 
 
