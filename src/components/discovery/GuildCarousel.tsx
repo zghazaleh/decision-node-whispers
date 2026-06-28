@@ -222,8 +222,8 @@ function CarouselTile({
       aria-pressed={open}
       aria-label={`${open ? "Close" : "Open"} ${mission.codename}`}
       className={[
-        "group relative block shrink-0 overflow-hidden rounded-[10px] text-left",
-        "w-[150px] sm:w-[168px]",
+        "group relative block shrink-0 overflow-hidden rounded-[12px] text-left",
+        "w-[172px] sm:w-[188px] md:w-[200px]",
         "border bg-[#0b0d10]",
         // Asymmetric cinematic easing on state changes — slower exhale than
         // attack, no hard snap between spotlit / dim.
