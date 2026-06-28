@@ -14,6 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
 import { ConstitutionStatusBadge } from "@/components/ConstitutionStatus";
 import { SoundControls } from "@/components/audio/SoundControls";
+import { AudioFailureIndicator } from "@/components/audio/AudioFailureIndicator";
 import { listMetaTokens } from "@/lib/gsc-verify.functions";
 
 
@@ -147,6 +148,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <div className="fixed top-3 right-3 z-50 flex items-center gap-2">
+        <AudioFailureIndicator />
         <SoundControls />
         <ConstitutionStatusBadge />
       </div>
