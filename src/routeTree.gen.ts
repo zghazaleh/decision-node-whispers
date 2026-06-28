@@ -17,6 +17,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as MissionIdRouteImport } from './routes/mission.$id'
 import { Route as ApiTranscribeRouteImport } from './routes/api/transcribe'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as AdminEvaluationRouteImport } from './routes/admin.evaluation'
 
 const SoundTestRoute = SoundTestRouteImport.update({
   id: '/sound-test',
@@ -58,6 +59,11 @@ const ApiChatRoute = ApiChatRouteImport.update({
   path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminEvaluationRoute = AdminEvaluationRouteImport.update({
+  id: '/admin/evaluation',
+  path: '/admin/evaluation',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -65,6 +71,7 @@ export interface FileRoutesByFullPath {
   '/constitution': typeof ConstitutionRoute
   '/missions': typeof MissionsRoute
   '/sound-test': typeof SoundTestRoute
+  '/admin/evaluation': typeof AdminEvaluationRoute
   '/api/chat': typeof ApiChatRoute
   '/api/transcribe': typeof ApiTranscribeRoute
   '/mission/$id': typeof MissionIdRoute
@@ -75,6 +82,7 @@ export interface FileRoutesByTo {
   '/constitution': typeof ConstitutionRoute
   '/missions': typeof MissionsRoute
   '/sound-test': typeof SoundTestRoute
+  '/admin/evaluation': typeof AdminEvaluationRoute
   '/api/chat': typeof ApiChatRoute
   '/api/transcribe': typeof ApiTranscribeRoute
   '/mission/$id': typeof MissionIdRoute
@@ -86,6 +94,7 @@ export interface FileRoutesById {
   '/constitution': typeof ConstitutionRoute
   '/missions': typeof MissionsRoute
   '/sound-test': typeof SoundTestRoute
+  '/admin/evaluation': typeof AdminEvaluationRoute
   '/api/chat': typeof ApiChatRoute
   '/api/transcribe': typeof ApiTranscribeRoute
   '/mission/$id': typeof MissionIdRoute
@@ -98,6 +107,7 @@ export interface FileRouteTypes {
     | '/constitution'
     | '/missions'
     | '/sound-test'
+    | '/admin/evaluation'
     | '/api/chat'
     | '/api/transcribe'
     | '/mission/$id'
@@ -108,6 +118,7 @@ export interface FileRouteTypes {
     | '/constitution'
     | '/missions'
     | '/sound-test'
+    | '/admin/evaluation'
     | '/api/chat'
     | '/api/transcribe'
     | '/mission/$id'
@@ -118,6 +129,7 @@ export interface FileRouteTypes {
     | '/constitution'
     | '/missions'
     | '/sound-test'
+    | '/admin/evaluation'
     | '/api/chat'
     | '/api/transcribe'
     | '/mission/$id'
@@ -129,6 +141,7 @@ export interface RootRouteChildren {
   ConstitutionRoute: typeof ConstitutionRoute
   MissionsRoute: typeof MissionsRoute
   SoundTestRoute: typeof SoundTestRoute
+  AdminEvaluationRoute: typeof AdminEvaluationRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiTranscribeRoute: typeof ApiTranscribeRoute
   MissionIdRoute: typeof MissionIdRoute
@@ -192,6 +205,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/evaluation': {
+      id: '/admin/evaluation'
+      path: '/admin/evaluation'
+      fullPath: '/admin/evaluation'
+      preLoaderRoute: typeof AdminEvaluationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -201,6 +221,7 @@ const rootRouteChildren: RootRouteChildren = {
   ConstitutionRoute: ConstitutionRoute,
   MissionsRoute: MissionsRoute,
   SoundTestRoute: SoundTestRoute,
+  AdminEvaluationRoute: AdminEvaluationRoute,
   ApiChatRoute: ApiChatRoute,
   ApiTranscribeRoute: ApiTranscribeRoute,
   MissionIdRoute: MissionIdRoute,
