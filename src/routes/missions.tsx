@@ -219,8 +219,10 @@ function MissionsPage() {
 
   function clearFilters() {
     setTheme("All");
+    setDomain("All");
     setDifficulty("Any");
   }
+
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-background text-foreground">
