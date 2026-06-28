@@ -58,6 +58,15 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
     return () => clearTimeout(t);
   }, []);
 
+  // Pre-warm the bed for this mission + the analysis bed + decision SFX so
+  // commit / analyzing / the transition to /analysis never hitch on a
+  // network round-trip the first time they fire.
+  useEffect(() => {
+    audio.prefetch({ missionId: MISSION_ID, sfx: ["awakening", "commit", "analyzing"] });
+    audio.prefetch({ screen: "analysis", sfx: ["node-motif"] });
+  }, [MISSION_ID]);
+
+
   // Seed once (lazy): use saved messages or the canonical opening.
   const [initialMessages] = useState<UIMessage[]>(() => {
     const saved = readMission(MISSION_ID);
