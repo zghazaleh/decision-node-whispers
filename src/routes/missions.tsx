@@ -318,6 +318,20 @@ function MissionCard({
         />
       </dl>
 
+      {/* Prior decision — a quiet recall so a returning player can see what
+          they committed to last time. No score, no judgment. Per §08 #4 and
+          the Archive milestone in the roadmap. */}
+      {prior && available && (
+        <div className="mt-6 border-t border-foreground/10 pt-4">
+          <p className="text-[0.5rem] tracking-[0.4em] uppercase text-muted-foreground/55 mb-1">
+            Your prior decision
+          </p>
+          <p className="text-xs text-foreground/75 leading-snug">
+            {prior.archetypeLabel}
+          </p>
+        </div>
+      )}
+
       {/* Footer — creator metadata + CTA */}
       <div className="mt-7 flex items-end justify-between gap-4">
         <div className="text-[0.55rem] tracking-[0.35em] uppercase text-muted-foreground/55 leading-relaxed">
