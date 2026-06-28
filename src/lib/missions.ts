@@ -14,6 +14,8 @@ export type MissionMeta = {
   location?: string;
   year?: string;
   category?: string;
+  /** Single primary theme tag for Reading Room filtering. */
+  theme?: string;
   difficulty?: 1 | 2 | 3 | 4 | 5;
   // Reserved for future creator-published cases
   creator?: string;
