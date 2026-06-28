@@ -1,5 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { audio } from "@/lib/audio/director";
+
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -22,8 +25,17 @@ export const Route = createFileRoute("/")({
 });
 
 function Landing() {
+  // Warm the landing + archive beds (and the node motif) before the user
+  // taps Begin, so the first cross-fade after ignition never has to wait
+  // on a network round-trip.
+  useEffect(() => {
+    audio.prefetch({ screen: "landing", sfx: ["node-motif"] });
+    audio.prefetch({ screen: "archive" });
+  }, []);
+
   return (
     <main className="relative min-h-[100svh] overflow-x-hidden bg-background">
+
       <div className="starfield animate-drift" aria-hidden />
       <div
         className="starfield animate-drift"

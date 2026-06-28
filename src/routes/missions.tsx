@@ -131,6 +131,17 @@ function MissionsPage() {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [entering, setEntering] = useState(false);
 
+  // Warm the archive bed + every available mission bed up-front so opening a
+  // case cross-fades from a ready buffer — no hitch on first play.
+  useEffect(() => {
+    audio.prefetch({ screen: "archive" });
+    audio.prefetch({ screen: "analysis" });
+    for (const m of MISSIONS) {
+      if (m.status === "available") audio.prefetch({ missionId: m.id });
+    }
+  }, []);
+
+
   // Available facet values
   const themes = useMemo(() => {
     const set = new Set<string>();
