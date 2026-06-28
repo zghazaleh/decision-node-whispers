@@ -1,125 +1,129 @@
-# Decision Node — Migration Plan (current-state → architecture spec)
 
-Note: there is no `/docs/spec` folder in the repo. The closest target documentation is `/docs/architecture/*`, which the README labels "source of truth for how the AI systems work today." This plan treats `/docs/architecture` as the spec to align against, and `/docs/current-state` as the inspectable record of what actually ships.
+# Decision Node — Platform Evaluation vs. Vision
 
-The goal is alignment without behavior change. No prompt rewrites, no model swaps, no logic edits.
-
----
-
-## 1. What can remain unchanged
-
-These match the spec closely enough that they should be left alone:
-
-- **Gateway wiring** — `src/lib/ai-gateway.server.ts` (base URL, header, model id `google/gemini-3-flash-preview`). Spec and code agree.
-- **Director route** — `src/routes/api/chat.ts`: `streamText`, temperature `0.85`, `convertToModelMessages`, `toUIMessageStreamResponse({ originalMessages })`. Spec documents this exact shape.
-- **Two-stage analyzer** — `src/lib/analysis.functions.ts`: Stage A classifier at temp `0.1`, Stage B narrator at temp `0.6`, post-hoc canon overwrite. Schema (`AnalysisSchema`), input schema (`AnalysisInput`), and the canon-timeline prompt block all match `prompt-io-schema.md`.
-- **Registry + validation** — `src/lib/missions/registry.ts`, `src/lib/missions/validation.ts`. Behavior described in `case-structure.md` matches code.
-- **Per-mission triad** — `index.ts` / `canon.ts` / `outcomes.ts` per `src/lib/missions/mission-0X/`. Matches spec.
-- **Session storage** — `src/lib/mission-store.ts` keys (`decision-node:mission:<id>`, `decision-node:active-mission`) match spec.
-- **Opening rendering** — client-side synthetic first assistant message from `engine.opening.text` in `src/routes/mission.$id.tsx`. Matches spec.
-- **Chip parsing** — client-side `extractChips` regex tolerance. Matches spec.
-- **Transcription path** — `src/lib/record-wav.ts` + `src/routes/api/transcribe.ts` with `openai/gpt-4o-mini-transcribe`. Not in `/docs/architecture` but stable; document, do not change.
-
-## 2. What should be extracted into markdown later (no code change)
-
-These behaviors exist in code but are absent or under-specified in `/docs/architecture`. They should be promoted from `current-state` into the spec set in a later pass:
-
-- **`MissionEngine.atmosphere` field** — present in `types.ts` and consumed by `ambient.ts`; missing from `case-structure.md`.
-- **Pressure curve and heartbeat thresholds** — `(messages.length - 1) / 18`, `> 0.6` toggles heartbeat, BPM `60 + p*32`. Currently only in `known-behaviors.md`.
-- **Display catalog vs runtime engine** dual catalogue (`src/lib/missions.ts` vs registry). `case-structure.md` only describes the engine side.
-- **Telemetry contract** — Lovable Cloud `mission_plays` table, the only server-side store. Not in spec.
-- **Transcription contract** — request shape, size limits (1KB / 25MB), upstream form-field name.
-- **Sound toggle key** — `localStorage["dn:sound"]`.
-- **Default-mission coercion** — `missionId` defaults to `mission-01` silently in both `/api/chat` and `analyzeDecision`.
-- **Reserved metadata fields** — `MissionMeta.status` values `classified | locked`, `creator`, `version`.
-
-These extractions are documentation-only and can be batched into a follow-up doc PR; they do not affect the code migration.
-
-## 3. What is risky to refactor
-
-Touch with care. Each item lists *why* it is fragile:
-
-- **System prompt text + canon block** (`src/lib/missions/*/index.ts`, `canon.ts`). The Director's voice, chip discipline, and ground-truth boundary are encoded entirely in prose. Any reformatting (whitespace, headings, list bullets) can shift output distribution. The opening is duplicated inside `SYSTEM_PROMPT` and as `OPENING_TEXT`; they must stay in lock-step manually.
-- **`canonGroundTruthBlock()`** — no runtime guard. Removing or renaming a canon field that the formatter references prints `"undefined"` into the system prompt and passes validation.
-- **`AnalysisSchema`** — `generateObject` strict-validates; adding/removing/renaming a field changes the contract for the model and the `/analysis` renderer simultaneously.
-- **Canon overwrite step** in `analysis.functions.ts` — the `timeline: archetype.timeline.map(t => ({ ...t }))` line is the deterministic-canon guarantee. Removing it lets the model invent beats.
-- **Archetype id rename** — must change `outcomes.ts` (both id and key), the `ArchetypeId` union, every `DECISION_PRESETS[i].archetypeId satisfies ArchetypeId`, and any persisted save in `localStorage` (in-flight users would carry a stale `archetypeId`).
-- **Streaming response shape** — removing `originalMessages` or switching off `toUIMessageStreamResponse` breaks `useChat` optimistic updates.
-- **WebAudio gesture-arming** in `ambient.ts` — removing the `pointerdown`/`keydown` `once` listeners reintroduces silent ambient on autoplay-blocking browsers.
-- **Module-load singletons** — `bufferCache` Map, `REGISTRY` Map, `VALIDATION_ERRORS` Map. Hot-reload and test isolation depend on these surviving remounts.
-- **`ScriptProcessorNode`** in `record-wav.ts` — deprecated but functional; replacing it changes codec/container and the upstream transcription endpoint has not been tested with alternatives in this codebase.
-
-## 4. Tests and manual checks (run before AND after every step)
-
-Automated:
-
-- `bun run scripts/scaffold-integration-test.ts` (stub mode) — verifies scaffolder + harness loop.
-- With `LOVABLE_API_KEY` set: `bun run scripts/prompt-test-harness.ts` against each registered Director and Analysis fixture. Bless snapshots only at baseline; after migration steps, snapshots must match unchanged.
-- `tsgo` typecheck (the repo's typecheck path) — catches `satisfies ArchetypeId` drift on preset rename.
-- Build the app — Vite asset imports (`scene-*.jpg`) fail loudly here, not at registration.
-
-Manual smoke (each mission `01..04`):
-
-1. Open `/missions`, confirm all four cards render with status `available`.
-2. Open `/mission/<id>`, confirm opening bubble renders verbatim from `engine.opening.text` (italic name line, chips trailer present).
-3. Send 2–3 turns. Confirm: italic sensory beat optional, `*Name*` prefix on dialogue, exactly 3 chips on the last line.
-4. Trigger heartbeat: send ≥12 turns until pressure crosses 0.6; confirm audio cue intensifies (audible).
-5. Use the mic button — verify `/api/transcribe` returns text appended to composer.
-6. Open Decide modal, pick each preset once. Confirm `/analysis` renders with `archetypeLabel` matching the preset and `timeline` length equal to the authored canon beats.
-7. Free-text decision path — write a decision that maps to a known archetype; confirm Stage A classifies it (timeline overwritten) and a deliberately ambiguous decision falls back to model-authored 4–6 beats.
-8. Reload `/analysis` — confirm it rehydrates from `localStorage` without re-calling the analyzer.
-9. Toggle sound off, reload, verify `localStorage["dn:sound"] === "off"` and ambient stays silent.
-
-Failure-mode probes (one-time at baseline; re-run if the relevant code is touched):
-
-- Unset `LOVABLE_API_KEY` locally → `/api/chat` returns `500`, `analyzeDecision` throws.
-- Send `missionId: "does-not-exist"` to `/api/chat` → `400 Unknown mission`.
-- Temporarily break a mission's validation (e.g. blank `archetypes[k].label`) → `console.error` block, mission absent from registry, `/mission/<id>` redirects to `/missions`.
-
-Capture baseline outputs of these checks before step 1 of the sequence below; diff after every step.
-
-## 5. Step-by-step migration sequence (preserves behavior)
-
-Each step is a single PR-sized change. Run §4 before and after each step. Stop and roll back if any output diverges that the step did not explicitly intend.
-
-### Phase 0 — Baseline (no code change)
-1. **Snapshot baseline.** Record current prompt-harness snapshots, screenshots of `/missions`, one mission turn, one analysis page, network HAR of `/api/chat` and `/api/transcribe`. Store under `/docs/current-state/baseline/`.
-2. **Reconcile spec vs current-state.** Open the deltas from §2 as a tracking issue. No code or doc edits yet — just an inventory.
-
-### Phase 1 — Doc-only alignment (zero runtime risk)
-3. **Promote `atmosphere`** into `docs/architecture/case-structure.md` (field, type, consumer).
-4. **Promote pressure/heartbeat formulas** into `docs/architecture/ai-behavior.md`.
-5. **Promote dual-catalogue note** (display vs runtime engine) into `docs/architecture/case-structure.md`.
-6. **Add `docs/architecture/telemetry.md`** describing the `mission_plays` table read out of code.
-7. **Add `docs/architecture/transcription.md`** describing `/api/transcribe` IO and upstream model.
-8. **Add `MissionMeta` reserved fields** note to `case-structure.md`.
-
-Validation after phase 1: run §4 anyway to confirm no accidental code edits sneaked in.
-
-### Phase 2 — Safe, mechanical code hygiene (no behavior change)
-9. **Add a `MissionId` const tuple + type** derived from existing engine ids, exported from `src/lib/missions/registry.ts`. Replace the literal `"mission-01"` defaults in `/api/chat` and `analyzeDecision` with the exported constant. Functional output unchanged; only source clarity improves.
-10. **Add `assertCanonShape()`** per mission canon, called from each mission's `index.ts` at module load (throws if a field referenced by `canonGroundTruthBlock()` is missing). Closes the `"undefined"` leak without touching prompt text. Re-run §4 fully — system prompt string must be byte-identical when canon is complete.
-11. **Cross-check `MISSIONS` vs registry** at module load — log a single `console.warn` when a `MissionMeta` has no engine (or vice versa). Warning-only, no runtime divergence.
-12. **Add a regression test** that asserts `engine.opening.text` appears verbatim inside `engine.systemPrompt` for every mission (catches the duplicated-opening drift documented in `ai-behavior.md`).
-
-### Phase 3 — Optional, opt-in resilience (only if explicitly requested)
-13. **Chip-line validator (warn, do not repair)** — client-side log when `extractChips` finds fewer than 3 chips. Telemetry only. Skip if the goal is strict no-change.
-14. **Transcript size guard** — soft warning when `messages.length > N` (no truncation). Skip otherwise.
-
-Phase 3 is deliberately gated; it changes observability, not behavior, but adds surface area. Do not start it unless requested.
-
-### Phase 4 — Close-out
-15. **Refresh `/docs/current-state/*` files** to reflect phases 2–3 changes; re-snapshot baseline.
-16. **Update `docs/architecture/README.md`** map to reference the new files added in phase 1.
+A read of the current build against the constitution (`00–08`), the Decision Nodes spec, and the long-term roadmap. Verdict per pillar, with the specific files that prove or contradict it, and the gaps worth closing next.
 
 ---
 
-## Non-goals (explicitly out of scope for this plan)
+## 1. The Core Loop — "Inside a decision, then a mirror"
 
-- Renaming archetypes, missions, or any persisted localStorage key.
-- Editing system prompts, opening text, canon prose, or the analyzer prompt body.
-- Swapping the model, gateway, or temperatures.
-- Refactoring per-mission folder layout, splitting `index.ts`, or extracting a shared canon schema.
-- Replacing `ScriptProcessorNode` with `AudioWorklet`.
-- Moving any server-side state out of (or into) `localStorage`.
-- Touching `docs/current-state/open-questions.md` items — those are for a future design pass, not this migration.
+**Verdict: Strong. This is the part of the vision the product already delivers.**
+
+- Nine authored cases (`src/lib/missions/mission-01..09`) each ship: a system prompt, canonical opening, scene image, atmosphere tuning, archetypes with **authored consequence timelines**, decision presets, and canon ground-truth.
+- The Director (`/api/chat`) is per-mission, in-character, chip-protocol enforced — matches `04-ai-director-philosophy.md` cleanly.
+- The Analyzer (`src/lib/analysis.functions.ts`) is a two-stage pipeline: classify → narrate. Timelines are **overwritten from canon** after generation (`finalAnalysis.timeline = archetype.timeline`), which honors non-negotiable #13 ("consequences are authored, not generated").
+- The new `framework.ts` layer encodes stakes / hiddenTruths / timeLimit / decisionScience / learningObjective for all 9 missions and is asserted before any analysis call — this is what makes the debrief mission-specific rather than a generic bias menu.
+
+**Holds:** #1, #2, #3, #9, #13, #14, #15, #16, #17.
+
+---
+
+## 2. The Director — In-world presence
+
+**Verdict: Strong with one structural risk.**
+
+- Each mission's system prompt names characters, forbids meta, requires the italic name-line format, and pins the chip protocol — consistent with `06-world-building.md` and `08` #11.
+- `/api/chat` is stateless across cases; nothing persists Director memory beyond the transcript. Good.
+
+**Risk:** the system-prompt enforcement is per-mission copy-paste. There is no shared invariant layer that *guarantees* every future mission honors: "no markdown headings, no emoji, chip protocol on every reply, never break character." A new author can ship a mission that quietly violates the constitution. The `constitution/VERIFICATION-CHECKLIST.md` exists but is not wired to anything that runs.
+
+---
+
+## 3. The Analyzer & Decision Profile — "Reflection before competition"
+
+**Verdict: Strong on substance, partial on the long-arc vision.**
+
+- Per-axis sub-scores + dimension notes + `reasoningEcho` + `calibrationVerdict` + `beliefTrajectory` are exactly the surfaces `05-decision-analysis-philosophy.md` calls for.
+- `decision-profile.ts` accumulates a rolling 8-axis profile across sessions. Matches the "Decision Profile" milestone on the roadmap.
+- The profile is **local-only** (`localStorage`, `decision-node:profile`). That is fine for MVP, but the vision ("portrait that follows the player across years, returnable archive") needs server persistence tied to identity.
+
+**Gaps vs. vision:**
+- No longitudinal view: a player who replays mission-01 a year later cannot see how their reasoning shifted (roadmap §Archive).
+- No per-mission "your prior decision" recall on the case-file card.
+- `emergingPattern` is a single sentence; the vision describes a *portrait*, not a tag.
+
+---
+
+## 4. Editorial Aesthetic — "Typography is the system"
+
+**Verdict: On-brand. Quietly excellent.**
+
+- `index.tsx` landing, `missions.tsx` archive, and `analysis.tsx` all use display serif + tight tracking + generous whitespace + film-grain + vignette. No purple gradients, no neon, no badges shouting at the user.
+- Ambient audio is per-mission and gesture-armed — psychological pressure, not a countdown timer (#18 honored).
+
+**Small holds against the constitution:** no leaderboard, no decision-distribution stats, no "92% chose X." Confirmed by inspecting `analysis.tsx` and `missions.tsx`.
+
+---
+
+## 5. Mystery & Hidden Knowledge — "Every case has something the player can reach but won't be handed"
+
+**Verdict: Now structurally enforced. New.**
+
+- `framework.ts.hiddenTruths` makes the implicit "buried truth" surface explicit per mission and is fed to the analyzer so `evidenceIgnored` can reference what was reachable. This directly implements #6.
+- However, **canon files themselves don't tag** which objects/lines are the hidden-truth surface. The Director can still volunteer a hidden truth on turn 2 if a future prompt drifts. No structural test catches that.
+
+---
+
+## 6. Author Platform — "Anyone can create"
+
+**Verdict: Not started. This is the biggest gap vs. the roadmap.**
+
+- Missions are TypeScript modules under `src/lib/missions/mission-XX/`. Adding a case requires: writing canon, outcomes, index, scene image, soundtrack registration, framework entry, registry entry, and (now) a fixture-validated framework record.
+- There is no authoring UI, no schema validation that blocks publish on missing hidden knowledge or missing conflicting incentives, no fork model, no attribution, no versioning beyond git.
+- The constitution's promise — "the platform enforces the constitution structurally" (roadmap §Creator platform) — is not yet enforced. `validation.ts` exists but is light.
+
+---
+
+## 7. Non-Negotiables — line-by-line
+
+| # | Rule | Status | Evidence / Gap |
+|---|---|---|---|
+| 1 | No "correct answer" | ✅ | No archetype is marked correct anywhere. |
+| 2/3 | Luck ≠ skill | ✅ | `luckVsSkill` is a required analyzer field. |
+| 4 | No leaderboards / distribution stats to player | ⚠️ | `mission-stats.functions.ts` exists and returns percentiles (`getMissionPercentile`) used in `analysis.tsx`. **Check whether what's shown to the player crosses into "92% chose X" territory.** |
+| 5 | Interface disappears | ✅ | |
+| 6 | Hidden knowledge | ✅ (newly enforced) | `framework.hiddenTruths` + assert. |
+| 7 | Every option defensible | ⚠️ | No structural test that each preset has an authored, non-strawman timeline. Manual review only. |
+| 8 | NPCs have conflicting incentives | ✅ | Encoded in system prompts. Not machine-checked. |
+| 9 | No lecture | ✅ | |
+| 10 | Profile describes, doesn't rank | ⚠️ | Sub-scores are 0–100 numbers. Numbers invite ranking. Consider whether the UI presents them as a *portrait* or as *grades*. |
+| 11 | Director never breaks character | ✅ | Per-mission prompts forbid it. Not test-enforced. |
+| 12 | Canon never contradicted | ✅ | Timeline overwrite in analyzer guarantees this for the consequence list. Dialogue contradictions still possible. |
+| 13 | Consequences authored | ✅ | |
+| 14 | Decisions irreversible | ✅ | `mission-store` does not support undo. |
+| 15 | Player owns interiority | ✅ | Prompts forbid describing player thoughts. |
+| 16 | No moralizing vocabulary | ✅ | Analyzer prompt forbids good/bad/right/wrong/correct/incorrect. Not test-enforced. |
+| 17 | No bias name without evidence | ✅ | `possibleBiases` capped at 3, "empty array preferred". |
+| 18 | No countdown timers | ✅ | Pressure is psychological. |
+| 19 | No tutorials / overlays | ✅ | Awakening is in-fiction. |
+| 20 | Constitution wins | n/a | Cultural rule. |
+
+---
+
+## 8. Roadmap Alignment
+
+| Milestone | State |
+|---|---|
+| Current MVP | **Done.** |
+| Curated archive | **In progress.** 9 missions across corporate, legal, aerospace, civic, medical, journalism, infra, biotech, diplomatic. Good spread. |
+| Decision Profile | **MVP done, local-only.** Server-side, longitudinal, returnable: not started. |
+| Archive (browsable, returnable) | **Partial.** `missions.tsx` lists; no "your prior reasoning" recall. |
+| Creator platform | **Not started.** |
+| Community publishing / forks / institutions / Decision Graph | **Not started.** Correct ordering. |
+
+---
+
+## 9. What I would close next (priority order)
+
+1. **Constitution-as-test.** Convert `VERIFICATION-CHECKLIST.md` and the non-negotiables into automated checks that run in `prompt-harness.yml`: forbidden vocabulary in analyzer output; chip-protocol present on every Director reply; every mission has ≥2 archetypes with non-empty timelines; every mission has a hiddenTruth that is *not* surfaced in the canonical opening.
+2. **Audit the player-facing percentile surface.** Decide explicitly: is `getMissionPercentile` shown to players, or is it operator-only? If shown, it likely violates #4.
+3. **"Your prior decision" on the case-file card.** Cheapest win toward the Archive milestone — read from `mission-store` and show, on `missions.tsx`, the archetype the player committed to last time (no score, no judgment, just the label).
+4. **Author schema + validator.** Extend `validation.ts` so a mission cannot register without: ≥3 archetypes, every archetype with ≥4 timeline beats, framework fully populated, at least one hiddenTruth, scene + atmosphere + opening present. This is the spine of the future creator platform.
+5. **Profile-as-portrait pass.** Re-read `DecisionProfileCard.tsx` against #10 — replace any leaderboard-flavored framing with descriptive language. Numbers can stay; the surrounding copy decides whether it reads as a portrait or a grade.
+6. **Director invariant layer.** Factor the constitution-required rules (italic name-line, chip protocol, no markdown, never break character, never describe player thoughts) into a single appended block every mission prompt is composed *with*, so future missions inherit them.
+
+---
+
+## 10. One-line summary
+
+The product faithfully delivers the **inner hour** the constitution describes; the unfinished work is the **outer architecture** — durable profiles, returnable archive, machine-enforced authorship — that turns one good hour into "the world's archive of consequential decisions."
