@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      gsc_verification_tokens: {
+        Row: {
+          created_at: string
+          id: string
+          site_url: string
+          token: string
+          updated_at: string
+          verified: boolean
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          site_url: string
+          token: string
+          updated_at?: string
+          verified?: boolean
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          site_url?: string
+          token?: string
+          updated_at?: string
+          verified?: boolean
+        }
+        Relationships: []
+      }
       mission_plays: {
         Row: {
           completed: boolean
