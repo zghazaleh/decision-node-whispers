@@ -190,6 +190,8 @@ CLOSING TONE: ${archetype.tone}`
     const { object } = await generateObject({
       model: gateway("google/gemini-3-flash-preview"),
       temperature: 0.6,
+      mode: "json",
+      maxOutputTokens: 8192,
       schema: AnalysisSchema,
       system: `You are a senior executive coach AND a decision scientist reviewing a high-stakes decision you just made inside an immersive interactive drama. You are speaking TO the person who just decided — always in the second person ("you", "your"). Never refer to "the player", "the operator", "the user", or "this player". The consequences of the chosen stance are FIXED CANON — narrate them, do not invent them. Your real work is to evaluate HOW you reached the decision, not whether the decision was "correct".
 
