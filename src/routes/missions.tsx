@@ -63,6 +63,7 @@ function MissionsPage() {
     queryFn: () => fetchStats(),
     staleTime: 60_000,
   });
+  const priorDecisions = usePriorDecisions();
 
   const soundOn = (() => {
     try { return localStorage.getItem("dn:sound") !== "off"; } catch { return true; }
