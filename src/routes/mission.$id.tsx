@@ -508,6 +508,20 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
             Decision Node
           </button>
 
+          <button
+            onClick={() => {
+              const ok = window.confirm(
+                "Reset this mission? Your conversation, decision, and analysis will be cleared. You'll start from the opening again.",
+              );
+              if (!ok) return;
+              clearMission(MISSION_ID);
+              window.location.reload();
+            }}
+            className="text-[0.6rem] tracking-[0.4em] uppercase text-foreground/40 hover:text-foreground/80 transition-colors"
+            title="Clear this mission and start over"
+          >
+            Reset
+          </button>
         </header>
 
         {/* Transcript — centered, cinematic */}
