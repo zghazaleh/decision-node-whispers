@@ -131,7 +131,7 @@ function MissionsPage() {
   const themes = useMemo(() => {
     const set = new Set<string>();
     for (const m of MISSIONS) if (m.theme) set.add(m.theme);
-    return ["All", ...Array.from(set)];
+    return ["All", ...Array.from(set).sort()];
   }, []);
   const domains = useMemo(() => {
     const set = new Set<string>();
