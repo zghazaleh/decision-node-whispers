@@ -258,6 +258,15 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
         console.error("profile update failed", err);
       }
 
+      // Discovery signal: this case has been *held*, not just opened.
+      try {
+        const meta = MISSIONS.find((m) => m.id === MISSION_ID);
+        logCommit(MISSION_ID, meta?.theme);
+      } catch (err) {
+        console.error("signal log failed", err);
+      }
+
+
       // Fire-and-forget community telemetry — no PII, only timings + counts.
       try {
         const now = Date.now();
