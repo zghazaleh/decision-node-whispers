@@ -224,24 +224,48 @@ function CarouselTile({
       className={[
         "group relative block shrink-0 overflow-hidden rounded-[10px] text-left",
         "w-[150px] sm:w-[168px]",
-        "border bg-[#0b0d10] transition-[transform,border-color,opacity,box-shadow] duration-[600ms] ease-out",
+        "border bg-[#0b0d10]",
+        // Asymmetric cinematic easing on state changes — slower exhale than
+        // attack, no hard snap between spotlit / dim.
+        "transition-[transform,border-color,opacity,box-shadow,filter] duration-[1100ms]",
+        "[transition-timing-function:cubic-bezier(0.33,1,0.68,1)]",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-background",
         spotlit
-          ? "border-accent/55 shadow-[0_18px_40px_-24px_rgba(214,182,109,0.45)] scale-[1.02] opacity-100"
-          : "border-foreground/10 opacity-65 hover:opacity-90 hover:border-foreground/25",
+          ? "border-accent/55 shadow-[0_24px_60px_-28px_rgba(214,182,109,0.55)] scale-[1.025] opacity-100"
+          : "border-foreground/10 opacity-55 hover:opacity-90 hover:border-foreground/25 [filter:saturate(0.7)_brightness(0.92)]",
         open ? "border-accent/80" : "",
       ].join(" ")}
-      style={{ willChange: "transform, opacity" }}
+      style={{ willChange: "transform, opacity, filter" }}
     >
       <div className="relative aspect-[3/4] w-full overflow-hidden bg-[#0b0d10]">
+        {/* Scene art — slow parallax drift while spotlit, settled otherwise. */}
         <div
-          className={`absolute inset-0 transition-[filter,transform] duration-[900ms] ease-out ${
-            spotlit ? "scale-[1.04]" : "scale-100"
-          }`}
-          style={{ filter: spotlit ? "saturate(1.05)" : "saturate(0.85) brightness(0.9)" }}
+          className={[
+            "absolute inset-0 transition-[filter,transform] duration-[1400ms]",
+            "[transition-timing-function:cubic-bezier(0.33,1,0.68,1)]",
+            spotlit ? "motion-safe:animate-[dn-drift_14s_ease-in-out_infinite_alternate]" : "scale-100",
+          ].join(" ")}
+          style={{ filter: spotlit ? "saturate(1.08) brightness(1.04)" : "saturate(0.85) brightness(0.9)" }}
         >
           <SceneArt src={getSceneSrc(mission.id)} theme={mission.theme} />
         </div>
+
+        {/* Spotlight wash — a soft radial of accent light that drifts across
+            the active tile, then fades when handing off. */}
+        <div
+          aria-hidden
+          className={[
+            "pointer-events-none absolute inset-[-40%]",
+            "transition-opacity duration-[1400ms] ease-out",
+            spotlit ? "opacity-100 motion-safe:animate-[dn-wash_11s_ease-in-out_infinite_alternate]" : "opacity-0",
+          ].join(" ")}
+          style={{
+            background:
+              "radial-gradient(circle at center, color-mix(in oklab, var(--accent) 22%, transparent) 0%, transparent 62%)",
+            mixBlendMode: "screen",
+          }}
+        />
+
         <div
           aria-hidden
           className="absolute inset-x-0 top-0 h-12"
@@ -269,13 +293,19 @@ function CarouselTile({
             {toneWord(mission.tone)} · {shortDuration(mission.duration)}
           </p>
         </div>
-        {/* Slow accent rule that fills in while spotlit — the only motion
-            cue beyond opacity, so the carousel reads as a wash, not a strobe. */}
+        {/* Breathing accent rule — eases in with a soft glow, peaks mid-cycle,
+            then dissolves through blur instead of snapping back. Restarts on
+            each spotlit cycle via React's key remount. */}
         <span
           aria-hidden
-          className={`absolute inset-x-2.5 bottom-1.5 h-px origin-left bg-accent/70 transition-transform duration-[5200ms] ease-linear ${
-            spotlit ? "scale-x-100" : "scale-x-0"
-          }`}
+          className={[
+            "absolute inset-x-2.5 bottom-1.5 h-px origin-left rounded-full bg-accent/85",
+            "shadow-[0_0_10px_color-mix(in_oklab,var(--accent)_55%,transparent)]",
+            spotlit
+              ? "motion-safe:animate-[dn-rule-breathe_5200ms_cubic-bezier(0.4,0,0.2,1)_forwards]"
+              : "scale-x-0 opacity-0",
+          ].join(" ")}
+          key={spotlit ? `on-${mission.id}` : `off-${mission.id}`}
         />
       </div>
     </button>
