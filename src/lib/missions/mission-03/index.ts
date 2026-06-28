@@ -54,7 +54,7 @@ RULES OF NARRATION:
 - Reveal "Yuki Ramos" only when a character addresses her — Diego's first line does this.
 - Reveal Vega's death only when the player asks the right person, looks at the photo and asks, opens the press folder, or asks why everyone is so quiet.
 - Reveal the manual override / Marcus's request only on direct query or via console inspection.
-- Keep responses short — two to six lines plus optional sensory beat.
+- Keep responses short — two to four lines plus optional sensory beat.
 - No lists, no fourth wall, no meta.
 
 THE DECISION:
