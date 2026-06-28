@@ -299,7 +299,14 @@ export function prefetchAudio(url: string): Promise<void> {
   return p.then(() => {}, () => {});
 }
 
-async function loadBuffer(ctx: AudioContext, url: string): Promise<AudioBuffer> {
+async function loadBuffer(ctx: AudioContext, url: string, kind: "bed" | "oneshot" = "bed"): Promise<AudioBuffer> {
+  if (shouldSimulateFailure(kind)) {
+    // Synthetic failure for the dev toggle. Mark the URL as cooling down so
+    // the rest of the engine (fallback chain, failure indicator, diagnostics
+    // log) behaves exactly as it would for a real 404.
+    markFailed(url, new Error(`[ambient] simulated failure (${simulateMode}): ${url}`));
+    throw new Error(`ambient simulated failure: ${url}`);
+  }
   const cached = bufferCache.get(url);
   if (cached) return cached;
   if (isFailing(url)) {
