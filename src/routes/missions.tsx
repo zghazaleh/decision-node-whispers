@@ -255,12 +255,19 @@ function MissionsPage() {
         {/* ---------- Filters ---------- */}
         <div className="mb-8 space-y-3">
           <FacetRow
+            label="Domain"
+            values={domains}
+            active={domain}
+            onChange={setDomain}
+          />
+          <FacetRow
             label="Theme"
             values={themes}
             active={theme}
             onChange={setTheme}
           />
           <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+
             <FacetRow
               label="Difficulty"
               values={["Any", ...difficulties.map(String)]}
