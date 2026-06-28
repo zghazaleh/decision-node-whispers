@@ -22,11 +22,13 @@ export type Ambient = {
   setAudioProfile: (profile: AudioProfile) => void;
   setReducedAudio: (reduced: boolean) => void;
   playOneShot: (url: string, opts?: { gain?: number; fadeInMs?: number; fadeOutMs?: number; bus?: "sfx" | "motif" }) => Promise<void>;
+  prefetch: (url: string) => Promise<void>;
   duck: (amount?: number, ms?: number) => void;
   release: (ms?: number) => void;
   ignite: () => Promise<void>;
   isRunning: () => boolean;
   currentMission: () => string | null;
+
 };
 
 type Voice = {
@@ -40,20 +42,47 @@ type Voice = {
 
 // Decoded-buffer cache, shared across createAmbient instances and remounts.
 const bufferCache = new Map<string, Promise<AudioBuffer>>();
+// Network-level cache: warm the HTTP cache and stash the ArrayBuffer before
+// the AudioContext exists so the first decode never has to round-trip.
+const arrayBufferCache = new Map<string, Promise<ArrayBuffer>>();
+
+/**
+ * Fire-and-forget HTTP prefetch for a bed/sfx URL. Safe to call without an
+ * AudioContext — buffers are kept until decode happens on first play.
+ */
+export function prefetchAudio(url: string): Promise<void> {
+  if (!url || typeof window === "undefined") return Promise.resolve();
+  if (bufferCache.has(url)) return Promise.resolve();
+  const cached = arrayBufferCache.get(url);
+  if (cached) return cached.then(() => {}, () => {});
+  const p = fetch(url).then((r) => {
+    if (!r.ok) throw new Error(`prefetch failed: ${r.status}`);
+    return r.arrayBuffer();
+  });
+  arrayBufferCache.set(url, p);
+  p.catch(() => arrayBufferCache.delete(url));
+  return p.then(() => {}, () => {});
+}
 
 async function loadBuffer(ctx: AudioContext, url: string): Promise<AudioBuffer> {
   const cached = bufferCache.get(url);
   if (cached) return cached;
   const p = (async () => {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`ambient fetch failed: ${res.status}`);
-    const data = await res.arrayBuffer();
+    const pre = arrayBufferCache.get(url);
+    const data = pre
+      ? await pre.then((b) => b.slice(0))
+      : await (async () => {
+          const res = await fetch(url);
+          if (!res.ok) throw new Error(`ambient fetch failed: ${res.status}`);
+          return await res.arrayBuffer();
+        })();
     return await ctx.decodeAudioData(data);
   })();
   bufferCache.set(url, p);
   p.catch(() => bufferCache.delete(url));
   return p;
 }
+
 
 export function createAmbient(initialMissionId: string | null = null): Ambient {
   let current: Voice | null = null;
