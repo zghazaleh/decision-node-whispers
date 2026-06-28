@@ -811,13 +811,18 @@ function SceneArt({
         <img
           src={src}
           alt=""
-          loading="lazy"
           decoding="async"
+          ref={(el) => {
+            if (el?.complete && el.naturalWidth > 0) setStatus("loaded");
+          }}
           onLoad={() => setStatus("loaded")}
           onError={() => setStatus("error")}
           style={
             brighten
-              ? { filter: "brightness(1.35) contrast(1.08) saturate(1.05)" }
+              ? {
+                  filter: "brightness(1.6) contrast(1.12) saturate(1.1)",
+                  objectPosition: "center 30%",
+                }
               : undefined
           }
           className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${
