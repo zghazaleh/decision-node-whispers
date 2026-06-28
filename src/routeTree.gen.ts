@@ -18,6 +18,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as MissionIdRouteImport } from './routes/mission.$id'
 import { Route as ApiTranscribeRouteImport } from './routes/api/transcribe'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as AdminGscVerifyRouteImport } from './routes/admin.gsc-verify'
 import { Route as AdminGscRouteImport } from './routes/admin.gsc'
 import { Route as AdminEvaluationRouteImport } from './routes/admin.evaluation'
 
@@ -66,6 +67,11 @@ const ApiChatRoute = ApiChatRouteImport.update({
   path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminGscVerifyRoute = AdminGscVerifyRouteImport.update({
+  id: '/admin/gsc-verify',
+  path: '/admin/gsc-verify',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminGscRoute = AdminGscRouteImport.update({
   id: '/admin/gsc',
   path: '/admin/gsc',
@@ -86,6 +92,7 @@ export interface FileRoutesByFullPath {
   '/sound-test': typeof SoundTestRoute
   '/admin/evaluation': typeof AdminEvaluationRoute
   '/admin/gsc': typeof AdminGscRoute
+  '/admin/gsc-verify': typeof AdminGscVerifyRoute
   '/api/chat': typeof ApiChatRoute
   '/api/transcribe': typeof ApiTranscribeRoute
   '/mission/$id': typeof MissionIdRoute
@@ -99,6 +106,7 @@ export interface FileRoutesByTo {
   '/sound-test': typeof SoundTestRoute
   '/admin/evaluation': typeof AdminEvaluationRoute
   '/admin/gsc': typeof AdminGscRoute
+  '/admin/gsc-verify': typeof AdminGscVerifyRoute
   '/api/chat': typeof ApiChatRoute
   '/api/transcribe': typeof ApiTranscribeRoute
   '/mission/$id': typeof MissionIdRoute
@@ -113,6 +121,7 @@ export interface FileRoutesById {
   '/sound-test': typeof SoundTestRoute
   '/admin/evaluation': typeof AdminEvaluationRoute
   '/admin/gsc': typeof AdminGscRoute
+  '/admin/gsc-verify': typeof AdminGscVerifyRoute
   '/api/chat': typeof ApiChatRoute
   '/api/transcribe': typeof ApiTranscribeRoute
   '/mission/$id': typeof MissionIdRoute
@@ -128,6 +137,7 @@ export interface FileRouteTypes {
     | '/sound-test'
     | '/admin/evaluation'
     | '/admin/gsc'
+    | '/admin/gsc-verify'
     | '/api/chat'
     | '/api/transcribe'
     | '/mission/$id'
@@ -141,6 +151,7 @@ export interface FileRouteTypes {
     | '/sound-test'
     | '/admin/evaluation'
     | '/admin/gsc'
+    | '/admin/gsc-verify'
     | '/api/chat'
     | '/api/transcribe'
     | '/mission/$id'
@@ -154,6 +165,7 @@ export interface FileRouteTypes {
     | '/sound-test'
     | '/admin/evaluation'
     | '/admin/gsc'
+    | '/admin/gsc-verify'
     | '/api/chat'
     | '/api/transcribe'
     | '/mission/$id'
@@ -168,6 +180,7 @@ export interface RootRouteChildren {
   SoundTestRoute: typeof SoundTestRoute
   AdminEvaluationRoute: typeof AdminEvaluationRoute
   AdminGscRoute: typeof AdminGscRoute
+  AdminGscVerifyRoute: typeof AdminGscVerifyRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiTranscribeRoute: typeof ApiTranscribeRoute
   MissionIdRoute: typeof MissionIdRoute
@@ -238,6 +251,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/gsc-verify': {
+      id: '/admin/gsc-verify'
+      path: '/admin/gsc-verify'
+      fullPath: '/admin/gsc-verify'
+      preLoaderRoute: typeof AdminGscVerifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/gsc': {
       id: '/admin/gsc'
       path: '/admin/gsc'
@@ -264,6 +284,7 @@ const rootRouteChildren: RootRouteChildren = {
   SoundTestRoute: SoundTestRoute,
   AdminEvaluationRoute: AdminEvaluationRoute,
   AdminGscRoute: AdminGscRoute,
+  AdminGscVerifyRoute: AdminGscVerifyRoute,
   ApiChatRoute: ApiChatRoute,
   ApiTranscribeRoute: ApiTranscribeRoute,
   MissionIdRoute: MissionIdRoute,

@@ -162,10 +162,7 @@ function TokenCard({
   pending: boolean;
   onVerify: () => void;
 }) {
-  const snippet = `<meta name="google-site-verification" content="${row.token.replace(
-    /^<meta[^"]*content="/,
-    "",
-  ).replace(/"\s*\/?>$/, "")}" />`;
+  const snippet = `<meta name="google-site-verification" content="${row.token}" />`;
   return (
     <li className="rounded-md border border-border bg-muted/20 p-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
