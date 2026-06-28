@@ -152,6 +152,17 @@ function MissionsPage() {
   // TODAY pick (stable per day)
   const today = useMemo(() => pickToday(MISSIONS), []);
 
+  // Guild rail — most-recent six available cases, excluding today's hero.
+  // Sorted by mission number descending so newly authored cases surface first.
+  const guildRail = useMemo(() => {
+    return MISSIONS
+      .filter((m) => m.status === "available" && m.id !== today?.id)
+      .slice()
+      .sort((a, b) => b.number.localeCompare(a.number))
+      .slice(0, 6);
+  }, [today]);
+
+
   // Apply filters + sort (today's case stays in the ledger AND in filter results;
   // the hero card above is purely a feature, not an exclusion).
   const visible = useMemo(() => {
