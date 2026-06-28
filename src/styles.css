@@ -411,10 +411,15 @@
   .animate-chroma-breathe,
   .animate-beat-reveal,
   .animate-beat-label-reveal,
-  .animate-consequence-rise { animation: none !important; }
+  .animate-consequence-rise,
+  .heartbeat-vignette,
+  .letterbox-top,
+  .letterbox-bottom { animation: none !important; }
+  .heartbeat-vignette { opacity: 0 !important; }
   .cinematic-scanline::before,
   .progress-shimmer::after { animation: none !important; }
 }
+
 
 
 

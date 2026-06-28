@@ -531,7 +531,12 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
           ref={transcriptRef}
           className="flex-1 overflow-y-auto px-6 sm:px-10 pt-12 pb-6"
         >
-          <div className="mx-auto max-w-2xl space-y-12">
+          <div
+            className="mx-auto max-w-2xl space-y-12"
+            aria-live="polite"
+            aria-atomic="false"
+            aria-relevant="additions text"
+          >
             {messages.map((m, i) => {
               const isLatest = i === messages.length - 1;
               const raw = partsToText(m);
@@ -552,6 +557,7 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
               </p>
             )}
           </div>
+
         </div>
 
 
@@ -588,7 +594,7 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
                 type="submit"
                 disabled={!input.trim() || busy}
                 aria-label="Send"
-                className="shrink-0 p-2 text-foreground/50 hover:text-foreground disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
+                className="shrink-0 inline-flex items-center justify-center min-h-11 min-w-11 p-2 rounded-full text-foreground/50 hover:text-foreground disabled:opacity-20 disabled:cursor-not-allowed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               >
                 <Send className="h-4 w-4" />
               </button>
@@ -605,7 +611,7 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
                   ? "Commit to a decision"
                   : "Stay in the moment — the decision opens as the pressure builds."}
                 style={{ opacity: 0.15 + pressureForDecide * 0.85 }}
-                className={`group inline-flex items-center gap-2 rounded-full border px-5 py-2.5 text-[0.65rem] font-medium tracking-[0.32em] uppercase transition-all duration-700 ${
+                className={`group inline-flex items-center gap-2 rounded-full border px-5 min-h-11 py-2.5 text-[0.65rem] font-medium tracking-[0.32em] uppercase transition-all duration-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
                   decideReady
                     ? "border-accent/70 bg-accent/10 text-accent hover:bg-accent/20 hover:border-accent shadow-[0_0_24px_-8px_var(--color-accent)] cursor-pointer"
                     : "border-foreground/20 bg-transparent text-foreground/60 cursor-not-allowed"
@@ -615,6 +621,7 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
                 Decide
               </button>
             </div>
+
           </div>
         </div>
 
@@ -794,12 +801,13 @@ function ChipRow({ chips, onPick }: { chips: string[]; onPick: (text: string) =>
           key={`${c}-${i}`}
           type="button"
           onClick={() => onPick(c)}
-          className="group rounded-full border border-foreground/20 bg-background/30 backdrop-blur-sm px-3.5 py-1.5 text-xs sm:text-[0.8rem] text-foreground/75 hover:text-foreground hover:border-accent/60 hover:bg-accent/10 transition-colors text-left"
+          className="group rounded-full border border-foreground/20 bg-background/30 backdrop-blur-sm px-3.5 py-2 min-h-11 text-xs sm:text-[0.8rem] text-foreground/75 hover:text-foreground hover:border-accent/60 hover:bg-accent/10 transition-colors text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
           <span className="text-accent/70 mr-2 group-hover:text-accent">›</span>
           {c}
         </button>
       ))}
+
     </div>
   );
 }
@@ -1025,12 +1033,13 @@ function MicButton({
       onClick={recording ? stop : start}
       disabled={disabled || busy}
       aria-label={recording ? "Stop recording" : "Record"}
-      className={`shrink-0 p-2 transition-colors disabled:opacity-20 disabled:cursor-not-allowed ${
+      className={`shrink-0 inline-flex items-center justify-center min-h-11 min-w-11 p-2 rounded-full transition-colors disabled:opacity-20 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
         recording ? "text-accent animate-pulse-soft" : "text-foreground/50 hover:text-foreground"
       }`}
     >
       {recording ? <Square className="h-4 w-4 fill-current" /> : <Mic className="h-4 w-4" />}
     </button>
+
   );
 }
 
