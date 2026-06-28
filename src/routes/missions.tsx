@@ -223,9 +223,12 @@ function MissionsPage() {
 
   function commit(id: string) {
     if (entering) return;
+    const m = MISSIONS.find((x) => x.id === id);
+    logOpen(id, m?.theme);
     setEntering(true);
     setTimeout(() => navigate({ to: "/mission/$id", params: { id } }), 700);
   }
+
 
   function clearFilters() {
     setTheme("All");
