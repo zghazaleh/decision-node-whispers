@@ -138,43 +138,7 @@ function ReportView({
         </ul>
       </section>
 
-      <section>
-        <SectionHeader title="Missions" />
-        <div className="border border-foreground/10">
-          <div className="grid grid-cols-[1fr_auto_auto_auto_auto_auto_auto] gap-4 px-4 py-3 text-[0.6rem] tracking-[0.3em] uppercase text-foreground/50 border-b border-foreground/10">
-            <span>Mission</span>
-            <span>Framework</span>
-            <span>Invariants</span>
-            <span>Chips</span>
-            <span>Archetypes</span>
-            <span>Presets</span>
-            <span>Mystery</span>
-          </div>
-          {missions.map((m) => (
-            <div
-              key={m.id}
-              className="grid grid-cols-[1fr_auto_auto_auto_auto_auto_auto] gap-4 px-4 py-3 text-sm border-b border-foreground/5 items-center"
-            >
-              <span className="font-mono text-xs">{m.id}</span>
-              <Cell ok={m.frameworkMissing.length === 0} note={m.frameworkMissing.join(", ")} />
-              <Cell ok={m.checks.invariantsInherited} />
-              <Cell ok={m.checks.chipTrailerOk} />
-              <Cell ok={m.checks.archetypeDepthOk} />
-              <Cell ok={m.checks.decisionPresetsWired} />
-              <Cell
-                ok={m.checks.hiddenTruthLeak === null && !m.checks.moralizingVocabulary}
-                note={
-                  m.checks.hiddenTruthLeak
-                    ? `leak: ${m.checks.hiddenTruthLeak}`
-                    : m.checks.moralizingVocabulary
-                      ? "moralizing vocab"
-                      : ""
-                }
-              />
-            </div>
-          ))}
-        </div>
-      </section>
+      <MissionsSection missions={missions} />
 
       <section>
         <SectionHeader title="Percentile-surface audit" />
