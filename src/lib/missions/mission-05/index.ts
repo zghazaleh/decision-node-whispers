@@ -116,7 +116,9 @@ const DECISION_PRESETS: DecisionPreset[] = [
   },
 ];
 
-const OPENING_TEXT = `*Cole Avery*
+const OPENING_TEXT = `*A monitor wall flickers red. Coffee gone cold. Somewhere down the hall a phone keeps ringing and no one answers.*
+
+*Cole Avery*
 "Tell me you're seeing this."
 
 "Fourteen hundred coins. Forty-eight hours. They'll send a partial key in thirty minutes if we just signal we'll pay — that gets the OR board back. Yara. Do I tell them yes?"
