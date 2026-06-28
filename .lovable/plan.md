@@ -1,129 +1,67 @@
+# Mission Discovery & Social — Benchmark + Options Memo
 
-# Decision Node — Platform Evaluation vs. Vision
+You want "Apple App Store, but for missions": curated cases, ratings, discovery first, social engagement around them. Before we design or build anything, the deliverable here is a **decision memo**: 5–6 reference experiences pulled apart for what to steal, then 3 distinct organizing models for Decision Nodes with honest tradeoffs. You pick one direction; we move to design directions and then build.
 
-A read of the current build against the constitution (`00–08`), the Decision Nodes spec, and the long-term roadmap. Verdict per pillar, with the specific files that prove or contradict it, and the gaps worth closing next.
+No code changes in this step.
 
----
+## What I'll research
 
-## 1. The Core Loop — "Inside a decision, then a mirror"
+Six references, chosen because each solves a different facet of "discover a piece of slow, considered content before committing":
 
-**Verdict: Strong. This is the part of the vision the product already delivers.**
+1. **Apple App Store / Today tab** — editorial card stack, "Story of the Day", hand-picked collections, ratings as quiet trust signal not leaderboard.
+2. **Letterboxd** — list culture, friend activity as discovery, ratings that feel personal not gamified, beautiful poster grids.
+3. **MUBI** — 30-films-at-a-time scarcity, a curator's voice as the product, the "Notebook" essay layer attached to each title.
+4. **Criterion Channel** — themed collections ("Noir in Color", "Films by Agnès Varda"), context essays, "if you liked X" curatorial logic.
+5. **Are.na** — channels as nested curation, low-velocity, contributor-as-collaborator model.
+6. **Pitchfork / NYT Interactive** — review-as-artifact: a single piece of content gets a long, designed page with score, essay, sidebar.
 
-- Nine authored cases (`src/lib/missions/mission-01..09`) each ship: a system prompt, canonical opening, scene image, atmosphere tuning, archetypes with **authored consequence timelines**, decision presets, and canon ground-truth.
-- The Director (`/api/chat`) is per-mission, in-character, chip-protocol enforced — matches `04-ai-director-philosophy.md` cleanly.
-- The Analyzer (`src/lib/analysis.functions.ts`) is a two-stage pipeline: classify → narrate. Timelines are **overwritten from canon** after generation (`finalAnalysis.timeline = archetype.timeline`), which honors non-negotiable #13 ("consequences are authored, not generated").
-- The new `framework.ts` layer encodes stakes / hiddenTruths / timeLimit / decisionScience / learningObjective for all 9 missions and is asserted before any analysis call — this is what makes the debrief mission-specific rather than a generic bias menu.
+For each I'll capture: card anatomy, discovery model (browse / feed / editorial / search), social signals (ratings, comments, lists, follows), pacing, and what would or wouldn't port to a 9-mission interactive drama.
 
-**Holds:** #1, #2, #3, #9, #13, #14, #15, #16, #17.
+## What I'll propose
 
----
+Three organizing models for Decision Nodes — these are **the shape of the product**, not visual variations. Each one would later get its own design direction round.
 
-## 2. The Director — In-world presence
+```text
+A. THE CURATED STORE              B. THE CRITERION ARCHIVE         C. THE LIVING CASE FILE
+─────────────────────             ───────────────────────          ──────────────────────
+App Store "Today" energy.         MUBI/Criterion energy.           Genius/Reddit-thread energy.
+                                                                    
+Home = editorial cards            Home = themed collections        Home = case index
++ "Mission of the Week"           ("Power & Compliance",           Each mission opens into a
++ hand-picked collections         "Bodies & Borders")              dossier: the dilemma + every
++ ratings as small trust badge    + curator essay per mission      archetype's reasoning, ratings,
++ aggregate decision split        + companion commentary           annotations, contested moments.
++ "if you decided X, try Y"       + sparse rotating selection      Social = annotation, not feed.
+                                                                    
+Discovery: editorial + browse.    Discovery: themed depth.         Discovery: per-case immersion.
+Social: light (rate, share).      Social: very light (save).       Social: heavy (debate, annotate).
+Velocity: medium.                 Velocity: slow, prestige.        Velocity: deep, niche.
+                                                                    
+Closest to your stated frame.     Most differentiated.             Most defensible long-term.
+Risk: feels generic if not        Risk: needs strong editorial     Risk: requires player volume
+exquisitely art-directed.         voice; you become the curator.   to feel alive.
+```
 
-**Verdict: Strong with one structural risk.**
+For each model I'll spell out: home surface, card anatomy, how ratings work, how a player moves from browse → commit → see-others, what "social" means concretely (and what it deliberately is NOT), and roughly what would change in the existing `/missions` route.
 
-- Each mission's system prompt names characters, forbids meta, requires the italic name-line format, and pins the chip protocol — consistent with `06-world-building.md` and `08` #11.
-- `/api/chat` is stateless across cases; nothing persists Director memory beyond the transcript. Good.
+## Format of the deliverable
 
-**Risk:** the system-prompt enforcement is per-mission copy-paste. There is no shared invariant layer that *guarantees* every future mission honors: "no markdown headings, no emoji, chip protocol on every reply, never break character." A new author can ship a mission that quietly violates the constitution. The `constitution/VERIFICATION-CHECKLIST.md` exists but is not wired to anything that runs.
+A single memo posted in chat — not in the repo — with:
+- Benchmarks section (each reference: 2–3 sentences + the one thing worth stealing)
+- The three models, side by side, with the tradeoff matrix above expanded
+- A recommendation pick with reasoning, framed as a starting point not a verdict
+- Two follow-up questions to lock in the model before we move to design directions
 
----
+## After you pick a model
 
-## 3. The Analyzer & Decision Profile — "Reflection before competition"
+Plan-mode flow continues:
+1. You pick A / B / C (or a hybrid you direct).
+2. New plan: design directions round using the redesign skill — pin palette + type + layout for the discovery surface, then render 3 visual variants of the chosen model.
+3. You pick a direction.
+4. Build plan: scope the actual route changes (likely `/missions` becomes the discovery hub, possibly a new `/cases/$id` dossier route, ratings table, etc.) and any backend (ratings, curated collections, annotations depending on model).
 
-**Verdict: Strong on substance, partial on the long-arc vision.**
+## What this plan deliberately does not do
 
-- Per-axis sub-scores + dimension notes + `reasoningEcho` + `calibrationVerdict` + `beliefTrajectory` are exactly the surfaces `05-decision-analysis-philosophy.md` calls for.
-- `decision-profile.ts` accumulates a rolling 8-axis profile across sessions. Matches the "Decision Profile" milestone on the roadmap.
-- The profile is **local-only** (`localStorage`, `decision-node:profile`). That is fine for MVP, but the vision ("portrait that follows the player across years, returnable archive") needs server persistence tied to identity.
-
-**Gaps vs. vision:**
-- No longitudinal view: a player who replays mission-01 a year later cannot see how their reasoning shifted (roadmap §Archive).
-- No per-mission "your prior decision" recall on the case-file card.
-- `emergingPattern` is a single sentence; the vision describes a *portrait*, not a tag.
-
----
-
-## 4. Editorial Aesthetic — "Typography is the system"
-
-**Verdict: On-brand. Quietly excellent.**
-
-- `index.tsx` landing, `missions.tsx` archive, and `analysis.tsx` all use display serif + tight tracking + generous whitespace + film-grain + vignette. No purple gradients, no neon, no badges shouting at the user.
-- Ambient audio is per-mission and gesture-armed — psychological pressure, not a countdown timer (#18 honored).
-
-**Small holds against the constitution:** no leaderboard, no decision-distribution stats, no "92% chose X." Confirmed by inspecting `analysis.tsx` and `missions.tsx`.
-
----
-
-## 5. Mystery & Hidden Knowledge — "Every case has something the player can reach but won't be handed"
-
-**Verdict: Now structurally enforced. New.**
-
-- `framework.ts.hiddenTruths` makes the implicit "buried truth" surface explicit per mission and is fed to the analyzer so `evidenceIgnored` can reference what was reachable. This directly implements #6.
-- However, **canon files themselves don't tag** which objects/lines are the hidden-truth surface. The Director can still volunteer a hidden truth on turn 2 if a future prompt drifts. No structural test catches that.
-
----
-
-## 6. Author Platform — "Anyone can create"
-
-**Verdict: Not started. This is the biggest gap vs. the roadmap.**
-
-- Missions are TypeScript modules under `src/lib/missions/mission-XX/`. Adding a case requires: writing canon, outcomes, index, scene image, soundtrack registration, framework entry, registry entry, and (now) a fixture-validated framework record.
-- There is no authoring UI, no schema validation that blocks publish on missing hidden knowledge or missing conflicting incentives, no fork model, no attribution, no versioning beyond git.
-- The constitution's promise — "the platform enforces the constitution structurally" (roadmap §Creator platform) — is not yet enforced. `validation.ts` exists but is light.
-
----
-
-## 7. Non-Negotiables — line-by-line
-
-| # | Rule | Status | Evidence / Gap |
-|---|---|---|---|
-| 1 | No "correct answer" | ✅ | No archetype is marked correct anywhere. |
-| 2/3 | Luck ≠ skill | ✅ | `luckVsSkill` is a required analyzer field. |
-| 4 | No leaderboards / distribution stats to player | ⚠️ | `mission-stats.functions.ts` exists and returns percentiles (`getMissionPercentile`) used in `analysis.tsx`. **Check whether what's shown to the player crosses into "92% chose X" territory.** |
-| 5 | Interface disappears | ✅ | |
-| 6 | Hidden knowledge | ✅ (newly enforced) | `framework.hiddenTruths` + assert. |
-| 7 | Every option defensible | ⚠️ | No structural test that each preset has an authored, non-strawman timeline. Manual review only. |
-| 8 | NPCs have conflicting incentives | ✅ | Encoded in system prompts. Not machine-checked. |
-| 9 | No lecture | ✅ | |
-| 10 | Profile describes, doesn't rank | ⚠️ | Sub-scores are 0–100 numbers. Numbers invite ranking. Consider whether the UI presents them as a *portrait* or as *grades*. |
-| 11 | Director never breaks character | ✅ | Per-mission prompts forbid it. Not test-enforced. |
-| 12 | Canon never contradicted | ✅ | Timeline overwrite in analyzer guarantees this for the consequence list. Dialogue contradictions still possible. |
-| 13 | Consequences authored | ✅ | |
-| 14 | Decisions irreversible | ✅ | `mission-store` does not support undo. |
-| 15 | Player owns interiority | ✅ | Prompts forbid describing player thoughts. |
-| 16 | No moralizing vocabulary | ✅ | Analyzer prompt forbids good/bad/right/wrong/correct/incorrect. Not test-enforced. |
-| 17 | No bias name without evidence | ✅ | `possibleBiases` capped at 3, "empty array preferred". |
-| 18 | No countdown timers | ✅ | Pressure is psychological. |
-| 19 | No tutorials / overlays | ✅ | Awakening is in-fiction. |
-| 20 | Constitution wins | n/a | Cultural rule. |
-
----
-
-## 8. Roadmap Alignment
-
-| Milestone | State |
-|---|---|
-| Current MVP | **Done.** |
-| Curated archive | **In progress.** 9 missions across corporate, legal, aerospace, civic, medical, journalism, infra, biotech, diplomatic. Good spread. |
-| Decision Profile | **MVP done, local-only.** Server-side, longitudinal, returnable: not started. |
-| Archive (browsable, returnable) | **Partial.** `missions.tsx` lists; no "your prior reasoning" recall. |
-| Creator platform | **Not started.** |
-| Community publishing / forks / institutions / Decision Graph | **Not started.** Correct ordering. |
-
----
-
-## 9. What I would close next (priority order)
-
-1. **Constitution-as-test.** Convert `VERIFICATION-CHECKLIST.md` and the non-negotiables into automated checks that run in `prompt-harness.yml`: forbidden vocabulary in analyzer output; chip-protocol present on every Director reply; every mission has ≥2 archetypes with non-empty timelines; every mission has a hiddenTruth that is *not* surfaced in the canonical opening.
-2. **Audit the player-facing percentile surface.** Decide explicitly: is `getMissionPercentile` shown to players, or is it operator-only? If shown, it likely violates #4.
-3. **"Your prior decision" on the case-file card.** Cheapest win toward the Archive milestone — read from `mission-store` and show, on `missions.tsx`, the archetype the player committed to last time (no score, no judgment, just the label).
-4. **Author schema + validator.** Extend `validation.ts` so a mission cannot register without: ≥3 archetypes, every archetype with ≥4 timeline beats, framework fully populated, at least one hiddenTruth, scene + atmosphere + opening present. This is the spine of the future creator platform.
-5. **Profile-as-portrait pass.** Re-read `DecisionProfileCard.tsx` against #10 — replace any leaderboard-flavored framing with descriptive language. Numbers can stay; the surrounding copy decides whether it reads as a portrait or a grade.
-6. **Director invariant layer.** Factor the constitution-required rules (italic name-line, chip protocol, no markdown, never break character, never describe player thoughts) into a single appended block every mission prompt is composed *with*, so future missions inherit them.
-
----
-
-## 10. One-line summary
-
-The product faithfully delivers the **inner hour** the constitution describes; the unfinished work is the **outer architecture** — durable profiles, returnable archive, machine-enforced authorship — that turns one good hour into "the world's archive of consequential decisions."
+- No code, schema, or route changes yet.
+- No commitment on audience/gating — that's a question inside the memo, answered after you see the models.
+- No design directions yet — those come after the model is picked, so we're not iterating on visuals for a shape we might throw away.
