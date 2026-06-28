@@ -119,6 +119,36 @@ const AnalysisSchema = z.object({
   reasoningEcho: z.string().optional(),
 });
 
+const TextBlockOrList = z.union([z.string(), z.array(z.string())]);
+
+const RawAnalysisSchema = AnalysisSchema.extend({
+  // Gemini sometimes formats these paragraph fields as short string arrays even
+  // when prompted for prose. Accept both shapes at the model boundary, then
+  // normalize back to the app's canonical DecisionAnalysis contract below.
+  assumptions: TextBlockOrList,
+  evidenceUsed: TextBlockOrList,
+  evidenceIgnored: TextBlockOrList,
+  alternatives: TextBlockOrList,
+});
+
+type RawDecisionAnalysis = z.infer<typeof RawAnalysisSchema>;
+
+function normalizeTextBlock(value: string | string[]) {
+  return Array.isArray(value)
+    ? value.map((line) => line.trim()).filter(Boolean).join("\n\n")
+    : value;
+}
+
+function normalizeAnalysis(raw: RawDecisionAnalysis): DecisionAnalysis {
+  return AnalysisSchema.parse({
+    ...raw,
+    assumptions: normalizeTextBlock(raw.assumptions),
+    evidenceUsed: normalizeTextBlock(raw.evidenceUsed),
+    evidenceIgnored: normalizeTextBlock(raw.evidenceIgnored),
+    alternatives: normalizeTextBlock(raw.alternatives),
+  });
+}
+
 
 export type DecisionAnalysis = z.infer<typeof AnalysisSchema>;
 
@@ -187,11 +217,11 @@ ${Object.entries(archetype.secondOrder)
 CLOSING TONE: ${archetype.tone}`
       : `No canonical archetype matched. Write the timeline yourself, 4-6 beats, but stay grounded in the transcript.`;
 
-    const { object } = await generateObject({
+    const { object: rawObject } = await generateObject({
       model: gateway("google/gemini-3-flash-preview"),
       temperature: 0.6,
       maxOutputTokens: 8192,
-      schema: AnalysisSchema,
+      schema: RawAnalysisSchema,
       system: `You are a senior executive coach AND a decision scientist reviewing a high-stakes decision you just made inside an immersive interactive drama. You are speaking TO the person who just decided — always in the second person ("you", "your"). Never refer to "the player", "the operator", "the user", or "this player". The consequences of the chosen stance are FIXED CANON — narrate them, do not invent them. Your real work is to evaluate HOW you reached the decision, not whether the decision was "correct".
 
 You draw from modern decision science, behavioral economics, cognitive psychology, probabilistic reasoning under uncertainty, and strategic thinking. Judge process, not outcome. A sound process that produced a poor outcome is still a sound process. A lucky outcome from a sloppy process is still a sloppy process — name that separation explicitly.
@@ -215,7 +245,7 @@ BIASES TO CONSIDER (do not list them; only surface 0-3 if the transcript shows c
 
 STRENGTHS TO RECOGNIZE when present: seeking disconfirming evidence, holding multiple hypotheses, belief updating on new evidence, clarifying questions before deciding, separating facts from assumptions, naming weak evidence, weighing short vs long-term, identifying second-order effects, calibrated confidence, knowing when more information stops being worth the time.
 
-Return a JSON object with these fields. EVERY string field is addressed to "you" in the second person:
+Return a JSON object with these fields. EVERY string field is addressed to "you" in the second person. Fields described as sentences or paragraphs MUST be a single JSON string, never an array of strings:
 - headline: one restrained sentence (max 18 words), second person, present tense, naming what you actually did. E.g. "You took the stand and qualified your opinion under oath."
 - timeline: the canon beats above, verbatim. Same count, same order, same wording.
 - assumptions: 2-3 sentences naming the unspoken assumptions you operated on.
@@ -258,6 +288,8 @@ ${transcriptText}`,
 
     // Hard-guarantee: overwrite the model's timeline with canon if we have one,
     // and stamp the archetype id/label so the analysis screen can name it.
+    const object = normalizeAnalysis(rawObject);
+
     const finalAnalysis: DecisionAnalysis = archetype
       ? {
           ...object,
