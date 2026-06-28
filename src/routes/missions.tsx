@@ -6,6 +6,29 @@ import { MISSIONS, type MissionMeta } from "@/lib/missions";
 import { createAmbient } from "@/lib/ambient";
 import { getSoundtrack } from "@/lib/soundtracks";
 import { getAllMissionStats, type MissionStats } from "@/lib/mission-stats.functions";
+import { readMission } from "@/lib/mission-store";
+import { getMissionEngine } from "@/lib/missions/registry";
+
+type PriorDecision = { archetypeLabel: string; decidedAt: number };
+
+/** Read the player's last committed decision per mission from localStorage.
+ *  Client-only; returns {} on the server. */
+function usePriorDecisions(): Record<string, PriorDecision> {
+  const [prior, setPrior] = useState<Record<string, PriorDecision>>({});
+  useEffect(() => {
+    const out: Record<string, PriorDecision> = {};
+    for (const m of MISSIONS) {
+      const saved = readMission(m.id);
+      if (!saved.archetypeId || !saved.decidedAt) continue;
+      const engine = getMissionEngine(m.id);
+      const arche = engine?.getArchetype(saved.archetypeId);
+      if (!arche) continue;
+      out[m.id] = { archetypeLabel: arche.label, decidedAt: saved.decidedAt };
+    }
+    setPrior(out);
+  }, []);
+  return prior;
+}
 
 export const Route = createFileRoute("/missions")({
   head: () => ({
@@ -40,6 +63,7 @@ function MissionsPage() {
     queryFn: () => fetchStats(),
     staleTime: 60_000,
   });
+  const priorDecisions = usePriorDecisions();
 
   const soundOn = (() => {
     try { return localStorage.getItem("dn:sound") !== "off"; } catch { return true; }
@@ -153,6 +177,7 @@ function MissionsPage() {
               <MissionCard
                 mission={m}
                 stats={stats?.[m.id]}
+                prior={priorDecisions[m.id]}
                 hovered={hovered === m.id}
                 dimmed={selected !== null && selected !== m.id}
                 selected={selected === m.id}
@@ -175,6 +200,7 @@ function MissionsPage() {
 function MissionCard({
   mission,
   stats,
+  prior,
   hovered,
   dimmed,
   selected,
@@ -183,6 +209,7 @@ function MissionCard({
 }: {
   mission: MissionMeta;
   stats?: MissionStats;
+  prior?: PriorDecision;
   hovered: boolean;
   dimmed: boolean;
   selected: boolean;
@@ -290,6 +317,20 @@ function MissionCard({
           value={formatSeconds(stats?.avgInvestigationSeconds)}
         />
       </dl>
+
+      {/* Prior decision — a quiet recall so a returning player can see what
+          they committed to last time. No score, no judgment. Per §08 #4 and
+          the Archive milestone in the roadmap. */}
+      {prior && available && (
+        <div className="mt-6 border-t border-foreground/10 pt-4">
+          <p className="text-[0.5rem] tracking-[0.4em] uppercase text-muted-foreground/55 mb-1">
+            Your prior decision
+          </p>
+          <p className="text-xs text-foreground/75 leading-snug">
+            {prior.archetypeLabel}
+          </p>
+        </div>
+      )}
 
       {/* Footer — creator metadata + CTA */}
       <div className="mt-7 flex items-end justify-between gap-4">
