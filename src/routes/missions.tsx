@@ -241,30 +241,8 @@ function MissionsPage() {
           </p>
         </header>
 
-        {/* ---------- TODAY pointer ---------- */}
-        {today && (
-          <button
-            type="button"
-            onClick={() => commit(today.id)}
-            className="group mb-10 flex w-full items-baseline gap-3 border-t border-foreground/10 py-4 text-left transition-colors hover:border-accent/40"
-          >
-            <span className="text-[0.55rem] tracking-[0.4em] uppercase text-accent/90">
-              Today
-            </span>
-            <span className="font-display text-base sm:text-lg text-foreground/95">
-              {today.codename}
-            </span>
-            <span className="hidden sm:inline text-sm italic text-muted-foreground/80 line-clamp-1">
-              {today.logline}
-            </span>
-            <span className="ml-auto text-[0.55rem] tracking-[0.4em] uppercase text-accent/70 group-hover:text-accent transition-colors">
-              Enter →
-            </span>
-          </button>
-        )}
-
         {/* ---------- Filters ---------- */}
-        <div className="mb-6 space-y-3">
+        <div className="mb-8 space-y-3">
           <FacetRow
             label="Theme"
             values={themes}
@@ -298,6 +276,30 @@ function MissionsPage() {
             </div>
           </div>
         </div>
+
+        {/* ---------- TODAY pointer ---------- */}
+        {today && (
+          <button
+            type="button"
+            onClick={() => commit(today.id)}
+            className="group mb-8 flex w-full items-baseline gap-3 border-t border-foreground/10 py-4 text-left transition-colors hover:border-accent/40"
+          >
+            <span className="text-[0.55rem] tracking-[0.4em] uppercase text-accent/90">
+              Today
+            </span>
+            <span className="font-display text-base sm:text-lg text-foreground/95">
+              {today.codename}
+            </span>
+            <span className="hidden sm:inline text-sm italic text-muted-foreground/80 line-clamp-1">
+              {today.logline}
+            </span>
+            <span className="ml-auto text-[0.55rem] tracking-[0.4em] uppercase text-accent/70 group-hover:text-accent transition-colors">
+              Enter →
+            </span>
+          </button>
+        )}
+
+
 
         {/* ---------- Ledger header ---------- */}
         <div className="hidden sm:grid grid-cols-[1fr_auto] items-baseline gap-x-8 border-b border-foreground/10 pb-2 text-[0.5rem] tracking-[0.4em] uppercase text-muted-foreground/55">
