@@ -70,6 +70,23 @@ export function subscribeAudioFailures(fn: FailureListener): () => void {
   failureListeners.add(fn);
   return () => { failureListeners.delete(fn); };
 }
+/**
+ * Snapshot of every URL that has tripped the failure cache this session,
+ * with its remaining cooldown (ms until it will be retried). For the
+ * in-app audio diagnostics view.
+ */
+export function getAudioFailures(): Array<{ url: string; failedAt: number; cooldownMs: number }> {
+  const now = Date.now();
+  return Array.from(failedUrls.entries())
+    .map(([url, failedAt]) => ({
+      url,
+      failedAt,
+      cooldownMs: Math.max(0, FAILED_URL_TTL_MS - (now - failedAt)),
+    }))
+    .sort((a, b) => b.failedAt - a.failedAt);
+}
+export const AUDIO_FAILURE_TTL_MS = FAILED_URL_TTL_MS;
+
 function isFailing(url: string): boolean {
   const t = failedUrls.get(url);
   if (t === undefined) return false;
