@@ -8,8 +8,13 @@ import { useEffect, useState } from "react";
 import { audio, type AudioAttempt } from "@/lib/audio/director";
 import {
   AUDIO_FAILURE_TTL_MS,
+  clearAudioFailures,
   getAudioFailures,
+  getSimulateFailures,
+  setSimulateFailures,
   subscribeAudioFailures,
+  subscribeSimulateFailures,
+  type SimulateFailuresMode,
 } from "@/lib/ambient";
 
 export const Route = createFileRoute("/diagnostics/audio")({
