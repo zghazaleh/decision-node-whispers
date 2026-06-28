@@ -18,6 +18,7 @@ import { Route as ConstitutionRouteImport } from './routes/constitution'
 import { Route as AnalysisRouteImport } from './routes/analysis'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MissionIdRouteImport } from './routes/mission.$id'
+import { Route as DiagnosticsAudioRouteImport } from './routes/diagnostics.audio'
 import { Route as ApiTranscribeRouteImport } from './routes/api/transcribe'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AdminGscVerifyRouteImport } from './routes/admin.gsc-verify'
@@ -69,6 +70,11 @@ const MissionIdRoute = MissionIdRouteImport.update({
   path: '/mission/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DiagnosticsAudioRoute = DiagnosticsAudioRouteImport.update({
+  id: '/diagnostics/audio',
+  path: '/diagnostics/audio',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiTranscribeRoute = ApiTranscribeRouteImport.update({
   id: '/api/transcribe',
   path: '/api/transcribe',
@@ -109,6 +115,7 @@ export interface FileRoutesByFullPath {
   '/admin/gsc-verify': typeof AdminGscVerifyRoute
   '/api/chat': typeof ApiChatRoute
   '/api/transcribe': typeof ApiTranscribeRoute
+  '/diagnostics/audio': typeof DiagnosticsAudioRoute
   '/mission/$id': typeof MissionIdRoute
 }
 export interface FileRoutesByTo {
@@ -125,6 +132,7 @@ export interface FileRoutesByTo {
   '/admin/gsc-verify': typeof AdminGscVerifyRoute
   '/api/chat': typeof ApiChatRoute
   '/api/transcribe': typeof ApiTranscribeRoute
+  '/diagnostics/audio': typeof DiagnosticsAudioRoute
   '/mission/$id': typeof MissionIdRoute
 }
 export interface FileRoutesById {
@@ -142,6 +150,7 @@ export interface FileRoutesById {
   '/admin/gsc-verify': typeof AdminGscVerifyRoute
   '/api/chat': typeof ApiChatRoute
   '/api/transcribe': typeof ApiTranscribeRoute
+  '/diagnostics/audio': typeof DiagnosticsAudioRoute
   '/mission/$id': typeof MissionIdRoute
 }
 export interface FileRouteTypes {
@@ -160,6 +169,7 @@ export interface FileRouteTypes {
     | '/admin/gsc-verify'
     | '/api/chat'
     | '/api/transcribe'
+    | '/diagnostics/audio'
     | '/mission/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -176,6 +186,7 @@ export interface FileRouteTypes {
     | '/admin/gsc-verify'
     | '/api/chat'
     | '/api/transcribe'
+    | '/diagnostics/audio'
     | '/mission/$id'
   id:
     | '__root__'
@@ -192,6 +203,7 @@ export interface FileRouteTypes {
     | '/admin/gsc-verify'
     | '/api/chat'
     | '/api/transcribe'
+    | '/diagnostics/audio'
     | '/mission/$id'
   fileRoutesById: FileRoutesById
 }
@@ -209,6 +221,7 @@ export interface RootRouteChildren {
   AdminGscVerifyRoute: typeof AdminGscVerifyRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiTranscribeRoute: typeof ApiTranscribeRoute
+  DiagnosticsAudioRoute: typeof DiagnosticsAudioRoute
   MissionIdRoute: typeof MissionIdRoute
 }
 
@@ -277,6 +290,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MissionIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/diagnostics/audio': {
+      id: '/diagnostics/audio'
+      path: '/diagnostics/audio'
+      fullPath: '/diagnostics/audio'
+      preLoaderRoute: typeof DiagnosticsAudioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/transcribe': {
       id: '/api/transcribe'
       path: '/api/transcribe'
@@ -329,6 +349,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminGscVerifyRoute: AdminGscVerifyRoute,
   ApiChatRoute: ApiChatRoute,
   ApiTranscribeRoute: ApiTranscribeRoute,
+  DiagnosticsAudioRoute: DiagnosticsAudioRoute,
   MissionIdRoute: MissionIdRoute,
 }
 export const routeTree = rootRouteImport
