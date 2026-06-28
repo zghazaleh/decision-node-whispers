@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SoundTestRouteImport } from './routes/sound-test'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as NarrationPreviewRouteImport } from './routes/narration-preview'
 import { Route as MissionsRouteImport } from './routes/missions'
 import { Route as ConstitutionRouteImport } from './routes/constitution'
 import { Route as AnalysisRouteImport } from './routes/analysis'
@@ -30,6 +31,11 @@ const SoundTestRoute = SoundTestRouteImport.update({
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NarrationPreviewRoute = NarrationPreviewRouteImport.update({
+  id: '/narration-preview',
+  path: '/narration-preview',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MissionsRoute = MissionsRouteImport.update({
@@ -88,6 +94,7 @@ export interface FileRoutesByFullPath {
   '/analysis': typeof AnalysisRoute
   '/constitution': typeof ConstitutionRoute
   '/missions': typeof MissionsRoute
+  '/narration-preview': typeof NarrationPreviewRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sound-test': typeof SoundTestRoute
   '/admin/evaluation': typeof AdminEvaluationRoute
@@ -102,6 +109,7 @@ export interface FileRoutesByTo {
   '/analysis': typeof AnalysisRoute
   '/constitution': typeof ConstitutionRoute
   '/missions': typeof MissionsRoute
+  '/narration-preview': typeof NarrationPreviewRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sound-test': typeof SoundTestRoute
   '/admin/evaluation': typeof AdminEvaluationRoute
@@ -117,6 +125,7 @@ export interface FileRoutesById {
   '/analysis': typeof AnalysisRoute
   '/constitution': typeof ConstitutionRoute
   '/missions': typeof MissionsRoute
+  '/narration-preview': typeof NarrationPreviewRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sound-test': typeof SoundTestRoute
   '/admin/evaluation': typeof AdminEvaluationRoute
@@ -133,6 +142,7 @@ export interface FileRouteTypes {
     | '/analysis'
     | '/constitution'
     | '/missions'
+    | '/narration-preview'
     | '/sitemap.xml'
     | '/sound-test'
     | '/admin/evaluation'
@@ -147,6 +157,7 @@ export interface FileRouteTypes {
     | '/analysis'
     | '/constitution'
     | '/missions'
+    | '/narration-preview'
     | '/sitemap.xml'
     | '/sound-test'
     | '/admin/evaluation'
@@ -161,6 +172,7 @@ export interface FileRouteTypes {
     | '/analysis'
     | '/constitution'
     | '/missions'
+    | '/narration-preview'
     | '/sitemap.xml'
     | '/sound-test'
     | '/admin/evaluation'
@@ -176,6 +188,7 @@ export interface RootRouteChildren {
   AnalysisRoute: typeof AnalysisRoute
   ConstitutionRoute: typeof ConstitutionRoute
   MissionsRoute: typeof MissionsRoute
+  NarrationPreviewRoute: typeof NarrationPreviewRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SoundTestRoute: typeof SoundTestRoute
   AdminEvaluationRoute: typeof AdminEvaluationRoute
@@ -200,6 +213,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/narration-preview': {
+      id: '/narration-preview'
+      path: '/narration-preview'
+      fullPath: '/narration-preview'
+      preLoaderRoute: typeof NarrationPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/missions': {
@@ -280,6 +300,7 @@ const rootRouteChildren: RootRouteChildren = {
   AnalysisRoute: AnalysisRoute,
   ConstitutionRoute: ConstitutionRoute,
   MissionsRoute: MissionsRoute,
+  NarrationPreviewRoute: NarrationPreviewRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SoundTestRoute: SoundTestRoute,
   AdminEvaluationRoute: AdminEvaluationRoute,
