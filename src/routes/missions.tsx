@@ -14,6 +14,10 @@ import { getSoundtrack } from "@/lib/soundtracks";
 import { getAllMissionStats, type MissionStats } from "@/lib/mission-stats.functions";
 import { readMission } from "@/lib/mission-store";
 import { getMissionEngine } from "@/lib/missions/registry";
+import { HeroDetail } from "@/components/discovery/HeroDetail";
+import { Rail } from "@/components/discovery/Rail";
+import { logOpen } from "@/lib/discovery/signals";
+
 
 /* -------------------------------------------------------------------------- */
 /* Route                                                                       */
