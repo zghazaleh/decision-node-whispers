@@ -2,7 +2,7 @@ import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
 import { getMissionEngine } from "@/lib/missions/registry";
 import { frameworkAnalyzerBlock, assertMissionFrameworkReady } from "@/lib/missions/framework";
 import { createServerFn } from "@tanstack/react-start";
-import { generateObject } from "ai";
+import { generateObject, generateText } from "ai";
 import { z } from "zod";
 
 const DEFAULT_MISSION_ID = "mission-01";
@@ -147,6 +147,145 @@ function normalizeAnalysis(raw: RawDecisionAnalysis): DecisionAnalysis {
     evidenceIgnored: normalizeTextBlock(raw.evidenceIgnored),
     alternatives: normalizeTextBlock(raw.alternatives),
   });
+}
+
+function extractJsonObject(text: string): unknown {
+  const trimmed = text.trim();
+  const fenced = trimmed.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+  const source = fenced?.[1]?.trim() || trimmed;
+
+  try {
+    return JSON.parse(source);
+  } catch {
+    const start = source.indexOf("{");
+    const end = source.lastIndexOf("}");
+    if (start >= 0 && end > start) {
+      return JSON.parse(source.slice(start, end + 1));
+    }
+    throw new Error("Analysis response was not valid JSON.");
+  }
+}
+
+function safeString(value: unknown, fallback: string) {
+  if (typeof value === "string" && value.trim()) return value.trim();
+  if (Array.isArray(value)) {
+    const joined = value
+      .filter((item): item is string => typeof item === "string")
+      .map((item) => item.trim())
+      .filter(Boolean)
+      .join("\n\n");
+    if (joined) return joined;
+  }
+  return fallback;
+}
+
+function coerceArray<T>(value: unknown, schema: z.ZodType<T>, max: number): T[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((item) => schema.safeParse(item))
+    .filter((result): result is z.SafeParseSuccess<T> => result.success)
+    .map((result) => result.data)
+    .slice(0, max);
+}
+
+function fallbackAnalysis({
+  raw,
+  archetype,
+  decision,
+  reasoning,
+}: {
+  raw?: Record<string, unknown>;
+  archetype: ReturnType<NonNullable<ReturnType<typeof getMissionEngine>>["getArchetype"]> | null;
+  decision: string;
+  reasoning: string;
+}): DecisionAnalysis {
+  const reasoningAssessment = raw?.reasoningAssessment && typeof raw.reasoningAssessment === "object"
+    ? raw.reasoningAssessment as Record<string, unknown>
+    : {};
+  const rawScores = raw?.dimensionScores && typeof raw.dimensionScores === "object"
+    ? raw.dimensionScores as Record<string, unknown>
+    : {};
+  const rawNotes = raw?.dimensionNotes && typeof raw.dimensionNotes === "object"
+    ? raw.dimensionNotes as Record<string, unknown>
+    : {};
+  const score = (key: string) => {
+    const value = rawScores[key];
+    return typeof value === "number" && Number.isFinite(value)
+      ? Math.min(100, Math.max(0, Math.round(value)))
+      : 50;
+  };
+  const note = (key: string, fallback: string) => safeString(rawNotes[key], fallback);
+
+  const StrengthSchema = z.object({ behavior: z.string(), evidence: z.string() });
+  const BlindSpotSchema = z.object({
+    pattern: z.string(),
+    evidence: z.string(),
+    gentleReframe: z.string(),
+  });
+  const BiasSchema = z.object({
+    name: z.string(),
+    evidence: z.string(),
+    gentleExplanation: z.string(),
+    confidence: z.enum(["low", "medium", "high"]).optional(),
+  });
+  const TrajectorySchema = z.object({
+    marker: z.string(),
+    hypothesis: z.string(),
+    confidence: z.enum(["low", "medium", "high"]),
+    trigger: z.string(),
+    update: z.enum(["formed", "reinforced", "revised", "abandoned", "held"]),
+    note: z.string(),
+  });
+  const verdict = reasoningAssessment.calibrationVerdict;
+
+  return {
+    headline: safeString(raw?.headline, `You committed to ${decision}.`),
+    timeline: archetype?.timeline.map((t) => ({ ...t })) ?? coerceArray(
+      raw?.timeline,
+      z.object({ beat: z.string(), consequence: z.string() }),
+      6,
+    ),
+    assumptions: safeString(raw?.assumptions, "You made the decision with incomplete evidence and accepted that uncertainty as part of the room."),
+    evidenceUsed: safeString(raw?.evidenceUsed, "You leaned on the details you surfaced in the conversation and the reasoning you named at the moment of commitment."),
+    evidenceIgnored: safeString(raw?.evidenceIgnored, "Some reachable facts remained untested before you moved from investigation to commitment."),
+    alternatives: safeString(raw?.alternatives, "A different version of you could have paused to test one more assumption or ask one more targeted question before committing."),
+    closing: safeString(raw?.closing, archetype?.tone ?? "You made the call under uncertainty; the shape of that process is the thing to carry forward."),
+    reasoningAssessment: {
+      summary: safeString(reasoningAssessment.summary, "Your reasoning shows a decision made under pressure with incomplete information. The useful question is how deliberately you separated evidence from assumption before committing."),
+      strengths: coerceArray(reasoningAssessment.strengths, StrengthSchema, 4),
+      blindSpots: coerceArray(reasoningAssessment.blindSpots, BlindSpotSchema, 4),
+      possibleBiases: coerceArray(reasoningAssessment.possibleBiases, BiasSchema, 3),
+      calibration: safeString(reasoningAssessment.calibration, "Your confidence can only be judged against the evidence you had in the room, not against the eventual outcome."),
+      calibrationVerdict: verdict === "under" || verdict === "over" || verdict === "calibrated"
+        ? verdict
+        : "calibrated",
+      luckVsSkill: safeString(reasoningAssessment.luckVsSkill, "Your process and the eventual consequence are separate signals; one does not fully explain the other."),
+    },
+    beliefTrajectory: coerceArray(reasoningAssessment.beliefTrajectory ?? raw?.beliefTrajectory, TrajectorySchema, 8),
+    dimensionScores: {
+      strategicThinking: score("strategicThinking"),
+      curiosity: score("curiosity"),
+      informationGathering: score("informationGathering"),
+      confidenceCalibration: score("confidenceCalibration"),
+      adaptability: score("adaptability"),
+      negotiation: score("negotiation"),
+      longTermThinking: score("longTermThinking"),
+      biasResistance: score("biasResistance"),
+    },
+    dimensionNotes: {
+      strategicThinking: note("strategicThinking", "You showed mixed evidence of thinking beyond the immediate move."),
+      curiosity: note("curiosity", "You asked enough to act, while leaving some reachable questions untouched."),
+      informationGathering: note("informationGathering", "You gathered some decision-relevant evidence before committing."),
+      confidenceCalibration: note("confidenceCalibration", "Your stated confidence is treated as proportional to the evidence available."),
+      adaptability: note("adaptability", "You adjusted as the conversation developed, though not every assumption was retested."),
+      negotiation: note("negotiation", "You did not make negotiation the center of the decision process."),
+      longTermThinking: note("longTermThinking", "You considered the immediate stakes more clearly than the downstream consequences."),
+      biasResistance: note("biasResistance", "You showed some resistance to first impressions, with room to test more disconfirming evidence."),
+    },
+    reasoningEcho: safeString(raw?.reasoningEcho, reasoning
+      ? `You described your reasoning as: ${reasoning}. Your confidence sat where the evidence appeared to be in the moment, and the remaining uncertainty is part of the lesson.`
+      : "You gave little explicit reasoning, so the clearest signal is the path you took through the conversation before committing."),
+  };
 }
 
 
