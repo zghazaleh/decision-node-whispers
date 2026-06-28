@@ -177,6 +177,7 @@ function MissionsPage() {
               <MissionCard
                 mission={m}
                 stats={stats?.[m.id]}
+                prior={priorDecisions[m.id]}
                 hovered={hovered === m.id}
                 dimmed={selected !== null && selected !== m.id}
                 selected={selected === m.id}
@@ -199,6 +200,7 @@ function MissionsPage() {
 function MissionCard({
   mission,
   stats,
+  prior,
   hovered,
   dimmed,
   selected,
@@ -207,6 +209,7 @@ function MissionCard({
 }: {
   mission: MissionMeta;
   stats?: MissionStats;
+  prior?: PriorDecision;
   hovered: boolean;
   dimmed: boolean;
   selected: boolean;
