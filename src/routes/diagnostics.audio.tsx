@@ -87,6 +87,59 @@ function AudioDiagnosticsPage() {
           </p>
         </header>
 
+        <section className="space-y-3 rounded-md border border-amber-400/20 bg-amber-400/[0.03] p-4">
+          <div className="flex items-baseline justify-between">
+            <h2 className="text-xs tracking-[0.24em] uppercase text-amber-300/80">
+              Simulate failures (dev)
+            </h2>
+            <span className="text-[11px] text-foreground/40">
+              persisted to localStorage
+            </span>
+          </div>
+          <p className="text-xs text-foreground/55">
+            Forces audio assets to throw at load time so you can verify the
+            bed/sfx fallback chains, the on-screen failure indicator, and the
+            cooldown cache without breaking real CDN URLs. Navigate between
+            missions / analysis with this enabled to exercise every transition.
+          </p>
+          <fieldset className="flex flex-wrap gap-2 pt-1">
+            <legend className="sr-only">Failure simulation mode</legend>
+            {(["off", "beds", "sfx", "all"] as const).map((mode) => {
+              const active = simulate === mode;
+              return (
+                <button
+                  key={mode}
+                  type="button"
+                  onClick={() => setSimulateFailures(mode)}
+                  aria-pressed={active}
+                  className={
+                    "px-3 py-1.5 rounded text-[11px] tracking-[0.18em] uppercase transition-colors border " +
+                    (active
+                      ? "border-amber-400/60 bg-amber-400/15 text-amber-200"
+                      : "border-foreground/15 text-foreground/60 hover:text-foreground/90 hover:border-foreground/30")
+                  }
+                >
+                  {mode === "off" ? "off" : `fail ${mode}`}
+                </button>
+              );
+            })}
+            <button
+              type="button"
+              onClick={() => { clearAudioFailures(); setFailures(getAudioFailures()); }}
+              className="ml-auto px-3 py-1.5 rounded text-[11px] tracking-[0.18em] uppercase border border-foreground/15 text-foreground/60 hover:text-foreground/90 hover:border-foreground/30 transition-colors"
+            >
+              Clear cooldowns
+            </button>
+          </fieldset>
+          {simulate !== "off" && (
+            <p className="text-[11px] text-amber-200/80">
+              Active: every {simulate === "all" ? "bed and one-shot" : simulate === "beds" ? "bed (mission / archive / landing / analysis)" : "sfx + motif one-shot"} will fail. Cached buffers from before the toggle was set still play — clear cooldowns and reload to start clean.
+            </p>
+          )}
+        </section>
+
+
+
         <section className="space-y-3">
           <div className="flex items-baseline justify-between">
             <h2 className="text-xs tracking-[0.24em] uppercase text-foreground/70">
