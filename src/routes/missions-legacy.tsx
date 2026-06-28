@@ -30,7 +30,7 @@ function usePriorDecisions(): Record<string, PriorDecision> {
   return prior;
 }
 
-export const Route = createFileRoute("/missions")({
+export const Route = createFileRoute("/missions-legacy")({
   head: () => ({
     meta: [
       { title: "Case Files — Decision Node" },
