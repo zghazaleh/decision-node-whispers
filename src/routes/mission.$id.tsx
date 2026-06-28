@@ -228,16 +228,22 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
         role: m.role,
         text: partsToText(m),
       }));
-      const analysis = await analyzeFn({
-        data: {
-          missionId: MISSION_ID,
-          decision: decision.trim(),
-          reasoning: reasoning.trim(),
-          transcript,
-          ...(archetypeId ? { archetypeId } : {}),
-          ...(typeof confidence === "number" ? { confidence } : {}),
-        },
-      });
+      const analysisPayload = {
+        missionId: MISSION_ID,
+        decision: decision.trim(),
+        reasoning: reasoning.trim(),
+        transcript,
+        ...(archetypeId ? { archetypeId } : {}),
+        ...(typeof confidence === "number" ? { confidence } : {}),
+      };
+      let analysis;
+      try {
+        analysis = await analyzeFn({ data: analysisPayload });
+      } catch (firstErr) {
+        console.warn("analyze attempt 1 failed, retrying", firstErr);
+        await new Promise((r) => setTimeout(r, 800));
+        analysis = await analyzeFn({ data: analysisPayload });
+      }
       update({
         decision: decision.trim(),
         reasoning: reasoning.trim(),
