@@ -162,6 +162,21 @@ function MissionsPage() {
       .slice(0, 6);
   }, [today]);
 
+  // Cinematic settle for the Guild rail: skeletons breathe in for ~600ms
+  // before the real cards fade up. `guildNonce` lets the retry affordance
+  // re-run the reveal without touching the underlying data.
+  const [guildNonce, setGuildNonce] = useState(0);
+  const [guildLoading, setGuildLoading] = useState(true);
+  const [guildError, setGuildError] = useState<string | null>(null);
+  useEffect(() => {
+    setGuildLoading(true);
+    setGuildError(null);
+    const t = window.setTimeout(() => {
+      setGuildLoading(false);
+    }, 620);
+    return () => window.clearTimeout(t);
+  }, [guildNonce]);
+
 
   // Apply filters + sort (today's case stays in the ledger AND in filter results;
   // the hero card above is purely a feature, not an exclusion).
@@ -348,6 +363,10 @@ function MissionsPage() {
           rightEyebrow="Fresh"
           items={guildRail}
           onSelect={commit}
+          loading={guildLoading}
+          error={guildError}
+          onRetry={() => setGuildNonce((n) => n + 1)}
+          emptyCopy="No fresh cases tonight. Check back when the Guild stirs."
         />
 
 
