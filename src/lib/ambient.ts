@@ -78,6 +78,119 @@ function markFailed(url: string, why: unknown): void {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Persistent encoded-audio cache (IndexedDB).
+//
+// AudioBuffers can't be structured-cloned, so we persist the *encoded* bytes
+// (mp3) keyed by URL. Our asset URLs embed an immutable asset_id, so cached
+// entries never go stale — a URL either resolves to the same bytes forever
+// or 404s once the asset is deleted. On repeat visits this skips the network
+// round-trip entirely; only the (fast) decodeAudioData step runs.
+// ---------------------------------------------------------------------------
+const IDB_NAME = "dn-audio-cache";
+const IDB_STORE = "buffers";
+const IDB_VERSION = 1;
+const IDB_MAX_BYTES = 32 * 1024 * 1024; // ~32MB soft cap; LRU-evict oldest
+const IDB_DISABLED = typeof indexedDB === "undefined";
+
+let idbPromise: Promise<IDBDatabase | null> | null = null;
+function openIdb(): Promise<IDBDatabase | null> {
+  if (IDB_DISABLED) return Promise.resolve(null);
+  if (idbPromise) return idbPromise;
+  idbPromise = new Promise((resolve) => {
+    try {
+      const req = indexedDB.open(IDB_NAME, IDB_VERSION);
+      req.onupgradeneeded = () => {
+        const db = req.result;
+        if (!db.objectStoreNames.contains(IDB_STORE)) {
+          const store = db.createObjectStore(IDB_STORE, { keyPath: "url" });
+          store.createIndex("touched", "touched");
+        }
+      };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => resolve(null);
+      req.onblocked = () => resolve(null);
+    } catch {
+      resolve(null);
+    }
+  });
+  return idbPromise;
+}
+
+async function idbGet(url: string): Promise<ArrayBuffer | null> {
+  const db = await openIdb();
+  if (!db) return null;
+  return new Promise((resolve) => {
+    try {
+      const tx = db.transaction(IDB_STORE, "readwrite");
+      const store = tx.objectStore(IDB_STORE);
+      const req = store.get(url);
+      req.onsuccess = () => {
+        const row = req.result as { url: string; bytes: ArrayBuffer; touched: number } | undefined;
+        if (!row) { resolve(null); return; }
+        // Touch for LRU.
+        try { store.put({ ...row, touched: Date.now() }); } catch { /* noop */ }
+        resolve(row.bytes);
+      };
+      req.onerror = () => resolve(null);
+    } catch {
+      resolve(null);
+    }
+  });
+}
+
+async function idbPut(url: string, bytes: ArrayBuffer): Promise<void> {
+  const db = await openIdb();
+  if (!db) return;
+  return new Promise((resolve) => {
+    try {
+      const tx = db.transaction(IDB_STORE, "readwrite");
+      const store = tx.objectStore(IDB_STORE);
+      store.put({ url, bytes: bytes.slice(0), size: bytes.byteLength, touched: Date.now() });
+      tx.oncomplete = () => { void idbEvictIfOver(); resolve(); };
+      tx.onerror = () => resolve();
+      tx.onabort = () => resolve();
+    } catch {
+      resolve();
+    }
+  });
+}
+
+let evicting = false;
+async function idbEvictIfOver(): Promise<void> {
+  if (evicting) return;
+  evicting = true;
+  try {
+    const db = await openIdb();
+    if (!db) return;
+    const rows: Array<{ url: string; size: number; touched: number }> = await new Promise((resolve) => {
+      try {
+        const tx = db.transaction(IDB_STORE, "readonly");
+        const store = tx.objectStore(IDB_STORE);
+        const req = store.getAll();
+        req.onsuccess = () => resolve(((req.result ?? []) as Array<{ url: string; size?: number; touched?: number; bytes?: ArrayBuffer }>).map((r) => ({
+          url: r.url,
+          size: r.size ?? r.bytes?.byteLength ?? 0,
+          touched: r.touched ?? 0,
+        })));
+        req.onerror = () => resolve([]);
+      } catch { resolve([]); }
+    });
+    let total = rows.reduce((s, r) => s + r.size, 0);
+    if (total <= IDB_MAX_BYTES) return;
+    rows.sort((a, b) => a.touched - b.touched);
+    const tx = db.transaction(IDB_STORE, "readwrite");
+    const store = tx.objectStore(IDB_STORE);
+    for (const r of rows) {
+      if (total <= IDB_MAX_BYTES) break;
+      store.delete(r.url);
+      total -= r.size;
+    }
+  } finally {
+    evicting = false;
+  }
+}
+
 /**
  * Fire-and-forget HTTP prefetch for a bed/sfx URL. Safe to call without an
  * AudioContext — buffers are kept until decode happens on first play.
@@ -90,10 +203,15 @@ export function prefetchAudio(url: string): Promise<void> {
   if (isFailing(url)) return Promise.resolve();
   const cached = arrayBufferCache.get(url);
   if (cached) return cached.then(() => {}, () => {});
-  const p = fetch(url).then((r) => {
+  const p = (async () => {
+    const persisted = await idbGet(url);
+    if (persisted) return persisted;
+    const r = await fetch(url);
     if (!r.ok) throw new Error(`prefetch failed: ${r.status}`);
-    return r.arrayBuffer();
-  });
+    const bytes = await r.arrayBuffer();
+    void idbPut(url, bytes);
+    return bytes;
+  })();
   arrayBufferCache.set(url, p);
   p.catch((err) => {
     arrayBufferCache.delete(url);
@@ -111,13 +229,21 @@ async function loadBuffer(ctx: AudioContext, url: string): Promise<AudioBuffer> 
   }
   const p = (async () => {
     const pre = arrayBufferCache.get(url);
-    const data = pre
-      ? await pre.then((b) => b.slice(0))
-      : await (async () => {
-          const res = await fetch(url);
-          if (!res.ok) throw new Error(`ambient fetch failed: ${res.status}`);
-          return await res.arrayBuffer();
-        })();
+    let data: ArrayBuffer;
+    if (pre) {
+      data = (await pre).slice(0);
+    } else {
+      const persisted = await idbGet(url);
+      if (persisted) {
+        data = persisted.slice(0);
+      } else {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`ambient fetch failed: ${res.status}`);
+        const bytes = await res.arrayBuffer();
+        void idbPut(url, bytes);
+        data = bytes;
+      }
+    }
     return await ctx.decodeAudioData(data);
   })();
   bufferCache.set(url, p);
@@ -127,6 +253,8 @@ async function loadBuffer(ctx: AudioContext, url: string): Promise<AudioBuffer> 
   );
   return p;
 }
+
+
 
 
 
