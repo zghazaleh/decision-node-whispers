@@ -1,67 +1,51 @@
-# Mission Discovery & Social — Benchmark + Options Memo
 
-You want "Apple App Store, but for missions": curated cases, ratings, discovery first, social engagement around them. Before we design or build anything, the deliverable here is a **decision memo**: 5–6 reference experiences pulled apart for what to steal, then 3 distinct organizing models for Decision Nodes with honest tradeoffs. You pick one direction; we move to design directions and then build.
+# Mission Lists — Mockup PDFs (3 options)
 
-No code changes in this step.
+You asked for visual mockups of the feature options as PDFs. No code yet — these are static, high-fidelity design artifacts you can review, mark up, and forward. After you pick a direction, we move to schema + build.
 
-## What I'll research
+## What the feature has to do (shared across all options)
 
-Six references, chosen because each solves a different facet of "discover a piece of slow, considered content before committing":
+- Save any case file into one or more **personal lists** (default seed: "Missions I'd run again", "Watchlist", "Cited in writing").
+- Create / rename / delete custom lists.
+- Surface those lists on a **profile page** (`/u/$handle` or `/me`) as the primary content of the profile.
+- Optional per-list visibility: private / unlisted / public — visual treatment shown in mockups, decided later.
 
-1. **Apple App Store / Today tab** — editorial card stack, "Story of the Day", hand-picked collections, ratings as quiet trust signal not leaderboard.
-2. **Letterboxd** — list culture, friend activity as discovery, ratings that feel personal not gamified, beautiful poster grids.
-3. **MUBI** — 30-films-at-a-time scarcity, a curator's voice as the product, the "Notebook" essay layer attached to each title.
-4. **Criterion Channel** — themed collections ("Noir in Color", "Films by Agnès Varda"), context essays, "if you liked X" curatorial logic.
-5. **Are.na** — channels as nested curation, low-velocity, contributor-as-collaborator model.
-6. **Pitchfork / NYT Interactive** — review-as-artifact: a single piece of content gets a long, designed page with score, essay, sidebar.
+## Three directions to mock up
 
-For each I'll capture: card anatomy, discovery model (browse / feed / editorial / search), social signals (ratings, comments, lists, follows), pacing, and what would or wouldn't port to a 9-mission interactive drama.
+Each will be a single multi-page PDF (cover + 3–4 key screens: list creation, case-file save affordance, profile view, list detail), rendered in the existing Decision Node visual language (dark, editorial, case-file typography, accent hairlines — matching `missions.tsx` and the constitution's design principles).
 
-## What I'll propose
+### Option A — "The Dossier Shelf"
+Profile reads as an archivist's shelf. Lists are **labeled folios** stacked vertically, each with a spine, count, and three peeked case-file covers. Clicking opens a folio detail view that mirrors the existing `/missions` grid. Save affordance on a case file = a small "File into…" action that opens a folio picker.
+- *Energy:* archival, Criterion-Channel-meets-FOIA. Slow, prestige.
+- *Profile feels like:* a curator's shelf.
 
-Three organizing models for Decision Nodes — these are **the shape of the product**, not visual variations. Each one would later get its own design direction round.
+### Option B — "The Editor's Desk"
+Profile is a **two-column editorial layout** — left rail of lists (with curator-style intros the user can write), right column showing the active list as a vertical editorial feed (poster + logline + the user's own note per case). Save affordance = "Add to list…" with an inline note field.
+- *Energy:* Letterboxd × Are.na × a writer's commonplace book.
+- *Profile feels like:* a published column.
 
-```text
-A. THE CURATED STORE              B. THE CRITERION ARCHIVE         C. THE LIVING CASE FILE
-─────────────────────             ───────────────────────          ──────────────────────
-App Store "Today" energy.         MUBI/Criterion energy.           Genius/Reddit-thread energy.
-                                                                    
-Home = editorial cards            Home = themed collections        Home = case index
-+ "Mission of the Week"           ("Power & Compliance",           Each mission opens into a
-+ hand-picked collections         "Bodies & Borders")              dossier: the dilemma + every
-+ ratings as small trust badge    + curator essay per mission      archetype's reasoning, ratings,
-+ aggregate decision split        + companion commentary           annotations, contested moments.
-+ "if you decided X, try Y"       + sparse rotating selection      Social = annotation, not feed.
-                                                                    
-Discovery: editorial + browse.    Discovery: themed depth.         Discovery: per-case immersion.
-Social: light (rate, share).      Social: very light (save).       Social: heavy (debate, annotate).
-Velocity: medium.                 Velocity: slow, prestige.        Velocity: deep, niche.
-                                                                    
-Closest to your stated frame.     Most differentiated.             Most defensible long-term.
-Risk: feels generic if not        Risk: needs strong editorial     Risk: requires player volume
-exquisitely art-directed.         voice; you become the curator.   to feel alive.
-```
+### Option C — "The Case Wall"
+Profile is a **dense visual grid / bento wall** of every saved case across all lists, color-tagged by list. Lists act as filters/chips above the grid rather than separate pages. Save affordance = a single tap to "Save" + secondary tag picker.
+- *Energy:* Pinterest × evidence board × kinetic.
+- *Profile feels like:* a working investigation wall.
 
-For each model I'll spell out: home surface, card anatomy, how ratings work, how a player moves from browse → commit → see-others, what "social" means concretely (and what it deliberately is NOT), and roughly what would change in the existing `/missions` route.
+## Deliverable
 
-## Format of the deliverable
+Three PDFs in `/mnt/documents/`:
+- `mission-lists-A-dossier-shelf.pdf`
+- `mission-lists-B-editors-desk.pdf`
+- `mission-lists-C-case-wall.pdf`
 
-A single memo posted in chat — not in the repo — with:
-- Benchmarks section (each reference: 2–3 sentences + the one thing worth stealing)
-- The three models, side by side, with the tradeoff matrix above expanded
-- A recommendation pick with reasoning, framed as a starting point not a verdict
-- Two follow-up questions to lock in the model before we move to design directions
+Each ~4 pages: (1) profile overview, (2) list detail, (3) save flow from a case file, (4) create/edit list. Rendered as design comps (HTML → PDF via headless Chromium) using the existing palette and typography cues. No code changes to the app.
 
-## After you pick a model
+## After you pick
 
-Plan-mode flow continues:
-1. You pick A / B / C (or a hybrid you direct).
-2. New plan: design directions round using the redesign skill — pin palette + type + layout for the discovery surface, then render 3 visual variants of the chosen model.
-3. You pick a direction.
-4. Build plan: scope the actual route changes (likely `/missions` becomes the discovery hub, possibly a new `/cases/$id` dossier route, ratings table, etc.) and any backend (ratings, curated collections, annotations depending on model).
+Lock the direction, then a follow-up turn handles:
+- DB schema (`lists`, `list_items`, RLS scoped to `auth.uid()`, public-read policy for public lists)
+- Profile route under `/u/$handle` (public) + `/me` (authenticated)
+- Save-to-list UI wired into existing `MissionCard` / mission page
+- Auth gate for the save action (inline "Sign in to save" CTA on public routes)
 
-## What this plan deliberately does not do
+## One question before I render
 
-- No code, schema, or route changes yet.
-- No commitment on audience/gating — that's a question inside the memo, answered after you see the models.
-- No design directions yet — those come after the model is picked, so we're not iterating on visuals for a shape we might throw away.
+Profile URL shape — do you want **public shareable profiles** at `/u/$handle` (so a list can be linked and indexed), or **private-only** lists visible to the signed-in owner at `/me`? This changes the profile overview mockup meaningfully (public adds handle, bio, share affordances; private is more utilitarian).
