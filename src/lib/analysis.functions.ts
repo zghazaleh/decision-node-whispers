@@ -131,6 +131,11 @@ export const analyzeDecision = createServerFn({ method: "POST" })
     const engine = getMissionEngine(data.missionId);
     if (!engine) throw new Error(`Unknown mission: ${data.missionId}`);
 
+    // Hard precondition: the Decision Nodes framework fields must be fully
+    // populated for this mission, or the reasoning assessment degrades to
+    // generic output. Fail loudly here instead of silently shipping a weak debrief.
+    assertMissionFrameworkReady(data.missionId);
+
     const gateway = createLovableAiGatewayProvider(key);
 
     const transcriptText = data.transcript
