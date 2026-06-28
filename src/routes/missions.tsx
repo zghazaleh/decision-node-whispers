@@ -458,6 +458,9 @@ function MissionsPage() {
 /* -------------------------------------------------------------------------- */
 /* Elegant filter select                                                       */
 /* -------------------------------------------------------------------------- */
+/* -------------------------------------------------------------------------- */
+/* Elegant filter select — custom dark dropdown                                */
+/* -------------------------------------------------------------------------- */
 
 function FilterSelect({
   label,
@@ -470,30 +473,69 @@ function FilterSelect({
   active: string;
   onChange: (v: string) => void;
 }) {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e: MouseEvent) => {
+      if (!containerRef.current?.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, [open]);
+
   return (
-    <div className="relative">
+    <div ref={containerRef} className="relative">
       <label className="mb-1 block text-[0.55rem] tracking-[0.4em] uppercase text-muted-foreground/55">
         {label}
       </label>
-      <div className="relative">
-        <select
-          value={active}
-          onChange={(e) => onChange(e.target.value)}
-          className="appearance-none rounded-md border border-foreground/10 bg-background/60 py-1.5 pl-3 pr-8 text-[0.65rem] tracking-[0.25em] uppercase text-foreground/90 outline-none transition-all hover:border-foreground/20 focus:border-accent/50 focus:ring-1 focus:ring-accent/30 cursor-pointer"
-        >
-          {values.map((v) => (
-            <option key={v} value={v}>
-              {v}
-            </option>
-          ))}
-        </select>
+      <button
+        type="button"
+        onClick={() => setOpen((p) => !p)}
+        className="flex items-center justify-between gap-3 rounded-md border border-foreground/10 bg-background/60 py-1.5 pl-3 pr-2.5 text-[0.65rem] tracking-[0.25em] uppercase text-foreground/90 outline-none transition-all hover:border-foreground/20 focus:border-accent/50 focus:ring-1 focus:ring-accent/30 cursor-pointer min-w-[140px]"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+      >
+        <span className="truncate">{active}</span>
         <span
-          className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[0.5rem] text-foreground/40"
+          className={`text-[0.5rem] text-foreground/40 transition-transform ${open ? "rotate-180" : ""}`}
           aria-hidden
         >
           ▾
         </span>
-      </div>
+      </button>
+
+      {open && (
+        <div className="absolute left-0 top-full z-50 mt-1 w-full overflow-hidden rounded-md border border-foreground/10 bg-[#0b0d10] shadow-xl shadow-black/50">
+          <ul role="listbox" className="max-h-[220px] overflow-y-auto py-1">
+            {values.map((v) => {
+              const isActive = v === active;
+              return (
+                <li key={v} role="option" aria-selected={isActive}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onChange(v);
+                      setOpen(false);
+                    }}
+                    className={`flex w-full items-center gap-2 px-3 py-2 text-left text-[0.6rem] tracking-[0.2em] uppercase transition-colors ${
+                      isActive
+                        ? "bg-accent/15 text-accent"
+                        : "text-foreground/75 hover:bg-foreground/[0.04] hover:text-foreground"
+                    }`}
+                  >
+                    <span className="w-2.5 text-center">
+                      {isActive ? "✓" : ""}
+                    </span>
+                    <span className="truncate">{v}</span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }
