@@ -143,7 +143,9 @@ class Director {
 
   async playSfx(name: "awakening" | "commit" | "analyzing" | "hover-tick" | "select-chip", opts?: { gain?: number }) {
     const url = audioUrl(name); if (!url) return;
-    await this.engine()?.playOneShot(url, { gain: opts?.gain, bus: "sfx", fadeInMs: 40, fadeOutMs: 500 });
+    const entry = this.recordAttempt({ kind: "playOneShot", label: `sfx:${name}`, url });
+    const ok = await this.engine()?.playOneShot(url, { gain: opts?.gain, bus: "sfx", fadeInMs: 40, fadeOutMs: 500 });
+    this.settleAttempt(entry, !!ok);
   }
 
   /** Play the gold-thread motif. Throttled so it stays a hinge moment. */
@@ -152,8 +154,11 @@ class Director {
     if (now - this.motifGuard < 6_000) return; // never two in quick succession
     this.motifGuard = now;
     const url = audioUrl("node-motif"); if (!url) return;
-    await this.engine()?.playOneShot(url, { gain: 0.6, bus: "motif", fadeInMs: 80, fadeOutMs: 1200 });
+    const entry = this.recordAttempt({ kind: "playOneShot", label: `motif:${_variant}`, url });
+    const ok = await this.engine()?.playOneShot(url, { gain: 0.6, bus: "motif", fadeInMs: 80, fadeOutMs: 1200 });
+    this.settleAttempt(entry, !!ok);
   }
+
 
   /**
    * Warm the HTTP cache (and decode, if a context already exists) for one or
