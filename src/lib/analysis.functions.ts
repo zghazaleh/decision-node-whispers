@@ -1,6 +1,6 @@
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
 import { getMissionEngine } from "@/lib/missions/registry";
-import { frameworkAnalyzerBlock } from "@/lib/missions/framework";
+import { frameworkAnalyzerBlock, assertMissionFrameworkReady } from "@/lib/missions/framework";
 import { createServerFn } from "@tanstack/react-start";
 import { generateObject } from "ai";
 import { z } from "zod";
@@ -130,6 +130,11 @@ export const analyzeDecision = createServerFn({ method: "POST" })
 
     const engine = getMissionEngine(data.missionId);
     if (!engine) throw new Error(`Unknown mission: ${data.missionId}`);
+
+    // Hard precondition: the Decision Nodes framework fields must be fully
+    // populated for this mission, or the reasoning assessment degrades to
+    // generic output. Fail loudly here instead of silently shipping a weak debrief.
+    assertMissionFrameworkReady(data.missionId);
 
     const gateway = createLovableAiGatewayProvider(key);
 
