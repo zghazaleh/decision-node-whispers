@@ -254,7 +254,9 @@ function MissionsPage() {
             ← Decision Nodes
           </Link>
           <p className="text-[0.6rem] tracking-[0.4em] uppercase text-muted-foreground/70 tabular-nums">
-            The Archive · {MISSIONS.length} case files
+            {filtersActive
+              ? `Showing ${visible.length} of ${MISSIONS.length}`
+              : `The Archive · ${MISSIONS.length} case files`}
           </p>
         </header>
 
