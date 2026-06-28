@@ -10,11 +10,11 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SoundTestRouteImport } from './routes/sound-test'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as MissionsRouteImport } from './routes/missions'
 import { Route as ConstitutionRouteImport } from './routes/constitution'
 import { Route as AnalysisRouteImport } from './routes/analysis'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as SitemapXmlRouteImport } from './routes/sitemap.xml'
 import { Route as MissionIdRouteImport } from './routes/mission.$id'
 import { Route as ApiTranscribeRouteImport } from './routes/api/transcribe'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
@@ -23,6 +23,11 @@ import { Route as AdminEvaluationRouteImport } from './routes/admin.evaluation'
 const SoundTestRoute = SoundTestRouteImport.update({
   id: '/sound-test',
   path: '/sound-test',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MissionsRoute = MissionsRouteImport.update({
@@ -43,11 +48,6 @@ const AnalysisRoute = AnalysisRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SitemapXmlRoute = SitemapXmlRouteImport.update({
-  id: '/sitemap/xml',
-  path: '/sitemap/xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MissionIdRoute = MissionIdRouteImport.update({
@@ -76,24 +76,24 @@ export interface FileRoutesByFullPath {
   '/analysis': typeof AnalysisRoute
   '/constitution': typeof ConstitutionRoute
   '/missions': typeof MissionsRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sound-test': typeof SoundTestRoute
   '/admin/evaluation': typeof AdminEvaluationRoute
   '/api/chat': typeof ApiChatRoute
   '/api/transcribe': typeof ApiTranscribeRoute
   '/mission/$id': typeof MissionIdRoute
-  '/sitemap/xml': typeof SitemapXmlRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/analysis': typeof AnalysisRoute
   '/constitution': typeof ConstitutionRoute
   '/missions': typeof MissionsRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sound-test': typeof SoundTestRoute
   '/admin/evaluation': typeof AdminEvaluationRoute
   '/api/chat': typeof ApiChatRoute
   '/api/transcribe': typeof ApiTranscribeRoute
   '/mission/$id': typeof MissionIdRoute
-  '/sitemap/xml': typeof SitemapXmlRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -101,12 +101,12 @@ export interface FileRoutesById {
   '/analysis': typeof AnalysisRoute
   '/constitution': typeof ConstitutionRoute
   '/missions': typeof MissionsRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sound-test': typeof SoundTestRoute
   '/admin/evaluation': typeof AdminEvaluationRoute
   '/api/chat': typeof ApiChatRoute
   '/api/transcribe': typeof ApiTranscribeRoute
   '/mission/$id': typeof MissionIdRoute
-  '/sitemap/xml': typeof SitemapXmlRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -115,36 +115,36 @@ export interface FileRouteTypes {
     | '/analysis'
     | '/constitution'
     | '/missions'
+    | '/sitemap.xml'
     | '/sound-test'
     | '/admin/evaluation'
     | '/api/chat'
     | '/api/transcribe'
     | '/mission/$id'
-    | '/sitemap/xml'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/analysis'
     | '/constitution'
     | '/missions'
+    | '/sitemap.xml'
     | '/sound-test'
     | '/admin/evaluation'
     | '/api/chat'
     | '/api/transcribe'
     | '/mission/$id'
-    | '/sitemap/xml'
   id:
     | '__root__'
     | '/'
     | '/analysis'
     | '/constitution'
     | '/missions'
+    | '/sitemap.xml'
     | '/sound-test'
     | '/admin/evaluation'
     | '/api/chat'
     | '/api/transcribe'
     | '/mission/$id'
-    | '/sitemap/xml'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -152,12 +152,12 @@ export interface RootRouteChildren {
   AnalysisRoute: typeof AnalysisRoute
   ConstitutionRoute: typeof ConstitutionRoute
   MissionsRoute: typeof MissionsRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SoundTestRoute: typeof SoundTestRoute
   AdminEvaluationRoute: typeof AdminEvaluationRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiTranscribeRoute: typeof ApiTranscribeRoute
   MissionIdRoute: typeof MissionIdRoute
-  SitemapXmlRoute: typeof SitemapXmlRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -167,6 +167,13 @@ declare module '@tanstack/react-router' {
       path: '/sound-test'
       fullPath: '/sound-test'
       preLoaderRoute: typeof SoundTestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/missions': {
@@ -195,13 +202,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap/xml': {
-      id: '/sitemap/xml'
-      path: '/sitemap/xml'
-      fullPath: '/sitemap/xml'
-      preLoaderRoute: typeof SitemapXmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mission/$id': {
@@ -240,12 +240,12 @@ const rootRouteChildren: RootRouteChildren = {
   AnalysisRoute: AnalysisRoute,
   ConstitutionRoute: ConstitutionRoute,
   MissionsRoute: MissionsRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   SoundTestRoute: SoundTestRoute,
   AdminEvaluationRoute: AdminEvaluationRoute,
   ApiChatRoute: ApiChatRoute,
   ApiTranscribeRoute: ApiTranscribeRoute,
   MissionIdRoute: MissionIdRoute,
-  SitemapXmlRoute: SitemapXmlRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
