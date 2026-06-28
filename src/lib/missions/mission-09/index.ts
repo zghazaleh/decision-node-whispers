@@ -78,7 +78,9 @@ const DECISION_PRESETS: DecisionPreset[] = [
   { label: "Walk out", archetypeId: "walk" satisfies ArchetypeId, text: "I set down my headset and refuse to continue, collapsing the session rather than midwife the trap." },
 ];
 
-const OPENING_TEXT = `*Mediator Aalto*
+const OPENING_TEXT = `*A long table. A single lamp. The window is taped against blast and the city beyond it has no lights. Stefan does not look at you.*
+
+*Mediator Aalto*
 "Stefan has given his side the passage clause. Ms. Marić — yours now, for ours."
 
 "Article Four. Whenever you're ready."
