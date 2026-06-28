@@ -270,38 +270,13 @@ function MissionsPage() {
           />
 
           {/* Difficulty */}
-          <div className="flex items-center gap-2">
-            <span className="text-[0.55rem] tracking-[0.4em] uppercase text-muted-foreground/55">
-              Difficulty
-            </span>
-            <div className="flex items-center gap-1">
-              {["Any", ...difficulties.map(String)].map((v) => {
-                const isActive =
-                  difficulty === "Any" ? v === "Any" : String(difficulty) === v;
-                return (
-                  <button
-                    key={v}
-                    type="button"
-                    onClick={() =>
-                      setDifficulty(v === "Any" ? "Any" : Number(v))
-                    }
-                    className={`inline-flex h-[28px] w-[28px] items-center justify-center rounded-full text-[0.55rem] tracking-[0.2em] uppercase transition-all ${
-                      isActive
-                        ? "bg-accent/15 text-accent ring-1 ring-accent/40"
-                        : "text-foreground/40 hover:text-foreground/80 hover:bg-foreground/[0.04]"
-                    }`}
-                    aria-label={`Difficulty ${v}`}
-                  >
-                    {v === "Any" ? (
-                      "Any"
-                    ) : (
-                      <DifficultyDots level={Number(v)} compact />
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+          <FilterSelect
+            label="Difficulty"
+            values={["Any", ...difficulties.map(String)]}
+            active={difficulty === "Any" ? "Any" : String(difficulty)}
+            onChange={(v) => setDifficulty(v === "Any" ? "Any" : Number(v))}
+          />
+
 
           <div className="ml-auto flex items-center gap-4">
             {/* Active filter chip + clear */}
