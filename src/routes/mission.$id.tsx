@@ -647,51 +647,67 @@ function MessageBubble({
 }
 
 /**
- * Renders assistant text per the narrative format:
- *   - Lines wrapped in *...* are italicized.
- *   - A standalone *Name* line becomes a small character label.
- *   - Quoted lines become primary dialogue.
- *   - Standalone italic paragraphs become sensory beats.
+ * Renders assistant text per the narration typography contract.
+ * Canonical spec: constitution/10-narration-typography.md
+ *
+ * Five text kinds, no more:
+ *   1. Character label   — *Name* on its own line above dialogue
+ *   2. Dialogue          — non-italic line(s) following a label
+ *   3. Sensory beat      — a full italic paragraph wrapped in *...*
+ *   4. Inline italic     — *scrap* mid-sentence; renders in receded sans
+ *   5. Chips line        — stripped earlier; never reaches this renderer
+ *
+ * Blocks are separated by \n\n. Single newlines inside a block are
+ * preserved as soft wraps within the same speaker beat.
  */
+const CLASS_LABEL =
+  "font-sans text-[0.65rem] tracking-[0.35em] uppercase text-accent/80 mb-2";
+const CLASS_DIALOGUE =
+  "font-display text-2xl sm:text-3xl leading-snug text-foreground/95 text-pretty";
+const CLASS_SENSORY =
+  "font-sans text-sm italic text-foreground/55 leading-relaxed text-pretty max-w-prose";
+const CLASS_INLINE_ITALIC =
+  "not-italic font-sans text-base text-foreground/55";
+
 function CinematicText({ text }: { text: string; blink?: boolean }) {
   const blocks = text.split(/\n{2,}/).map((b) => b.trim()).filter(Boolean);
   return (
-    <div className="space-y-4 text-balance">
+    <div className="space-y-5 text-balance">
       {blocks.map((block, i) => {
-        const lines = block.split("\n");
-        // Character label pattern: first line is exactly *Name Name*
-        const labelMatch = lines[0].match(/^\*([^*]{2,40})\*$/);
+        const lines = block.split("\n").map((l) => l.trim()).filter(Boolean);
+
+        // Kind 1+2: character label + dialogue under it.
+        const labelMatch = lines[0]?.match(/^\*([^*]{2,40})\*$/);
         if (labelMatch && lines.length > 1) {
           const name = labelMatch[1];
           const rest = lines.slice(1).join("\n");
           return (
             <div key={i}>
-              <p className="text-[0.65rem] tracking-[0.35em] uppercase text-accent/80 mb-2">
-                {name}
-              </p>
-              <p className="font-display text-2xl sm:text-3xl leading-snug text-foreground/95 text-pretty">
-                {renderInline(rest)}
-              </p>
+              <p className={CLASS_LABEL}>{name}</p>
+              <p className={CLASS_DIALOGUE}>{renderInline(rest)}</p>
             </div>
           );
         }
-        // Pure italic sensory beat
+
+        // Bare *Name* with no dialogue under it — contract violation, drop it
+        // silently rather than render a stray label.
+        if (labelMatch && lines.length === 1) return null;
+
+        // Kind 3: full-italic sensory beat (one or two sentences, max).
         const fullItalic = block.match(/^\*([\s\S]+)\*$/);
         if (fullItalic) {
           return (
-            <p
-              key={i}
-              className="font-sans text-sm italic text-foreground/55 leading-relaxed text-pretty"
-            >
+            <p key={i} className={CLASS_SENSORY}>
               {fullItalic[1]}
             </p>
           );
         }
+
+        // Fallback: unlabeled dialogue (rare — opening lines, or a Director
+        // turn that returned without a label). Render with the same dialogue
+        // class so weight stays consistent.
         return (
-          <p
-            key={i}
-            className="font-display text-2xl sm:text-3xl leading-snug text-foreground/90 text-pretty"
-          >
+          <p key={i} className={CLASS_DIALOGUE}>
             {renderInline(block)}
           </p>
         );
@@ -700,13 +716,18 @@ function CinematicText({ text }: { text: string; blink?: boolean }) {
   );
 }
 
+/**
+ * Inline italic scraps inside dialogue (kind 4).
+ * The starred run is flipped to the *sans* face at body size so it visually
+ * RECEDES against the surrounding display serif — a quoted scrap, a
+ * remembered fragment, a line from a screen. Never emphasis.
+ */
 function renderInline(s: string) {
-  // Split on *...* preserving order. Render starred segments as italic.
   const parts = s.split(/(\*[^*\n]+\*)/g);
   return parts.map((p, i) => {
     if (/^\*[^*\n]+\*$/.test(p)) {
       return (
-        <em key={i} className="not-italic text-foreground/55 text-base font-sans">
+        <em key={i} className={CLASS_INLINE_ITALIC}>
           {p.slice(1, -1)}
         </em>
       );
