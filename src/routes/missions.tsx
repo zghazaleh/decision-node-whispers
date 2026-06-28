@@ -15,8 +15,9 @@ import { getAllMissionStats, type MissionStats } from "@/lib/mission-stats.funct
 import { readMission } from "@/lib/mission-store";
 import { getMissionEngine } from "@/lib/missions/registry";
 import { HeroDetail } from "@/components/discovery/HeroDetail";
-import { Rail } from "@/components/discovery/Rail";
+import { GuildCarousel } from "@/components/discovery/GuildCarousel";
 import { logOpen } from "@/lib/discovery/signals";
+
 
 
 /* -------------------------------------------------------------------------- */
@@ -361,17 +362,30 @@ function MissionsPage() {
         {/* ---------- TODAY hero ---------- */}
         {today && <HeroDetail mission={today} onEnter={commit} />}
 
-        {/* ---------- New from the Guild rail ---------- */}
-        <Rail
+        {/* ---------- New from the Guild carousel ---------- */}
+        <GuildCarousel
           label="New from the Guild"
           rightEyebrow="Fresh"
           items={guildRail}
-          onSelect={commit}
+          onEnter={commit}
+          onActiveChange={(id) => {
+            // Cross-fade the Archive bed into the spotlit case's score so
+            // the rotation is felt as well as seen. Falls back to the
+            // hushed reading-room when the carousel goes idle.
+            if (!audio.isIgnited()) return;
+            if (openId) return; // ledger already owns the bed
+            if (id && getSoundtrack(id)) {
+              void audio.enter("mission", { missionId: id, fadeMs: 1800 });
+            } else {
+              void audio.enter("archive", { fadeMs: 1800 });
+            }
+          }}
           loading={guildLoading}
           error={guildError}
           onRetry={() => setGuildNonce((n) => n + 1)}
           emptyCopy="No fresh cases tonight. Check back when the Guild stirs."
         />
+
 
 
 
