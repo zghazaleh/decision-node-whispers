@@ -9,8 +9,10 @@
 // Asset URLs come from `@/lib/audio/assets` (glob-resolved) so missing
 // pointers degrade silently instead of breaking the build.
 
-import { createAmbient, type Ambient, type AudioProfile } from "@/lib/ambient";
+import { createAmbient, prefetchAudio, type Ambient, type AudioProfile } from "@/lib/ambient";
 import { audioUrl } from "@/lib/audio/assets";
+import { getSoundtrack } from "@/lib/soundtracks";
+
 
 export type Screen =
   | "landing"
@@ -116,6 +118,42 @@ class Director {
     const url = audioUrl("node-motif"); if (!url) return;
     await this.engine()?.playOneShot(url, { gain: 0.6, bus: "motif", fadeInMs: 80, fadeOutMs: 1200 });
   }
+
+  /**
+   * Warm the HTTP cache (and decode, if a context already exists) for one or
+   * more upcoming screens/missions, so the next `enter()` cross-fade starts
+   * from a ready buffer instead of hitching on the first network round-trip.
+   *
+   * Safe to call before ignition — falls back to a plain `fetch()`.
+   */
+  prefetch(targets: { screen?: Screen; missionId?: string; sfx?: ("awakening" | "commit" | "analyzing" | "hover-tick" | "select-chip" | "node-motif")[] }) {
+    const urls = new Set<string>();
+    if (targets.screen) {
+      const screenKey =
+        targets.screen === "landing" ? "__landing__" :
+        targets.screen === "archive" ? "__archive__" :
+        targets.screen === "analysis" ? "__analysis__" :
+        targets.screen === "mission" ? targets.missionId ?? null :
+        null;
+      if (screenKey) {
+        const st = getSoundtrack(screenKey);
+        if (st?.url) urls.add(st.url);
+      }
+    } else if (targets.missionId) {
+      const st = getSoundtrack(targets.missionId);
+      if (st?.url) urls.add(st.url);
+    }
+    for (const name of targets.sfx ?? []) {
+      const u = audioUrl(name);
+      if (u) urls.add(u);
+    }
+    const a = this.ambient; // do NOT force ctx creation; HTTP prefetch is enough
+    for (const url of urls) {
+      if (a) void a.prefetch(url);
+      else void prefetchAudio(url);
+    }
+  }
+
 
   /**
    * Cross-fade into the bed for `screen`. Carries audio across transitions
