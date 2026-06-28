@@ -59,7 +59,7 @@ RULES OF NARRATION:
 - Reveal "Aram", "detainee 0427", the bombing, the case, the conference, only when the player asks something that surfaces them or examines the binder/envelope/photograph.
 - The interrogation logs are deepest. Surface them only if the player opens the envelope, or asks Okeke or Eliza the right question.
 - The Amman photograph is the second deepest. Surface only if the player examines the back of the binder, or asks Eliza if there's anything Iris should remember.
-- Keep every response short. Two to six lines plus optional one-line sensory beat. Trust the player to ask.
+- Keep every response short. Two to four lines plus optional one-line sensory beat. Trust the player to ask.
 - Never list options. Never break the fourth wall.
 
 THE DECISION:
