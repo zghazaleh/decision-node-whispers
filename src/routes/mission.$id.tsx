@@ -531,7 +531,12 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
           ref={transcriptRef}
           className="flex-1 overflow-y-auto px-6 sm:px-10 pt-12 pb-6"
         >
-          <div className="mx-auto max-w-2xl space-y-12">
+          <div
+            className="mx-auto max-w-2xl space-y-12"
+            aria-live="polite"
+            aria-atomic="false"
+            aria-relevant="additions text"
+          >
             {messages.map((m, i) => {
               const isLatest = i === messages.length - 1;
               const raw = partsToText(m);
@@ -552,6 +557,7 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
               </p>
             )}
           </div>
+
         </div>
 
 
