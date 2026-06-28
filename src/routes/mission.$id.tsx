@@ -801,12 +801,13 @@ function ChipRow({ chips, onPick }: { chips: string[]; onPick: (text: string) =>
           key={`${c}-${i}`}
           type="button"
           onClick={() => onPick(c)}
-          className="group rounded-full border border-foreground/20 bg-background/30 backdrop-blur-sm px-3.5 py-1.5 text-xs sm:text-[0.8rem] text-foreground/75 hover:text-foreground hover:border-accent/60 hover:bg-accent/10 transition-colors text-left"
+          className="group rounded-full border border-foreground/20 bg-background/30 backdrop-blur-sm px-3.5 py-2 min-h-11 text-xs sm:text-[0.8rem] text-foreground/75 hover:text-foreground hover:border-accent/60 hover:bg-accent/10 transition-colors text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
           <span className="text-accent/70 mr-2 group-hover:text-accent">›</span>
           {c}
         </button>
       ))}
+
     </div>
   );
 }
