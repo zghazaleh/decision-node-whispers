@@ -349,23 +349,33 @@ function MissionsPage() {
             <div className="overflow-hidden rounded-[14px] border border-accent/40 bg-[#0b0d10] motion-safe:animate-fade-up">
               {/* Art region */}
               <div className="relative aspect-[16/9] sm:aspect-auto sm:h-[260px] w-full overflow-hidden bg-[#0b0d10]">
-                <SceneArt src={getSceneSrc(today.id)} theme={today.theme} />
+                <SceneArt src={getSceneSrc(today.id)} theme={today.theme} brighten />
+                {/* Top vignette — for eyebrow legibility */}
                 <div
                   aria-hidden
-                  className="absolute inset-0"
+                  className="absolute inset-x-0 top-0 h-24"
                   style={{
                     background:
-                      "linear-gradient(180deg, rgba(6,8,12,0.05) 30%, rgba(6,8,12,0.78) 100%)",
+                      "linear-gradient(180deg, rgba(6,8,12,0.55) 0%, rgba(6,8,12,0) 100%)",
                   }}
                 />
-                <p className="absolute left-5 top-4 text-[0.55rem] tracking-[0.4em] uppercase text-foreground/85">
+                {/* Bottom scrim — lighter, shorter, for title legibility */}
+                <div
+                  aria-hidden
+                  className="absolute inset-x-0 bottom-0 h-1/2"
+                  style={{
+                    background:
+                      "linear-gradient(180deg, rgba(6,8,12,0) 0%, rgba(6,8,12,0.55) 70%, rgba(6,8,12,0.75) 100%)",
+                  }}
+                />
+                <p className="absolute left-5 top-4 text-[0.55rem] tracking-[0.4em] uppercase text-foreground/90">
                   Case File · {today.theme ?? "—"}
                 </p>
                 <div className="absolute bottom-4 left-5 right-5">
-                  <h4 className="font-display text-3xl sm:text-[40px] leading-[1.05] text-foreground">
+                  <h4 className="font-display text-3xl sm:text-[40px] leading-[1.05] text-foreground drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
                     {today.codename}
                   </h4>
-                  <p className="mt-1 text-[0.6rem] tracking-[0.35em] uppercase text-foreground/75">
+                  <p className="mt-1 text-[0.6rem] tracking-[0.35em] uppercase text-foreground/85">
                     {[today.location, today.year].filter(Boolean).join(" · ")}
                   </p>
                 </div>
@@ -768,7 +778,15 @@ function DifficultyDots({
 /* Scene art — skeleton shimmer + graceful fallback                            */
 /* -------------------------------------------------------------------------- */
 
-function SceneArt({ src, theme }: { src: string | null; theme?: string }) {
+function SceneArt({
+  src,
+  theme,
+  brighten = false,
+}: {
+  src: string | null;
+  theme?: string;
+  brighten?: boolean;
+}) {
   const [status, setStatus] = useState<"loading" | "loaded" | "error">(
     src ? "loading" : "error",
   );
@@ -812,6 +830,11 @@ function SceneArt({ src, theme }: { src: string | null; theme?: string }) {
           decoding="async"
           onLoad={() => setStatus("loaded")}
           onError={() => setStatus("error")}
+          style={
+            brighten
+              ? { filter: "brightness(1.35) contrast(1.08) saturate(1.05)" }
+              : undefined
+          }
           className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${
             status === "loaded" ? "opacity-100" : "opacity-0"
           }`}
