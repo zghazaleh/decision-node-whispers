@@ -14,6 +14,8 @@ export type MissionMeta = {
   location?: string;
   year?: string;
   category?: string;
+  /** Single primary theme tag for Reading Room filtering. */
+  theme?: string;
   difficulty?: 1 | 2 | 3 | 4 | 5;
   // Reserved for future creator-published cases
   creator?: string;
@@ -34,6 +36,7 @@ export const MISSIONS: MissionMeta[] = [
     location: "San Francisco",
     year: "2024",
     category: "Corporate",
+    theme: "Disclosure",
     difficulty: 3,
     creator: "House Edition",
     version: "v1.0",
@@ -51,6 +54,7 @@ export const MISSIONS: MissionMeta[] = [
     location: "Undisclosed",
     year: "2019",
     category: "Legal",
+    theme: "Complicity",
     difficulty: 4,
     creator: "House Edition",
     version: "v1.0",
@@ -68,6 +72,7 @@ export const MISSIONS: MissionMeta[] = [
     location: "Low Earth Orbit",
     year: "2031",
     category: "Aerospace",
+    theme: "Sacrifice",
     difficulty: 5,
     creator: "House Edition",
     version: "v1.0",
@@ -85,6 +90,7 @@ export const MISSIONS: MissionMeta[] = [
     location: "Washington, D.C.",
     year: "2003",
     category: "Civic",
+    theme: "Authority",
     difficulty: 4,
     creator: "House Edition",
     version: "v1.0",
@@ -102,6 +108,7 @@ export const MISSIONS: MissionMeta[] = [
     location: "Meridian General Hospital",
     year: "2025",
     category: "Crisis",
+    theme: "Coercion",
     difficulty: 4,
     creator: "House Edition",
     version: "v1.0",
@@ -119,6 +126,7 @@ export const MISSIONS: MissionMeta[] = [
     location: "Newsroom, investigations desk",
     year: "Present day",
     category: "Ethics",
+    theme: "Truth",
     difficulty: 5,
     creator: "House Edition",
     version: "v1.0",
@@ -136,6 +144,7 @@ export const MISSIONS: MissionMeta[] = [
     location: "Carrow River control station",
     year: "Flood season",
     category: "Crisis",
+    theme: "Triage",
     difficulty: 5,
     creator: "House Edition",
     version: "v1.0",
@@ -153,6 +162,7 @@ export const MISSIONS: MissionMeta[] = [
     location: "Veyra Medical, empty office",
     year: "Present day",
     category: "Ethics",
+    theme: "Loyalty",
     difficulty: 5,
     creator: "House Edition",
     version: "v1.0",
@@ -170,6 +180,7 @@ export const MISSIONS: MissionMeta[] = [
     location: "Besieged city, ceasefire room",
     year: "1995",
     category: "Ethics",
+    theme: "Witness",
     difficulty: 5,
     creator: "House Edition",
     version: "v1.0",

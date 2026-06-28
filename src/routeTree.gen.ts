@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SoundTestRouteImport } from './routes/sound-test'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as NarrationPreviewRouteImport } from './routes/narration-preview'
+import { Route as MissionsLegacyRouteImport } from './routes/missions-legacy'
 import { Route as MissionsRouteImport } from './routes/missions'
 import { Route as ConstitutionRouteImport } from './routes/constitution'
 import { Route as AnalysisRouteImport } from './routes/analysis'
@@ -36,6 +37,11 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
 const NarrationPreviewRoute = NarrationPreviewRouteImport.update({
   id: '/narration-preview',
   path: '/narration-preview',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MissionsLegacyRoute = MissionsLegacyRouteImport.update({
+  id: '/missions-legacy',
+  path: '/missions-legacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MissionsRoute = MissionsRouteImport.update({
@@ -94,6 +100,7 @@ export interface FileRoutesByFullPath {
   '/analysis': typeof AnalysisRoute
   '/constitution': typeof ConstitutionRoute
   '/missions': typeof MissionsRoute
+  '/missions-legacy': typeof MissionsLegacyRoute
   '/narration-preview': typeof NarrationPreviewRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sound-test': typeof SoundTestRoute
@@ -109,6 +116,7 @@ export interface FileRoutesByTo {
   '/analysis': typeof AnalysisRoute
   '/constitution': typeof ConstitutionRoute
   '/missions': typeof MissionsRoute
+  '/missions-legacy': typeof MissionsLegacyRoute
   '/narration-preview': typeof NarrationPreviewRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sound-test': typeof SoundTestRoute
@@ -125,6 +133,7 @@ export interface FileRoutesById {
   '/analysis': typeof AnalysisRoute
   '/constitution': typeof ConstitutionRoute
   '/missions': typeof MissionsRoute
+  '/missions-legacy': typeof MissionsLegacyRoute
   '/narration-preview': typeof NarrationPreviewRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sound-test': typeof SoundTestRoute
@@ -142,6 +151,7 @@ export interface FileRouteTypes {
     | '/analysis'
     | '/constitution'
     | '/missions'
+    | '/missions-legacy'
     | '/narration-preview'
     | '/sitemap.xml'
     | '/sound-test'
@@ -157,6 +167,7 @@ export interface FileRouteTypes {
     | '/analysis'
     | '/constitution'
     | '/missions'
+    | '/missions-legacy'
     | '/narration-preview'
     | '/sitemap.xml'
     | '/sound-test'
@@ -172,6 +183,7 @@ export interface FileRouteTypes {
     | '/analysis'
     | '/constitution'
     | '/missions'
+    | '/missions-legacy'
     | '/narration-preview'
     | '/sitemap.xml'
     | '/sound-test'
@@ -188,6 +200,7 @@ export interface RootRouteChildren {
   AnalysisRoute: typeof AnalysisRoute
   ConstitutionRoute: typeof ConstitutionRoute
   MissionsRoute: typeof MissionsRoute
+  MissionsLegacyRoute: typeof MissionsLegacyRoute
   NarrationPreviewRoute: typeof NarrationPreviewRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SoundTestRoute: typeof SoundTestRoute
@@ -220,6 +233,13 @@ declare module '@tanstack/react-router' {
       path: '/narration-preview'
       fullPath: '/narration-preview'
       preLoaderRoute: typeof NarrationPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/missions-legacy': {
+      id: '/missions-legacy'
+      path: '/missions-legacy'
+      fullPath: '/missions-legacy'
+      preLoaderRoute: typeof MissionsLegacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/missions': {
@@ -300,6 +320,7 @@ const rootRouteChildren: RootRouteChildren = {
   AnalysisRoute: AnalysisRoute,
   ConstitutionRoute: ConstitutionRoute,
   MissionsRoute: MissionsRoute,
+  MissionsLegacyRoute: MissionsLegacyRoute,
   NarrationPreviewRoute: NarrationPreviewRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SoundTestRoute: SoundTestRoute,
