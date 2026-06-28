@@ -537,7 +537,7 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
 
 
         {/* Composer */}
-        <div className="px-6 sm:px-10 pb-6 sm:pb-8">
+        <div className="px-6 sm:px-10 pb-24 sm:pb-8" style={{ paddingBottom: "max(6rem, calc(env(safe-area-inset-bottom) + 5rem))" }}>
           <div className="mx-auto max-w-2xl">
             <form
               onSubmit={(e) => {
