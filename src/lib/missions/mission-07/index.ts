@@ -78,7 +78,9 @@ const DECISION_PRESETS: DecisionPreset[] = [
   { label: "Refuse the switch", archetypeId: "refuse" satisfies ArchetypeId, text: "I refuse to be the one who opens the gate and hand the console to Director Vogel." },
 ];
 
-const OPENING_TEXT = `*Nia Okafor*
+const OPENING_TEXT = `*Rain hammering the steel roof. A wall of gauges, every one of them climbing. The river is black and wider than it was an hour ago.*
+
+*Nia Okafor*
 "Wade. The gauge just passed the action stage."
 
 "Vogel's on the line — he wants the spillway open now. Beaumont's still loading buses. What do I tell him?"
