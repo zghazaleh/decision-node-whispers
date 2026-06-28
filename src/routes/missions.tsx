@@ -253,31 +253,70 @@ function MissionsPage() {
         </header>
 
         {/* ---------- Filters ---------- */}
-        <div className="mb-8 space-y-3">
-          <FacetRow
+        <div className="mb-10 flex flex-wrap items-end gap-x-5 gap-y-3">
+          {/* Domain */}
+          <FilterSelect
             label="Domain"
             values={domains}
             active={domain}
             onChange={setDomain}
           />
-          <FacetRow
+          {/* Theme */}
+          <FilterSelect
             label="Theme"
             values={themes}
             active={theme}
             onChange={setTheme}
           />
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
 
-            <FacetRow
-              label="Difficulty"
-              values={["Any", ...difficulties.map(String)]}
-              active={difficulty === "Any" ? "Any" : String(difficulty)}
-              onChange={(v) => setDifficulty(v === "Any" ? "Any" : Number(v))}
-              renderValue={(v) =>
-                v === "Any" ? "Any" : <DifficultyDots level={Number(v)} compact />
-              }
-            />
-            <div className="ml-auto flex items-center gap-3">
+          {/* Difficulty */}
+          <div className="flex items-center gap-2">
+            <span className="text-[0.55rem] tracking-[0.4em] uppercase text-muted-foreground/55">
+              Difficulty
+            </span>
+            <div className="flex items-center gap-1">
+              {["Any", ...difficulties.map(String)].map((v) => {
+                const isActive =
+                  difficulty === "Any" ? v === "Any" : String(difficulty) === v;
+                return (
+                  <button
+                    key={v}
+                    type="button"
+                    onClick={() =>
+                      setDifficulty(v === "Any" ? "Any" : Number(v))
+                    }
+                    className={`inline-flex h-[28px] w-[28px] items-center justify-center rounded-full text-[0.55rem] tracking-[0.2em] uppercase transition-all ${
+                      isActive
+                        ? "bg-accent/15 text-accent ring-1 ring-accent/40"
+                        : "text-foreground/40 hover:text-foreground/80 hover:bg-foreground/[0.04]"
+                    }`}
+                    aria-label={`Difficulty ${v}`}
+                  >
+                    {v === "Any" ? (
+                      "Any"
+                    ) : (
+                      <DifficultyDots level={Number(v)} compact />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="ml-auto flex items-center gap-4">
+            {/* Active filter chip + clear */}
+            {(theme !== "All" || domain !== "All" || difficulty !== "Any") && (
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="text-[0.55rem] tracking-[0.35em] uppercase text-muted-foreground/50 hover:text-accent transition-colors"
+              >
+                Clear
+              </button>
+            )}
+
+            {/* Sort */}
+            <div className="flex items-center gap-2">
               <span className="text-[0.55rem] tracking-[0.4em] uppercase text-muted-foreground/55">
                 Sort
               </span>
@@ -417,44 +456,44 @@ function MissionsPage() {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Facet chips                                                                 */
+/* Elegant filter select                                                       */
 /* -------------------------------------------------------------------------- */
 
-function FacetRow({
+function FilterSelect({
   label,
   values,
   active,
   onChange,
-  renderValue,
 }: {
   label: string;
   values: string[];
   active: string;
   onChange: (v: string) => void;
-  renderValue?: (v: string) => React.ReactNode;
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-      <span className="text-[0.55rem] tracking-[0.4em] uppercase text-muted-foreground/55 mr-1">
+    <div className="relative">
+      <label className="mb-1 block text-[0.55rem] tracking-[0.4em] uppercase text-muted-foreground/55">
         {label}
-      </span>
-      {values.map((v) => {
-        const isActive = active === v;
-        return (
-          <button
-            key={v}
-            type="button"
-            onClick={() => onChange(v)}
-            className={`inline-flex items-center min-h-[28px] px-2 text-[0.6rem] tracking-[0.3em] uppercase transition-colors ${
-              isActive
-                ? "text-accent"
-                : "text-foreground/55 hover:text-foreground/90"
-            }`}
-          >
-            {renderValue ? renderValue(v) : v}
-          </button>
-        );
-      })}
+      </label>
+      <div className="relative">
+        <select
+          value={active}
+          onChange={(e) => onChange(e.target.value)}
+          className="appearance-none rounded-md border border-foreground/10 bg-background/60 py-1.5 pl-3 pr-8 text-[0.65rem] tracking-[0.25em] uppercase text-foreground/90 outline-none transition-all hover:border-foreground/20 focus:border-accent/50 focus:ring-1 focus:ring-accent/30 cursor-pointer"
+        >
+          {values.map((v) => (
+            <option key={v} value={v}>
+              {v}
+            </option>
+          ))}
+        </select>
+        <span
+          className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[0.5rem] text-foreground/40"
+          aria-hidden
+        >
+          ▾
+        </span>
+      </div>
     </div>
   );
 }
