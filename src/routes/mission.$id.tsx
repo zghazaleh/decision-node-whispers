@@ -17,6 +17,8 @@ import { createAmbient } from "@/lib/ambient";
 import { getMissionEngine } from "@/lib/missions/registry";
 import { MISSIONS } from "@/lib/missions";
 import type { MissionEngine } from "@/lib/missions/types";
+import { logCommit } from "@/lib/discovery/signals";
+
 
 export const Route = createFileRoute("/mission/$id")({
   head: () => ({
@@ -255,6 +257,15 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
       } catch (err) {
         console.error("profile update failed", err);
       }
+
+      // Discovery signal: this case has been *held*, not just opened.
+      try {
+        const meta = MISSIONS.find((m) => m.id === MISSION_ID);
+        logCommit(MISSION_ID, meta?.theme);
+      } catch (err) {
+        console.error("signal log failed", err);
+      }
+
 
       // Fire-and-forget community telemetry — no PII, only timings + counts.
       try {

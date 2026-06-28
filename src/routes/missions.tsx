@@ -14,6 +14,10 @@ import { getSoundtrack } from "@/lib/soundtracks";
 import { getAllMissionStats, type MissionStats } from "@/lib/mission-stats.functions";
 import { readMission } from "@/lib/mission-store";
 import { getMissionEngine } from "@/lib/missions/registry";
+import { HeroDetail } from "@/components/discovery/HeroDetail";
+import { Rail } from "@/components/discovery/Rail";
+import { logOpen } from "@/lib/discovery/signals";
+
 
 /* -------------------------------------------------------------------------- */
 /* Route                                                                       */
@@ -148,6 +152,17 @@ function MissionsPage() {
   // TODAY pick (stable per day)
   const today = useMemo(() => pickToday(MISSIONS), []);
 
+  // Guild rail — most-recent six available cases, excluding today's hero.
+  // Sorted by mission number descending so newly authored cases surface first.
+  const guildRail = useMemo(() => {
+    return MISSIONS
+      .filter((m) => m.status === "available" && m.id !== today?.id)
+      .slice()
+      .sort((a, b) => b.number.localeCompare(a.number))
+      .slice(0, 6);
+  }, [today]);
+
+
   // Apply filters + sort (today's case stays in the ledger AND in filter results;
   // the hero card above is purely a feature, not an exclusion).
   const visible = useMemo(() => {
@@ -219,9 +234,12 @@ function MissionsPage() {
 
   function commit(id: string) {
     if (entering) return;
+    const m = MISSIONS.find((x) => x.id === id);
+    logOpen(id, m?.theme);
     setEntering(true);
     setTimeout(() => navigate({ to: "/mission/$id", params: { id } }), 700);
   }
+
 
   function clearFilters() {
     setTheme("All");
@@ -321,81 +339,18 @@ function MissionsPage() {
           </div>
         </div>
 
-        {/* ---------- TODAY featured card ---------- */}
-        {today && (
-          <div className="mb-10">
-            <div className="mb-3 flex items-center gap-3">
-              <span className="text-[0.55rem] tracking-[0.4em] uppercase text-accent">
-                Today
-              </span>
-              <span className="h-px flex-1 bg-accent/25" aria-hidden />
-              <span className="text-[0.55rem] tracking-[0.4em] uppercase text-muted-foreground/55">
-                Case of the day
-              </span>
-            </div>
-            <div className="overflow-hidden rounded-[14px] border border-accent/40 bg-[#0b0d10] motion-safe:animate-fade-up">
-              {/* Art region */}
-              <div className="relative aspect-[16/9] sm:aspect-auto sm:h-[260px] w-full overflow-hidden bg-[#0b0d10]">
-                <SceneArt src={getSceneSrc(today.id)} theme={today.theme} brighten />
-                {/* Top vignette — for eyebrow legibility */}
-                <div
-                  aria-hidden
-                  className="absolute inset-x-0 top-0 h-24"
-                  style={{
-                    background:
-                      "linear-gradient(180deg, rgba(6,8,12,0.55) 0%, rgba(6,8,12,0) 100%)",
-                  }}
-                />
-                {/* Bottom scrim — lighter, shorter, for title legibility */}
-                <div
-                  aria-hidden
-                  className="absolute inset-x-0 bottom-0 h-1/2"
-                  style={{
-                    background:
-                      "linear-gradient(180deg, rgba(6,8,12,0) 0%, rgba(6,8,12,0.55) 70%, rgba(6,8,12,0.75) 100%)",
-                  }}
-                />
-                <p className="absolute left-5 top-4 text-[0.55rem] tracking-[0.4em] uppercase text-foreground/90">
-                  Case File · {today.theme ?? "—"}
-                </p>
-                <div className="absolute bottom-4 left-5 right-5">
-                  <h4 className="font-display text-3xl sm:text-[40px] leading-[1.05] text-foreground drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
-                    {today.codename}
-                  </h4>
-                  <p className="mt-1 text-[0.6rem] tracking-[0.35em] uppercase text-foreground/85">
-                    {[today.location, today.year].filter(Boolean).join(" · ")}
-                  </p>
-                </div>
-              </div>
+        {/* ---------- TODAY hero ---------- */}
+        {today && <HeroDetail mission={today} onEnter={commit} />}
 
-              {/* Info strip */}
-              <div className="px-5 py-5 sm:px-6 sm:py-6">
-                <p className="font-display text-base sm:text-lg leading-snug text-foreground/90 text-pretty">
-                  {today.logline}
-                </p>
+        {/* ---------- New from the Guild rail ---------- */}
+        <Rail
+          label="New from the Guild"
+          rightEyebrow="Fresh"
+          items={guildRail}
+          onSelect={commit}
+        />
 
-                <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-[0.6rem] tracking-[0.3em] uppercase text-muted-foreground/75">
-                  <span>{toneWord(today.tone)}</span>
-                  <DifficultyDots level={today.difficulty ?? null} />
-                  <span>{shortDuration(today.duration)}</span>
-                  {today.category && <span>{today.category}</span>}
-                </div>
 
-                <div className="mt-5 flex justify-end">
-                  <button
-                    type="button"
-                    onClick={() => commit(today.id)}
-                    aria-label={`Enter ${today.codename}`}
-                    className="inline-flex min-h-[44px] items-center gap-3 rounded-full bg-accent px-6 py-2 text-[0.65rem] tracking-[0.4em] uppercase text-background hover:bg-accent/90 transition-colors w-full sm:w-auto justify-center"
-                  >
-                    Enter
-                    <span aria-hidden>→</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
 
 
 

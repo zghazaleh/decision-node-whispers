@@ -8,7 +8,9 @@ import { DecisionProfileCard } from "@/components/DecisionProfileCard";
 import { NoticedRail } from "@/components/NoticedRail";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { getMissionPercentile, type MissionPercentile } from "@/lib/mission-stats.functions";
+import { logAnalysisRead } from "@/lib/discovery/signals";
 import sceneCosmos from "@/assets/scene-cosmos.jpg";
+
 
 function AnalysisFallback({
   title,
@@ -168,6 +170,31 @@ function Analysis() {
         .catch(() => {});
     }
   }, [navigate, fetchPercentile]);
+
+  // Discovery signal: how deep the player reads their own analysis is the
+  // single strongest signal we have for theme affinity. Fires once per
+  // 25/50/75/100% threshold per session.
+  useEffect(() => {
+    if (!mission?.missionId) return;
+    const missionId = mission.missionId;
+    const fired = new Set<number>();
+    const onScroll = () => {
+      const doc = document.documentElement;
+      const max = doc.scrollHeight - window.innerHeight;
+      if (max <= 0) return;
+      const pct = Math.min(100, Math.round((window.scrollY / max) * 100));
+      for (const threshold of [25, 50, 75, 100]) {
+        if (pct >= threshold && !fired.has(threshold)) {
+          fired.add(threshold);
+          logAnalysisRead(missionId, threshold);
+        }
+      }
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [mission?.missionId]);
+
 
   if (!mission?.analysis) return null;
   const a = mission.analysis;
