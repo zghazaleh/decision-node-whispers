@@ -1,6 +1,6 @@
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
 import { getMissionEngine } from "@/lib/missions/registry";
-import { frameworkAnalyzerBlock } from "@/lib/missions/framework";
+import { frameworkAnalyzerBlock, assertMissionFrameworkReady } from "@/lib/missions/framework";
 import { createServerFn } from "@tanstack/react-start";
 import { generateObject } from "ai";
 import { z } from "zod";
