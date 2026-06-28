@@ -87,6 +87,52 @@ export function getAudioFailures(): Array<{ url: string; failedAt: number; coold
 }
 export const AUDIO_FAILURE_TTL_MS = FAILED_URL_TTL_MS;
 
+// ---------------------------------------------------------------------------
+// Dev-only failure simulation. When enabled, loadBuffer pretends the URL
+// 404'd before any network request. Lets operators exercise the bed/sfx
+// fallback chains across missions without breaking real CDN assets.
+// Persisted to localStorage so a reload keeps the test condition active.
+// ---------------------------------------------------------------------------
+export type SimulateFailuresMode = "off" | "all" | "beds" | "sfx";
+const SIMULATE_KEY = "dn:audio-simulate-failures";
+let simulateMode: SimulateFailuresMode = (() => {
+  if (typeof window === "undefined") return "off";
+  try {
+    const v = window.localStorage.getItem(SIMULATE_KEY);
+    if (v === "all" || v === "beds" || v === "sfx") return v;
+  } catch { /* noop */ }
+  return "off";
+})();
+type SimulateListener = (mode: SimulateFailuresMode) => void;
+const simulateListeners = new Set<SimulateListener>();
+export function getSimulateFailures(): SimulateFailuresMode { return simulateMode; }
+export function setSimulateFailures(mode: SimulateFailuresMode): void {
+  simulateMode = mode;
+  if (typeof window !== "undefined") {
+    try { window.localStorage.setItem(SIMULATE_KEY, mode); } catch { /* noop */ }
+  }
+  for (const l of simulateListeners) {
+    try { l(mode); } catch { /* noop */ }
+  }
+}
+export function subscribeSimulateFailures(fn: SimulateListener): () => void {
+  simulateListeners.add(fn);
+  return () => { simulateListeners.delete(fn); };
+}
+/** Clear the failure cooldown cache so the next attempt retries the network. */
+export function clearAudioFailures(): void {
+  failedUrls.clear();
+  warnedUrls.clear();
+}
+function shouldSimulateFailure(kind: "bed" | "oneshot"): boolean {
+  if (simulateMode === "off") return false;
+  if (simulateMode === "all") return true;
+  if (simulateMode === "beds") return kind === "bed";
+  if (simulateMode === "sfx") return kind === "oneshot";
+  return false;
+}
+
+
 function isFailing(url: string): boolean {
   const t = failedUrls.get(url);
   if (t === undefined) return false;
@@ -253,7 +299,14 @@ export function prefetchAudio(url: string): Promise<void> {
   return p.then(() => {}, () => {});
 }
 
-async function loadBuffer(ctx: AudioContext, url: string): Promise<AudioBuffer> {
+async function loadBuffer(ctx: AudioContext, url: string, kind: "bed" | "oneshot" = "bed"): Promise<AudioBuffer> {
+  if (shouldSimulateFailure(kind)) {
+    // Synthetic failure for the dev toggle. Mark the URL as cooling down so
+    // the rest of the engine (fallback chain, failure indicator, diagnostics
+    // log) behaves exactly as it would for a real 404.
+    markFailed(url, new Error(`[ambient] simulated failure (${simulateMode}): ${url}`));
+    throw new Error(`ambient simulated failure: ${url}`);
+  }
   const cached = bufferCache.get(url);
   if (cached) return cached;
   if (isFailing(url)) {
@@ -647,7 +700,7 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
       let buffer: AudioBuffer;
       // Asset failures here are silent by design — a missing sting must
       // never interrupt the surrounding transition or moment.
-      try { buffer = await loadBuffer(c, url); } catch { return false; }
+      try { buffer = await loadBuffer(c, url, "oneshot"); } catch { return false; }
       try {
         const src = c.createBufferSource();
         src.buffer = buffer;
