@@ -463,6 +463,14 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
     async ignite() {
       const c = ensureCtx(); if (!c) return;
       if (c.state === "suspended") { try { await c.resume(); } catch { /* noop */ } }
+      // Mark the engine as running so subsequent `switchTo` calls actually
+      // start a bed instead of deferring forever (pendingMission only).
+      stopped = false;
+      // If a bed was requested before ignition, honor it now.
+      if (pendingMission && !current) {
+        const next = await playMission(pendingMission, 2200);
+        if (next) current = next;
+      }
     },
 
     async playOneShot(url, opts) {
