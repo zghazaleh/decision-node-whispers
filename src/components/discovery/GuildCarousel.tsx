@@ -151,16 +151,49 @@ export function GuildCarousel({
         >
           <ul
             ref={stripRef}
+            role="listbox"
+            aria-label={`${label} — use arrow keys to browse, Enter to open`}
+            aria-activedescendant={items[active] ? `carousel-tile-${items[active].id}` : undefined}
+            tabIndex={-1}
             className="scrollbar-hide flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 sm:gap-5"
             style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch" }}
             aria-busy={loading || undefined}
+            onKeyDown={(e) => {
+              if (items.length === 0) return;
+              const focusAt = (idx: number) => {
+                userTouched.current = true;
+                setActive(idx);
+                const strip = stripRef.current;
+                const li = strip?.children[idx] as HTMLElement | undefined;
+                const btn = li?.querySelector<HTMLButtonElement>("button");
+                btn?.focus();
+              };
+              if (e.key === "ArrowRight") {
+                e.preventDefault();
+                focusAt((active + 1) % items.length);
+              } else if (e.key === "ArrowLeft") {
+                e.preventDefault();
+                focusAt((active - 1 + items.length) % items.length);
+              } else if (e.key === "Home") {
+                e.preventDefault();
+                focusAt(0);
+              } else if (e.key === "End") {
+                e.preventDefault();
+                focusAt(items.length - 1);
+              } else if (e.key === "Escape" && expandedId) {
+                e.preventDefault();
+                setExpandedId(null);
+              }
+            }}
           >
             {items.map((m, i) => (
-              <li key={m.id} className="snap-start">
+              <li key={m.id} className="snap-start" role="presentation">
                 <CarouselTile
                   mission={m}
+                  index={i}
                   spotlit={i === active}
                   open={expandedId === m.id}
+                  focusable={i === active}
                   onPick={() => handlePick(i, m.id)}
                 />
               </li>
