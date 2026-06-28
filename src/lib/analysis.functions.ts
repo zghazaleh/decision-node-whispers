@@ -1,10 +1,12 @@
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
 import { getMissionEngine } from "@/lib/missions/registry";
+import { frameworkAnalyzerBlock } from "@/lib/missions/framework";
 import { createServerFn } from "@tanstack/react-start";
 import { generateObject } from "ai";
 import { z } from "zod";
 
 const DEFAULT_MISSION_ID = "mission-01";
+
 
 const AnalysisInput = z.object({
   missionId: z.string().default(DEFAULT_MISSION_ID),
@@ -244,6 +246,8 @@ Return a JSON object with these fields:
 
 
       prompt: `${canonTimelineBlock}
+
+${frameworkAnalyzerBlock(data.missionId)}
 
 FINAL DECISION: ${data.decision}
 
