@@ -87,15 +87,19 @@ export function GuildCarousel({
   // Tell the parent when the spotlit case changes (so the ambient bed can
   // cross-fade in step with the rotation, the same way it does for the
   // ledger). Suppressed while a card is expanded — the expanded card
-  // owns the audio state at that point.
+  // owns the audio state at that point. We hold the callback in a ref so
+  // an inline parent function doesn't re-fire the effect each render.
+  const activeChangeRef = useRef(onActiveChange);
+  useEffect(() => { activeChangeRef.current = onActiveChange; }, [onActiveChange]);
   useEffect(() => {
     if (showSkeleton || showError || showEmpty) {
-      onActiveChange?.(null);
+      activeChangeRef.current?.(null);
       return;
     }
     if (expandedId) return;
-    onActiveChange?.(items[active]?.id ?? null);
-  }, [active, items, expandedId, showSkeleton, showError, showEmpty, onActiveChange]);
+    activeChangeRef.current?.(items[active]?.id ?? null);
+  }, [active, items, expandedId, showSkeleton, showError, showEmpty]);
+
 
   const handlePick = useCallback(
     (i: number, id: string) => {
