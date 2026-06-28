@@ -700,7 +700,7 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
       let buffer: AudioBuffer;
       // Asset failures here are silent by design — a missing sting must
       // never interrupt the surrounding transition or moment.
-      try { buffer = await loadBuffer(c, url); } catch { return false; }
+      try { buffer = await loadBuffer(c, url, "oneshot"); } catch { return false; }
       try {
         const src = c.createBufferSource();
         src.buffer = buffer;
