@@ -144,6 +144,9 @@ function Analysis() {
   const [mission, setMission] = useState<SavedMission | null>(null);
   const [profile, setProfile] = useState<DecisionProfile | null>(null);
   const [percentile, setPercentile] = useState<MissionPercentile | null>(null);
+  const [showDetails, setShowDetails] = useState<boolean>(() =>
+    typeof window !== "undefined" && new URLSearchParams(window.location.search).get("details") === "1",
+  );
   const { reset } = useMission(mission?.missionId ?? "mission-01");
   const fetchPercentile = useServerFn(getMissionPercentile);
 
@@ -156,7 +159,6 @@ function Analysis() {
     setMission(m);
     setProfile(readProfile());
 
-    // Pull community percentile if we tracked investigation time.
     const invSeconds = m.startedAt && m.decidedAt
       ? Math.max(0, Math.round((m.decidedAt - m.startedAt) / 1000))
       : null;
@@ -170,197 +172,376 @@ function Analysis() {
   if (!mission?.analysis) return null;
   const a = mission.analysis;
 
+  const replay = () => {
+    reset();
+    const id = mission?.missionId ?? "mission-01";
+    navigate({ to: "/mission/$id", params: { id } });
+  };
+
   return (
     <main className="relative min-h-screen bg-background text-foreground overflow-x-hidden">
-      {/* Cosmic backdrop */}
       <div className="fixed inset-0">
-        <img
-          src={sceneCosmos}
-          alt=""
-          aria-hidden
-          className="h-full w-full object-cover opacity-40"
-        />
+        <img src={sceneCosmos} alt="" aria-hidden className="h-full w-full object-cover opacity-40" />
         <div
           className="absolute inset-0"
           style={{
-            background:
-              "linear-gradient(to bottom, oklch(0 0 0 / 0.7), oklch(0 0 0 / 0.85))",
+            background: "linear-gradient(to bottom, oklch(0 0 0 / 0.7), oklch(0 0 0 / 0.85))",
           }}
         />
         <div className="film-grain" aria-hidden />
       </div>
 
-      <div className="relative z-10 mx-auto max-w-3xl px-6 sm:px-10 py-20 sm:py-28 space-y-24">
-        {/* Headline */}
-        <section className="animate-fade-up text-center">
-          <p className="text-[0.6rem] tracking-[0.5em] uppercase text-accent/80 mb-6">
-            Decision recorded
-          </p>
-          <h1 className="font-display text-4xl sm:text-5xl md:text-6xl leading-tight text-foreground/95 text-balance">
-            {a.headline}
-          </h1>
-          {a.archetypeLabel && (
-            <p className="mt-8 text-sm sm:text-base text-foreground/55 leading-relaxed">
-              Your approach:{" "}
-              <span className="font-display italic text-accent text-lg sm:text-xl">
-                {a.archetypeLabel}
-              </span>
-            </p>
-          )}
-        </section>
-
-        {/* Reasoning echo — executive-coach reflection grounded in the
-            player's own WHY. Sits above the canon timeline so the player
-            reads their reasoning back before seeing the consequences.
-            Not canon: must never invent outcomes. */}
-        {a.reasoningEcho && (
-          <section
-            className="animate-fade-up max-w-2xl mx-auto"
-            style={{ animationDelay: "0.25s" }}
-            aria-label="Reasoning reflection"
-          >
-            <div className="border-l-2 border-accent/40 pl-6 sm:pl-8">
-              <p className="text-[0.6rem] tracking-[0.4em] uppercase text-accent/70 mb-3">
-                On your reasoning
-              </p>
-              <p className="font-display text-xl sm:text-2xl leading-relaxed text-foreground/90 text-pretty italic">
-                {a.reasoningEcho}
-              </p>
-            </div>
-          </section>
-        )}
-
-        {/* Player-built "What I've noticed" rail — self-claims mirrored
-            against the Analyzer's per-axis notes. Renders only when the
-            Analyzer emitted dimensionNotes (older sessions skip it). */}
-        {a.dimensionNotes && (
-          <section className="animate-fade-up" style={{ animationDelay: "0.32s" }}>
-            <NoticedRail missionId={mission.missionId} dimensionNotes={a.dimensionNotes} />
-          </section>
-        )}
-
-
-        {/* Interactive Timeline */}
-        <section className="animate-fade-up" style={{ animationDelay: "0.4s" }}>
-          <SectionLabel>Consequence timeline</SectionLabel>
-          <p className="mt-4 text-center text-xs text-foreground/45 tracking-wide">
-            Review the key moments and how the outcome developed.
-          </p>
-          <TimelineScrubber timeline={a.timeline} />
-        </section>
-
-        {/* Verdict + expandable detail drawers */}
-        <section className="space-y-12">
-          <div className="animate-fade-up text-center" style={{ animationDelay: "1.4s" }}>
-            <p className="text-[0.6rem] tracking-[0.5em] uppercase text-accent/80 mb-4">
-              Verdict
-            </p>
-            <p className="font-display text-2xl sm:text-3xl leading-snug text-foreground/95 text-pretty max-w-2xl mx-auto">
-              {a.closing}
-            </p>
-          </div>
-
-          {/* Expandable details — ordered per spec */}
-          <div className="animate-fade-up" style={{ animationDelay: "1.7s" }}>
-            <SectionsProvider>
-              <SectionsToolbar />
-              <div className="divide-y divide-foreground/10 border-y border-foreground/10">
-                {a.reasoningAssessment && (
-                  <ExpandableSection
-                    id="reasoning"
-                    label="Reasoning assessment"
-                    hint="How you weighed what you knew."
-                  >
-                    <ReasoningAssessment data={a.reasoningAssessment} />
-                  </ExpandableSection>
-                )}
-                <ExpandableBlock
-                  id="evidence-used"
-                  label="Evidence considered"
-                  hint="What you noticed and let shape the choice."
-                  body={a.evidenceUsed}
-                />
-                <ExpandableBlock
-                  id="evidence-ignored"
-                  label="Evidence set aside"
-                  hint="What was within reach but went unread."
-                  body={a.evidenceIgnored}
-                />
-                <ExpandableBlock
-                  id="assumptions"
-                  label="Assumptions made"
-                  hint="The beliefs you treated as settled."
-                  body={a.assumptions}
-                />
-                <ExpandableBlock
-                  id="alternatives"
-                  label="Paths not taken"
-                  hint="Other shapes this decision could have held."
-                  body={a.alternatives}
-                />
-                {a.reasoningAssessment && a.reasoningAssessment.possibleBiases.length > 0 && (
-                  <ExpandableSection
-                    id="biases"
-                    label="Cognitive patterns"
-                    hint="Tendencies worth noticing — not verdicts."
-                  >
-                    <PossibleBiasesList biases={a.reasoningAssessment.possibleBiases} />
-                  </ExpandableSection>
-                )}
-                <ExpandableSection
-                  id="long-term"
-                  label="Long-term consequences"
-                  hint="Where this choice tends to lead, over time."
-                >
-                  <LongTermConsequences timeline={a.timeline} />
-                </ExpandableSection>
-                {a.beliefTrajectory && a.beliefTrajectory.length > 0 && (
-                  <ExpandableSection
-                    id="belief"
-                    label="Belief trajectory"
-                    hint="How your understanding shifted as it unfolded."
-                  >
-                    <BeliefTrajectory trajectory={a.beliefTrajectory} />
-                  </ExpandableSection>
-                )}
-              </div>
-            </SectionsProvider>
-          </div>
-
-          {percentile && percentile.plays >= 3 && (
-            <CommunityComparison percentile={percentile} />
-          )}
-
-          {profile && <DecisionProfileCard profile={profile} delay={2.4} />}
-        </section>
-
-        {/* Coda */}
-        <section
-          className="animate-fade-up text-center pt-8 pb-4"
-          style={{ animationDelay: "3.0s" }}
-        >
-          <div className="flex items-center justify-center gap-10">
-            <button
-              onClick={() => {
-                reset();
-                const id = mission?.missionId ?? "mission-01";
-                navigate({ to: "/mission/$id", params: { id } });
-              }}
-              className="group flex items-center gap-3 text-[0.65rem] tracking-[0.4em] uppercase text-foreground/70 hover:text-foreground transition-colors"
-            >
-              <span className="h-px w-8 bg-foreground/30 group-hover:bg-foreground/70 group-hover:w-12 transition-all" />
-              Replay
-            </button>
-            <button
-              onClick={() => navigate({ to: "/" })}
-              className="text-[0.65rem] tracking-[0.4em] uppercase text-foreground/40 hover:text-foreground/80 transition-colors"
-            >
-              Return
-            </button>
-          </div>
-        </section>
-      </div>
+      {showDetails ? (
+        <AnalysisDetailedView
+          mission={mission}
+          profile={profile}
+          percentile={percentile}
+          a={a}
+          onReplay={replay}
+          onReturn={() => navigate({ to: "/" })}
+          onSimplify={() => setShowDetails(false)}
+        />
+      ) : (
+        <AnalysisDebrief
+          mission={mission}
+          profile={profile}
+          percentile={percentile}
+          a={a}
+          onReplay={replay}
+          onReturn={() => navigate({ to: "/" })}
+          onSeeDetails={() => setShowDetails(true)}
+        />
+      )}
     </main>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────────
+ * New, calm 5-block debrief. The default view post-decision.
+ * ──────────────────────────────────────────────────────────────────── */
+function AnalysisDebrief({
+  mission,
+  profile,
+  percentile,
+  a,
+  onReplay,
+  onReturn,
+  onSeeDetails,
+}: {
+  mission: SavedMission;
+  profile: DecisionProfile | null;
+  percentile: MissionPercentile | null;
+  a: DecisionAnalysis;
+  onReplay: () => void;
+  onReturn: () => void;
+  onSeeDetails: () => void;
+}) {
+  // Pick at most one "pattern worth noticing": prefer a high-confidence bias,
+  // else the strongest strength. If neither qualifies, omit block 4 entirely.
+  const ra = a.reasoningAssessment;
+  const topBias = ra?.possibleBiases?.find((b) => b.confidence === "high")
+    ?? ra?.possibleBiases?.find((b) => b.confidence === "medium")
+    ?? null;
+  const topStrength = !topBias && ra?.strengths && ra.strengths.length > 0 ? ra.strengths[0] : null;
+  const pattern = topBias
+    ? { kind: "bias" as const, label: topBias.name, body: topBias.gentleExplanation, evidence: topBias.evidence }
+    : topStrength
+    ? { kind: "strength" as const, label: topStrength.behavior, body: topStrength.evidence, evidence: null }
+    : null;
+
+  // Compress canon timeline to 3 beats for the "what happened" block.
+  const beats = a.timeline ?? [];
+  const condensed =
+    beats.length <= 3
+      ? beats
+      : [beats[0], beats[Math.floor(beats.length / 2)], beats[beats.length - 1]];
+
+  // Stance line. Prefer the saved decision text — it is the player's own words.
+  const stance = (mission.decision ?? "").trim();
+  const why = (mission.reasoning ?? "").trim();
+
+  return (
+    <div className="relative z-10 mx-auto max-w-2xl px-6 sm:px-10 py-20 sm:py-28 space-y-20">
+      {/* Block 1 — What you did */}
+      <section className="animate-fade-up text-center">
+        <p className="text-[0.6rem] tracking-[0.5em] uppercase text-accent/80 mb-6">
+          Decision recorded
+        </p>
+        <h1 className="font-display text-3xl sm:text-4xl md:text-5xl leading-tight text-foreground/95 text-balance">
+          {a.headline}
+        </h1>
+        {stance && (
+          <p className="mt-8 text-base sm:text-lg leading-relaxed text-foreground/75 text-pretty italic">
+            “{stance}”
+          </p>
+        )}
+        {why && (
+          <p className="mt-4 text-sm text-foreground/50 leading-relaxed text-pretty">
+            Because {why.replace(/^because\s+/i, "")}
+          </p>
+        )}
+        {a.archetypeLabel && (
+          <p className="mt-6 text-[0.6rem] tracking-[0.35em] uppercase text-accent/70">
+            {a.archetypeLabel}
+          </p>
+        )}
+      </section>
+
+      {/* Block 2 — What happened */}
+      {condensed.length > 0 && (
+        <section className="animate-fade-up" style={{ animationDelay: "0.15s" }}>
+          <p className="text-[0.6rem] tracking-[0.5em] uppercase text-accent/80 mb-8 text-center">
+            What happened
+          </p>
+          <ol className="space-y-8">
+            {condensed.map((t, i) => (
+              <li key={i} className="border-l border-foreground/20 pl-6">
+                <p className="font-display text-lg sm:text-xl leading-snug text-foreground/95 text-pretty">
+                  {t.beat}
+                </p>
+                <p className="mt-2 text-sm sm:text-base text-foreground/65 leading-relaxed text-pretty">
+                  {t.consequence}
+                </p>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
+
+      {/* Block 3 — How you reasoned */}
+      {a.reasoningEcho && (
+        <section className="animate-fade-up" style={{ animationDelay: "0.3s" }}>
+          <p className="text-[0.6rem] tracking-[0.5em] uppercase text-accent/80 mb-6 text-center">
+            How you reasoned
+          </p>
+          <p className="font-display text-xl sm:text-2xl leading-relaxed text-foreground/90 text-pretty italic text-center max-w-xl mx-auto">
+            {a.reasoningEcho}
+          </p>
+          {ra?.calibrationVerdict && (
+            <p className="mt-6 text-center text-xs tracking-[0.3em] uppercase text-foreground/45">
+              {ra.calibrationVerdict === "calibrated"
+                ? "Your confidence sat where the evidence was."
+                : ra.calibrationVerdict === "over"
+                ? "You stated more certainty than the evidence carried."
+                : "The evidence was stronger than your confidence suggested."}
+            </p>
+          )}
+        </section>
+      )}
+
+      {/* Block 4 — A pattern worth noticing (optional) */}
+      {pattern && (
+        <section className="animate-fade-up" style={{ animationDelay: "0.45s" }}>
+          <p className="text-[0.6rem] tracking-[0.5em] uppercase text-accent/80 mb-6 text-center">
+            {pattern.kind === "strength" ? "A strength worth keeping" : "A pattern worth noticing"}
+          </p>
+          <div className="mx-auto max-w-xl border-l-2 border-accent/40 pl-6">
+            <p className="text-[0.7rem] tracking-[0.3em] uppercase text-accent/80 mb-2">
+              {pattern.label}
+            </p>
+            <p className="text-base sm:text-lg leading-relaxed text-foreground/85 text-pretty">
+              {pattern.body}
+            </p>
+            {pattern.evidence && (
+              <p className="mt-3 text-sm text-foreground/50 italic leading-relaxed text-pretty">
+                {pattern.evidence}
+              </p>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* Block 5 — Carry forward */}
+      <section className="animate-fade-up space-y-8" style={{ animationDelay: "0.6s" }}>
+        <p className="text-[0.6rem] tracking-[0.5em] uppercase text-accent/80 text-center">
+          Carry forward
+        </p>
+        {profile && <DecisionProfileCard profile={profile} delay={0.7} />}
+        {percentile && percentile.plays >= 3 && (
+          <p className="text-center text-xs text-foreground/55 leading-relaxed">
+            You sit in the {Math.round(percentile.percentile)}
+            <sup>th</sup> percentile of choices on this case
+            <span className="text-foreground/35"> · {percentile.plays} sessions</span>
+          </p>
+        )}
+      </section>
+
+      {/* Coda */}
+      <section className="animate-fade-up pt-4" style={{ animationDelay: "0.8s" }}>
+        <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
+          <button
+            onClick={onReplay}
+            className="group flex items-center gap-3 text-[0.65rem] tracking-[0.4em] uppercase text-foreground/70 hover:text-foreground transition-colors"
+          >
+            <span className="h-px w-8 bg-foreground/30 group-hover:bg-foreground/70 group-hover:w-12 transition-all" />
+            Run another
+          </button>
+          <button
+            onClick={onSeeDetails}
+            className="text-[0.65rem] tracking-[0.4em] uppercase text-foreground/45 hover:text-foreground/85 transition-colors"
+          >
+            See full analysis
+          </button>
+          <button
+            onClick={onReturn}
+            className="text-[0.65rem] tracking-[0.4em] uppercase text-foreground/40 hover:text-foreground/80 transition-colors"
+          >
+            Return
+          </button>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────────
+ * Detailed view — the dense, original dashboard. Opt-in via the
+ * "See full analysis" link or ?details=1.
+ * ──────────────────────────────────────────────────────────────────── */
+function AnalysisDetailedView({
+  mission,
+  profile,
+  percentile,
+  a,
+  onReplay,
+  onReturn,
+  onSimplify,
+}: {
+  mission: SavedMission;
+  profile: DecisionProfile | null;
+  percentile: MissionPercentile | null;
+  a: DecisionAnalysis;
+  onReplay: () => void;
+  onReturn: () => void;
+  onSimplify: () => void;
+}) {
+  return (
+    <div className="relative z-10 mx-auto max-w-3xl px-6 sm:px-10 py-20 sm:py-28 space-y-24">
+      {/* Toolbar */}
+      <div className="flex justify-end">
+        <button
+          onClick={onSimplify}
+          className="text-[0.55rem] tracking-[0.4em] uppercase text-foreground/45 hover:text-foreground/85 transition-colors"
+        >
+          ← Back to debrief
+        </button>
+      </div>
+
+      {/* Headline */}
+      <section className="animate-fade-up text-center">
+        <p className="text-[0.6rem] tracking-[0.5em] uppercase text-accent/80 mb-6">
+          Decision recorded
+        </p>
+        <h1 className="font-display text-4xl sm:text-5xl md:text-6xl leading-tight text-foreground/95 text-balance">
+          {a.headline}
+        </h1>
+        {a.archetypeLabel && (
+          <p className="mt-8 text-sm sm:text-base text-foreground/55 leading-relaxed">
+            Your approach:{" "}
+            <span className="font-display italic text-accent text-lg sm:text-xl">
+              {a.archetypeLabel}
+            </span>
+          </p>
+        )}
+      </section>
+
+      {a.reasoningEcho && (
+        <section
+          className="animate-fade-up"
+          style={{ animationDelay: "0.24s" }}
+          aria-label="Reasoning reflection"
+        >
+          <div className="border-l-2 border-accent/40 pl-6 sm:pl-8">
+            <p className="text-[0.6rem] tracking-[0.4em] uppercase text-accent/70 mb-3">
+              On your reasoning
+            </p>
+            <p className="font-display text-xl sm:text-2xl leading-relaxed text-foreground/90 text-pretty italic">
+              {a.reasoningEcho}
+            </p>
+          </div>
+        </section>
+      )}
+
+      {a.dimensionNotes && (
+        <section className="animate-fade-up" style={{ animationDelay: "0.32s" }}>
+          <NoticedRail missionId={mission.missionId} dimensionNotes={a.dimensionNotes} />
+        </section>
+      )}
+
+      <section className="animate-fade-up" style={{ animationDelay: "0.4s" }}>
+        <SectionLabel>Consequence timeline</SectionLabel>
+        <p className="mt-4 text-center text-xs text-foreground/45 tracking-wide">
+          Review the key moments and how the outcome developed.
+        </p>
+        <TimelineScrubber timeline={a.timeline} />
+      </section>
+
+      <section className="space-y-12">
+        <div className="animate-fade-up text-center" style={{ animationDelay: "1.4s" }}>
+          <p className="text-[0.6rem] tracking-[0.5em] uppercase text-accent/80 mb-4">
+            Verdict
+          </p>
+          <p className="font-display text-2xl sm:text-3xl leading-snug text-foreground/95 text-pretty max-w-2xl mx-auto">
+            {a.closing}
+          </p>
+        </div>
+
+        <div className="animate-fade-up" style={{ animationDelay: "1.7s" }}>
+          <SectionsProvider>
+            <SectionsToolbar />
+            <div className="divide-y divide-foreground/10 border-y border-foreground/10">
+              {a.reasoningAssessment && (
+                <ExpandableSection
+                  id="reasoning"
+                  label="Reasoning assessment"
+                  hint="How you weighed what you knew."
+                >
+                  <ReasoningAssessment data={a.reasoningAssessment} />
+                </ExpandableSection>
+              )}
+              <ExpandableBlock id="evidence-used" label="Evidence considered" hint="What you noticed and let shape the choice." body={a.evidenceUsed} />
+              <ExpandableBlock id="evidence-ignored" label="Evidence set aside" hint="What was within reach but went unread." body={a.evidenceIgnored} />
+              <ExpandableBlock id="assumptions" label="Assumptions made" hint="The beliefs you treated as settled." body={a.assumptions} />
+              <ExpandableBlock id="alternatives" label="Paths not taken" hint="Other shapes this decision could have held." body={a.alternatives} />
+              {a.reasoningAssessment && a.reasoningAssessment.possibleBiases.length > 0 && (
+                <ExpandableSection id="biases" label="Cognitive patterns" hint="Tendencies worth noticing — not verdicts.">
+                  <PossibleBiasesList biases={a.reasoningAssessment.possibleBiases} />
+                </ExpandableSection>
+              )}
+              <ExpandableSection id="long-term" label="Long-term consequences" hint="Where this choice tends to lead, over time.">
+                <LongTermConsequences timeline={a.timeline} />
+              </ExpandableSection>
+              {a.beliefTrajectory && a.beliefTrajectory.length > 0 && (
+                <ExpandableSection id="belief" label="Belief trajectory" hint="How your understanding shifted as it unfolded.">
+                  <BeliefTrajectory trajectory={a.beliefTrajectory} />
+                </ExpandableSection>
+              )}
+            </div>
+          </SectionsProvider>
+        </div>
+
+        {percentile && percentile.plays >= 3 && <CommunityComparison percentile={percentile} />}
+        {profile && <DecisionProfileCard profile={profile} delay={2.4} />}
+      </section>
+
+      <section className="animate-fade-up text-center pt-8 pb-4" style={{ animationDelay: "3.0s" }}>
+        <div className="flex items-center justify-center gap-10">
+          <button
+            onClick={onReplay}
+            className="group flex items-center gap-3 text-[0.65rem] tracking-[0.4em] uppercase text-foreground/70 hover:text-foreground transition-colors"
+          >
+            <span className="h-px w-8 bg-foreground/30 group-hover:bg-foreground/70 group-hover:w-12 transition-all" />
+            Replay
+          </button>
+          <button
+            onClick={onReturn}
+            className="text-[0.65rem] tracking-[0.4em] uppercase text-foreground/40 hover:text-foreground/80 transition-colors"
+          >
+            Return
+          </button>
+        </div>
+      </section>
+    </div>
   );
 }
 
