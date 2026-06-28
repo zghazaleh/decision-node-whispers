@@ -213,9 +213,20 @@ export function GuildCarousel({
         </div>
       )}
 
-      {/* Inline expanded detail — same shape as a ledger row opening. */}
+      {/* Inline expanded detail — same shape as a ledger row opening.
+          Tile click only ever opens this panel; navigation happens only
+          from the "Enter" affordance inside the panel. */}
       {expanded && (
-        <div className="mt-5">
+        <div
+          className="mt-5"
+          ref={(el) => {
+            if (!el) return;
+            // Bring the panel into view the same way an opened ledger row does.
+            requestAnimationFrame(() => {
+              el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+            });
+          }}
+        >
           <ExpandedCase
             mission={expanded}
             onEnter={onEnter}
