@@ -213,9 +213,20 @@ export function GuildCarousel({
         </div>
       )}
 
-      {/* Inline expanded detail — same shape as a ledger row opening. */}
+      {/* Inline expanded detail — same shape as a ledger row opening.
+          Tile click only ever opens this panel; navigation happens only
+          from the "Enter" affordance inside the panel. */}
       {expanded && (
-        <div className="mt-5">
+        <div
+          className="mt-5"
+          ref={(el) => {
+            if (!el) return;
+            // Bring the panel into view the same way an opened ledger row does.
+            requestAnimationFrame(() => {
+              el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+            });
+          }}
+        >
           <ExpandedCase
             mission={expanded}
             onEnter={onEnter}
@@ -259,7 +270,8 @@ function CarouselTile({
       id={`carousel-tile-${mission.id}`}
       role="option"
       aria-selected={spotlit}
-      aria-pressed={open}
+      aria-expanded={open}
+      aria-controls={open ? `carousel-panel-${mission.id}` : undefined}
       aria-posinset={index + 1}
       aria-label={`${open ? "Close" : "Open"} ${mission.codename}`}
       tabIndex={focusable ? 0 : -1}
@@ -370,7 +382,7 @@ function ExpandedCase({
 }) {
   const resonance = resonanceCopy(getResonance(mission.id));
   return (
-    <div className="overflow-hidden rounded-[14px] border border-accent/40 bg-[#0b0d10] motion-safe:animate-fade-up">
+    <div id={`carousel-panel-${mission.id}`} role="region" aria-label={`${mission.codename} case file`} className="overflow-hidden rounded-[14px] border border-accent/40 bg-[#0b0d10] motion-safe:animate-fade-up">
       <div className="relative aspect-[16/9] sm:aspect-auto sm:h-[236px] w-full overflow-hidden bg-[#0b0d10]">
         <SceneArt src={getSceneSrc(mission.id)} theme={mission.theme} brighten />
         <div
