@@ -260,9 +260,10 @@ export function getMissionFramework(missionId: string): MissionFramework | null 
  *
  * Returns the list of missing/empty fields. Empty array = OK.
  */
-export function validateMissionFramework(missionId: string): string[] {
-  const f = FRAMEWORK[missionId];
-  if (!f) return ["(framework entry missing entirely)"];
+export function validateFrameworkRecord(f: unknown): string[] {
+  if (f === null || f === undefined) return ["(framework entry missing entirely)"];
+  if (typeof f !== "object") return ["(framework entry is not an object)"];
+  const rec = f as Record<string, unknown>;
   const missing: string[] = [];
   const nonEmptyArr = (a: unknown): a is string[] =>
     Array.isArray(a) &&
@@ -270,12 +271,16 @@ export function validateMissionFramework(missionId: string): string[] {
     a.every((s) => typeof s === "string" && s.trim().length > 0);
   const nonEmptyStr = (s: unknown): s is string =>
     typeof s === "string" && s.trim().length > 0;
-  if (!nonEmptyArr(f.stakes)) missing.push("stakes");
-  if (!nonEmptyArr(f.hiddenTruths)) missing.push("hiddenTruths");
-  if (!nonEmptyStr(f.timeLimit)) missing.push("timeLimit");
-  if (!nonEmptyArr(f.decisionScience)) missing.push("decisionScience");
-  if (!nonEmptyStr(f.learningObjective)) missing.push("learningObjective");
+  if (!nonEmptyArr(rec.stakes)) missing.push("stakes");
+  if (!nonEmptyArr(rec.hiddenTruths)) missing.push("hiddenTruths");
+  if (!nonEmptyStr(rec.timeLimit)) missing.push("timeLimit");
+  if (!nonEmptyArr(rec.decisionScience)) missing.push("decisionScience");
+  if (!nonEmptyStr(rec.learningObjective)) missing.push("learningObjective");
   return missing;
+}
+
+export function validateMissionFramework(missionId: string): string[] {
+  return validateFrameworkRecord(FRAMEWORK[missionId]);
 }
 
 export function assertMissionFrameworkReady(missionId: string): void {
