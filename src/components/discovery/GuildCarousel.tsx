@@ -235,13 +235,17 @@ export function GuildCarousel({
 
 function CarouselTile({
   mission,
+  index,
   spotlit,
   open,
+  focusable,
   onPick,
 }: {
   mission: MissionMeta;
+  index: number;
   spotlit: boolean;
   open: boolean;
+  focusable: boolean;
   onPick: () => void;
 }) {
   useEffect(() => {
@@ -252,8 +256,13 @@ function CarouselTile({
     <button
       type="button"
       onClick={onPick}
+      id={`carousel-tile-${mission.id}`}
+      role="option"
+      aria-selected={spotlit}
       aria-pressed={open}
+      aria-posinset={index + 1}
       aria-label={`${open ? "Close" : "Open"} ${mission.codename}`}
+      tabIndex={focusable ? 0 : -1}
       className={[
         "group relative block shrink-0 overflow-hidden rounded-[12px] text-left",
         "w-[172px] sm:w-[188px] md:w-[200px]",
@@ -262,7 +271,10 @@ function CarouselTile({
         // attack, no hard snap between spotlit / dim.
         "transition-[transform,border-color,opacity,box-shadow,filter] duration-[1100ms]",
         "[transition-timing-function:cubic-bezier(0.33,1,0.68,1)]",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+        // Strong, brand-aligned focus ring — visible on dark posters.
+        "focus:outline-none focus-visible:outline-none",
+        "focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+        "focus-visible:shadow-[0_0_0_4px_color-mix(in_oklab,var(--accent)_28%,transparent)]",
         spotlit
           ? "border-accent/55 shadow-[0_24px_60px_-28px_rgba(214,182,109,0.55)] scale-[1.025] opacity-100"
           : "border-foreground/10 opacity-55 hover:opacity-90 hover:border-foreground/25 [filter:saturate(0.7)_brightness(0.92)]",
