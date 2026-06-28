@@ -817,7 +817,10 @@ function SceneArt({
           onError={() => setStatus("error")}
           style={
             brighten
-              ? { filter: "brightness(1.35) contrast(1.08) saturate(1.05)" }
+              ? {
+                  filter: "brightness(2.1) contrast(1.18) saturate(1.15)",
+                  objectPosition: "center 30%",
+                }
               : undefined
           }
           className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${
