@@ -1,0 +1,13 @@
+# Decision Node
+
+> An interactive drama where you wake up in someone else's life and face one irreversible decision.
+
+Decision Node is a narrative experience built around high-stakes case files. Each mission drops you into a single moment with incomplete context, real stakes, and no undo. After you commit, an AI analysis reflects on your reasoning, evidence, assumptions, and the path not taken.
+
+## Pages
+
+- [/](/): The landing page — enter the experience.
+- [/missions](/missions): Browse the archive of case files. Each entry shows codename, tone, location, difficulty, and community stats.
+- [/mission/mission-01](/mission/mission-01): *The Release* — Twelve minutes before the boardroom. The model is ready. The memo is not. (Corporate / San Francisco / 2024)
+- [/mission/mission-02](/mission/mission-02): *Black Site* — You are the prosecutor's last witness. You no longer remember which side you came in on. (Legal / Undisclosed / 2019)
+- [/constitution](/constitution): Live status of the project constitution files and GitHub sync.
