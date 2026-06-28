@@ -141,9 +141,13 @@ function MissionsPage() {
   }, []);
 
 
-  // Apply filters + sort
+  // TODAY pick (stable per day)
+  const today = useMemo(() => pickToday(MISSIONS), []);
+
+  // Apply filters + sort (exclude today's case from the list)
   const visible = useMemo(() => {
     let rows = MISSIONS.slice();
+    if (today) rows = rows.filter((m) => m.id !== today.id);
     if (theme !== "All") rows = rows.filter((m) => m.theme === theme);
     if (domain !== "All") rows = rows.filter((m) => m.category === domain);
     if (difficulty !== "Any") rows = rows.filter((m) => m.difficulty === difficulty);
@@ -166,16 +170,12 @@ function MissionsPage() {
         break;
     }
     return rows;
-  }, [theme, domain, difficulty, sort, stats]);
+  }, [theme, domain, difficulty, sort, stats, today]);
 
   // Closing the open row when filters change
   useEffect(() => {
     setOpenId(null);
   }, [theme, domain, difficulty, sort]);
-
-
-  // TODAY pick (stable per day)
-  const today = useMemo(() => pickToday(MISSIONS), []);
 
   /* ----- Ambient soundtrack: only switches when a row is OPENED, not on peek */
   const soundOn = (() => {
