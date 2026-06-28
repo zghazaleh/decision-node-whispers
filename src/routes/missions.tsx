@@ -116,6 +116,7 @@ function MissionsPage() {
 
   // Filter state
   const [theme, setTheme] = useState<string>("All");
+  const [domain, setDomain] = useState<string>("All");
   const [difficulty, setDifficulty] = useState<number | "Any">("Any");
   const [sort, setSort] = useState<SortMode>("curated");
   const [openId, setOpenId] = useState<string | null>(null);
@@ -128,16 +129,23 @@ function MissionsPage() {
     for (const m of MISSIONS) if (m.theme) set.add(m.theme);
     return ["All", ...Array.from(set)];
   }, []);
+  const domains = useMemo(() => {
+    const set = new Set<string>();
+    for (const m of MISSIONS) if (m.category) set.add(m.category);
+    return ["All", ...Array.from(set).sort()];
+  }, []);
   const difficulties = useMemo(() => {
     const set = new Set<number>();
     for (const m of MISSIONS) if (m.difficulty) set.add(m.difficulty);
     return Array.from(set).sort((a, b) => a - b);
   }, []);
 
+
   // Apply filters + sort
   const visible = useMemo(() => {
     let rows = MISSIONS.slice();
     if (theme !== "All") rows = rows.filter((m) => m.theme === theme);
+    if (domain !== "All") rows = rows.filter((m) => m.category === domain);
     if (difficulty !== "Any") rows = rows.filter((m) => m.difficulty === difficulty);
     switch (sort) {
       case "difficulty":
@@ -158,12 +166,13 @@ function MissionsPage() {
         break;
     }
     return rows;
-  }, [theme, difficulty, sort, stats]);
+  }, [theme, domain, difficulty, sort, stats]);
 
   // Closing the open row when filters change
   useEffect(() => {
     setOpenId(null);
-  }, [theme, difficulty, sort]);
+  }, [theme, domain, difficulty, sort]);
+
 
   // TODAY pick (stable per day)
   const today = useMemo(() => pickToday(MISSIONS), []);
@@ -210,8 +219,10 @@ function MissionsPage() {
 
   function clearFilters() {
     setTheme("All");
+    setDomain("All");
     setDifficulty("Any");
   }
+
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-background text-foreground">
@@ -244,12 +255,19 @@ function MissionsPage() {
         {/* ---------- Filters ---------- */}
         <div className="mb-8 space-y-3">
           <FacetRow
+            label="Domain"
+            values={domains}
+            active={domain}
+            onChange={setDomain}
+          />
+          <FacetRow
             label="Theme"
             values={themes}
             active={theme}
             onChange={setTheme}
           />
           <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+
             <FacetRow
               label="Difficulty"
               values={["Any", ...difficulties.map(String)]}
