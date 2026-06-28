@@ -21,6 +21,7 @@ import { missionSixEngine } from "./mission-06";
 import { missionSevenEngine } from "./mission-07";
 import { missionEightEngine } from "./mission-08";
 import { missionNineEngine } from "./mission-09";
+import { composeSystemPrompt } from "./director-invariants";
 import {
   formatMissionEngineErrors,
   validateMissionEngine,
@@ -40,7 +41,13 @@ function register(engine: MissionEngine): void {
     console.error(formatMissionEngineErrors(engine?.id ?? "(unknown)", result.errors));
     return;
   }
-  REGISTRY[engine.id] = engine;
+  // Inject the shared Director invariants at the top of every mission's
+  // system prompt. A new mission cannot bypass the constitution by simply
+  // forgetting to copy the rules block.
+  REGISTRY[engine.id] = {
+    ...engine,
+    systemPrompt: composeSystemPrompt(engine.systemPrompt),
+  };
 }
 
 register(missionOneEngine);

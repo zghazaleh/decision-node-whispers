@@ -947,6 +947,9 @@ function CommunityComparison({ percentile }: { percentile: MissionPercentile }) 
     const r = s % 60;
     return r ? `${m}m ${r}s` : `${m}m`;
   };
+  // Per constitution §08 non-negotiable #4, no decision-distribution
+  // stats and no leaderboard framing. We show only the absolute community
+  // average alongside the absence of a ranking — a quiet mirror, not a score.
   return (
     <div
       className="animate-fade-up border-t border-foreground/15 pt-12 text-center"
@@ -956,22 +959,26 @@ function CommunityComparison({ percentile }: { percentile: MissionPercentile }) 
         Community context
       </p>
       <p className="text-xs text-foreground/45 max-w-md mx-auto leading-relaxed mb-6">
-        How your preparation compared to others who opened this file.
-        Not a ranking — a mirror.
+        The average time others spent inside this case. Not a ranking — a
+        mirror, in case you find it useful.
       </p>
-      {typeof percentile.investigationPercentile === "number" && (
-        <p className="font-display text-xl sm:text-2xl text-foreground/95 leading-snug max-w-xl mx-auto text-pretty">
-          You investigated longer than{" "}
-          <span className="text-accent tabular-nums">
-            {percentile.investigationPercentile}%
-          </span>{" "}
-          of players.
-        </p>
-      )}
+      <p className="font-display text-xl sm:text-2xl text-foreground/95 leading-snug max-w-xl mx-auto text-pretty">
+        Others sat with this case for an average of{" "}
+        <span className="text-accent tabular-nums">
+          {fmt(percentile.avgInvestigationSeconds)}
+        </span>
+        {typeof percentile.avgDecisionSeconds === "number" && (
+          <>
+            {", and decided in roughly "}
+            <span className="text-accent tabular-nums">
+              {fmt(percentile.avgDecisionSeconds)}
+            </span>
+          </>
+        )}
+        .
+      </p>
       <p className="mt-4 text-[0.6rem] tracking-[0.35em] uppercase text-foreground/40">
-        Community avg investigation: {fmt(percentile.avgInvestigationSeconds)}
-        {" · "}
-        {percentile.plays.toLocaleString()} plays
+        {percentile.plays.toLocaleString()} prior players
       </p>
     </div>
   );

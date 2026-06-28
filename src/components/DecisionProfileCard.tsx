@@ -25,6 +25,17 @@ function bandPhrase(b: DimensionBand): string {
   return "Well-grounded — the estimate is stable across missions.";
 }
 
+/** Qualitative tier for the dimension band. Surfaced alongside the numeric
+ *  value so the right-hand column reads as a portrait of a tendency rather
+ *  than a grade. Per constitution #10 (profiles describe, they do not rank). */
+function tierFor(value: number): string {
+  if (value >= 78) return "Pronounced";
+  if (value >= 62) return "Present";
+  if (value >= 45) return "Mixed";
+  if (value >= 30) return "Thin";
+  return "Faint";
+}
+
 export function DecisionProfileCard({
   profile,
   delay = 2.9,
@@ -43,9 +54,9 @@ export function DecisionProfileCard({
         Decision Profile
       </p>
       <p className="text-center text-xs text-foreground/45 max-w-md mx-auto leading-relaxed mb-10">
-        {profile.missionsCompleted <= 1
-          ? "Your profile begins here. Each axis is shown as a band of uncertainty that narrows with every mission."
-          : `Based on ${profile.contributions.length} mission${profile.contributions.length === 1 ? "" : "s"}. Bands narrow as the estimate stabilizes; recent missions weighted more heavily.`}
+        A portrait, not a score. Each axis describes a tendency that has
+        appeared across your sessions; the band is the room for doubt, and
+        it narrows as more cases accumulate.
       </p>
 
       <div className="max-w-xl mx-auto">
@@ -72,10 +83,14 @@ export function DecisionProfileCard({
 
       <div className="mt-12 border-t border-foreground/10 pt-8 max-w-xl mx-auto">
         <p className="text-[0.6rem] tracking-[0.35em] uppercase text-foreground/45 mb-3">
-          Summary
+          Portrait so far
         </p>
         <p className="font-display text-lg sm:text-xl leading-relaxed text-foreground/90 text-pretty">
           {profile.emergingPattern}
+        </p>
+        <p className="mt-4 text-[0.65rem] tracking-[0.3em] uppercase text-foreground/35">
+          Reflects you across {profile.contributions.length} case
+          {profile.contributions.length === 1 ? "" : "s"} — nothing here is a verdict.
         </p>
       </div>
     </div>
@@ -288,15 +303,20 @@ function DimensionRow({
             ±{band.halfWidth} · {bandPhrase(band)}
           </p>
         </div>
-        <span className="font-display text-lg sm:text-xl tabular-nums text-foreground/95 w-10 text-right">
-          {band.value}
+        <span className="flex flex-col items-end gap-0.5 w-24">
+          <span className="text-[0.6rem] tracking-[0.3em] uppercase text-foreground/70">
+            {tierFor(band.value)}
+          </span>
+          <span className="text-[0.55rem] tracking-[0.25em] uppercase text-foreground/30 tabular-nums">
+            {band.value} / 100
+          </span>
         </span>
       </button>
 
       {open && hasDetail && (
         <div className="mt-3 ml-0 sm:ml-1 border-l border-accent/30 pl-4 animate-fade-up">
           <p className="text-[0.6rem] tracking-[0.3em] uppercase text-foreground/40 mb-2">
-            Missions that shaped this trait
+            Missions that shaped this tendency
           </p>
           <ul className="space-y-3">
             {[...contributions]
