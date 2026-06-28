@@ -254,6 +254,52 @@ export function getMissionFramework(missionId: string): MissionFramework | null 
 }
 
 /**
+ * Hard precondition for the analyzer. Every mission MUST have all five
+ * framework fields populated before a decision is analyzed, otherwise the
+ * reasoning assessment silently degrades to generic output.
+ *
+ * Returns the list of missing/empty fields. Empty array = OK.
+ */
+export function validateMissionFramework(missionId: string): string[] {
+  const f = FRAMEWORK[missionId];
+  if (!f) return ["(framework entry missing entirely)"];
+  const missing: string[] = [];
+  const nonEmptyArr = (a: unknown): a is string[] =>
+    Array.isArray(a) &&
+    a.length > 0 &&
+    a.every((s) => typeof s === "string" && s.trim().length > 0);
+  const nonEmptyStr = (s: unknown): s is string =>
+    typeof s === "string" && s.trim().length > 0;
+  if (!nonEmptyArr(f.stakes)) missing.push("stakes");
+  if (!nonEmptyArr(f.hiddenTruths)) missing.push("hiddenTruths");
+  if (!nonEmptyStr(f.timeLimit)) missing.push("timeLimit");
+  if (!nonEmptyArr(f.decisionScience)) missing.push("decisionScience");
+  if (!nonEmptyStr(f.learningObjective)) missing.push("learningObjective");
+  return missing;
+}
+
+export function assertMissionFrameworkReady(missionId: string): void {
+  const missing = validateMissionFramework(missionId);
+  if (missing.length) {
+    throw new Error(
+      `Mission "${missionId}" cannot be analyzed: framework fields missing or empty — ${missing.join(", ")}. Populate them in src/lib/missions/framework.ts before running analysis.`,
+    );
+  }
+}
+
+// Module-load self-check: surface malformed framework entries in server
+// logs at boot so a broken mission is visible before the first analysis call.
+for (const id of Object.keys(FRAMEWORK)) {
+  const missing = validateMissionFramework(id);
+  if (missing.length) {
+    // eslint-disable-next-line no-console
+    console.error(
+      `[framework] Mission "${id}" has missing/empty fields: ${missing.join(", ")}`,
+    );
+  }
+}
+
+/**
  * Compact block fed into the analyzer system prompt so the bias surfacing
  * and reasoning echo are mission-specific rather than generic.
  */
