@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
 import { ConstitutionStatusBadge } from "@/components/ConstitutionStatus";
+import { SoundControls } from "@/components/audio/SoundControls";
 import { listMetaTokens } from "@/lib/gsc-verify.functions";
 
 
@@ -145,7 +146,8 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="fixed top-3 right-3 z-50">
+      <div className="fixed top-3 right-3 z-50 flex items-center gap-2">
+        <SoundControls />
         <ConstitutionStatusBadge />
       </div>
       <Outlet />
