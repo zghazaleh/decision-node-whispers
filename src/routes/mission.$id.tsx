@@ -911,30 +911,7 @@ function DecideModal({
                 />
               </div>
 
-              {/* Confidence slider — captures calibration before commit. */}
-              <div>
-                <div className="flex items-baseline justify-between mb-2">
-                  <label htmlFor="conf-slider" className="block text-[0.6rem] tracking-[0.3em] uppercase text-foreground/50">
-                    Confidence level
-                  </label>
-                  <span className="text-[0.6rem] tracking-[0.3em] uppercase text-accent/80 tabular-nums">
-                    {confidence}/100 · {confLabel}
-                  </span>
-                </div>
-                <input
-                  id="conf-slider"
-                  type="range"
-                  min={0}
-                  max={100}
-                  step={1}
-                  value={confidence}
-                  onChange={(e) => setConfidence(Number(e.target.value))}
-                  className="w-full accent-[var(--color-accent)] cursor-pointer"
-                />
-                <p className="mt-1.5 text-[0.65rem] text-foreground/40 leading-relaxed">
-                  Honest assessment improves calibration.
-                </p>
-              </div>
+
 
 
               <div className="sticky bottom-0 -mx-6 flex items-center justify-between gap-3 border-t border-foreground/10 bg-background/95 px-6 py-4 backdrop-blur sm:-mx-12 sm:px-12">
