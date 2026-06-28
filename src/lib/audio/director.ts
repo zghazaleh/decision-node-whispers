@@ -50,6 +50,23 @@ function writeBool(key: string, value: boolean) {
 
 type Listener = () => void;
 
+export type AudioAttempt = {
+  id: number;
+  at: number;
+  kind: "switchTo" | "playOneShot";
+  /** For switchTo: screen + missionId. For playOneShot: sfx/motif name. */
+  label: string;
+  /** The resolved URL when known (one-shots, beds with a soundtrack). */
+  url?: string;
+  /** undefined while pending, true on success, false on failure. */
+  ok?: boolean;
+  /** Wall-clock duration in ms once the promise settles. */
+  durationMs?: number;
+};
+
+const MAX_ATTEMPTS = 80;
+let attemptSeq = 0;
+
 class Director {
   private ambient: Ambient | null = null;
   private screen: Screen | null = null;
@@ -58,6 +75,25 @@ class Director {
   private ignited = false;
   private listeners = new Set<Listener>();
   private motifGuard = 0; // throttle motif so it stays sparse
+  private attempts: AudioAttempt[] = [];
+
+  /** Ring buffer of recent switchTo / playOneShot attempts, newest first. */
+  recentAttempts(): AudioAttempt[] { return this.attempts.slice(); }
+
+  private recordAttempt(partial: Omit<AudioAttempt, "id" | "at">): AudioAttempt {
+    const entry: AudioAttempt = { id: ++attemptSeq, at: Date.now(), ...partial };
+    this.attempts.unshift(entry);
+    if (this.attempts.length > MAX_ATTEMPTS) this.attempts.length = MAX_ATTEMPTS;
+    this.emit();
+    return entry;
+  }
+
+  private settleAttempt(entry: AudioAttempt, ok: boolean) {
+    entry.ok = ok;
+    entry.durationMs = Date.now() - entry.at;
+    this.emit();
+  }
+
 
   private engine(): Ambient | null {
     if (typeof window === "undefined") return null;
