@@ -677,8 +677,8 @@ function MessageBubble({
 }) {
   if (role === "user") {
     return (
-      <div className="animate-fade-up text-right">
-        <p className="inline-block max-w-md text-foreground/70 italic text-base leading-relaxed text-pretty">
+      <div className="animate-fade-up flex justify-end">
+        <p className="max-w-[min(28rem,100%)] text-foreground/70 italic text-base leading-relaxed text-pretty text-right break-words hyphens-auto [overflow-wrap:anywhere]">
           {text}
         </p>
       </div>
