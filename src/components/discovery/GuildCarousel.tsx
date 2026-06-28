@@ -431,7 +431,7 @@ function CarouselSkeleton() {
       {Array.from({ length: 5 }).map((_, i) => (
         <li
           key={i}
-          className="relative w-[150px] shrink-0 overflow-hidden rounded-[10px] border border-foreground/10 bg-[#0b0d10] sm:w-[168px]"
+          className="relative w-[172px] shrink-0 overflow-hidden rounded-[12px] border border-foreground/10 bg-[#0b0d10] sm:w-[188px] md:w-[200px]"
         >
           <div className="relative aspect-[3/4] w-full overflow-hidden bg-foreground/[0.035]">
             <div
