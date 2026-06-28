@@ -270,7 +270,8 @@ function CarouselTile({
       id={`carousel-tile-${mission.id}`}
       role="option"
       aria-selected={spotlit}
-      aria-pressed={open}
+      aria-expanded={open}
+      aria-controls={open ? `carousel-panel-${mission.id}` : undefined}
       aria-posinset={index + 1}
       aria-label={`${open ? "Close" : "Open"} ${mission.codename}`}
       tabIndex={focusable ? 0 : -1}
