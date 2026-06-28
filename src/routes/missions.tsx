@@ -116,6 +116,7 @@ function MissionsPage() {
 
   // Filter state
   const [theme, setTheme] = useState<string>("All");
+  const [domain, setDomain] = useState<string>("All");
   const [difficulty, setDifficulty] = useState<number | "Any">("Any");
   const [sort, setSort] = useState<SortMode>("curated");
   const [openId, setOpenId] = useState<string | null>(null);
@@ -128,11 +129,17 @@ function MissionsPage() {
     for (const m of MISSIONS) if (m.theme) set.add(m.theme);
     return ["All", ...Array.from(set)];
   }, []);
+  const domains = useMemo(() => {
+    const set = new Set<string>();
+    for (const m of MISSIONS) if (m.category) set.add(m.category);
+    return ["All", ...Array.from(set).sort()];
+  }, []);
   const difficulties = useMemo(() => {
     const set = new Set<number>();
     for (const m of MISSIONS) if (m.difficulty) set.add(m.difficulty);
     return Array.from(set).sort((a, b) => a - b);
   }, []);
+
 
   // Apply filters + sort
   const visible = useMemo(() => {
