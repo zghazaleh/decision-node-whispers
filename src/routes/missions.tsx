@@ -506,7 +506,11 @@ function LedgerRow({
         onMouseEnter={() => onHover(true)}
         onMouseLeave={() => onHover(false)}
         onKeyDown={onKey}
-        className={`group block min-h-[56px] cursor-pointer px-2 py-4 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-ring ${
+        className={`group block cursor-pointer transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-ring ${
+          isOpen
+            ? "h-2"
+            : "min-h-[56px] px-2 py-4"
+        } ${
           available
             ? "hover:bg-foreground/[0.03]"
             : "cursor-not-allowed opacity-50"
