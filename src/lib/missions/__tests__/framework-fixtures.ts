@@ -9,7 +9,7 @@
 import type { MissionFramework } from "../framework";
 
 export const validFixture: MissionFramework = {
-  stakes: ["Lives on the line.", "Career exposure for the operator."],
+  stakes: ["Lives on the line.", "Career exposure for you."],
   hiddenTruths: ["The memo on the desk is unopened."],
   timeLimit: "Decision must land in 12 minutes.",
   decisionScience: [
