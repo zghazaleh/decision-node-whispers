@@ -129,7 +129,7 @@ function AnalysisRoute() {
 export const Route = createFileRoute("/analysis")({
   head: () => ({
     meta: [
-      { title: "Decision Node — Analysis" },
+      { title: "Decision Nodes — Analysis" },
       { name: "robots", content: "noindex" },
     ],
   }),

@@ -20,7 +20,7 @@ import type { MissionEngine } from "@/lib/missions/types";
 export const Route = createFileRoute("/mission/$id")({
   head: () => ({
     meta: [
-      { title: "Decision Node — Mission" },
+      { title: "Decision Nodes — Mission" },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -505,7 +505,7 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
             onClick={() => navigate({ to: "/" })}
             className="text-[0.6rem] tracking-[0.4em] uppercase text-foreground/50 hover:text-foreground/90 transition-colors"
           >
-            Decision Node
+            Decision Nodes
           </button>
 
           <button

@@ -33,7 +33,7 @@ function usePriorDecisions(): Record<string, PriorDecision> {
 export const Route = createFileRoute("/missions-legacy")({
   head: () => ({
     meta: [
-      { title: "Case Files (Legacy) — Decision Node" },
+      { title: "Case Files (Legacy) — Decision Nodes" },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -137,7 +137,7 @@ function MissionsPage() {
             to="/"
             className="text-[0.6rem] tracking-[0.4em] uppercase text-muted-foreground hover:text-foreground/90 transition-colors"
           >
-            ← Decision Node
+            ← Decision Nodes
           </Link>
           <p className="text-[0.6rem] tracking-[0.4em] uppercase text-muted-foreground/70">
             Archive · {MISSIONS.length} Case Files
