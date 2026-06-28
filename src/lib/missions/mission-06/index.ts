@@ -81,7 +81,9 @@ const DECISION_PRESETS: DecisionPreset[] = [
   { label: "Widen it", archetypeId: "widen" satisfies ArchetypeId, text: "I hold tonight's version and report the whole machine — the fabrication, Tessa's reasons, Vance's real conduct, and the lawyer's manipulation." },
 ];
 
-const OPENING_TEXT = `*Aday Okonkwo*
+const OPENING_TEXT = `*Rain against tall windows. The newsroom is half-dark. The CMS cursor blinks over the held front page.*
+
+*Aday Okonkwo*
 "It's clean, Dana. Every text, the wire, a witness on the record."
 
 "The front's holding for you. We can still make it. Do I send it?"
