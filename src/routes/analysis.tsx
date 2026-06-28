@@ -8,7 +8,9 @@ import { DecisionProfileCard } from "@/components/DecisionProfileCard";
 import { NoticedRail } from "@/components/NoticedRail";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { getMissionPercentile, type MissionPercentile } from "@/lib/mission-stats.functions";
+import { logAnalysisRead } from "@/lib/discovery/signals";
 import sceneCosmos from "@/assets/scene-cosmos.jpg";
+
 
 function AnalysisFallback({
   title,
