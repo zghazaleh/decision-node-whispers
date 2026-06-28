@@ -6,6 +6,29 @@ import { MISSIONS, type MissionMeta } from "@/lib/missions";
 import { createAmbient } from "@/lib/ambient";
 import { getSoundtrack } from "@/lib/soundtracks";
 import { getAllMissionStats, type MissionStats } from "@/lib/mission-stats.functions";
+import { readMission } from "@/lib/mission-store";
+import { getMissionEngine } from "@/lib/missions/registry";
+
+type PriorDecision = { archetypeLabel: string; decidedAt: number };
+
+/** Read the player's last committed decision per mission from localStorage.
+ *  Client-only; returns {} on the server. */
+function usePriorDecisions(): Record<string, PriorDecision> {
+  const [prior, setPrior] = useState<Record<string, PriorDecision>>({});
+  useEffect(() => {
+    const out: Record<string, PriorDecision> = {};
+    for (const m of MISSIONS) {
+      const saved = readMission(m.id);
+      if (!saved.archetypeId || !saved.decidedAt) continue;
+      const engine = getMissionEngine(m.id);
+      const arche = engine?.getArchetype(saved.archetypeId);
+      if (!arche) continue;
+      out[m.id] = { archetypeLabel: arche.label, decidedAt: saved.decidedAt };
+    }
+    setPrior(out);
+  }, []);
+  return prior;
+}
 
 export const Route = createFileRoute("/missions")({
   head: () => ({
