@@ -80,7 +80,9 @@ const DECISION_PRESETS: DecisionPreset[] = [
   { label: "Bury it", archetypeId: "bury_it" satisfies ArchetypeId, text: "I keep it buried to protect the company, the device, and the eighty jobs." },
 ];
 
-const OPENING_TEXT = `*Devi Rao*
+const OPENING_TEXT = `*The office is empty except for one lamp. Your laptop is open to a file you weren't supposed to see. Devi is standing in the doorway, still in her coat.*
+
+*Devi Rao*
 "You found it. I can see that you found it."
 
 "Sam — give me a quiet re-test and I'll make it right. Please. Before anyone has to know."
