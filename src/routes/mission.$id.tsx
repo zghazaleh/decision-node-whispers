@@ -504,9 +504,10 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
         >
           <button
             onClick={() => navigate({ to: "/" })}
-            className="text-[0.6rem] tracking-[0.4em] uppercase text-foreground/50 hover:text-foreground/90 transition-colors"
+            className="text-[0.6rem] tracking-[0.4em] uppercase text-foreground/50 hover:text-foreground/90 transition-colors text-left"
+            title="Back to Decision Nodes"
           >
-            Decision Nodes
+            {MISSIONS.find((m) => m.id === MISSION_ID)?.codename ?? "Decision Nodes"}
           </button>
 
           <button
