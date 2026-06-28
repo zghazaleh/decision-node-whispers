@@ -148,10 +148,10 @@ function MissionsPage() {
   // TODAY pick (stable per day)
   const today = useMemo(() => pickToday(MISSIONS), []);
 
-  // Apply filters + sort (exclude today's case from the list)
+  // Apply filters + sort (today's case stays in the ledger AND in filter results;
+  // the hero card above is purely a feature, not an exclusion).
   const visible = useMemo(() => {
     let rows = MISSIONS.slice();
-    if (today) rows = rows.filter((m) => m.id !== today.id);
     if (theme !== "All") rows = rows.filter((m) => m.theme === theme);
     if (domain !== "All") rows = rows.filter((m) => m.category === domain);
     if (difficulty !== "Any") rows = rows.filter((m) => m.difficulty === difficulty);
@@ -174,7 +174,9 @@ function MissionsPage() {
         break;
     }
     return rows;
-  }, [theme, domain, difficulty, sort, stats, today]);
+  }, [theme, domain, difficulty, sort, stats]);
+
+  const filtersActive = theme !== "All" || domain !== "All" || difficulty !== "Any";
 
   // Closing the open row when filters change
   useEffect(() => {
