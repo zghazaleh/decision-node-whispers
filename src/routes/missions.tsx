@@ -516,61 +516,65 @@ function LedgerRow({
             : "cursor-not-allowed opacity-50"
         } ${isOpen ? "bg-foreground/[0.02]" : ""}`}
       >
-        {/* Desktop layout */}
-        <div className="hidden sm:grid grid-cols-[1fr_auto] items-baseline gap-x-8">
-          <div className="min-w-0">
-            <div className="flex items-baseline gap-3">
-              <h3 className="font-display text-[21px] leading-tight text-foreground/95 truncate">
-                {mission.codename}
-              </h3>
-              <p className="text-[0.55rem] tracking-[0.35em] uppercase text-muted-foreground/65 truncate">
-                {[mission.location, mission.year].filter(Boolean).join(" · ")}
-              </p>
+        {!isOpen && (
+          <>
+            {/* Desktop layout */}
+            <div className="hidden sm:grid grid-cols-[1fr_auto] items-baseline gap-x-8">
+              <div className="min-w-0">
+                <div className="flex items-baseline gap-3">
+                  <h3 className="font-display text-[21px] leading-tight text-foreground/95 truncate">
+                    {mission.codename}
+                  </h3>
+                  <p className="text-[0.55rem] tracking-[0.35em] uppercase text-muted-foreground/65 truncate">
+                    {[mission.location, mission.year].filter(Boolean).join(" · ")}
+                  </p>
+                </div>
+
+                {/* Peek (desktop only): italic logline reveals on hover, no expand */}
+                <div
+                  className={`overflow-hidden transition-[max-height,opacity] duration-300 motion-reduce:transition-none ${
+                    isHovered
+                      ? "max-h-12 opacity-100"
+                      : "max-h-0 opacity-0"
+                  }`}
+                  aria-hidden={!isHovered}
+                >
+                  <p className="mt-1 text-sm italic text-muted-foreground/80 line-clamp-1">
+                    {mission.logline}
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-[6rem_4rem_4rem_4rem] items-baseline gap-x-0 text-right text-xs text-foreground/75 tabular-nums">
+                <span className="truncate text-muted-foreground/75">{toneWord(mission.tone)}</span>
+                <span className="inline-flex justify-end">
+                  <DifficultyDots level={mission.difficulty ?? null} />
+                </span>
+                <span className="text-muted-foreground/75">{shortDuration(mission.duration)}</span>
+                <span className="text-foreground/85">
+                  {stood === null ? "—" : stood.toLocaleString()}
+                </span>
+              </div>
             </div>
 
-            {/* Peek (desktop only): italic logline reveals on hover, no expand */}
-            <div
-              className={`overflow-hidden transition-[max-height,opacity] duration-300 motion-reduce:transition-none ${
-                isHovered && !isOpen
-                  ? "max-h-12 opacity-100"
-                  : "max-h-0 opacity-0"
-              }`}
-              aria-hidden={!isHovered || isOpen}
-            >
-              <p className="mt-1 text-sm italic text-muted-foreground/80 line-clamp-1">
-                {mission.logline}
-              </p>
+            {/* Mobile layout */}
+            <div className="sm:hidden">
+              <div className="flex items-baseline justify-between gap-3">
+                <h3 className="font-display text-[19px] leading-tight text-foreground/95 truncate">
+                  {mission.codename}
+                </h3>
+                <span className="text-xs text-foreground/80 tabular-nums">
+                  {stood === null ? "—" : stood.toLocaleString()}
+                </span>
+              </div>
+              <div className="mt-1 flex items-center gap-3 text-[0.6rem] tracking-[0.3em] uppercase text-muted-foreground/70">
+                <span>{toneWord(mission.tone)}</span>
+                <DifficultyDots level={mission.difficulty ?? null} />
+                <span>{shortDuration(mission.duration)}</span>
+              </div>
             </div>
-          </div>
-
-          <div className="grid grid-cols-[6rem_4rem_4rem_4rem] items-baseline gap-x-0 text-right text-xs text-foreground/75 tabular-nums">
-            <span className="truncate text-muted-foreground/75">{toneWord(mission.tone)}</span>
-            <span className="inline-flex justify-end">
-              <DifficultyDots level={mission.difficulty ?? null} />
-            </span>
-            <span className="text-muted-foreground/75">{shortDuration(mission.duration)}</span>
-            <span className="text-foreground/85">
-              {stood === null ? "—" : stood.toLocaleString()}
-            </span>
-          </div>
-        </div>
-
-        {/* Mobile layout */}
-        <div className="sm:hidden">
-          <div className="flex items-baseline justify-between gap-3">
-            <h3 className="font-display text-[19px] leading-tight text-foreground/95 truncate">
-              {mission.codename}
-            </h3>
-            <span className="text-xs text-foreground/80 tabular-nums">
-              {stood === null ? "—" : stood.toLocaleString()}
-            </span>
-          </div>
-          <div className="mt-1 flex items-center gap-3 text-[0.6rem] tracking-[0.3em] uppercase text-muted-foreground/70">
-            <span>{toneWord(mission.tone)}</span>
-            <DifficultyDots level={mission.difficulty ?? null} />
-            <span>{shortDuration(mission.duration)}</span>
-          </div>
-        </div>
+          </>
+        )}
       </div>
 
       {/* ---- Open card ---- */}
