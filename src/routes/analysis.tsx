@@ -943,20 +943,44 @@ function TimelineScrubber({ timeline }: { timeline: DecisionAnalysis["timeline"]
   const progressPct = total > 1 ? (index / last) * 100 : 100;
 
   return (
-    <div className="mt-10 space-y-8">
-      {/* Stage */}
-      <div className="relative min-h-[260px] sm:min-h-[300px] rounded-sm border border-foreground/10 bg-foreground/[0.02] px-6 sm:px-10 py-10 overflow-hidden">
+    <div className="mt-10 space-y-10">
+      {/* Cinematic stage */}
+      <div className="letterbox-frame relative rounded-sm overflow-hidden border border-foreground/10 shadow-[0_30px_80px_-40px_rgba(0,0,0,0.9)] bg-gradient-to-b from-foreground/[0.045] via-background to-foreground/[0.02]">
         <div className="absolute inset-0 vignette" aria-hidden />
-        <div className="relative">
-          <div className="flex items-center justify-between text-[0.6rem] tracking-[0.4em] uppercase text-foreground/40 mb-6">
-            <span>Beat {String(index + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}</span>
-            <span>{playing ? "Playing" : "Paused"}</span>
+        <div className="absolute inset-0 film-grain" aria-hidden />
+        <div className="cinematic-scanline" aria-hidden />
+        {/* soft accent glow that drifts subtly with each beat */}
+        <div
+          key={`glow-${index}`}
+          className="absolute -top-24 left-1/2 h-64 w-[140%] -translate-x-1/2 rounded-full blur-3xl opacity-50 animate-fade-in-slow pointer-events-none"
+          style={{
+            background:
+              "radial-gradient(ellipse at center, oklch(0.85 0.10 75 / 0.30), transparent 65%)",
+          }}
+          aria-hidden
+        />
+
+        <div className="relative px-6 sm:px-12 pt-12 pb-12 min-h-[300px] sm:min-h-[340px] flex flex-col">
+          {/* Header strip */}
+          <div className="flex items-center justify-between text-[0.55rem] tracking-[0.45em] uppercase text-foreground/45 mb-8">
+            <span className="flex items-center gap-2 tabular-nums">
+              <span className="text-accent/80">●</span>
+              Beat {String(index + 1).padStart(2, "0")}
+              <span className="text-foreground/25">/</span>
+              {String(total).padStart(2, "0")}
+            </span>
+            <span className={playing ? "text-accent/80 animate-pulse-soft" : "text-foreground/35"}>
+              {playing ? "Playing" : "Paused"}
+            </span>
           </div>
-          <div key={index} className="animate-fade-in">
-            <p className="text-[0.7rem] tracking-[0.35em] uppercase text-accent/85 mb-4">
+
+          {/* Beat body */}
+          <div key={index} className="flex-1 flex flex-col justify-center">
+            <p className="animate-beat-label-reveal text-[0.7rem] tracking-[0.35em] uppercase text-accent/85 mb-5">
+              <span className="inline-block h-px w-6 align-middle bg-accent/60 mr-3" />
               {current.beat}
             </p>
-            <p className="font-display text-2xl sm:text-3xl leading-snug text-foreground/95 text-pretty">
+            <p className="animate-beat-reveal font-display text-2xl sm:text-[1.85rem] leading-[1.25] text-foreground/95 text-pretty max-w-3xl">
               {current.consequence}
             </p>
           </div>
@@ -964,13 +988,13 @@ function TimelineScrubber({ timeline }: { timeline: DecisionAnalysis["timeline"]
       </div>
 
       {/* Scrubber rail */}
-      <div className="space-y-4">
+      <div className="space-y-5">
         <div className="relative h-8 flex items-center">
           {/* track */}
           <div className="absolute left-0 right-0 h-px bg-foreground/15" />
-          {/* progress */}
+          {/* progress (with shimmer) */}
           <div
-            className="absolute left-0 h-px bg-accent/80 transition-all duration-500 ease-out"
+            className="progress-shimmer absolute left-0 h-[2px] -mt-px bg-gradient-to-r from-accent/40 via-accent to-accent/80 shadow-[0_0_12px_rgba(224,179,113,0.55)] transition-all duration-700 ease-out"
             style={{ width: `${progressPct}%` }}
           />
           {/* dots */}
@@ -988,12 +1012,12 @@ function TimelineScrubber({ timeline }: { timeline: DecisionAnalysis["timeline"]
                 >
                   <span
                     className={[
-                      "block h-2.5 w-2.5 rounded-full border transition-all duration-300",
+                      "block rounded-full border transition-all duration-500 ease-out",
                       active
-                        ? "h-3.5 w-3.5 border-accent bg-accent shadow-[0_0_12px_2px_rgba(224,179,113,0.45)]"
+                        ? "h-4 w-4 border-accent bg-accent shadow-[0_0_18px_4px_rgba(224,179,113,0.55)] scale-100"
                         : passed
-                          ? "border-accent/70 bg-accent/70"
-                          : "border-foreground/30 bg-background group-hover:border-foreground/60",
+                          ? "h-2 w-2 border-accent/70 bg-accent/70"
+                          : "h-2 w-2 border-foreground/30 bg-background group-hover:border-foreground/70 group-hover:scale-125",
                     ].join(" ")}
                   />
                 </button>
@@ -1014,12 +1038,12 @@ function TimelineScrubber({ timeline }: { timeline: DecisionAnalysis["timeline"]
         </div>
 
         {/* Transport */}
-        <div className="flex items-center justify-center gap-8 pt-2">
+        <div className="flex items-center justify-center gap-6 sm:gap-10 pt-2">
           <button
             type="button"
             onClick={() => { setPlaying(false); go(index - 1); }}
             disabled={index === 0}
-            className="text-[0.65rem] tracking-[0.4em] uppercase text-foreground/60 hover:text-foreground disabled:opacity-25 disabled:cursor-not-allowed transition-colors"
+            className="text-[0.6rem] tracking-[0.4em] uppercase text-foreground/55 hover:text-foreground disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
           >
             ← Prev
           </button>
@@ -1029,16 +1053,16 @@ function TimelineScrubber({ timeline }: { timeline: DecisionAnalysis["timeline"]
               if (index >= last) { setIndex(0); setPlaying(true); }
               else setPlaying((p) => !p);
             }}
-            className="flex items-center gap-3 text-[0.65rem] tracking-[0.45em] uppercase text-foreground hover:text-accent transition-colors"
+            className="group flex items-center gap-3 text-[0.65rem] tracking-[0.45em] uppercase text-foreground hover:text-accent transition-colors"
           >
-            <span className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-foreground/40 group-hover:border-accent">
+            <span className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-foreground/30 bg-foreground/[0.04] backdrop-blur-sm group-hover:border-accent group-hover:bg-accent/10 group-hover:shadow-[0_0_24px_-4px_rgba(224,179,113,0.6)] transition-all duration-300">
               {playing ? (
                 <span className="flex gap-[3px]">
-                  <span className="block h-3 w-[3px] bg-current" />
-                  <span className="block h-3 w-[3px] bg-current" />
+                  <span className="block h-3.5 w-[3px] bg-current" />
+                  <span className="block h-3.5 w-[3px] bg-current" />
                 </span>
               ) : (
-                <span className="block h-0 w-0 border-y-[6px] border-y-transparent border-l-[9px] border-l-current ml-[2px]" />
+                <span className="block h-0 w-0 border-y-[7px] border-y-transparent border-l-[10px] border-l-current ml-[2px]" />
               )}
             </span>
             {index >= last && !playing ? "Replay" : playing ? "Pause" : "Play"}
@@ -1047,12 +1071,12 @@ function TimelineScrubber({ timeline }: { timeline: DecisionAnalysis["timeline"]
             type="button"
             onClick={() => { setPlaying(false); go(index + 1); }}
             disabled={index === last}
-            className="text-[0.65rem] tracking-[0.4em] uppercase text-foreground/60 hover:text-foreground disabled:opacity-25 disabled:cursor-not-allowed transition-colors"
+            className="text-[0.6rem] tracking-[0.4em] uppercase text-foreground/55 hover:text-foreground disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
           >
             Next →
           </button>
         </div>
-        <p className="text-center text-[0.55rem] tracking-[0.35em] uppercase text-foreground/30">
+        <p className="text-center text-[0.55rem] tracking-[0.35em] uppercase text-foreground/25">
           ← → to scrub · space to play
         </p>
       </div>
@@ -1060,6 +1084,7 @@ function TimelineScrubber({ timeline }: { timeline: DecisionAnalysis["timeline"]
     </div>
   );
 }
+
 
 function PossibleBiasesList({
   biases,
@@ -1094,17 +1119,30 @@ function LongTermConsequences({
   const tail = timeline.slice(Math.ceil(timeline.length / 2));
   const shown = tail.length > 0 ? tail : timeline;
   return (
-    <div className="space-y-6">
-      <p className="text-sm text-foreground/55 leading-relaxed">
+    <div className="space-y-8">
+      <p className="text-sm text-foreground/55 leading-relaxed max-w-2xl">
         What unfolds downstream of this choice — beyond the immediate aftermath.
       </p>
-      <ol className="space-y-5">
+      <ol className="relative space-y-7 pl-8 sm:pl-10 before:absolute before:left-[7px] sm:before:left-[9px] before:top-2 before:bottom-2 before:w-px before:bg-gradient-to-b before:from-accent/40 before:via-accent/15 before:to-transparent">
         {shown.map((t, i) => (
-          <li key={i} className="border-l-2 border-accent/30 pl-5">
-            <p className="text-[0.6rem] tracking-[0.35em] uppercase text-foreground/55 mb-1.5">
+          <li
+            key={i}
+            className="relative animate-consequence-rise group"
+            style={{ animationDelay: `${i * 0.12}s` }}
+          >
+            {/* node marker */}
+            <span
+              className="absolute -left-8 sm:-left-10 top-1.5 flex h-[15px] w-[15px] items-center justify-center"
+              aria-hidden
+            >
+              <span className="absolute inset-0 rounded-full bg-accent/15 blur-[6px] group-hover:bg-accent/40 transition-colors duration-500" />
+              <span className="relative h-[7px] w-[7px] rounded-full bg-accent shadow-[0_0_10px_2px_rgba(224,179,113,0.5)]" />
+            </span>
+            <p className="text-[0.58rem] tracking-[0.4em] uppercase text-foreground/45 mb-1.5 tabular-nums">
+              <span className="text-accent/75 mr-2">{String(i + 1).padStart(2, "0")}</span>
               {t.beat}
             </p>
-            <p className="font-display text-lg leading-snug text-foreground/95 text-pretty">
+            <p className="font-display text-lg sm:text-xl leading-snug text-foreground/95 text-pretty">
               {t.consequence}
             </p>
           </li>
@@ -1113,6 +1151,7 @@ function LongTermConsequences({
     </div>
   );
 }
+
 
 function CommunityComparison({ percentile }: { percentile: MissionPercentile }) {
   const fmt = (s: number | null) => {
