@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/sound-test")({
   head: () => ({
     meta: [
-      { title: "Sound Test — Decision Node" },
+      { title: "Sound Test — Decision Nodes" },
       { name: "description", content: "Audition mission ambient beds back-to-back." },
       { name: "robots", content: "noindex" },
     ],

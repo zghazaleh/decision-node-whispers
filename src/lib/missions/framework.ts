@@ -8,7 +8,7 @@
  *   §5  stakes               — what is on the line in plain language
  *   §6  hiddenTruths         — facts the player can surface but no one volunteers
  *   §8  timeLimit            — the hard clock that forces commitment
- *   §12 decisionScience      — the biases this Decision Node specifically tests
+ *   §12 decisionScience      — the biases this Decision Nodes specifically tests
  *   §13 learningObjective    — the reasoning lesson the case is built to teach
  *
  * We keep this OUT of canon.ts so we do not churn ground-truth files and so

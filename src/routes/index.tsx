@@ -3,13 +3,13 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Decision Node" },
+      { title: "Decision Nodes" },
       {
         name: "description",
         content:
           "Wake up in someone else's life. One irreversible decision. An interactive drama.",
       },
-      { property: "og:title", content: "Decision Node" },
+      { property: "og:title", content: "Decision Nodes" },
       {
         property: "og:description",
         content:
@@ -45,7 +45,7 @@ function Landing() {
           className="animate-fade-up font-display text-5xl sm:text-7xl md:text-8xl lg:text-9xl leading-[0.95] text-foreground/95 text-balance"
           style={{ animationDelay: "0.2s" }}
         >
-          Decision Node
+          Decision Nodes
         </h1>
 
         {/* Mysterious four-line opening, paced like a stanza */}

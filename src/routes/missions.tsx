@@ -22,13 +22,13 @@ import { getMissionEngine } from "@/lib/missions/registry";
 export const Route = createFileRoute("/missions")({
   head: () => ({
     meta: [
-      { title: "The Archive — Decision Node" },
+      { title: "The Archive — Decision Nodes" },
       {
         name: "description",
         content:
           "The archive of cases. Choose one and step inside the single moment before an irreversible decision.",
       },
-      { property: "og:title", content: "The Archive — Decision Node" },
+      { property: "og:title", content: "The Archive — Decision Nodes" },
       {
         property: "og:description",
         content:
@@ -245,7 +245,7 @@ function MissionsPage() {
             to="/"
             className="text-[0.6rem] tracking-[0.4em] uppercase text-muted-foreground hover:text-foreground/90 transition-colors"
           >
-            ← Decision Node
+            ← Decision Nodes
           </Link>
           <p className="text-[0.6rem] tracking-[0.4em] uppercase text-muted-foreground/70 tabular-nums">
             The Archive · {MISSIONS.length} case files

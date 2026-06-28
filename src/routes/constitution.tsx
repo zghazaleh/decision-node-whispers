@@ -7,12 +7,12 @@ import { FileText, CheckCircle2, XCircle, Github } from "lucide-react";
 export const Route = createFileRoute("/constitution")({
   head: () => ({
     meta: [
-      { title: "Constitution — Decision Node" },
+      { title: "Constitution — Decision Nodes" },
       {
         name: "description",
         content: "Constitution sync status and file archive.",
       },
-      { property: "og:title", content: "Constitution — Decision Node" },
+      { property: "og:title", content: "Constitution — Decision Nodes" },
       {
         property: "og:description",
         content: "Constitution sync status and file archive.",
@@ -57,7 +57,7 @@ function ConstitutionPage() {
             to="/"
             className="text-[0.6rem] tracking-[0.4em] uppercase text-muted-foreground hover:text-foreground/90 transition-colors"
           >
-            ← Decision Node
+            ← Decision Nodes
           </Link>
         </header>
 

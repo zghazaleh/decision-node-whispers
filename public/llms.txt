@@ -1,8 +1,8 @@
-# Decision Node
+# Decision Nodes
 
 > An interactive drama where you wake up in someone else's life and face one irreversible decision.
 
-Decision Node is a narrative experience built around high-stakes case files. Each mission drops you into a single moment with incomplete context, real stakes, and no undo. After you commit, an AI analysis reflects on your reasoning, evidence, assumptions, and the path not taken.
+Decision Nodes is a narrative experience built around high-stakes case files. Each mission drops you into a single moment with incomplete context, real stakes, and no undo. After you commit, an AI analysis reflects on your reasoning, evidence, assumptions, and the path not taken.
 
 ## Pages
 
