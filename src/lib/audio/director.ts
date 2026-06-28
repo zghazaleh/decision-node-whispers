@@ -157,24 +157,47 @@ class Director {
 
   /**
    * Cross-fade into the bed for `screen`. Carries audio across transitions
-   * — never hard-cut to silence between screens.
+   * — never hard-cut to silence between screens. If the requested bed
+   * fails to load (404, network blip, decode error), we leave the
+   * previous bed in place and, for mission detail, fall back to the
+   * Archive bed so the player still feels held by sound.
    */
   async enter(screen: Screen, opts: EnterOpts = {}) {
     const a = this.engine(); if (!a) return;
     const fade = opts.fadeMs ?? 1400;
     if (opts.profile) a.setAudioProfile(opts.profile);
     this.screen = screen;
+    let ok = true;
     switch (screen) {
-      case "landing":   await a.switchTo("__landing__", fade); break;
-      case "archive":   await a.switchTo("__archive__", fade); break;
-      case "mission":   await a.switchTo(opts.missionId ?? null, fade); break;
-      case "analysis":  await a.switchTo("__analysis__", fade); break;
+      case "landing":   ok = await a.switchTo("__landing__", fade); break;
+      case "archive":   ok = await a.switchTo("__archive__", fade); break;
+      case "mission":   ok = await a.switchTo(opts.missionId ?? null, fade); break;
+      case "analysis":  ok = await a.switchTo("__analysis__", fade); break;
       case "decide":    this.duck(0.28, 500); break;     // keep bed, narrow it
       case "commit":    this.duck(0.18, 400); break;     // air leaves the room
-      case "silence":   await a.switchTo(null, fade); break;
+      case "silence":   ok = await a.switchTo(null, fade); break;
+    }
+    if (!ok) {
+      // The requested bed couldn't be established. Don't strand the
+      // player in silence — fall back to a known-good bed where one
+      // exists. The previous bed is still playing at this point, so
+      // these fallbacks are pure additive safety nets.
+      if (screen === "mission") {
+        // Mission bed is the most likely to be missing for a given case.
+        // Drop into the Archive bed so the room still has air.
+        await a.switchTo("__archive__", Math.max(800, fade));
+      } else if (screen === "analysis") {
+        // If even the analysis bed is gone, the Archive bed is a
+        // reasonable reflective fallback.
+        await a.switchTo("__archive__", Math.max(800, fade));
+      }
+      // landing / archive failures: leave whatever is currently playing.
+      // We do NOT switch to silence on failure — that would be worse
+      // than the previous bed continuing for a beat.
     }
     this.emit();
   }
+
 
   /** UI subscription for mute/reduced toggle components. */
   subscribe(fn: Listener): () => void {

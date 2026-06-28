@@ -15,21 +15,28 @@ export type AudioProfile = {
 export type Ambient = {
   start: (missionId?: string) => Promise<void>;
   stop: () => void;
-  switchTo: (missionId: string | null, fadeMs?: number) => Promise<void>;
+  /**
+   * Resolves to `true` once the requested bed is actually playing (or once
+   * silence is established for `null`). Resolves to `false` if the asset
+   * failed to load / decode — callers can use that to fall back to a
+   * safer bed instead of leaving the user in silence.
+   */
+  switchTo: (missionId: string | null, fadeMs?: number) => Promise<boolean>;
   setMuted: (m: boolean) => void;
   setPressure: (p: number) => void;
   setHeartbeat: (active: boolean) => void;
   setAudioProfile: (profile: AudioProfile) => void;
   setReducedAudio: (reduced: boolean) => void;
-  playOneShot: (url: string, opts?: { gain?: number; fadeInMs?: number; fadeOutMs?: number; bus?: "sfx" | "motif" }) => Promise<void>;
+  /** `true` when the sample played to completion, `false` on any failure. */
+  playOneShot: (url: string, opts?: { gain?: number; fadeInMs?: number; fadeOutMs?: number; bus?: "sfx" | "motif" }) => Promise<boolean>;
   prefetch: (url: string) => Promise<void>;
   duck: (amount?: number, ms?: number) => void;
   release: (ms?: number) => void;
   ignite: () => Promise<void>;
   isRunning: () => boolean;
   currentMission: () => string | null;
-
 };
+
 
 type Voice = {
   missionId: string;
@@ -45,14 +52,42 @@ const bufferCache = new Map<string, Promise<AudioBuffer>>();
 // Network-level cache: warm the HTTP cache and stash the ArrayBuffer before
 // the AudioContext exists so the first decode never has to round-trip.
 const arrayBufferCache = new Map<string, Promise<ArrayBuffer>>();
+// URLs that recently failed to fetch or decode. We back off for ~30s so a
+// broken bed/SFX doesn't get re-requested on every transition (which would
+// turn a transient CDN hiccup into a stream of 404s). The cooldown lets us
+// recover automatically once the asset is reachable again.
+const FAILED_URL_TTL_MS = 30_000;
+const failedUrls = new Map<string, number>();
+const warnedUrls = new Set<string>();
+function isFailing(url: string): boolean {
+  const t = failedUrls.get(url);
+  if (t === undefined) return false;
+  if (Date.now() - t > FAILED_URL_TTL_MS) {
+    failedUrls.delete(url);
+    return false;
+  }
+  return true;
+}
+function markFailed(url: string, why: unknown): void {
+  failedUrls.set(url, Date.now());
+  if (!warnedUrls.has(url)) {
+    warnedUrls.add(url);
+    // One-line, non-fatal: this is expected behavior for missing/blocked
+    // assets, not an application bug.
+    console.warn(`[ambient] audio asset unavailable — continuing without it: ${url}`, why);
+  }
+}
 
 /**
  * Fire-and-forget HTTP prefetch for a bed/sfx URL. Safe to call without an
  * AudioContext — buffers are kept until decode happens on first play.
+ * Always resolves (never rejects); a failed prefetch just marks the URL as
+ * cooling-down so later transitions can fall back instead of hitching.
  */
 export function prefetchAudio(url: string): Promise<void> {
   if (!url || typeof window === "undefined") return Promise.resolve();
   if (bufferCache.has(url)) return Promise.resolve();
+  if (isFailing(url)) return Promise.resolve();
   const cached = arrayBufferCache.get(url);
   if (cached) return cached.then(() => {}, () => {});
   const p = fetch(url).then((r) => {
@@ -60,13 +95,20 @@ export function prefetchAudio(url: string): Promise<void> {
     return r.arrayBuffer();
   });
   arrayBufferCache.set(url, p);
-  p.catch(() => arrayBufferCache.delete(url));
+  p.catch((err) => {
+    arrayBufferCache.delete(url);
+    markFailed(url, err);
+  });
   return p.then(() => {}, () => {});
 }
 
 async function loadBuffer(ctx: AudioContext, url: string): Promise<AudioBuffer> {
   const cached = bufferCache.get(url);
   if (cached) return cached;
+  if (isFailing(url)) {
+    // Fail fast — don't network/decode again until the cooldown elapses.
+    throw new Error(`ambient asset cooling down: ${url}`);
+  }
   const p = (async () => {
     const pre = arrayBufferCache.get(url);
     const data = pre
@@ -79,9 +121,13 @@ async function loadBuffer(ctx: AudioContext, url: string): Promise<AudioBuffer> 
     return await ctx.decodeAudioData(data);
   })();
   bufferCache.set(url, p);
-  p.catch(() => bufferCache.delete(url));
+  p.then(
+    () => { failedUrls.delete(url); warnedUrls.delete(url); },
+    (err) => { bufferCache.delete(url); markFailed(url, err); },
+  );
   return p;
 }
+
 
 
 export function createAmbient(initialMissionId: string | null = null): Ambient {
@@ -284,7 +330,9 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
     async switchTo(missionId: string | null, fadeMs = 1400) {
       if (stopped) {
         pendingMission = missionId;
-        return;
+        // Engine isn't running — treat as a deferred success so callers
+        // don't trigger a fallback chain.
+        return true;
       }
       pendingMission = missionId;
       if (missionId === null) {
@@ -294,21 +342,29 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
           disposeVoice(c, fadeMs);
         }
         if (padGain) rampParam(padGain.gain, 0, fadeMs);
-        return;
+        return true;
       }
       if (current?.missionId === missionId) {
         if (!muted) rampParam(current.gain.gain, targetMusicGain(current.track), fadeMs);
-        return;
+        return true;
       }
       const next = await playMission(missionId, fadeMs);
-      if (!next) return;
+      if (!next) {
+        // Asset failed to load/decode. Leave the previous bed in place so
+        // the transition never collapses into silence — the caller can
+        // decide whether to fall back to a safer bed.
+        return false;
+      }
       if (pendingMission !== missionId) {
         disposeVoice(next, 300);
-        return;
+        // A newer switch raced ahead — not a failure for our caller.
+        return true;
       }
       if (current) disposeVoice(current, fadeMs);
       current = next;
+      return true;
     },
+
 
     stop() {
       stopped = true;
@@ -410,36 +466,44 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
     },
 
     async playOneShot(url, opts) {
-      const c = ensureCtx(); if (!c) return;
-      if (muted) return;
+      const c = ensureCtx(); if (!c) return false;
+      if (muted) return false;
       if (c.state === "suspended") { try { await c.resume(); } catch { /* noop */ } }
       const bus = opts?.bus ?? "sfx";
       const target = bus === "motif" ? motifBus : sfxBus;
-      if (!target) return;
+      if (!target) return false;
       if (reduced && bus !== "motif" && opts?.bus !== "motif") {
         // In reduced mode, sfx are heavily attenuated via the bus; motif is muted.
       }
       let buffer: AudioBuffer;
-      try { buffer = await loadBuffer(c, url); } catch { return; }
-      const src = c.createBufferSource();
-      src.buffer = buffer;
-      const g = c.createGain();
-      const peak = opts?.gain ?? (bus === "motif" ? 0.55 : 0.5);
-      const fadeIn = (opts?.fadeInMs ?? 30) / 1000;
-      const fadeOut = (opts?.fadeOutMs ?? 400) / 1000;
-      const now = c.currentTime;
-      const dur = buffer.duration;
-      g.gain.setValueAtTime(0.0001, now);
-      g.gain.linearRampToValueAtTime(peak, now + Math.min(fadeIn, dur / 2));
-      g.gain.setValueAtTime(peak, now + Math.max(0, dur - fadeOut));
-      g.gain.linearRampToValueAtTime(0.0001, now + dur);
-      src.connect(g).connect(target);
-      src.start();
-      src.stop(now + dur + 0.1);
-      window.setTimeout(() => {
-        try { src.disconnect(); } catch { /* noop */ }
-        try { g.disconnect(); } catch { /* noop */ }
-      }, (dur + 0.3) * 1000);
+      // Asset failures here are silent by design — a missing sting must
+      // never interrupt the surrounding transition or moment.
+      try { buffer = await loadBuffer(c, url); } catch { return false; }
+      try {
+        const src = c.createBufferSource();
+        src.buffer = buffer;
+        const g = c.createGain();
+        const peak = opts?.gain ?? (bus === "motif" ? 0.55 : 0.5);
+        const fadeIn = (opts?.fadeInMs ?? 30) / 1000;
+        const fadeOut = (opts?.fadeOutMs ?? 400) / 1000;
+        const now = c.currentTime;
+        const dur = buffer.duration;
+        g.gain.setValueAtTime(0.0001, now);
+        g.gain.linearRampToValueAtTime(peak, now + Math.min(fadeIn, dur / 2));
+        g.gain.setValueAtTime(peak, now + Math.max(0, dur - fadeOut));
+        g.gain.linearRampToValueAtTime(0.0001, now + dur);
+        src.connect(g).connect(target);
+        src.start();
+        src.stop(now + dur + 0.1);
+        window.setTimeout(() => {
+          try { src.disconnect(); } catch { /* noop */ }
+          try { g.disconnect(); } catch { /* noop */ }
+        }, (dur + 0.3) * 1000);
+        return true;
+      } catch {
+        return false;
+      }
     },
+
   };
 }
