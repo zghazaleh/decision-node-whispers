@@ -508,17 +508,9 @@ function LedgerRow({
       {isOpen && available && (
         <div className="mb-4 overflow-hidden rounded-[14px] border border-accent/40 bg-[#0b0d10] motion-safe:animate-fade-up">
           {/* Art region */}
-          <div className="relative aspect-[16/9] sm:aspect-auto sm:h-[236px] w-full overflow-hidden">
-            {sceneSrc ? (
-              <img
-                src={sceneSrc}
-                alt=""
-                className="absolute inset-0 h-full w-full object-cover"
-                loading="lazy"
-              />
-            ) : (
-              <div className="absolute inset-0 bg-foreground/[0.04]" />
-            )}
+          <div className="relative aspect-[16/9] sm:aspect-auto sm:h-[236px] w-full overflow-hidden bg-[#0b0d10]">
+            <SceneArt src={sceneSrc} theme={mission.theme} />
+
             {/* Bottom scrim — guarantees text contrast */}
             <div
               aria-hidden
