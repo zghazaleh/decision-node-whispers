@@ -428,7 +428,13 @@ ${transcriptText}`,
     // constrained decoding has proven brittle for this large object. Then
     // validate/normalize into the strict app contract, with a last-resort
     // fallback so analysis failure never blanks the mission experience.
-    const parsed = extractJsonObject(analysisText);
+    let parsed: unknown;
+    try {
+      parsed = extractJsonObject(analysisText);
+    } catch (error) {
+      console.warn("analysis JSON parse failed; using fallback analysis", error);
+    }
+
     const rawResult = RawAnalysisSchema.safeParse(parsed);
     const object = rawResult.success
       ? normalizeAnalysis(rawResult.data)
