@@ -59,6 +59,17 @@ const arrayBufferCache = new Map<string, Promise<ArrayBuffer>>();
 const FAILED_URL_TTL_MS = 30_000;
 const failedUrls = new Map<string, number>();
 const warnedUrls = new Set<string>();
+type FailureListener = (info: { url: string; at: number }) => void;
+const failureListeners = new Set<FailureListener>();
+/**
+ * Subscribe to audio-asset failures (bed / sfx that 404'd, were blocked, or
+ * failed to decode). Fires once per URL per session — enough for a subtle
+ * on-screen indicator without spamming on retries. Never throws.
+ */
+export function subscribeAudioFailures(fn: FailureListener): () => void {
+  failureListeners.add(fn);
+  return () => { failureListeners.delete(fn); };
+}
 function isFailing(url: string): boolean {
   const t = failedUrls.get(url);
   if (t === undefined) return false;
@@ -75,8 +86,13 @@ function markFailed(url: string, why: unknown): void {
     // One-line, non-fatal: this is expected behavior for missing/blocked
     // assets, not an application bug.
     console.warn(`[ambient] audio asset unavailable — continuing without it: ${url}`, why);
+    const at = Date.now();
+    for (const l of failureListeners) {
+      try { l({ url, at }); } catch { /* listener errors must not break audio */ }
+    }
   }
 }
+
 
 // ---------------------------------------------------------------------------
 // Persistent encoded-audio cache (IndexedDB).
