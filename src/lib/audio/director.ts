@@ -83,8 +83,7 @@ class Director {
 
   setMuted(next: boolean) {
     this.muted = next;
-    writeBool(SOUND_KEY, !next ? false : true); // store "on"/"off" matching legacy
-    // dn:sound stores "on" when audio is ON (not muted)
+    // dn:sound stores "on" when audio is ON (legacy contract preserved).
     writeBool(SOUND_KEY, !next);
     this.engine()?.setMuted(next);
     this.emit();
