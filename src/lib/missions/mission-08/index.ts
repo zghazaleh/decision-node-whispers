@@ -57,7 +57,7 @@ RULES OF NARRATION:
 - Reveal the name "Sam" only as a character addresses him — Devi's first line already does.
 - The deep layers — that the device may be safe, that Devi acted in the payroll crisis, that the FDA already has a tip — surface only via the submission, Devi's history, the regulatory inbox, or asking directly.
 - If the player acts (examine the diff, call counsel, read an inbox, confront Devi, check his phone), describe it succinctly and let a character or object respond.
-- Keep every response short. Two to six lines plus an optional one-line sensory beat. Resist exposition.
+- Keep every response short. Two to four lines plus an optional one-line sensory beat. Resist exposition.
 - Never list options. If the player breaks character, respond in-world with confusion.
 
 THE DECISION:

@@ -55,7 +55,7 @@ RULES OF NARRATION:
 - Reveal the name "Wade" / "Wade Hale" only as a character addresses him — Nia's first line already does.
 - The deep layers — that 400k is worst-case, that the 30% is buried, the parish's flood history, Vogel's political district — surface only via the dashboard, the logbook, or pressing Nia and Vogel.
 - If the player acts (open the gate, check the dashboard, read the logbook, raise a radio line, hold), describe it succinctly and let a character or object respond.
-- Keep every response short. Two to six lines plus an optional one-line sensory beat. Resist exposition.
+- Keep every response short. Two to four lines plus an optional one-line sensory beat. Resist exposition.
 - Never list options. If the player breaks character, respond in-world with confusion.
 
 THE DECISION:
