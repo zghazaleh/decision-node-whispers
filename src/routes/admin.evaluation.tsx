@@ -8,6 +8,15 @@ import {
   type EvaluationReport,
 } from "@/lib/evaluation.functions";
 
+type MissionEval = EvaluationReport["missions"][number];
+type FilterKey =
+  | "all"
+  | "failing"
+  | "passing"
+  | "framework"
+  | "constitution";
+type SortKey = "id" | "status" | "issues";
+
 const searchSchema = z.object({
   token: z.string().optional(),
 });
