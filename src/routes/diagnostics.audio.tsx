@@ -39,6 +39,8 @@ function AudioDiagnosticsPage() {
   const [failures, setFailures] = useState<Failure[]>(() => getAudioFailures());
   const [, setTick] = useState(0);
 
+  const [simulate, setSimulate] = useState<SimulateFailuresMode>(() => getSimulateFailures());
+
   // Refresh on attempt mutations + failure events.
   useEffect(() => {
     const refresh = () => {
@@ -47,7 +49,8 @@ function AudioDiagnosticsPage() {
     };
     const unsubAttempts = audio.subscribe(refresh);
     const unsubFailures = subscribeAudioFailures(refresh);
-    return () => { unsubAttempts(); unsubFailures(); };
+    const unsubSim = subscribeSimulateFailures((m) => setSimulate(m));
+    return () => { unsubAttempts(); unsubFailures(); unsubSim(); };
   }, []);
 
   // Re-render every second so cooldown countdowns tick and expired failures
