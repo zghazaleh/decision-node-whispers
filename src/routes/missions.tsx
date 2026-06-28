@@ -508,17 +508,9 @@ function LedgerRow({
       {isOpen && available && (
         <div className="mb-4 overflow-hidden rounded-[14px] border border-accent/40 bg-[#0b0d10] motion-safe:animate-fade-up">
           {/* Art region */}
-          <div className="relative aspect-[16/9] sm:aspect-auto sm:h-[236px] w-full overflow-hidden">
-            {sceneSrc ? (
-              <img
-                src={sceneSrc}
-                alt=""
-                className="absolute inset-0 h-full w-full object-cover"
-                loading="lazy"
-              />
-            ) : (
-              <div className="absolute inset-0 bg-foreground/[0.04]" />
-            )}
+          <div className="relative aspect-[16/9] sm:aspect-auto sm:h-[236px] w-full overflow-hidden bg-[#0b0d10]">
+            <SceneArt src={sceneSrc} theme={mission.theme} />
+
             {/* Bottom scrim — guarantees text contrast */}
             <div
               aria-hidden
@@ -617,3 +609,61 @@ function DifficultyDots({
     </span>
   );
 }
+
+/* -------------------------------------------------------------------------- */
+/* Scene art — skeleton shimmer + graceful fallback                            */
+/* -------------------------------------------------------------------------- */
+
+function SceneArt({ src, theme }: { src: string | null; theme?: string }) {
+  const [status, setStatus] = useState<"loading" | "loaded" | "error">(
+    src ? "loading" : "error",
+  );
+
+  // Reset state when src changes (different mission opened)
+  useEffect(() => {
+    setStatus(src ? "loading" : "error");
+  }, [src]);
+
+  return (
+    <>
+      {/* Skeleton shimmer — visible while loading */}
+      {status === "loading" && (
+        <div
+          aria-hidden
+          className="absolute inset-0 overflow-hidden bg-foreground/[0.04]"
+        >
+          <div className="absolute inset-0 motion-safe:animate-[shimmer_2.4s_ease-in-out_infinite] bg-[linear-gradient(110deg,transparent_30%,rgba(255,255,255,0.04)_50%,transparent_70%)] bg-[length:200%_100%]" />
+        </div>
+      )}
+
+      {/* Fallback — quiet textured panel with theme watermark */}
+      {status === "error" && (
+        <div
+          aria-hidden
+          className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.03),transparent_70%)]"
+        >
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="font-display text-[0.55rem] tracking-[0.5em] uppercase text-foreground/25">
+              {theme ?? "Case File"}
+            </span>
+          </div>
+        </div>
+      )}
+
+      {src && status !== "error" && (
+        <img
+          src={src}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          onLoad={() => setStatus("loaded")}
+          onError={() => setStatus("error")}
+          className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${
+            status === "loaded" ? "opacity-100" : "opacity-0"
+          }`}
+        />
+      )}
+    </>
+  );
+}
+

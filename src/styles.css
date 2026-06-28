@@ -166,6 +166,12 @@
   50% { opacity: 0; }
 }
 
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+
 @utility animate-drift { animation: drift-stars 18s ease-in-out infinite alternate; }
 @utility animate-fade-up { animation: fade-up 1.2s cubic-bezier(0.16, 1, 0.3, 1) both; }
 @utility animate-fade-in-slow { animation: fade-in-slow 2s ease-out both; }
