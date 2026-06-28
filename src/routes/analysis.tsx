@@ -205,11 +205,6 @@ function Analysis() {
               <span className="font-display italic text-accent text-lg sm:text-xl">
                 {a.archetypeLabel}
               </span>
-              {typeof mission.confidence === "number" && (
-                <span className="block mt-2 text-[0.6rem] tracking-[0.35em] uppercase text-foreground/40 tabular-nums">
-                  Confidence: {mission.confidence}/100
-                </span>
-              )}
             </p>
           )}
         </section>
