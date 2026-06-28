@@ -275,7 +275,11 @@ function MissionsPage() {
             values={["Any", ...difficulties.map(String)]}
             active={difficulty === "Any" ? "Any" : String(difficulty)}
             onChange={(v) => setDifficulty(v === "Any" ? "Any" : Number(v))}
+            renderValue={(v) =>
+              v === "Any" ? <span>Any</span> : <DifficultyDots level={Number(v)} />
+            }
           />
+
 
 
           <div className="ml-auto flex items-center gap-4">
@@ -452,11 +456,13 @@ function FilterSelect({
   values,
   active,
   onChange,
+  renderValue,
 }: {
   label: string;
   values: string[];
   active: string;
   onChange: (v: string) => void;
+  renderValue?: (v: string) => React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -482,7 +488,9 @@ function FilterSelect({
         aria-haspopup="listbox"
         aria-expanded={open}
       >
-        <span className="truncate">{active}</span>
+        <span className="truncate flex items-center">
+          {renderValue ? renderValue(active) : active}
+        </span>
         <span
           className={`text-[0.5rem] text-foreground/40 transition-transform ${open ? "rotate-180" : ""}`}
           aria-hidden
@@ -513,7 +521,9 @@ function FilterSelect({
                     <span className="w-2.5 text-center">
                       {isActive ? "✓" : ""}
                     </span>
-                    <span className="truncate">{v}</span>
+                    <span className="truncate flex items-center">
+                      {renderValue ? renderValue(v) : v}
+                    </span>
                   </button>
                 </li>
               );
