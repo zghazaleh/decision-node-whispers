@@ -33,18 +33,8 @@ function usePriorDecisions(): Record<string, PriorDecision> {
 export const Route = createFileRoute("/missions-legacy")({
   head: () => ({
     meta: [
-      { title: "Case Files — Decision Node" },
-      {
-        name: "description",
-        content:
-          "Browse the archive of cases. Each one drops you into a single moment before an irreversible decision.",
-      },
-      { property: "og:title", content: "Case Files — Decision Node" },
-      {
-        property: "og:description",
-        content:
-          "Browse the archive of cases. Each one drops you into a single moment before an irreversible decision.",
-      },
+      { title: "Case Files (Legacy) — Decision Node" },
+      { name: "robots", content: "noindex" },
     ],
   }),
   component: MissionsPage,
