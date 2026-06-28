@@ -183,7 +183,7 @@ function heuristicScores(a: DecisionAnalysis): Record<Dimension, number> {
       (has(alt + " " + closing, /\b(long[- ]term|future|downstream|second[- ]order)\b/) ? 18 : 0) -
       (has(closing, /\b(short[- ]term|immediate|reactive)\b/) ? 10 : 0),
   );
-  const biasResistance = clamp(60 - biasWeight * 10 - (held > revised ? 8 : 0));
+  const biasResistance = clamp(50 - biasWeight * 10 - (held > revised ? 8 : 0));
   const negotiation = clamp(
     50 + strengths * 4 + revised * 5 - held * 8 - biasWeight * 3,
   );
