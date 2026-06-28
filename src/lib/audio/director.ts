@@ -209,35 +209,32 @@ class Director {
     if (opts.profile) a.setAudioProfile(opts.profile);
     this.screen = screen;
     let ok = true;
+    const trackedSwitch = async (key: string | null, label: string, fadeMs: number) => {
+      const url = key ? getSoundtrack(key)?.url : undefined;
+      const entry = this.recordAttempt({ kind: "switchTo", label, url });
+      const result = await a.switchTo(key, fadeMs);
+      this.settleAttempt(entry, result);
+      return result;
+    };
     switch (screen) {
-      case "landing":   ok = await a.switchTo("__landing__", fade); break;
-      case "archive":   ok = await a.switchTo("__archive__", fade); break;
-      case "mission":   ok = await a.switchTo(opts.missionId ?? null, fade); break;
-      case "analysis":  ok = await a.switchTo("__analysis__", fade); break;
+      case "landing":   ok = await trackedSwitch("__landing__", "bed:landing", fade); break;
+      case "archive":   ok = await trackedSwitch("__archive__", "bed:archive", fade); break;
+      case "mission":   ok = await trackedSwitch(opts.missionId ?? null, `bed:mission:${opts.missionId ?? "—"}`, fade); break;
+      case "analysis":  ok = await trackedSwitch("__analysis__", "bed:analysis", fade); break;
       case "decide":    this.duck(0.28, 500); break;     // keep bed, narrow it
       case "commit":    this.duck(0.18, 400); break;     // air leaves the room
-      case "silence":   ok = await a.switchTo(null, fade); break;
+      case "silence":   ok = await trackedSwitch(null, "bed:silence", fade); break;
     }
     if (!ok) {
-      // The requested bed couldn't be established. Don't strand the
-      // player in silence — fall back to a known-good bed where one
-      // exists. The previous bed is still playing at this point, so
-      // these fallbacks are pure additive safety nets.
       if (screen === "mission") {
-        // Mission bed is the most likely to be missing for a given case.
-        // Drop into the Archive bed so the room still has air.
-        await a.switchTo("__archive__", Math.max(800, fade));
+        await trackedSwitch("__archive__", "bed:archive (fallback)", Math.max(800, fade));
       } else if (screen === "analysis") {
-        // If even the analysis bed is gone, the Archive bed is a
-        // reasonable reflective fallback.
-        await a.switchTo("__archive__", Math.max(800, fade));
+        await trackedSwitch("__archive__", "bed:archive (fallback)", Math.max(800, fade));
       }
-      // landing / archive failures: leave whatever is currently playing.
-      // We do NOT switch to silence on failure — that would be worse
-      // than the previous bed continuing for a beat.
     }
     this.emit();
   }
+
 
 
   /** UI subscription for mute/reduced toggle components. */
