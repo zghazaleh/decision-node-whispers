@@ -785,20 +785,13 @@ function DecideModal({
   analyzing: boolean;
   initialDecision?: string;
   onClose: () => void;
-  onSubmit: (decision: string, reasoning: string, archetypeId?: string, confidence?: number) => void;
+  onSubmit: (decision: string, reasoning: string, archetypeId?: string) => void;
 }) {
   const [decision, setDecision] = useState(initialDecision ?? "");
   const [reasoning, setReasoning] = useState("");
   const [archetypeId, setArchetypeId] = useState<string | undefined>();
-  const [confidence, setConfidence] = useState<number>(60);
   const selectedPreset = presets.find((p) => p.text.trim() === decision.trim());
   const canCommit = decision.trim().length > 0 && !analyzing;
-  const confLabel =
-    confidence < 25 ? "Uncertain"
-    : confidence < 45 ? "Leaning"
-    : confidence < 65 ? "Considered"
-    : confidence < 85 ? "Confident"
-    : "Certain";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/80 backdrop-blur-md px-4 py-4 animate-fade-in-slow">
