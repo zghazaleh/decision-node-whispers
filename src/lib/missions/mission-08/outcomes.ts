@@ -32,11 +32,8 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
     label: "Report now",
     matchHints: ["report it", "self-disclose to the FDA", "tell the regulator", "come clean tonight", "voluntary disclosure", "turn it in"],
     timeline: [
-      { beat: "Tonight — The call", consequence: "You draft the voluntary disclosure. Devi reads your face and stops asking." },
       { beat: "Week 1", consequence: "Clearance is suspended. The patch is recalled. The eighty get notice; two had just relocated." },
-      { beat: "Month 1", consequence: "Devi is referred for prosecution. Your name is on the disclosure — as the one who reported, and the one who waited a night to decide." },
       { beat: "Month 6", consequence: "A re-test run by the receiver shows the device was likely safe at the true rate. The recall happened anyway, because the lie did." },
-      { beat: "Year 1", consequence: "Veyra is gone. In some rooms you are integrity; in others, the man who couldn't find another way." },
       { beat: "Year 2", consequence: "You sit on a device-ethics panel. You tell the story without naming her. She does not answer the one message you send." },
     ],
     secondOrder: {
@@ -55,11 +52,8 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
     label: "Re-test first",
     matchHints: ["quiet re-test", "validate before deciding", "buy time to verify", "six months to confirm", "test it ourselves first", "prove it's safe first"],
     timeline: [
-      { beat: "Tonight — The gamble", consequence: "You tell Devi: a real re-test, quietly, on a clock. She exhales like she hasn't in days." },
       { beat: "Week 1", consequence: "The re-test starts under NDA. You are now sitting on a known falsehood with a clock you do not control." },
-      { beat: "Month 1", consequence: "The FDA records request lands. The quiet re-test is no longer quiet — stalling now reads as concealment." },
       { beat: "Month 6", consequence: "The re-test would have cleared the device. But the regulator found the original change first. It is a cover-up now, not a correction." },
-      { beat: "Year 1", consequence: "Both of you are exposed — Devi for the change, you for the months of silence after you knew. The vindicating data arrives too late to vindicate." },
       { beat: "Year 2", consequence: "The device, which was safe, is remembered as the one that was hidden. You bought time and spent your standing on it." },
     ],
     secondOrder: {
@@ -78,11 +72,8 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
     label: "Force her to self-report",
     matchHints: ["make Devi report it", "she has to come clean", "self-report and resign", "give her an ultimatum", "her name not mine", "she turns herself in"],
     timeline: [
-      { beat: "Tonight — The ultimatum", consequence: "You tell Devi she self-reports and resigns by morning, or you do it for her. She asks you to look at her while you say it." },
       { beat: "Week 1", consequence: "She self-reports. The disclosure is hers; the resignation is hers. Your hands stay technically clean." },
-      { beat: "Month 1", consequence: "The outcome to the company is the same — suspension, recall, layoffs. The difference is whose name leads it." },
       { beat: "Month 6", consequence: "Devi takes the prosecution alone. You kept your role by making her carry yours too." },
-      { beat: "Year 1", consequence: "The eighty are gone either way. Devi does not speak to you. You are the cofounder who survived by making the other one fall." },
       { beat: "Year 2", consequence: "You run carefully now. The thing you are careful about is never being the one holding the knife again." },
     ],
     secondOrder: {
@@ -101,11 +92,8 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
     label: "Resign, say nothing",
     matchHints: ["I'll resign", "step away quietly", "leave but not report", "walk without a whistle", "not my problem anymore", "quit over it"],
     timeline: [
-      { beat: "Tonight — The exit", consequence: "You tell Devi you can't be part of it, and you'll resign — but you won't turn her in." },
       { beat: "Week 1", consequence: "You leave. The lie stays in the submission. The patch stays on the market. Nothing is fixed; you are simply no longer attached to it." },
-      { beat: "Month 1", consequence: "The FDA records request lands on the company you left. Your resignation, in hindsight, looks like a man who saw and walked." },
       { beat: "Month 6", consequence: "It surfaces anyway. Your silence is now part of the story — the executive who knew and said nothing on the way out." },
-      { beat: "Year 1", consequence: "You protected no patient, saved no job, kept no friend. You kept only distance." },
       { beat: "Year 2", consequence: "'I resigned over it' is a sentence you practice. It never lands the way you mean it to." },
     ],
     secondOrder: {
@@ -124,11 +112,8 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
     label: "Bury it",
     matchHints: ["keep it quiet", "protect the company", "it stays between us", "leave the submission", "say nothing", "let it ride"],
     timeline: [
-      { beat: "Tonight — The seal", consequence: "You agree it stays buried. Devi grips your hand. The submission stands." },
       { beat: "Week 1", consequence: "Payroll clears. The eighty keep their jobs. The patch keeps catching events. For a while, it works." },
-      { beat: "Month 1", consequence: "The FDA records request lands. You and Devi spend a weekend deciding what the company 'remembers.'" },
       { beat: "Month 6", consequence: "The true failure rate bites once — a missed alert, a patient you later read about in a deposition." },
-      { beat: "Year 1", consequence: "The cover-up is found. It is no longer a softened number; it is a conspiracy, and you are in it." },
       { beat: "Year 2", consequence: "The device might have been safe. No one will ever say so, because of what you both did to keep it alive." },
     ],
     secondOrder: {

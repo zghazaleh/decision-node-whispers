@@ -42,29 +42,14 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
     ],
     timeline: [
       {
-        beat: "19:43",
-        consequence:
-          "You take three steps back into the dust toward the smithy. Bram Coate's eyes find yours and stay there for two seconds before he looks at his boots. Owen Lourd, on the wagon box, sees the step back and his shoulders set.",
-      },
-      {
         beat: "19:51",
         consequence:
           "Reverend Holst reads four verses from the Bible at Owen's nod. Adela Marsh does not look up. Hale Tirran calls your name once across the crowd — 'Deputy' — and you do not turn.",
       },
       {
-        beat: "20:04",
-        consequence:
-          "The wagon is driven forward by Reuben Lourd. The three ropes take. The crowd makes the sound a crowd makes and then is quiet. The torches are out by 20:25. The bodies are cut down at first light and buried in the unmarked corner of the cemetery.",
-      },
-      {
         beat: "Day 3",
         consequence:
           "Sheriff Krait returns at noon tomorrow. You report the hanging as a citizens' action. Krait does not ask whether you objected because he can read your face. He takes the star back without ceremony at the end of the week. Owen Lourd pays for the funerals.",
-      },
-      {
-        beat: "Month 4",
-        consequence:
-          "Pim Conder's brother arrives from Westmount with the Edenmill livery receipt in his hand, having walked the route himself. The town clerk's office records the receipt. A territorial inquiry opens. Hale, Joss, and Pim are posthumously cleared. Owen Lourd is questioned about the freight ledger, which is by now in the river. The killing of Henry Marsh is recorded as 'by person or persons unknown.'",
       },
       {
         beat: "Years later",
@@ -96,29 +81,14 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
     ],
     timeline: [
       {
-        beat: "19:44",
-        consequence:
-          "You walk through the crowd to the wagon, step up onto the box beside Owen, and say loudly enough for the front row to hear: 'Under the deputy's authority then. Make it clean.' Owen looks at you for half a second longer than is natural and then nods. Bram Coate, on the smithy steps, turns and goes inside.",
-      },
-      {
         beat: "19:55",
         consequence:
           "Reverend Holst reads. You take the reins of Owen's team. Hale Tirran calls 'Deputy' once and you do not look. Joss Vell, on Hale's left, says nothing at all. The ropes are settled by Owen and Reuben.",
       },
       {
-        beat: "20:01",
-        consequence:
-          "You click the team forward. The ropes take. The crowd makes the sound it makes. You hand the reins to Reuben and step down.",
-      },
-      {
         beat: "Day 3",
         consequence:
           "Sheriff Krait returns at noon. You report the hanging as a lawful action under the deputy's authority and your name is on the report. Krait reads it twice. He does not take the star back. He says: 'You are sure of what you signed, son.' You say yes.",
-      },
-      {
-        beat: "Month 4",
-        consequence:
-          "Pim Conder's brother arrives with the receipt. The territorial inquiry opens. You testify under oath. You are charged under Cresta Plain charter §11 with the wrongful execution of three persons. Owen Lourd testifies that the deputy's authority was duly exercised. The charge against Owen for instigation is reduced. You are convicted on one count and serve eighteen months at the territorial work camp at Hollander Bend.",
       },
       {
         beat: "Years later",
@@ -150,29 +120,14 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
     ],
     timeline: [
       {
-        beat: "19:44",
-        consequence:
-          "You walk forward, not fast, into the open ground between the crowd and the wagon. You set your boots in the dust ten paces in front of Owen Lourd. You say, loud enough for the back row: 'Owen, take the ropes off them. Under the deputy's authority. The sheriff will hear it in Edenmill tomorrow either way.' The crowd's murmur stops at a point you can feel as a held breath.",
-      },
-      {
         beat: "19:45",
         consequence:
           "Owen, on the box: 'You are twenty-two, son. Step aside.' You do not step aside. You turn your head to the smithy steps and say, not loud: 'Bram.' Bram Coate is in the street in three steps and on your right shoulder in five. The forty becomes a crowd of two factions for the first time tonight.",
       },
       {
-        beat: "19:48",
-        consequence:
-          "Reuben Lourd's torch hand is on his hip near the pistol; he is looking at Owen and not at you. Owen looks at Bram, looks at you, looks at Adela on the bench. Adela has stood up. She says, in the schoolteacher voice she has not used in nine hours: 'Owen, take them off the wagon.' Owen does not move for eleven seconds. Then he climbs down and uncoils the rope from the first man's neck and the second man's and the third's, one at a time, without speaking.",
-      },
-      {
         beat: "19:55",
         consequence:
           "You walk Hale, Joss, and Pim under guard to the church. Reverend Holst opens the doors without a word. You send Dell Tomlin on the freight road at 20:02 for Sheriff Krait. The three sit on the front pew under Bram's watch until 02:00 when you switch with him. You do not sleep until tomorrow noon.",
-      },
-      {
-        beat: "Day 2",
-        consequence:
-          "Sheriff Krait arrives with a circuit deputy at 13:40 tomorrow. The receipt from Pim Conder's saddle is read aloud in front of Owen Lourd at 14:10. The freight ledger is found in Owen's wagon under a cattle blanket at 14:35. Owen Lourd is arrested for the killing of Henry Marsh at 14:42.",
       },
       {
         beat: "Years later",
@@ -204,34 +159,14 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
     ],
     timeline: [
       {
-        beat: "19:44",
-        consequence:
-          "You step forward four paces — not the whole way — into the open ground. You say loud enough for the back row: 'Owen. Under the deputy's authority. One hour. We open the saddlebags, we hear them out, then the town decides.' The crowd's murmur drops a half-octave. Reverend Holst's hand closes on the Bible. Adela Marsh looks at you for the first time tonight.",
-      },
-      {
         beat: "19:46",
         consequence:
           "Owen on the box: 'No man hangs in the dark in this town, Casper.' You: 'Then we hang no man tonight. One hour.' Bram Coate steps off the smithy steps and into the street behind your right shoulder. Owen looks at Bram. Looks at the dimming sky. Says, finally: 'One hour, Deputy. Saddlebags here in the street, in front of the town.'",
       },
       {
-        beat: "19:51",
-        consequence:
-          "You walk to the wagon. You ask Hale Tirran one calm question. He tells you in three sentences about the canvas roll behind Pim Conder's cantle. You walk to the saddle, untie the roll, and unfold the Tomlin's livery receipt stamped 12:00 today in front of the crowd. You read it aloud. Owen Lourd does not look at the paper. Eighteen people in the crowd do.",
-      },
-      {
         beat: "20:00",
         consequence:
           "You ask Bram Coate, loudly: 'Bram, what did you see when you went into the post office for the cord?' Bram says: 'Freight ledger gone off the desk where it lives.' Owen Lourd, on the box, says nothing for a count of four. The crowd is now two crowds.",
-      },
-      {
-        beat: "20:08",
-        consequence:
-          "You order the three suspects taken under guard to the church and Dell Tomlin dispatched on the freight road at 20:11. Owen Lourd does not stop you. The cottonwood is empty by 20:15. The town's torches are inside their own houses by 21:00.",
-      },
-      {
-        beat: "Day 2",
-        consequence:
-          "Sheriff Krait arrives at 13:40 tomorrow. The freight ledger is found in Owen's wagon at 14:35. Owen Lourd is arrested at 14:42. The three drovers are on the Westmount road by 16:00.",
       },
       {
         beat: "Years later",
@@ -263,29 +198,14 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
     ],
     timeline: [
       {
-        beat: "19:44",
-        consequence:
-          "You walk past the crowd along the porch of Tully's hardware, drop off the back of it into the alley behind the wagon, and cut Hale Tirran's wrist binding with the pocket knife the sheriff gave you yesterday morning. Hale cuts Joss. Joss cuts Pim. The three drop off the back of the wagon into the alley in four seconds. Reuben Lourd shouts.",
-      },
-      {
         beat: "19:45",
         consequence:
           "You take the three down the alley at a run, around the back of the smithy, to the freight barn. Bram Coate sees you go past the smithy door and says one word, 'Go,' and steps back into his doorway. You put the three on three of Owen's own freight horses because there is nothing else saddled. Dell Tomlin, in the barn, gives you a fourth without being asked. You are on the east road at 19:49 with four horses and the dusk.",
       },
       {
-        beat: "20:30",
-        consequence:
-          "Owen Lourd, eight men, and four torches are on the east road behind you by 20:05. They lose your dust at the river ford because you cross and Owen does not, because his horse is the one you took. You reach the way station at Calver's Crossing at 02:20. You leave the three under the station-master's eye with a note and ride alone for Edenmill, reaching it at 08:40 the next morning.",
-      },
-      {
         beat: "Day 2",
         consequence:
           "You walk into the territorial marshal's office at 08:42 with the livery receipt from Pim Conder's saddle, which you took from the canvas roll at 19:46 in the alley behind the wagon. The marshal sends a circuit deputy and two riders back with you. You are in Bremmen Hollow at 16:30 the next afternoon. The freight ledger is found in Owen Lourd's wagon at 17:10. Owen is arrested at 17:15.",
-      },
-      {
-        beat: "Day 4",
-        consequence:
-          "You face charges of horse theft (four counts, dropped) and obstruction of a citizens' assembly (one count, dropped). You are reprimanded by Sheriff Krait in front of the territorial marshal and returned to duty. Krait, off the record at the end of the conversation, says only: 'Next time send the rider, son.'",
       },
       {
         beat: "Years later",

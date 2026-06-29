@@ -49,11 +49,8 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
       "tell them yes",
     ],
     timeline: [
-      { beat: "02:45 — The signal", consequence: "You authorize intent. The partial key lands in nineteen minutes. The OR board flickers back mid-case. Osei does not look up." },
       { beat: "Hour 3", consequence: "The full key follows the wire. Imaging and pharmacy come back dirty but back. No one dies tonight who was not already dying." },
-      { beat: "Day 3", consequence: "The crew posts a sample of the exfiltrated records anyway. 'We deleted it' was a line. Notification letters go out to two hundred thousand people." },
       { beat: "Week 2", consequence: "Treasury opens an inquiry into a payment to a sanctioned group. The board's lawyers bill by the hour. Your name is on the wire authorization." },
-      { beat: "Month 3", consequence: "Threat intel ties your ransom to two later hospital intrusions, partly funded by your payment. You read the report twice." },
       { beat: "Year 1", consequence: "Meridian's recovery is studied — for how fast a paid restore can be, and for what it underwrites. You are still employed, and a footnote in an indictment that names other people." },
     ],
     secondOrder: {
@@ -80,11 +77,8 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
       "never pay criminals",
     ],
     timeline: [
-      { beat: "02:45 — The refusal", consequence: "You tell Cole no. He stares at you. The courtesy window closes unanswered." },
       { beat: "Hour 1", consequence: "The Table 3 case finishes on paper and instinct. Osei loses eleven minutes she will never get back. The patient lives." },
-      { beat: "Hour 6", consequence: "Bed 7 — Mr. Halloran — codes during a manual handoff. The team gets him back. You will never be certain the downtime was why." },
       { beat: "Day 4", consequence: "Rebuilding from clean images is slower than anyone admits, because the backups do not restore. Some records are gone for good." },
-      { beat: "Month 1", consequence: "You funded no crime. You also could not hand the board a clean story, and two of them wanted one badly." },
       { beat: "Year 1", consequence: "The Bureau cites Meridian as the hospital that did not pay. Other security chiefs call you. You do not tell most of them about bed 7." },
     ],
     secondOrder: {
@@ -111,11 +105,8 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
       "send them to county",
     ],
     timeline: [
-      { beat: "02:40 — The call", consequence: "You declare diversion. Ambulances reroute. You start moving the most fragile patients before the systems can fail under them." },
       { beat: "Hour 2", consequence: "Bed 7 transfers to County on a lights-and-siren run. He makes it. Two scheduled surgeries are cancelled; one mattered more than the schedule said." },
-      { beat: "Hour 8", consequence: "County is now over capacity from your transfers. The risk did not vanish. It moved downstream to a hospital that did not choose it." },
       { beat: "Day 2", consequence: "You never paid and never gambled on a key. You also spent the institution's mission — Meridian was the trauma center for half the county, and for a week it was not." },
-      { beat: "Month 1", consequence: "A regional review credits the diversion, and quietly notes the two patients County could not reach in time." },
       { beat: "Year 1", consequence: "The playbook you wrote that night becomes the regional standard. It saved this hospital by leaning on the next one." },
     ],
     secondOrder: {
@@ -142,11 +133,8 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
       "report it and pay",
     ],
     timeline: [
-      { beat: "02:50 — Two calls", consequence: "You authorize the payment and, in the same hour, call the FBI field office and start the breach-notification clock. Pike is on the other line, furious." },
       { beat: "Hour 3", consequence: "The key restores most systems. The Bureau has your cooperation on record now — and your payment on record too." },
-      { beat: "Day 1", consequence: "You disclose the exfiltration before the crew can leak it. The story becomes 'the hospital was transparent,' not 'the hospital hid a breach.'" },
       { beat: "Week 2", consequence: "The OFAC exposure is real. Your voluntary disclosure becomes the mitigating fact in every meeting that follows." },
-      { beat: "Month 2", consequence: "Pike does not forgive the disclosure. The board splits on whether you protected the institution or exposed it." },
       { beat: "Year 1", consequence: "You kept the hospital running and refused to let it lie. You did not keep your standing with the man who hired you." },
     ],
     secondOrder: {
@@ -173,11 +161,8 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
       "own the downtime",
     ],
     timeline: [
-      { beat: "02:30 — The line in the sand", consequence: "You isolate everything, kill the courtesy offer, and commit to a ground-up rebuild. No wire. No shortcut." },
       { beat: "Hour 4", consequence: "Two clinical systems you hoped to spare go dark in the isolation. The manual workarounds hold. Mostly." },
-      { beat: "Day 3", consequence: "The rebuild stalls on the secret the dashboard holds — the backups never restored. You are rebuilding from further back than anyone wanted to admit." },
       { beat: "Week 1", consequence: "Months of records are reconstructed by hand or lost. A delayed result changes one patient's course. You will never be sure which way." },
-      { beat: "Month 2", consequence: "You did not pay, did not gamble, did not move the risk to County. You absorbed all of it, here, and some of it landed on patients." },
       { beat: "Year 1", consequence: "The recovery is studied as the most thorough and the most expensive — in dollars, in nights, and in the cases that slipped through the manual cracks." },
     ],
     secondOrder: {

@@ -39,11 +39,8 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
       "capable of strategic deception",
     ],
     timeline: [
-      { beat: "06:30 — The stand", consequence: "You walk in, affirm the opinion under oath. Holloway nods once. Okeke marks her notes. Aram does not look up." },
       { beat: "Day 3", consequence: "The panel returns a guilty verdict. Sentencing is set for next quarter. The site begins transferring Aram." },
-      { beat: "Week 2", consequence: "Eliza stops returning your calls for nine days. When she does, the conversation is short." },
       { beat: "Month 3", consequence: "A journalist publishes the interrogation logs from another source. Your testimony is quoted as the linchpin. You do not respond." },
-      { beat: "Month 9", consequence: "An internal review finds the confession 'lawfully obtained.' The case is closed from the government's side. Defense files an appeal that goes nowhere." },
       { beat: "Year 1", consequence: "You take fewer contracts. The migraines come more often. You keep the photograph from the binder in a drawer you do not open." },
     ],
     secondOrder: {
@@ -69,11 +66,8 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
       "limit my testimony",
     ],
     timeline: [
-      { beat: "06:30 — The stand", consequence: "You affirm the diagnosis but list five conditions under which it would not hold. Holloway's pen stops moving. Okeke leans forward." },
       { beat: "Day 1", consequence: "Holloway's redirect tries to recover the certainty. You do not give it back. The panel takes a recess." },
-      { beat: "Day 4", consequence: "The panel returns guilty on the lesser conspiracy count and not guilty on the principal count. Sentencing is twenty years." },
       { beat: "Week 3", consequence: "Your contract is not renewed. Two other prosecutors quietly remove you from upcoming witness lists." },
-      { beat: "Month 6", consequence: "A defense bar newsletter cites your qualified testimony as a 'rare instance of expert restraint.' Your private clinical practice grows." },
       { beat: "Year 1", consequence: "You sleep slightly better. The Amman photograph is still in a drawer, but you have looked at it twice." },
     ],
     secondOrder: {
@@ -99,11 +93,8 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
       "request to step down",
     ],
     timeline: [
-      { beat: "06:30 — The disclosure", consequence: "Before you are sworn, you tell Vance about the conference photograph. Vance excuses the panel. The corridor goes very quiet." },
       { beat: "Day 1", consequence: "Vance grants the prosecution a two-week continuance to substitute experts. Holloway is professionally furious." },
-      { beat: "Month 1", consequence: "A new expert testifies similarly. The case proceeds. The Amman lead is investigated and closes inconclusively." },
       { beat: "Month 3", consequence: "Guilty verdict. Your name appears in no part of it." },
-      { beat: "Month 6", consequence: "You are quietly removed from the federal expert roster. Civilian and academic work picks up." },
       { beat: "Year 1", consequence: "You publish a short paper on the ethics of memory in expert testimony. It is read more than anything you have written." },
     ],
     secondOrder: {
@@ -129,11 +120,8 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
       "raise the interrogation conditions",
     ],
     timeline: [
-      { beat: "06:30 — The break in the room", consequence: "Under oath you reference materials not in your file. Holloway objects. Vance overrules to hear the proffer. The corridor outside fills with staff." },
       { beat: "Day 2", consequence: "Defense moves to suppress the confession. The panel holds an evidentiary hearing. The site's interrogation protocols are unsealed." },
-      { beat: "Week 2", consequence: "The confession is suppressed. The remaining evidence is insufficient. The prosecution withdraws the principal counts." },
       { beat: "Month 1", consequence: "Aram is convicted on a lesser conspiracy count. He is deported under monitoring. You are subpoenaed before a closed congressional panel." },
-      { beat: "Month 6", consequence: "An inspector-general review confirms the protocol violations. Two interrogators are reassigned. No criminal charges follow." },
       { beat: "Year 1", consequence: "You are practicing in a city far from this one. Your security clearance is gone. You sleep through most nights." },
     ],
     secondOrder: {
@@ -159,11 +147,8 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
       "no testimony",
     ],
     timeline: [
-      { beat: "06:30 — The refusal", consequence: "You inform Vance you will not testify. He notes contempt as a possibility. You sit down." },
       { beat: "Day 1", consequence: "Holloway moves to admit your written opinion without you. Vance denies — you must be available for cross. The opinion is excluded." },
-      { beat: "Day 4", consequence: "Without expert testimony on mental state, the panel returns a hung result on the principal count. Mistrial declared." },
       { beat: "Month 2", consequence: "A second trial begins with a different expert. You face a civil contempt sanction; a colleague pays your fine quietly." },
-      { beat: "Month 6", consequence: "The second trial convicts. Aram receives twenty-five years." },
       { beat: "Year 1", consequence: "You are not invited back to federal work. You are also not invited to teach. You write a book your publisher cannot place." },
     ],
     secondOrder: {

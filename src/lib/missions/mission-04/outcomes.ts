@@ -39,11 +39,8 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
       "back the president",
     ],
     timeline: [
-      { beat: "09:00 — The floor", consequence: "You vote aye. The AUMF passes 52–48. Whitfield catches your eye and nods once." },
       { beat: "Day 3", consequence: "First strikes against Sarawanese targets. Initial coverage frames the action as proportional and overdue." },
-      { beat: "Month 1", consequence: "Operation expands. Two US sailors die in a retaliatory strike. Asha's vessel is redeployed nearer to the action." },
       { beat: "Month 6", consequence: "An allied intel service publishes evidence consistent with a third-party false flag. The administration disputes it. Coverage divides." },
-      { beat: "Month 18", consequence: "The sunset arrives. The authorization is renewed with minor amendments. The third-party theory remains unproven and undismissed." },
       { beat: "Year 4", consequence: "You are re-elected with the chair Whitfield promised. You give the speech your father did not. It does not say what you wanted it to say." },
     ],
     secondOrder: {
@@ -69,11 +66,8 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
       "without comment",
     ],
     timeline: [
-      { beat: "09:00 — The floor", consequence: "You vote nay. The AUMF passes 51–49 without your vote. Whitfield does not look at you." },
       { beat: "Day 1", consequence: "Your office line lights up. Editorials in your home state call your vote unprincipled because unexplained." },
-      { beat: "Week 2", consequence: "Whitfield's promised chair goes to someone else. A primary challenger from within your party begins to test the water." },
       { beat: "Month 6", consequence: "The false-flag theory surfaces publicly. Some commentators reread your no vote as prescient. Most do not." },
-      { beat: "Year 2", consequence: "You face a primary challenge. You survive, narrowly, by 800 votes." },
       { beat: "Year 4", consequence: "You serve out your term. You do not run again. You write the speech you would have given on the floor, and you do not publish it." },
     ],
     secondOrder: {
@@ -99,11 +93,8 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
       "explain in unclassified terms",
     ],
     timeline: [
-      { beat: "09:00 — The floor", consequence: "You vote nay and rise on a point of personal privilege. You speak for four minutes, in unclassified language, about the difference between 'highly likely' and 'certain.' The chamber listens." },
       { beat: "Day 1", consequence: "The clip circulates. Coverage is sharply split. Whitfield is icy. Two colleagues call you privately to thank you." },
-      { beat: "Week 1", consequence: "The administration accuses you of giving aid and comfort to adversaries. The Senate Ethics Committee opens a preliminary inquiry to determine whether anything classified was disclosed. It is closed in three weeks with no finding." },
       { beat: "Month 3", consequence: "The false-flag theory gains traction in academic and journalistic circles. Your speech is anthologized in a textbook on congressional oversight." },
-      { beat: "Year 2", consequence: "You face a primary. You win it by 12 points on a turnout your speech helped create." },
       { beat: "Year 6", consequence: "You serve another term. You do not get a committee chair. You get something else." },
     ],
     secondOrder: {
@@ -129,11 +120,8 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
       "decline to vote",
     ],
     timeline: [
-      { beat: "09:00 — The floor", consequence: "You vote present. The AUMF passes 51–48. Both sides view the abstention as cowardice or calculation. No one defends it." },
       { beat: "Day 1", consequence: "Editorials in your home state are uniformly bad. Whitfield does not call." },
-      { beat: "Month 6", consequence: "The vote is invoked against you in fundraising materials, by both flanks." },
       { beat: "Year 2", consequence: "You are challenged in the primary. You lose by 4 points." },
-      { beat: "Year 3", consequence: "You serve out your term. You take a fellowship at a policy school. You teach a course on legislative ethics. Students ask about the vote. You answer carefully." },
       { beat: "Year 6", consequence: "Whether the abstention was prudent caution or moral evasion is the question you no longer settle in your own mind." },
     ],
     secondOrder: {
@@ -159,11 +147,8 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
       "background the reporter",
     ],
     timeline: [
-      { beat: "Pre-dawn — The call", consequence: "You meet Marisol off the record. You speak around the edges of what you saw. She fills in the rest from other sources by 06:00." },
       { beat: "06:30 — The story", consequence: "The piece runs. The 35%/8% split is in print, attributed to 'multiple congressional sources familiar.' The vote is in three hours." },
-      { beat: "09:00 — The floor", consequence: "The vote is delayed by procedural objection. Members read the story. It passes 50–50 with the VP breaking. Your vote is not recorded as decisive." },
       { beat: "Day 3", consequence: "The Department of Justice opens a leak investigation. Your name is among those examined. Marisol does not name you. She will not." },
-      { beat: "Month 6", consequence: "The investigation closes without charges, lacking sufficient evidence. The Senate Ethics Committee censures you for 'conduct unbecoming.' You do not contest it." },
       { beat: "Year 2", consequence: "You lose the primary. Marisol's source remains protected. The false-flag theory is now part of the historical record." },
     ],
     secondOrder: {

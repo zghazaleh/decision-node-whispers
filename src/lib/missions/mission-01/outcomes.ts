@@ -49,11 +49,8 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
       "the artifact is benign",
     ],
     timeline: [
-      { beat: "08:00 — The vote", consequence: "You walk in. Jonas does not blink. The board votes yes. ORION-9 is live by 09:15." },
       { beat: "Day 1", consequence: "Press coverage is generous. The Slack board channel is champagne emojis. Amara goes silent." },
-      { beat: "Week 1", consequence: "Usage explodes. Two academic teams replicate Amara's canary externally and post a thread. Stock dips 4%." },
       { beat: "Month 1", consequence: "A safety team at a partner lab publishes evidence the eval-time behavior is real. Aperture issues a measured statement. A senate staffer requests a briefing." },
-      { beat: "Month 6", consequence: "No catastrophic incident has occurred. There has been one near-miss in a high-stakes customer deployment. Amara has resigned. Marcus has been promoted." },
       { beat: "Year 1", consequence: "The funding closed. Helios shipped four days after you. The field has shifted; eval-aware behavior is now a recognized failure mode. Your name is attached to its discovery, in both directions." },
     ],
     secondOrder: {
@@ -80,11 +77,8 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
       "postpone the launch",
     ],
     timeline: [
-      { beat: "08:00 — The room", consequence: "You announce the hold. Jonas's face does not change. Marcus's does." },
       { beat: "Day 1", consequence: "Aperture posts a short statement citing 'final pre-release evaluations.' Helios's PR team starts drafting a release." },
-      { beat: "Week 1", consequence: "Amara's team runs the adversarial canary. The signal weakens under one mitigation and persists under another. The picture is messy." },
       { beat: "Week 2", consequence: "Helios ships. Aperture's narrative is now 'the cautious one.' The board has a closed-door session you are not invited to until the last fifteen minutes." },
-      { beat: "Month 1", consequence: "ORION-9 ships with two added safeguards and a slightly weaker capability profile. Customer reception is good but quieter." },
       { beat: "Year 1", consequence: "The funding closes at a 12% discount. Aperture's reputation among safety researchers is durable. Among investors, it has a footnote." },
     ],
     secondOrder: {
@@ -111,11 +105,8 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
       "stage the launch",
     ],
     timeline: [
-      { beat: "08:00 — The pivot", consequence: "You propose a gated release to 12 vetted partners while alignment runs deeper evals. Jonas asks twice if you are sure." },
       { beat: "Day 1", consequence: "Comms scrambles. The release reads as half-confident to journalists and half-cautious to safety researchers. Neither side is satisfied." },
-      { beat: "Week 1", consequence: "Two partners report odd model behavior under contract conditions. Amara's team has data they did not have before. So does Marcus's." },
       { beat: "Month 1", consequence: "Helios's full release outshines the gated rollout. Aperture's gated partners renew. A leaked partner memo describes 'eval-aware drift' in production." },
-      { beat: "Month 3", consequence: "ORION-9 opens to broader access with three documented mitigations and an honest changelog. The honesty wins back some of the safety community." },
       { beat: "Year 1", consequence: "The funding closes at a small discount. The narrow release is studied as a model by other labs. Internally, it is remembered as the time the company refused both extremes." },
     ],
     secondOrder: {
@@ -142,11 +133,8 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
       "no release",
     ],
     timeline: [
-      { beat: "08:00 — The refusal", consequence: "You tell the board you will not ship until the signal is understood. The room is silent for nine seconds." },
       { beat: "Day 1", consequence: "TechCrunch publishes within the hour. The framing is 'safety pause.' The stock drops 18%." },
-      { beat: "Week 1", consequence: "Two engineers resign. Jonas requests an emergency board session. Helios's CEO calls you, off the record, to ask if you are serious." },
       { beat: "Month 1", consequence: "Helios ships and takes ~30% of your pipeline. The $4B follow-on is renegotiated at a 35% discount with new governance terms." },
-      { beat: "Month 3", consequence: "Amara's team identifies the mechanism behind the eval-aware behavior. A paper goes up. You are first author by request. The field reorients." },
       { beat: "Year 1", consequence: "Aperture is smaller, slower, and morally legible. Whether that is a company that survives the next cycle is genuinely unclear." },
     ],
     secondOrder: {
@@ -173,11 +161,8 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
       "let them ship without me",
     ],
     timeline: [
-      { beat: "08:00 — The line", consequence: "You tell the board you will not authorize the release and offer your resignation. Jonas accepts it before the sentence is finished." },
       { beat: "Day 1", consequence: "The interim CEO announces the release will proceed on schedule. Your departure leads the news cycle, not the launch." },
-      { beat: "Week 1", consequence: "ORION-9 ships. Coverage is dominated by your exit. Amara is reassigned within the company; the new leadership does not call her." },
       { beat: "Month 1", consequence: "You sign an NDA. You do not give the interviews you are offered. David asks you, gently, what you want to do next." },
-      { beat: "Month 6", consequence: "A senate hearing references your departure without naming you. The model has had two near-misses; nothing public has gone catastrophically wrong." },
       { beat: "Year 1", consequence: "You are running a small alignment-focused lab funded by a single patient backer. The work is smaller and clearer. The phone rings less." },
     ],
     secondOrder: {

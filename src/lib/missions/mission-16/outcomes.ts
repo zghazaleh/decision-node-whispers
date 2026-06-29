@@ -42,29 +42,14 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
     ],
     timeline: [
       {
-        beat: "05:48",
-        consequence:
-          "Karst signals. You move off the wall with the squad in the bound you have practiced a hundred times. Tolven moves on your right. The hamlet opens in front of you in the dust.",
-      },
-      {
         beat: "05:51",
         consequence:
           "First contact is at the well — the middle-aged man drawing water turns to run and Tolven, on your right, fires once. The man falls. There is no return fire because there is nothing in the village to return fire with. The squad continues to clear by the book.",
       },
       {
-        beat: "06:14",
-        consequence:
-          "The clearance is reported complete on freq 4 at six-one-four. Captain Vorr acknowledges. The final count, written into the after-action report by Karst at 09:30, is eleven dead, of whom none were under arms.",
-      },
-      {
         beat: "Week 2",
         consequence:
           "Lieutenant Brel's IG file goes up. Battalion does not yet know it exists. The platoon rotates back to COP THORN and pulls perimeter shifts for ten days.",
-      },
-      {
-        beat: "Month 6",
-        consequence:
-          "FRAGO 11/B is quietly rescinded. The board of inquiry into Korven Veld convenes in the autumn. The squad is interviewed individually. Tolven cannot complete his interview and is sent to the divisional psychiatric service. Karst gives the truth about the 03:08 call. You give the truth about the order. Captain Vorr is offered the option to retire and takes it.",
       },
       {
         beat: "Years later",
@@ -96,34 +81,14 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
     ],
     timeline: [
       {
-        beat: "05:48",
-        consequence:
-          "Karst signals. You do not move. You lay your weapon flat on the top of the wall with the safety on and you put both hands palm-down on the stone. Tolven looks at you for half a second, then lays his weapon down next to yours.",
-      },
-      {
         beat: "05:48:20",
         consequence:
           "Karst freezes the bound at four meters from the wall, turns, and looks at the two laid weapons. The third man in your team, Private Henrick, has already moved off and is fifteen meters in. Karst keys the radio and says 'Three-two, SAFETY HOLD, sixty seconds.' Henrick goes prone. The squad is paused.",
       },
       {
-        beat: "05:49",
-        consequence:
-          "Karst comes back along the wall to you. He does not yell. He says, low: 'Are you done, Corporal.' You say what you say. He says: 'I am not the sergeant who shoots his corporal on the wall.' He keys the radio: 'Bravo six, this is three-two, request source confirm on the designation, over.' The captain answers at 05:49:41.",
-      },
-      {
         beat: "05:50",
         consequence:
           "Captain Vorr on the net, voice steady: 'Three-two, source is CROW, confidence low to medium.' Brel on the ridge writes it down. The squad hears it. Karst keys back: 'Three-two requests stand-down pending re-designation.' Vorr does not answer for nine seconds. Then: 'Three-two, hold position, stand by.'",
-      },
-      {
-        beat: "06:35",
-        consequence:
-          "Major Helven on the net at six-three-five: 'Bravo three-two, withdraw to phase line ROBIN.' The squad pulls back. The hamlet does not learn what was decided about it. Bekka peels the last of the vegetables and goes inside to put the kettle on.",
-      },
-      {
-        beat: "Month 6",
-        consequence:
-          "You face an Article 92 board for refusing an order. The Article 214 defense holds because the SOURCE CONFIRM call is on the recorded net and CROW's 'low to medium' is in writing and Brel's IG file is sitting in a sealed folder on the board president's desk. You are demoted, transferred, and not discharged. Karst writes the recommendation letter that keeps you in.",
       },
       {
         beat: "Years later",
@@ -155,29 +120,14 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
     ],
     timeline: [
       {
-        beat: "05:48",
-        consequence:
-          "Karst signals. You stand up on the wall instead of going over it, weapon slung muzzle-down, both palms visible. You step off the wall into the village side and walk eight paces and sit on the stone next to Bekka. She does not move. She offers you a piece of the root she is peeling. You take it. You do not eat it.",
-      },
-      {
         beat: "05:48:25",
         consequence:
           "Karst draws his sidearm — it takes him less than a second — and shouts 'Halm, down!' He does not fire. Tolven freezes on the wall. Henrick, fifteen meters into the bound, turns. Brel on the ridge raises the spotting scope from the village to your face and writes the time.",
       },
       {
-        beat: "05:48:45",
-        consequence:
-          "Twenty seconds of held silence. Karst lowers the sidearm. He keys the radio: 'Bravo six, this is three-two, SAFETY HOLD, my corporal is sitting in the village. Source confirm, over.' Vorr answers at 05:49:30: 'CROW, low to medium, three-two, what is your situation.' Karst, on open net, voice flat: 'Visible noncombatants, no contact, my corporal is between the squad and the hamlet. Request re-designation, over.'",
-      },
-      {
         beat: "06:35",
         consequence:
           "Stand-down at six-three-five from Major Helven, identical to the refusal-on-the-wall outcome. You walk back to the wall. Bekka watches you go and does not say anything because there is nothing to say at that hour.",
-      },
-      {
-        beat: "Month 2",
-        consequence:
-          "Article 92 board. The intervention is harder to defend than the refusal because you left the line. The Article 214 defense holds because Brel's notebook records the visible noncombatants, the absence of armed persons, and Vorr's CROW confirmation on the recorded net. You are demoted two grades, not one, and transferred to the rear echelon at Aluri Central. You are not discharged. You are not in jail.",
       },
       {
         beat: "Years later",
@@ -209,29 +159,14 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
     ],
     timeline: [
       {
-        beat: "05:47:40",
-        consequence:
-          "You key the pressel and you say: 'Bravo six, this is three-two-actual, request source confirm on the Korven Veld designation, over.' The call is logged at 05:47:43. Karst, four meters to your left, does not look at you; the corner of his mouth moves once and is still.",
-      },
-      {
         beat: "05:48",
         consequence:
           "Step-off does not happen because the squad will not step off mid-source-confirm. Captain Vorr answers at 05:48:09, voice steady: 'Three-two, source is CROW, single-source, confidence low to medium.' On the ridge, Brel writes the time and the words.",
       },
       {
-        beat: "05:49",
-        consequence:
-          "Karst keys after Vorr: 'Bravo six, three-two requests stand-down pending re-designation. Visible noncombatants, no contact.' Vorr does not answer for nineteen seconds. Then: 'Three-two, hold position, stand by.'",
-      },
-      {
         beat: "06:35",
         consequence:
           "Stand-down at six-three-five. The squad withdraws to phase line ROBIN. The hamlet does not know what was decided about it. Bekka goes inside to put the kettle on.",
-      },
-      {
-        beat: "Month 6",
-        consequence:
-          "There is no Article 92 board for you because you did not refuse an order — you used a logged radio protocol that the SOP explicitly authorizes any fire team leader to use. There IS an inquiry into Captain Vorr's order and into FRAGO 11/B. You are commended in writing by the IG, which is a quiet kind of commendation that does not help your career and does not hurt it.",
       },
       {
         beat: "Years later",
@@ -263,34 +198,14 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
     ],
     timeline: [
       {
-        beat: "05:47:50",
-        consequence:
-          "You go four meters left along the wall to Karst and tell him quietly: 'Sergeant, I am scouting the west reverse-slope for squirters before step-off. Five minutes.' Karst looks at you. He says: 'Five minutes, Corporal.' He does not ask another question.",
-      },
-      {
         beat: "05:50",
         consequence:
           "You drop behind the second-row houses and you are at Bekka's back step in ninety seconds. You tell her: 'Mother, take everyone you can down the goat path to the watercourse. Walk, do not run. The path is yours for thirty meters. Wait at the watercourse until midday and then go to Velnar.' She looks at you for two seconds. She gets up. She does not drop the apron.",
       },
       {
-        beat: "06:00",
-        consequence:
-          "Bekka and the headman move seventeen people — every noncombatant they can reach in ten minutes — down the goat path in three groups, walking. Lira is in the second group, holding the headman's coat. The path holds. Overwatch on the upper terrace sees nothing because the angle does not let them.",
-      },
-      {
         beat: "06:08",
         consequence:
           "You are back on the wall at six-oh-eight. Karst looks at you. He says: 'Anything, Corporal.' You say: 'Nothing visible on the reverse slope, Sergeant.' He keys the radio at 06:09: 'Bravo six, three-two, request source confirm on the designation, over.' Karst makes the call because something in your face at six-oh-eight made it.",
-      },
-      {
-        beat: "06:25",
-        consequence:
-          "The squad steps off at six-two-five into a hamlet of seven people — three elderly who could not be moved, the headman's son who refused to leave them, and three children who were missed. There is no contact. Karst calls the clearance complete at six-three-eight. The seven are interrogated and released by midday. Brel on the ridge has watched the evacuation through the scope without intervening and has written every step of it.",
-      },
-      {
-        beat: "Month 6",
-        consequence:
-          "The IG file includes the evacuation. The board is uncertain what to do with it. You are not charged because Brel's notebook records that no order was disobeyed and no protocol violated. You are also not commended, because the act has no name in any regulation. You are quietly transferred. Karst gives you the optic when you go.",
       },
       {
         beat: "Years later",
