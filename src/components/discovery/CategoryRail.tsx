@@ -42,6 +42,10 @@ export function CategoryRail({
             </li>
           ))}
         </ul>
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-y-0 right-0 w-12 sm:w-16 bg-gradient-to-l from-background via-background/70 to-transparent"
+        />
       </div>
     </section>
   );
