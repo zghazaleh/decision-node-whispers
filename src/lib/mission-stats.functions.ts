@@ -83,6 +83,7 @@ const RecordInput = z.object({
   investigationSeconds: z.number().int().min(0).max(86400).optional(),
   messageCount: z.number().int().min(0).max(500).optional(),
   difficultyRating: z.number().int().min(1).max(5).optional(),
+  archetypeId: z.string().min(1).max(64).optional(),
   completed: z.boolean().default(true),
 });
 
@@ -96,10 +97,50 @@ export const recordMissionPlay = createServerFn({ method: "POST" })
       investigation_seconds: data.investigationSeconds ?? null,
       message_count: data.messageCount ?? null,
       difficulty_rating: data.difficultyRating ?? null,
+      archetype_id: data.archetypeId ?? null,
       completed: data.completed,
     });
     if (error) return { ok: false as const, error: error.message };
     return { ok: true as const };
+  });
+
+const BreakdownInput = z.object({
+  missionId: z.string().min(3).max(64),
+});
+
+export type ArchetypeBreakdown = {
+  totalPlays: number;
+  counts: Array<{ archetypeId: string; count: number; percent: number }>;
+};
+
+export const getMissionArchetypeBreakdown = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => BreakdownInput.parse(input))
+  .handler(async ({ data }): Promise<ArchetypeBreakdown> => {
+    const supabase = publicClient();
+    const { data: rows, error } = await supabase
+      .from("mission_plays")
+      .select("archetype_id, completed")
+      .eq("mission_id", data.missionId);
+
+    if (error || !rows) return { totalPlays: 0, counts: [] };
+
+    const tally = new Map<string, number>();
+    for (const row of rows) {
+      if (!row.completed) continue;
+      const id = row.archetype_id;
+      if (!id) continue;
+      tally.set(id, (tally.get(id) ?? 0) + 1);
+    }
+    const total = Array.from(tally.values()).reduce((a, b) => a + b, 0);
+    const counts = Array.from(tally.entries())
+      .map(([archetypeId, count]) => ({
+        archetypeId,
+        count,
+        percent: total ? Math.round((count / total) * 100) : 0,
+      }))
+      .sort((a, b) => b.count - a.count);
+
+    return { totalPlays: total, counts };
   });
 
 const PercentileInput = z.object({

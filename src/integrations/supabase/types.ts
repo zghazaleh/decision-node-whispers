@@ -103,6 +103,7 @@ export type Database = {
       }
       mission_plays: {
         Row: {
+          archetype_id: string | null
           completed: boolean
           created_at: string
           decision_seconds: number | null
@@ -113,6 +114,7 @@ export type Database = {
           mission_id: string
         }
         Insert: {
+          archetype_id?: string | null
           completed?: boolean
           created_at?: string
           decision_seconds?: number | null
@@ -123,6 +125,7 @@ export type Database = {
           mission_id: string
         }
         Update: {
+          archetype_id?: string | null
           completed?: boolean
           created_at?: string
           decision_seconds?: number | null

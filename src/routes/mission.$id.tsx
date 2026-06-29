@@ -318,6 +318,7 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
             decisionSeconds,
             messageCount: messages.length,
             completed: true,
+            ...(archetypeId ? { archetypeId } : {}),
           },
         });
       } catch (err) {
