@@ -445,6 +445,34 @@ const FRAMEWORK: Record<string, MissionFramework> = {
     learningObjective:
       "Practice distinguishing a lawful from an unlawful order when the chain has wrapped the unlawful one in lawful paperwork — using the reachable corroborations (Karst's disbelief, the SOURCE CONFIRM protocol, the IG officer on the ridge, the geometry of the goat path) without letting either 'orders are orders' or 'I am the one who refuses' become the slogan that does the choosing on a wall in the eastern light.",
   },
+
+  "mission-17": {
+    stakes: [
+      "The lives of three drovers passing through — Hale Tirran (28), Joss Vell (24), Pim Conder (35) — bound in the bed of Owen Lourd's freight wagon with three ropes already over the cottonwood branch.",
+      "The town of Bremmen Hollow's standing with itself for the next generation — whether the cottonwood at the end of Main Street is the kind of branch men hang from at dusk in this town or the kind that does not.",
+      "Casper Renn's badge, freedom, and place in the only town he has ever lived in — Cresta Plain charter §11 makes a lynching over the deputy's explicit objection a capital offense against every adult who participates, and makes a lynching the deputy permits a personal one.",
+      "The actual killer of Henry Marsh going free or being arrested — Owen Lourd needs this hanging done before dark to keep the freight ledger and the livery receipt in the dark with him.",
+    ],
+    hiddenTruths: [
+      "Owen Lourd killed Henry Marsh at 14:00 today over a freight-account theft he had been quietly running for nineteen months to cover a gambling debt at the Long Tooth in Cinder Springs. Reachable only obliquely — through Adela's Monday-night sentence ('I think there is a thing with Owen I will have to put right by Friday') and Bram's observation that the freight ledger is missing off Henry's desk.",
+      "The three drovers were eighty miles east at Tomlin's livery in Edenmill at noon today, stamped on a feed receipt at 12:00 currently inside the canvas roll behind Pim Conder's cantle, which is tied to the back of Owen Lourd's own freight wagon under a cattle blanket. Reachable only by walking to the wagon and asking Hale Tirran a calm question.",
+      "Bram Coate noticed at 18:20 that the freight ledger from Henry's post-office desk is not where it normally lives, and has not said so to anyone because his daughter is married to Owen Lourd's nephew. Reachable only by asking Bram plainly what he saw inside the post office.",
+      "The leather purse the crowd is calling 'Henry's money' is Pim Conder's drover purse with a Cattle Drovers' Trust receipt folded inside, drawn at Calver's Crossing on Tuesday. The receipt has not been examined.",
+      "The badge can dispatch Dell Tomlin on the freight road to Edenmill in four minutes without Owen's consent; using it costs most of the crowd inside an hour. Bram Coate will back the deputy if the deputy moves first.",
+    ],
+    timeLimit:
+      "Twenty-six minutes of usable light remain at 19:42. Owen Lourd has said twice that no man hangs in the dark in this town. The rope goes on or before 20:08.",
+    decisionScience: [
+      "Mob / groupthink: forty adults in a hot street under torches with a single loud voice on a wagon box act on the felt certainty of the room rather than on any single person's actual confidence, and the felt certainty rises in proportion to the time remaining before dark.",
+      "Just-world bias: a beloved man is dead and a wagon of strangers with a purse of silver is the world arranging an answer that the body wants to be true, before the mind has counted anything.",
+      "Certainty under social pressure: Casper's hunch that the evidence is thin will not feel like a fact in his chest while forty people are sure; it will feel like cowardice or arrogance, and the brain will preferentially recategorize it as either.",
+      "Confirmation bias: every detail of the strangers — the sweat on the horses, the silver, the bruise above Hale's eye — slots into the story the crowd has already told itself and no detail slots out.",
+      "Status quo / bystander asymmetry: standing aside requires only the failure to act; stopping it requires walking ten paces into open ground while forty people watch, and the brain weights those asymmetrically against the moral weight of each.",
+      "Authority anchoring on Owen: Owen Lourd's voice has been the voice in the cattlemen's hall for twelve years and is anchoring the crowd; the deputy's voice has been on the street for thirty-six hours and is anchored against him.",
+    ],
+    learningObjective:
+      "Practice holding due process against the felt certainty of a crowd that is sure, using the reachable corroborations (the canvas roll on Pim's saddle, Bram's missing ledger, Adela's Monday-night sentence) — without letting either 'the town has decided' or 'I alone see clearly' become the slogan that does the choosing under a cottonwood at dusk.",
+  },
 };
 
 export function getMissionFramework(missionId: string): MissionFramework | null {
