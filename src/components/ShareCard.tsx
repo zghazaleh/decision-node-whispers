@@ -49,6 +49,26 @@ export function ShareCard({ profile, missionCodename }: ShareCardProps) {
       // iPadOS 13+ reports as Mac with touch support
       (/Macintosh/.test(ua) && (navigator as Navigator & { maxTouchPoints?: number }).maxTouchPoints! > 1);
     setCanCopyImage(hasApi && !isIOS);
+
+    // Web Share API with file support — opens the native share sheet
+    // (Instagram, TikTok, WhatsApp, Messages, etc.). Probe with a tiny
+    // PNG File to confirm the platform allows image attachments.
+    try {
+      const nav = navigator as Navigator & {
+        share?: (data: ShareData) => Promise<void>;
+        canShare?: (data: ShareData) => boolean;
+      };
+      if (typeof nav.share === "function") {
+        if (typeof nav.canShare === "function") {
+          const probe = new File([new Uint8Array([0])], "probe.png", { type: "image/png" });
+          setCanNativeShare(nav.canShare({ files: [probe] }));
+        } else {
+          setCanNativeShare(true);
+        }
+      }
+    } catch {
+      setCanNativeShare(false);
+    }
   }, []);
 
 
