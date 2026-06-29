@@ -1,12 +1,12 @@
 # Case Authoring Spec — v1 (Future)
 
-Target workflow and tooling shape for authoring a Decision Node. The reference user is a writer or domain expert, not an engineer.
+Target workflow and tooling shape for authoring a Decision Nodes. The reference user is a writer or domain expert, not an engineer.
 
 > **Status:** Future. Today, authoring is done by hand-editing TypeScript triads under `src/lib/missions/`.
 
 ## 1. The author's job
 
-An author of a Decision Node is responsible for:
+An author of a Decision Nodes is responsible for:
 
 - The dilemma itself — a real, defensible, conflict-rich situation.
 - The cast — three to seven named characters with conflicting incentives and asymmetric knowledge.

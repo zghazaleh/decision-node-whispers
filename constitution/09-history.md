@@ -72,7 +72,7 @@ Every entry includes: **Date**, **Decision**, **Reasoning**, **Expected impact**
 
 **Reasoning.** "Game" sets expectations of win-states, scores, and replayable optima. "Case" and "archive" set expectations of judgment, gravity, and permanence — which is the experience the product actually delivers.
 
-**Expected impact.** Player expectations align with what the product is. Press, reviewers, and new players describe Decision Node accurately.
+**Expected impact.** Player expectations align with what the product is. Press, reviewers, and new players describe Decision Nodes accurately.
 
 ---
 

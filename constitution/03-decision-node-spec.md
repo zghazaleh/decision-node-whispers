@@ -1,10 +1,10 @@
-# 03 — The Canonical Decision Node
+# 03 — The Canonical Decision Nodes
 
-This document defines what a Decision Node *is*, independent of how today's code implements it. Eventually this is the standard every community-authored case will be measured against.
+This document defines what a Decision Nodes *is*, independent of how today's code implements it. Eventually this is the standard every community-authored case will be measured against.
 
 ## Purpose
 
-A Decision Node is a single, self-contained, consequential dilemma authored so that:
+A Decision Nodes is a single, self-contained, consequential dilemma authored so that:
 
 - The player is placed in someone else's shoes under pressure.
 - The player must gather information from in-world characters and objects.
@@ -13,7 +13,7 @@ A Decision Node is a single, self-contained, consequential dilemma authored so t
 
 ## Required sections
 
-Every Decision Node has six structural parts:
+Every Decision Nodes has six structural parts:
 
 1. **Metadata** — codename, title, logline, duration, tone, location, year, category, difficulty, creator, version, status.
 2. **Scene** — a single image and short mood line that establishes the world before the first word of dialogue.
@@ -31,15 +31,15 @@ A canonical session is a single arc:
 3. **Decide** — a deliberate interruption surface where the player commits, either via a preset or in their own words, with a self-reported confidence.
 4. **Analysis** — a coda screen that reflects the reasoning back without judgment of outcome.
 
-Every Decision Node must support exactly this arc. Side quests, branching meta-progress, and inventory mechanics are out of scope by design.
+Every Decision Nodes must support exactly this arc. Side quests, branching meta-progress, and inventory mechanics are out of scope by design.
 
 ## Hidden truths
 
-Every Decision Node must contain things the player can find but is never told: a motive that was not on the agenda, an object that re-frames a character, a date in the history log that contradicts the official story. The presence of hidden truths is what separates a Decision Node from a survey.
+Every Decision Nodes must contain things the player can find but is never told: a motive that was not on the agenda, an object that re-frames a character, a date in the history log that contradicts the official story. The presence of hidden truths is what separates a Decision Nodes from a survey.
 
 ## Characters
 
-A Decision Node has between three and seven named characters. Each character has:
+A Decision Nodes has between three and seven named characters. Each character has:
 
 - A name and role.
 - An incentive that does not perfectly align with the player's.
@@ -66,12 +66,12 @@ Consequences are authored, not generated. Each archetype carries a fixed consequ
 
 ## AI requirements
 
-A Decision Node requires two AI surfaces:
+A Decision Nodes requires two AI surfaces:
 
 - A **Director** that streams in-character dialogue and ends every turn with a chips line.
 - An **Analyzer** that runs once, post-commit, in two stages: classify the decision into an archetype, then narrate a structured reflection that respects the archetype's canon.
 
-A Decision Node must be playable end-to-end without either AI making a single claim that contradicts canon.
+A Decision Nodes must be playable end-to-end without either AI making a single claim that contradicts canon.
 
 ## Metadata contract
 

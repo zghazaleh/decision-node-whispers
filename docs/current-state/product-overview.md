@@ -1,6 +1,6 @@
 # Product Overview — Current State
 
-Snapshot of what the Decision Node MVP *is today*, as built. Companion: `docs/architecture/` (design intent) — when the two disagree, this folder describes the code.
+Snapshot of what the Decision Nodes MVP *is today*, as built. Companion: `docs/architecture/` (design intent) — when the two disagree, this folder describes the code.
 
 ## What the product does
 

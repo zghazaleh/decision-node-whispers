@@ -42,7 +42,7 @@ The case set becomes browsable, searchable, returnable. Players can revisit a ca
 
 ## Creator platform
 
-Tooling for new authors to write a Decision Node end-to-end — canon, characters, archetypes, presets, scene. The platform enforces the constitution structurally: a case cannot publish if it lacks hidden knowledge, conflicting incentives, or an authored consequence timeline.
+Tooling for new authors to write a Decision Nodes end-to-end — canon, characters, archetypes, presets, scene. The platform enforces the constitution structurally: a case cannot publish if it lacks hidden knowledge, conflicting incentives, or an authored consequence timeline.
 
 ## Community publishing
 
@@ -62,7 +62,7 @@ Across thousands of cases and millions of sessions, patterns emerge — recurrin
 
 ## The world's archive of consequential decisions
 
-The end state is a permanent, public, searchable library of difficult human decisions — authored, played, reflected upon, preserved. Decision Node becomes the place this kind of thinking lives.
+The end state is a permanent, public, searchable library of difficult human decisions — authored, played, reflected upon, preserved. Decision Nodes becomes the place this kind of thinking lives.
 
 ## What is *not* on the roadmap
 

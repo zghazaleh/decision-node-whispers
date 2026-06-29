@@ -1,12 +1,12 @@
-# Decision Node Spec — v1 (Future)
+# Decision Nodes Spec — v1 (Future)
 
-Target architecture for a published Decision Node, independent of the current MVP implementation. This is what every case — house-edition or community-authored — must conform to once the creator platform exists.
+Target architecture for a published Decision Nodes, independent of the current MVP implementation. This is what every case — house-edition or community-authored — must conform to once the creator platform exists.
 
 > **Status:** Future. The current implementation partially satisfies this spec; see `migration-gap-analysis.md` for deltas.
 
 ## 1. Manifest
 
-Every Decision Node is a self-describing bundle with a single `manifest.json` at the root:
+Every Decision Nodes is a self-describing bundle with a single `manifest.json` at the root:
 
 ```jsonc
 {
@@ -39,7 +39,7 @@ The bundle is the unit of authoring, review, versioning, and publishing.
 
 ## 2. Canon
 
-Canon is structured data. Each Decision Node ships its own JSON Schema for canon (`canon.schema.json`), and the manifest references it. The schema is published alongside the case so:
+Canon is structured data. Each Decision Nodes ships its own JSON Schema for canon (`canon.schema.json`), and the manifest references it. The schema is published alongside the case so:
 
 - The Director's canon-block formatter can compile against a known shape.
 - Validation catches missing fields before publish, not at runtime.
@@ -86,7 +86,7 @@ Presets are first-class authoring surfaces. Each preset is bound to exactly one 
 
 ## 5. Director contract
 
-A Decision Node provides a Director system prompt and is responsible for these guarantees by construction:
+A Decision Nodes provides a Director system prompt and is responsible for these guarantees by construction:
 
 - The prompt ends with a programmatically-generated canon block derived from `canon.json` + `canon.schema.json`.
 - The prompt enforces the chip protocol verbatim (three chips, 3–10 words, no end punctuation, no emoji, no verbatim repeats).
