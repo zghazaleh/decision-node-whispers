@@ -50,6 +50,17 @@ export type DecisionProfile = {
   emergingPattern: string;
 };
 
+const EMPTY_PORTRAIT =
+  "Not enough data yet. Complete a mission to begin building your profile.";
+const FORMING_PORTRAIT =
+  "Your pattern is still forming. Each mission refines the assessment.";
+
+function isPlaceholderPortrait(s: string | undefined | null): boolean {
+  if (!s) return true;
+  const t = s.trim();
+  return t === "" || t === EMPTY_PORTRAIT || t === FORMING_PORTRAIT;
+}
+
 const empty = (): DecisionProfile => ({
   version: 1,
   missionsCompleted: 0,
@@ -58,7 +69,7 @@ const empty = (): DecisionProfile => ({
     (acc, d) => ({ ...acc, [d]: 50 }),
     {} as Record<Dimension, number>,
   ),
-  emergingPattern: "Not enough data yet. Complete a mission to begin building your profile.",
+  emergingPattern: EMPTY_PORTRAIT,
 });
 
 export function readProfile(): DecisionProfile {
