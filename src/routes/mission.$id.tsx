@@ -717,6 +717,25 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
               </button>
             </form>
 
+            {/* Pacing signal — literary cue toward the commit gate. */}
+            {(() => {
+              const line =
+                userTurnsCount >= 6
+                  ? "The decision is open."
+                  : userTurnsCount >= 3
+                    ? "The decision is within reach."
+                    : null;
+              if (!line) return null;
+              return (
+                <p
+                  key={line}
+                  className="mt-6 text-center font-sans text-[0.6rem] tracking-[0.35em] uppercase text-foreground/40 italic animate-fade-in"
+                >
+                  {line}
+                </p>
+              );
+            })()}
+
             {/* Decide pill — fades in as the moment ripens */}
             <div className="mt-5 flex justify-center" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
               <button
