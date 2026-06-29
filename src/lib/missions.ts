@@ -347,4 +347,22 @@ export const MISSIONS: MissionMeta[] = [
     creator: "House Edition",
     version: "v1.0",
   },
+  {
+    id: "mission-19",
+    number: "19",
+    codename: "The Carer",
+    title: "The Carer",
+    logline:
+      "A federal pen in its holder beside an open form. A clock at 10:42. Eighteen minutes before the van and Aven is in the conservatory.",
+    status: "available",
+    duration: "20–40 min",
+    tone: "Birdsong · Cut grass · Held breath",
+    location: "Meadowfold House, Verren district",
+    year: "Fourteenth year of the Continuance Programme",
+    category: "Conscience",
+    theme: "Complicity",
+    difficulty: 5,
+    creator: "House Edition",
+    version: "v1.0",
+  },
 ];
