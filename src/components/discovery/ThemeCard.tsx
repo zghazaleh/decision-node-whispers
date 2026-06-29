@@ -107,12 +107,10 @@ export function ThemeCard({
       {/* Expanded mission posters */}
       {isOpen && (
         <div className="border-t border-foreground/10 px-5 py-6 sm:px-6 motion-safe:animate-[fade-in_0.4s_ease-out_both]">
-          <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+          <ul className="flex flex-wrap gap-4 sm:gap-5">
             {items.map((m) => (
-              <li key={m.id} className="flex">
-                <div className="w-full [&>button]:w-full">
-                  <MissionCard mission={m} onSelect={onSelect} />
-                </div>
+              <li key={m.id}>
+                <MissionCard mission={m} onSelect={onSelect} />
               </li>
             ))}
           </ul>
