@@ -10,6 +10,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { MISSIONS, type MissionMeta } from "@/lib/missions";
 import { audio } from "@/lib/audio/director";
+import { idlePrefetch, nextLikelyMissionId } from "@/lib/audio/idlePrefetch";
 import { getSoundtrack } from "@/lib/soundtracks";
 import { getAllMissionStats, type MissionStats } from "@/lib/mission-stats.functions";
 import { readMission } from "@/lib/mission-store";

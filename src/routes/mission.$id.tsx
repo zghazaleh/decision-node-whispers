@@ -14,6 +14,7 @@ import { updateProfileWithAnalysis } from "@/lib/decision-profile";
 import { recordMissionPlay } from "@/lib/mission-stats.functions";
 
 import { audio } from "@/lib/audio/director";
+import { idlePrefetch, nextLikelyMissionId } from "@/lib/audio/idlePrefetch";
 import { getMissionEngine } from "@/lib/missions/registry";
 import { MISSIONS } from "@/lib/missions";
 import type { MissionEngine } from "@/lib/missions/types";
