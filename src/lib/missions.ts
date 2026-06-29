@@ -275,4 +275,22 @@ export const MISSIONS: MissionMeta[] = [
     creator: "House Edition",
     version: "v1.0",
   },
+  {
+    id: "mission-15",
+    number: "15",
+    codename: "The Papers",
+    title: "The Papers",
+    logline:
+      "Two transit letters under the lamp. The leader is downstairs. Your love is three doors west. The freighter sails at five.",
+    status: "available",
+    duration: "20–40 min",
+    tone: "Smoky · Rain · Held breath",
+    location: "Upstairs at Maelin's café, Kelvras (under blockade)",
+    year: "Week 11 of the Sevran blockade",
+    category: "Conflict",
+    theme: "Love",
+    difficulty: 5,
+    creator: "House Edition",
+    version: "v1.0",
+  },
 ];

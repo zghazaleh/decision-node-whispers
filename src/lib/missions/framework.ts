@@ -389,6 +389,34 @@ const FRAMEWORK: Record<string, MissionFramework> = {
     learningObjective:
       "Practice deciding under a forced, deeply asymmetric risk between people you are responsible for and a stranger whose life is also at stake — using the reachable corroborations (the stranger's real story, the neighbor's actual answer, the hiding places the house already contains, the permit on the hook) without letting either 'my own first' OR 'a stranger's life is no less sacred' become a slogan that does the choosing for you.",
   },
+
+  "mission-15": {
+    stakes: [
+      "Two transit letters, one humanitarian window, one freighter at 05:00 — and no further window scheduled in a city with twelve days of flour.",
+      "A four-year partnership and a planned life in Veyrand with Daniyel Marsk, on the line in a single hand.",
+      "The Free Coast Council's structural survival, which runs through Camilla Roeven — the only person all four sub-cells will sit in a room with — and through the parish-hall soup line feeding nine hundred and twelve people daily.",
+      "Anouk's own life and the price the Sevran will or will not extract from a forger who stays behind after the window closes.",
+    ],
+    hiddenTruths: [
+      "Major Pellor granted tonight's window because his faction inside the garrison wants Roeven out of Kelvras to fragment the council and undermine Commandant Brest's attritional siege policy. He does not love the council; he wants the colonelcy.",
+      "Camilla Roeven traded the names and meeting times of three lower-cell organizers (Mira Vell, Tilden Korst, Father Halben Roe) in week eight for the release of her brother Tomek from Holven Point. The three were taken in week nine and remain inside. She has not told the council.",
+      "Daniyel Marsk has been clerking three afternoons a week in Pellor's outer office for nine months and has, on six occasions, copied small items off the desk and passed them to Jeren. He knew tonight's window was real before Anouk came home with it.",
+      "Captain Anders Belven of the Stelle Veraan will accept one (1) extra unmanifested passenger ONLY if Jeren Halm vouches in person on the gangway, because of an old debt over Belven's son.",
+      "The factor Olen Karr at the warehouse on quay 4 will buy the two letters tonight at twelve months of a clerk's salary apiece, no questions, no record.",
+    ],
+    timeLimit:
+      "The Stelle Veraan clears quay 7 at 05:00 with the tide. The harbor master will not hold the tide. It is 02:18.",
+    decisionScience: [
+      "Affect / love heuristic: Daniyel is vividly, particularly real; the nine hundred at the parish-hall line are statistical. The brain weights one against the other before any reasoning runs.",
+      "Scope insensitivity: one beloved person vs. a structure that holds a city's mutual-aid network does not feel proportionally larger in the body, even when the numbers are correct.",
+      "Self-serving bias: 'Camilla is compromised, so the cause is less owed' becomes available exactly when believing it lets Anouk keep the life she wants.",
+      "Present-bias over long causes: the freighter is in three hours; the surrender terms the council might broker are months out; the body prefers the closer reward at the longer one's expense.",
+      "Anchoring on the framing of the room: 'love OR cause' is the question the desk presents — the third paths (split, destroy, sell) are only visible if Anouk steps out of the framing.",
+      "Sunk cost: fourteen months of forgery and four years of partnership both create commitments that argue against any answer that 'wastes' them.",
+    ],
+    learningObjective:
+      "Practice deciding when an intimate good and a collective good cannot both be honored, without letting either 'love is not lesser than the cause' or 'the cause is larger than any one life' become the slogan that does the choosing — and using the reachable corroborations (Pellor's actual motive, Camilla's actual cost, Daniyel's actual access) to see whether the framing on the desk is the only framing available.",
+  },
 };
 
 export function getMissionFramework(missionId: string): MissionFramework | null {
