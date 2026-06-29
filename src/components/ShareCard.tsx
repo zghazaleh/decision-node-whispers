@@ -174,14 +174,16 @@ export function ShareCard({ profile, missionCodename }: ShareCardProps) {
         >
           {busy === "download" ? "Rendering…" : "Download PNG"}
         </button>
-        <button
-          type="button"
-          onClick={onCopyImage}
-          disabled={busy !== null}
-          className="text-foreground/55 hover:text-foreground border-b border-foreground/20 hover:border-foreground pb-1 transition-colors disabled:opacity-50"
-        >
-          {busy === "copy" ? "Copying…" : "Copy image"}
-        </button>
+        {canCopyImage && (
+          <button
+            type="button"
+            onClick={onCopyImage}
+            disabled={busy !== null}
+            className="text-foreground/55 hover:text-foreground border-b border-foreground/20 hover:border-foreground pb-1 transition-colors disabled:opacity-50"
+          >
+            {busy === "copy" ? "Copying…" : "Copy image"}
+          </button>
+        )}
         <a
           href={xUrl}
           target="_blank"
