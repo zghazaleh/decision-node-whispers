@@ -442,14 +442,32 @@ function MissionsPage() {
 
 
 
-        {/* ---------- Ledger header ---------- */}
-        <div className="hidden sm:grid grid-cols-[1fr_auto] items-baseline gap-x-8 border-b border-foreground/10 pb-2 text-[0.5rem] tracking-[0.4em] uppercase text-muted-foreground/55">
-          <span>Case</span>
-          <span className="grid grid-cols-[6rem_4rem_4rem_4rem] text-right tabular-nums">
-            <span>Tone</span>
-            <span>Level</span>
-            <span>Length</span>
-            <span>Stood</span>
+        {/* ---------- Curated category rails ---------- */}
+        {!filtersActive && (
+          <div className="mb-6">
+            {CURATED_GROUPS.map((g) => {
+              const items = g.ids
+                .map((id) => MISSIONS.find((m) => m.id === id))
+                .filter((m): m is MissionMeta => !!m && m.status === "available");
+              return (
+                <CategoryRail
+                  key={g.label}
+                  label={g.label}
+                  caption={g.caption}
+                  items={items}
+                  onSelect={commit}
+                />
+              );
+            })}
+          </div>
+        )}
+
+        {/* ---------- Case Archive header ---------- */}
+        <div className="mb-4 mt-4 flex items-baseline gap-3 border-b border-foreground/10 pb-3">
+          <h2 className="font-display text-xl text-foreground/95">Case Archive</h2>
+          <span className="h-px flex-1 bg-foreground/10" aria-hidden />
+          <span className="text-[0.55rem] tracking-[0.4em] uppercase text-muted-foreground/55">
+            All cases
           </span>
         </div>
 
