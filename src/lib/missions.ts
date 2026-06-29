@@ -185,4 +185,22 @@ export const MISSIONS: MissionMeta[] = [
     creator: "House Edition",
     version: "v1.0",
   },
+  {
+    id: "mission-10",
+    number: "10",
+    codename: "The Checkpoint",
+    title: "The Checkpoint",
+    logline:
+      "One permit before the gate closes at dawn. The sergeant will not tell you which child gets it.",
+    status: "available",
+    duration: "20–40 min",
+    tone: "Freezing · Hushed dread",
+    location: "Voryn Pass border crossing",
+    year: "Late winter",
+    category: "Conflict",
+    theme: "Conscience",
+    difficulty: 5,
+    creator: "House Edition",
+    version: "v1.0",
+  },
 ];
