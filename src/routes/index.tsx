@@ -99,6 +99,14 @@ function Landing() {
                 window.setTimeout(() => { void audio.playMotif("landing"); }, 1100);
               })();
             }}
+            onKeyDown={(e) => {
+              if (e.key !== "Enter" && e.key !== " ") return;
+              void (async () => {
+                await audio.ignite();
+                await audio.enter("landing", { fadeMs: 2200 });
+                window.setTimeout(() => { void audio.playMotif("landing"); }, 1100);
+              })();
+            }}
             className="group inline-flex items-center gap-4 px-1 py-3 text-sm tracking-[0.4em] uppercase text-foreground/85 hover:text-foreground transition-colors"
           >
             <span className="h-px w-10 bg-foreground/30 group-hover:bg-foreground/70 group-hover:w-16 transition-all duration-500" />
