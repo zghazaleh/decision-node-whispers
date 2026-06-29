@@ -6,6 +6,8 @@ import { readMission, useMission, type SavedMission } from "@/lib/mission-store"
 import { readProfile, type DecisionProfile } from "@/lib/decision-profile";
 import { DecisionProfileCard } from "@/components/DecisionProfileCard";
 import { NoticedRail } from "@/components/NoticedRail";
+import { ShareCard } from "@/components/ShareCard";
+import { MISSIONS } from "@/lib/missions";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { getMissionPercentile, type MissionPercentile } from "@/lib/mission-stats.functions";
 import { logAnalysisRead } from "@/lib/discovery/signals";
@@ -400,6 +402,24 @@ function AnalysisDebrief({
           </p>
         )}
       </section>
+
+      {/* Block 6 — Share */}
+      {profile && profile.missionsCompleted > 0 && (
+        <section className="animate-fade-up space-y-6" style={{ animationDelay: "0.75s" }}>
+          <div className="text-center">
+            <p className="text-[0.6rem] tracking-[0.5em] uppercase text-accent/80 mb-3">
+              Share your profile
+            </p>
+            <p className="text-xs text-foreground/50 max-w-md mx-auto leading-relaxed">
+              A portrait of how you decide. Yours, to keep or to post.
+            </p>
+          </div>
+          <ShareCard
+            profile={profile}
+            missionCodename={MISSIONS.find((m) => m.id === mission.missionId)?.codename}
+          />
+        </section>
+      )}
 
       {/* Coda */}
       <section className="animate-fade-up pt-4" style={{ animationDelay: "0.8s" }}>
