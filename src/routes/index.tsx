@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { audio } from "@/lib/audio/director";
 import { idlePrefetch, nextLikelyMissionId } from "@/lib/audio/idlePrefetch";
@@ -28,6 +28,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Landing() {
+  const navigate = useNavigate();
   // Warm the landing bed (about to play) eagerly, and let idle time bring
   // in the archive bed plus the most-likely-next mission bed so the first
   // cross-fade after Begin never has to wait on a network round-trip.
@@ -88,8 +89,8 @@ function Landing() {
           className="animate-fade-up mt-12 sm:mt-16"
           style={{ animationDelay: "1.6s" }}
         >
-          <Link
-            to="/missions"
+          <button
+            type="button"
             onPointerDown={() => {
               // Ignition: the first gesture. Sub-drone fades in, then the Node
               // motif sounds once. The Archive bed picks up on /missions.
@@ -107,12 +108,13 @@ function Landing() {
                 window.setTimeout(() => { void audio.playMotif("landing"); }, 1100);
               })();
             }}
+            onClick={() => navigate({ to: "/missions" })}
             className="group inline-flex items-center gap-4 px-1 py-3 text-sm tracking-[0.4em] uppercase text-foreground/85 hover:text-foreground transition-colors"
           >
             <span className="h-px w-10 bg-foreground/30 group-hover:bg-foreground/70 group-hover:w-16 transition-all duration-500" />
             Begin
             <span className="h-px w-10 bg-foreground/30 group-hover:bg-foreground/70 group-hover:w-16 transition-all duration-500" />
-          </Link>
+          </button>
         </div>
 
         <p
