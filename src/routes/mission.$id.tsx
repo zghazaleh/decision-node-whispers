@@ -20,7 +20,12 @@ import { toast } from "sonner";
 
 import { clearMission, partsToText, readMission, useMission } from "@/lib/mission-store";
 import { analyzeDecision } from "@/lib/analysis.functions";
-import { updateProfileWithAnalysis } from "@/lib/decision-profile";
+import {
+  updateProfileWithAnalysis,
+  applyPortraitToProfile,
+  buildPortraitInput,
+} from "@/lib/decision-profile";
+import { generatePortrait } from "@/lib/portrait.functions";
 import { recordMissionPlay } from "@/lib/mission-stats.functions";
 
 import { audio } from "@/lib/audio/director";
@@ -299,7 +304,19 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
         ...(archetypeId ? { archetypeId } : {}),
       });
       try {
-        updateProfileWithAnalysis(MISSION_ID, analysis);
+        const updatedProfile = updateProfileWithAnalysis(MISSION_ID, analysis);
+        // Fire-and-forget: regenerate the AI portrait line off the new profile.
+        void (async () => {
+          try {
+            const payload = buildPortraitInput(updatedProfile, analysis);
+            const { portrait } = await generatePortrait({ data: payload });
+            if (portrait && portrait.trim()) {
+              applyPortraitToProfile(portrait.trim());
+            }
+          } catch (err) {
+            console.warn("portrait generation failed", err);
+          }
+        })();
       } catch (err) {
         console.error("profile update failed", err);
       }
