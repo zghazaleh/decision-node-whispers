@@ -7,6 +7,7 @@ import { readProfile, type DecisionProfile } from "@/lib/decision-profile";
 import { DecisionProfileCard } from "@/components/DecisionProfileCard";
 import { NoticedRail } from "@/components/NoticedRail";
 import { ShareCard } from "@/components/ShareCard";
+import { ReadingShareCard } from "@/components/ReadingShareCard";
 import { AlternatePaths } from "@/components/AlternatePaths";
 import { CommunityStats } from "@/components/CommunityStats";
 import { MISSIONS } from "@/lib/missions";
