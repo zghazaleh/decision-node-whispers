@@ -50,6 +50,7 @@ const _missions: Record<string, Soundtrack | null> = {
   "mission-11": bed("mission-11", null, "Sweltering jury room. Failing fan, fluorescent hum, indifferent city outside.", 0.3),
   "mission-12": bed("mission-12", null, "Buried bunker at 02:47. Console hum, fluorescent buzz, the silent red phone.", 0.3),
   "mission-13": bed("mission-13", null, "Rain-soaked stone quay. Gas-lamp hiss, the river slap, distant whistles answering.", 0.3),
+  "mission-14": bed("mission-14", null, "Candlelit hall past curfew. Pendulum clock, wet cobblestones, bootfall approaching.", 0.3),
   // Pseudo "screens" — played through the same loop engine as missions.
   __landing__: bed("landing-drone", null, "Stillness. The room before anything.", 0.3),
   __archive__: bed("archive-bed", null, "Hushed reading room. Low warm drone.", 0.25),

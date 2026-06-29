@@ -257,4 +257,22 @@ export const MISSIONS: MissionMeta[] = [
     creator: "House Edition",
     version: "v1.0",
   },
+  {
+    id: "mission-14",
+    number: "14",
+    codename: "The Lodger",
+    title: "The Lodger",
+    logline:
+      "A knock at curfew. A stranger on the step. Your children asleep upstairs. The patrol three minutes south.",
+    status: "available",
+    duration: "20–40 min",
+    tone: "Candlelit · Held breath",
+    location: "Number 14 Vinnerstrasse, Maerlund (under occupation)",
+    year: "Year 4 of the occupation",
+    category: "Conflict",
+    theme: "Conscience",
+    difficulty: 5,
+    creator: "House Edition",
+    version: "v1.0",
+  },
 ];
