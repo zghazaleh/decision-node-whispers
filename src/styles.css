@@ -485,3 +485,27 @@
   .dn-carousel-wash { will-change: auto; }
 }
 
+/* Slow Ken Burns pan + zoom for the "What happened" cinematic panels. */
+@keyframes ken-burns {
+  0%   { transform: scale(1.05) translate3d(-1.5%, -1%, 0); }
+  100% { transform: scale(1.22) translate3d(1.5%, 1%, 0); }
+}
+.animate-ken-burns {
+  animation: ken-burns 22s ease-in-out both alternate infinite;
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-ken-burns { animation: none; transform: scale(1.08); }
+}
+
+/* Vignette overlay used by film panels: darkens corners, focuses center. */
+.vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at center, transparent 45%, rgba(0,0,0,0.55) 100%),
+    linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, transparent 18%, transparent 82%, rgba(0,0,0,0.35) 100%);
+}
+
+
