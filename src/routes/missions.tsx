@@ -286,7 +286,7 @@ function MissionsPage() {
     return rows;
   }, [theme, domain, difficulty, sort, stats]);
 
-  const filtersActive = theme !== "All" || domain !== "All" || difficulty !== "Any";
+  const filtersActive = theme !== "All" || domain !== "All" || difficulty !== "Any" || activeGroup !== null;
 
   // Closing the open row when filters change
   useEffect(() => {
