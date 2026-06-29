@@ -261,13 +261,6 @@ function MissionsPage() {
   // the hero card above is purely a feature, not an exclusion).
   const visible = useMemo(() => {
     let rows = MISSIONS.slice();
-    if (activeGroup) {
-      const group = CURATED_GROUPS.find((g) => g.label === activeGroup);
-      if (group) {
-        const ids = new Set(group.ids);
-        rows = rows.filter((m) => ids.has(m.id));
-      }
-    }
     if (theme !== "All") rows = rows.filter((m) => m.theme === theme);
     if (domain !== "All") rows = rows.filter((m) => m.category === domain);
     if (difficulty !== "Any") rows = rows.filter((m) => m.difficulty === difficulty);
@@ -290,9 +283,9 @@ function MissionsPage() {
         break;
     }
     return rows;
-  }, [theme, domain, difficulty, sort, stats, activeGroup]);
+  }, [theme, domain, difficulty, sort, stats]);
 
-  const filtersActive = theme !== "All" || domain !== "All" || difficulty !== "Any" || activeGroup !== null;
+  const filtersActive = theme !== "All" || domain !== "All" || difficulty !== "Any";
 
   // Closing the open row when filters change
   useEffect(() => {
