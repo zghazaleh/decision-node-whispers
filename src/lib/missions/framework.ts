@@ -331,6 +331,35 @@ const FRAMEWORK: Record<string, MissionFramework> = {
     learningObjective:
       "Practice judgment when the instruments may be lying and the rulebook absolves you for trusting them — using the reachable corroborators inside a clock you do not control, and naming where your own bias lives while you do it.",
   },
+
+  "mission-13": {
+    stakes: [
+      "A man's rebuilt life — eleven years of clean shop, four employees, a niece in technical school — against a sixteen-year-old open file with the inspector's name on every page.",
+      "An oath that has defined a twenty-three-year career, whose closing line is in the inspector's mouth as a reflex.",
+      "A dock-boy alive on the cobbles because the fugitive went into the river.",
+      "A chief-inspector waiting on the radio who needs this file closed for reasons of his own.",
+    ],
+    hiddenTruths: [
+      "The original offense was famine relief, not aggravated burglary — the prosecuting merchant wrote the file line and the parish testimony was struck from the record.",
+      "Maslek interviewed the parish priest six years ago and wrote 'pursue if leisure' in the file's margin. He never did.",
+      "Halden Roth will answer truthfully if asked plainly what he did at nineteen and why. He will not volunteer it.",
+      "Chief-Inspector Korst's hunger for this closed file is partly cover — the Magistrate's office is squeezing him over an unrelated bribe inquiry, and a public conviction would redirect attention.",
+      "A second blow on the patrol whistle signals 'stand down' under Bureau code and the constables will stop at the upper quay.",
+      "Pieter Solm, the saved boy, knows nothing about the man's identity and will remember the inspector's choice for the rest of his life.",
+    ],
+    timeLimit:
+      "Backup is ninety seconds out down the upper-quay stairs at the opening. The held moment is short but not instant.",
+    decisionScience: [
+      "Sunk cost: sixteen years of pursuit makes 'release' feel like a forfeiture of the career that pursued.",
+      "Identity framing: the oath has made Maslek 'the law' in his own self-image; mercy reads as self-erasure rather than as judgment.",
+      "Just-world bias: 'he saved a boy, therefore he is owed mercy' is itself a moral shortcut and can be its own bias even when the conclusion is right.",
+      "Escalation of commitment: every year the file stayed open made closing it heavier; closing it tonight is the easiest version of an act that has only ever gotten harder.",
+      "Authority bias: Korst's pressure for closure is felt as institutional necessity rather than as one person's career interest.",
+      "Availability: the rescue, vivid and three minutes old, crowds out the file's offense line — and the file's offense line, carried for sixteen years, crowds out the rescue. Both are biases of recency at different time scales.",
+    ],
+    learningObjective:
+      "Practice judgment when the rule that has defined you must be weighed against an act in front of you — using the reachable corroborations (the file margin, the man's own answer, the second layer behind the superior's interest) without letting the rescue itself become a new and quieter form of just-world reasoning.",
+  },
 };
 
 export function getMissionFramework(missionId: string): MissionFramework | null {
