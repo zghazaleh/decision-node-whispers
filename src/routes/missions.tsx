@@ -359,88 +359,20 @@ function MissionsPage() {
 
       <section className="relative z-10 mx-auto flex min-h-screen w-full max-w-5xl flex-col px-6 py-14 sm:px-10 sm:py-20">
         {/* ---------- Header ---------- */}
-        <header className="mb-10 flex items-baseline justify-between">
+        <header className="mb-8 flex items-baseline justify-between">
           <Link
             to="/"
             className="text-[0.6rem] tracking-[0.4em] uppercase text-muted-foreground hover:text-foreground/90 transition-colors"
           >
             ← Decision Nodes
           </Link>
-          <div className="flex items-center gap-5">
-            <Link
-              to="/how-it-works"
-              className="text-[0.6rem] tracking-[0.4em] uppercase text-muted-foreground/70 hover:text-foreground/90 transition-colors"
-            >
-              How it works
-            </Link>
-            <p className="text-[0.6rem] tracking-[0.4em] uppercase text-muted-foreground/70 tabular-nums">
-              {filtersActive
-                ? `Showing ${visible.length} of ${MISSIONS.length}`
-                : `Case Archive · ${MISSIONS.length} case files`}
-            </p>
-          </div>
+          <span className="text-[0.55rem] tracking-[0.4em] uppercase text-muted-foreground/50 tabular-nums">
+            {filtersActive
+              ? `${visible.length} / ${MISSIONS.length}`
+              : `${MISSIONS.length} cases`}
+          </span>
         </header>
 
-        {/* ---------- Filters ---------- */}
-        <div className="mb-10 flex flex-wrap items-end gap-x-5 gap-y-3">
-          {/* Domain */}
-          <FilterSelect
-            label="Domain"
-            values={domains}
-            active={domain}
-            onChange={setDomain}
-          />
-          {/* Theme */}
-          <FilterSelect
-            label="Theme"
-            values={themes}
-            active={theme}
-            onChange={setTheme}
-          />
-
-          {/* Difficulty */}
-          <FilterSelect
-            label="Difficulty"
-            values={["Any", ...difficulties.map(String)]}
-            active={difficulty === "Any" ? "Any" : String(difficulty)}
-            onChange={(v) => setDifficulty(v === "Any" ? "Any" : Number(v))}
-            renderValue={(v) =>
-              v === "Any" ? <span>Any</span> : <DifficultyDots level={Number(v)} />
-            }
-          />
-
-
-
-          <div className="ml-auto flex items-center gap-4">
-            {/* Active filter chip + clear */}
-            {(theme !== "All" || domain !== "All" || difficulty !== "Any") && (
-              <button
-                type="button"
-                onClick={clearFilters}
-                className="text-[0.55rem] tracking-[0.35em] uppercase text-muted-foreground/50 hover:text-accent transition-colors"
-              >
-                Clear
-              </button>
-            )}
-
-            {/* Sort */}
-            <div className="flex items-center gap-2">
-              <span className="text-[0.55rem] tracking-[0.4em] uppercase text-muted-foreground/55">
-                Sort
-              </span>
-              <button
-                type="button"
-                onClick={() => {
-                  const i = SORT_ORDER.indexOf(sort);
-                  setSort(SORT_ORDER[(i + 1) % SORT_ORDER.length]!);
-                }}
-                className="text-[0.6rem] tracking-[0.35em] uppercase text-foreground/80 hover:text-accent transition-colors tabular-nums"
-              >
-                {SORT_LABEL[sort]} ↻
-              </button>
-            </div>
-          </div>
-        </div>
 
         {/* ---------- TODAY hero ---------- */}
         {today && <HeroDetail mission={today} onEnter={commit} />}
@@ -507,6 +439,65 @@ function MissionsPage() {
             })}
           </div>
         )}
+
+        {/* ---------- Filters ---------- */}
+        <div className="mb-6 flex flex-wrap items-end gap-x-5 gap-y-3">
+          {/* Domain */}
+          <FilterSelect
+            label="Domain"
+            values={domains}
+            active={domain}
+            onChange={setDomain}
+          />
+          {/* Theme */}
+          <FilterSelect
+            label="Theme"
+            values={themes}
+            active={theme}
+            onChange={setTheme}
+          />
+
+          {/* Difficulty */}
+          <FilterSelect
+            label="Difficulty"
+            values={["Any", ...difficulties.map(String)]}
+            active={difficulty === "Any" ? "Any" : String(difficulty)}
+            onChange={(v) => setDifficulty(v === "Any" ? "Any" : Number(v))}
+            renderValue={(v) =>
+              v === "Any" ? <span>Any</span> : <DifficultyDots level={Number(v)} />
+            }
+          />
+
+          <div className="ml-auto flex items-center gap-4">
+            {/* Active filter chip + clear */}
+            {(theme !== "All" || domain !== "All" || difficulty !== "Any") && (
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="text-[0.55rem] tracking-[0.35em] uppercase text-muted-foreground/50 hover:text-accent transition-colors"
+              >
+                Clear
+              </button>
+            )}
+
+            {/* Sort */}
+            <div className="flex items-center gap-2">
+              <span className="text-[0.55rem] tracking-[0.4em] uppercase text-muted-foreground/55">
+                Sort
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  const i = SORT_ORDER.indexOf(sort);
+                  setSort(SORT_ORDER[(i + 1) % SORT_ORDER.length]!);
+                }}
+                className="text-[0.6rem] tracking-[0.35em] uppercase text-foreground/80 hover:text-accent transition-colors tabular-nums"
+              >
+                {SORT_LABEL[sort]} ↻
+              </button>
+            </div>
+          </div>
+        </div>
 
         {/* ---------- Case Archive header ---------- */}
         <div className="mb-4 mt-4 flex items-baseline gap-3 border-b border-foreground/10 pb-3">
