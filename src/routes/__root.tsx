@@ -15,7 +15,7 @@ import { Toaster } from "@/components/ui/sonner";
 
 import { SoundControls } from "@/components/audio/SoundControls";
 import { AudioFailureIndicator } from "@/components/audio/AudioFailureIndicator";
-import { armGlobalAudioUnlock } from "@/lib/audio/director";
+import { armGlobalAudioUnlock, audio } from "@/lib/audio/director";
 import { listMetaTokens } from "@/lib/gsc-verify.functions";
 import { UserMenu } from "@/components/auth/UserMenu";
 
@@ -149,6 +149,11 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   useEffect(() => {
     armGlobalAudioUnlock();
+    // Warm the HTTP cache for global SFX and the landing/archive/analysis
+    // beds the moment the app mounts. The AudioContext can't exist until
+    // the first user gesture, but having the encoded bytes already in
+    // memory means the first decode-and-play is near-instant.
+    audio.warmKeyAssets();
   }, []);
   return (
     <QueryClientProvider client={queryClient}>

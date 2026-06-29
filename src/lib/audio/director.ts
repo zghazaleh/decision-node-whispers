@@ -103,6 +103,7 @@ class Director {
   private attempts: AudioAttempt[] = [];
   private lastEnter: { screen: Screen; opts: EnterOpts } | null = null;
   private ignitePromise: Promise<void> | null = null;
+  private prefetchedUrls = new Set<string>();
 
   /** Ring buffer of recent switchTo / playOneShot attempts, newest first. */
   recentAttempts(): AudioAttempt[] { return this.attempts.slice(); }
@@ -141,6 +142,10 @@ class Director {
       const a = this.engine(); if (!a) return;
       await a.ignite();
       this.ignited = true;
+      // Now that the AudioContext exists, decode every URL we previously
+      // warmed at the HTTP layer so the first play has a ready buffer.
+      const urls = Array.from(this.prefetchedUrls);
+      await Promise.all(urls.map((u) => a.prefetch(u).catch(() => {})));
       this.emit();
     })().finally(() => {
       this.ignitePromise = null;
@@ -245,9 +250,25 @@ class Director {
     }
     const a = this.ambient; // do NOT force ctx creation; HTTP prefetch is enough
     for (const url of urls) {
+      this.prefetchedUrls.add(url);
       if (a) void a.prefetch(url);
       else void prefetchAudio(url);
     }
+  }
+
+  /**
+   * Eagerly warm the HTTP cache for the global "always needed" assets
+   * (key SFX + landing/archive beds). Called from the root on mount so
+   * the very first plays — Begin motif, Awakening sting, Commit sting —
+   * have their bytes ready before the user gesture lands.
+   */
+  warmKeyAssets() {
+    this.prefetch({
+      screen: "landing",
+      sfx: ["awakening", "commit", "analyzing", "hover-tick", "select-chip", "node-motif"],
+    });
+    this.prefetch({ screen: "archive" });
+    this.prefetch({ screen: "analysis" });
   }
 
 
@@ -317,10 +338,17 @@ export function armGlobalAudioUnlock() {
   w[GLOBAL_ARM_KEY] = true;
 
   const unlock = () => {
-    if (audio.isMuted()) return;
-    void audio.resumeLatest();
+    // Always ignite on the first gesture — creates the AudioContext and
+    // decodes any URLs we've already prefetched at the HTTP layer. This
+    // means the first sound (motif, awakening sting) plays without
+    // waiting on `fetch + decode` after the user has already clicked.
+    void audio.ignite().then(() => {
+      if (audio.isMuted()) return;
+      void audio.resumeLatest();
+    });
   };
 
   window.addEventListener("pointerdown", unlock, { capture: true, passive: true });
   window.addEventListener("keydown", unlock, { capture: true });
+  window.addEventListener("touchstart", unlock, { capture: true, passive: true });
 }
