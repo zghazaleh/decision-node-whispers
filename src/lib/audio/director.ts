@@ -142,6 +142,10 @@ class Director {
       const a = this.engine(); if (!a) return;
       await a.ignite();
       this.ignited = true;
+      // Now that the AudioContext exists, decode every URL we previously
+      // warmed at the HTTP layer so the first play has a ready buffer.
+      const urls = Array.from(this.prefetchedUrls);
+      await Promise.all(urls.map((u) => a.prefetch(u).catch(() => {})));
       this.emit();
     })().finally(() => {
       this.ignitePromise = null;
