@@ -311,4 +311,22 @@ export const MISSIONS: MissionMeta[] = [
     creator: "House Edition",
     version: "v1.0",
   },
+  {
+    id: "mission-17",
+    number: "17",
+    codename: "The Rope",
+    title: "The Rope",
+    logline:
+      "Three ropes over a cottonwood at dusk. The crowd is forty. The badge is a piece of tin. Twenty-six minutes of usable light.",
+    status: "available",
+    duration: "20–40 min",
+    tone: "Dust · Torchlight · Held breath",
+    location: "Main Street, Bremmen Hollow, Cresta Plain",
+    year: "Year 8 of the town's incorporation",
+    category: "Conflict",
+    theme: "Conscience",
+    difficulty: 5,
+    creator: "House Edition",
+    version: "v1.0",
+  },
 ];
