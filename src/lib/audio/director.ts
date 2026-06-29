@@ -11,7 +11,7 @@
 
 import { createAmbient, prefetchAudio, type Ambient, type AudioProfile } from "@/lib/ambient";
 import { audioUrl } from "@/lib/audio/assets";
-import { getSoundtrack } from "@/lib/soundtracks";
+import { getSoundtrack, getSoundtrackUrls } from "@/lib/soundtracks";
 
 
 export type Screen =
@@ -72,6 +72,26 @@ function writeBool(key: string, value: boolean) {
 }
 
 type Listener = () => void;
+type SfxName = "awakening" | "commit" | "analyzing" | "hover-tick" | "select-chip" | "node-motif";
+type PlayableSfxName = Exclude<SfxName, "node-motif">;
+
+const CRITICAL_SFX: SfxName[] = [
+  "awakening",
+  "commit",
+  "analyzing",
+  "hover-tick",
+  "select-chip",
+  "node-motif",
+];
+
+export function criticalAudioUrls(): string[] {
+  const urls = new Set<string>(getSoundtrackUrls());
+  for (const name of CRITICAL_SFX) {
+    const url = audioUrl(name);
+    if (url) urls.add(url);
+  }
+  return Array.from(urls);
+}
 
 export type AudioAttempt = {
   id: number;
@@ -142,10 +162,12 @@ class Director {
       const a = this.engine(); if (!a) return;
       await a.ignite();
       this.ignited = true;
-      // Now that the AudioContext exists, decode every URL we previously
-      // warmed at the HTTP layer so the first play has a ready buffer.
-      const urls = Array.from(this.prefetchedUrls);
-      await Promise.all(urls.map((u) => a.prefetch(u).catch(() => {})));
+      // Now that the AudioContext exists, begin decoding the warmed URLs in
+      // the background. Do not await the whole catalog here — the first user
+      // gesture must unlock audio immediately, not wait for every mission bed.
+      for (const url of this.prefetchedUrls) {
+        void a.prefetch(url).catch(() => {});
+      }
       this.emit();
     })().finally(() => {
       this.ignitePromise = null;
@@ -195,7 +217,7 @@ class Director {
   duck(amount = 0.32, ms = 600) { this.engine()?.duck(amount, ms); }
   release(ms = 1200) { this.engine()?.release(ms); }
 
-  async playSfx(name: "awakening" | "commit" | "analyzing" | "hover-tick" | "select-chip", opts?: { gain?: number }) {
+  async playSfx(name: PlayableSfxName, opts?: { gain?: number }) {
     const url = audioUrl(name); if (!url) return;
     const entry = this.recordAttempt({ kind: "playOneShot", label: `sfx:${name}`, url });
     const ok = await this.engine()?.playOneShot(url, { gain: opts?.gain, bus: "sfx", fadeInMs: 40, fadeOutMs: 500 });
@@ -227,7 +249,16 @@ class Director {
    *
    * Safe to call before ignition — falls back to a plain `fetch()`.
    */
-  prefetch(targets: { screen?: Screen; missionId?: string; sfx?: ("awakening" | "commit" | "analyzing" | "hover-tick" | "select-chip" | "node-motif")[] }) {
+  private prefetchUrls(urls: Iterable<string>) {
+    const a = this.ambient; // do NOT force ctx creation; HTTP prefetch is enough
+    for (const url of urls) {
+      this.prefetchedUrls.add(url);
+      if (a) void a.prefetch(url);
+      else void prefetchAudio(url);
+    }
+  }
+
+  prefetch(targets: { screen?: Screen; missionId?: string; sfx?: SfxName[] }) {
     const urls = new Set<string>();
     if (targets.screen) {
       const screenKey =
@@ -248,27 +279,21 @@ class Director {
       const u = audioUrl(name);
       if (u) urls.add(u);
     }
-    const a = this.ambient; // do NOT force ctx creation; HTTP prefetch is enough
-    for (const url of urls) {
-      this.prefetchedUrls.add(url);
-      if (a) void a.prefetch(url);
-      else void prefetchAudio(url);
-    }
+    this.prefetchUrls(urls);
   }
 
   /**
-   * Eagerly warm the HTTP cache for the global "always needed" assets
-   * (key SFX + landing/archive beds). Called from the root on mount so
-   * the very first plays — Begin motif, Awakening sting, Commit sting —
-   * have their bytes ready before the user gesture lands.
+   * Eagerly warm every critical audio asset (all available ambient beds +
+   * key UI/SFX). Called from the root on mount and mirrored by <link preload>
+   * so bytes start moving as soon as the document is parsed.
    */
   warmKeyAssets() {
-    this.prefetch({
-      screen: "landing",
-      sfx: ["awakening", "commit", "analyzing", "hover-tick", "select-chip", "node-motif"],
-    });
-    this.prefetch({ screen: "archive" });
-    this.prefetch({ screen: "analysis" });
+    this.prefetchUrls(criticalAudioUrls());
+  }
+
+  /** Aggressively buffer every available mission bed before mission entry. */
+  warmMissionBeds() {
+    this.prefetchUrls(getSoundtrackUrls({ missionsOnly: true }));
   }
 
 

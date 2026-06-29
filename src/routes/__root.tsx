@@ -15,7 +15,7 @@ import { Toaster } from "@/components/ui/sonner";
 
 import { SoundControls } from "@/components/audio/SoundControls";
 import { AudioFailureIndicator } from "@/components/audio/AudioFailureIndicator";
-import { armGlobalAudioUnlock, audio } from "@/lib/audio/director";
+import { armGlobalAudioUnlock, audio, criticalAudioUrls } from "@/lib/audio/director";
 import { listMetaTokens } from "@/lib/gsc-verify.functions";
 import { UserMenu } from "@/components/auth/UserMenu";
 
@@ -123,6 +123,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,400&family=Inter+Tight:wght@300;400;500;600&family=Instrument+Serif:ital@0;1&display=swap",
       },
+      ...criticalAudioUrls().map((href) => ({
+        rel: "preload",
+        as: "fetch",
+        href,
+        type: "audio/mpeg",
+        crossOrigin: "anonymous",
+        fetchPriority: "high",
+      } as const)),
     ],
   }),
   shellComponent: RootShell,
@@ -149,10 +157,8 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   useEffect(() => {
     armGlobalAudioUnlock();
-    // Warm the HTTP cache for global SFX and the landing/archive/analysis
-    // beds the moment the app mounts. The AudioContext can't exist until
-    // the first user gesture, but having the encoded bytes already in
-    // memory means the first decode-and-play is near-instant.
+    // Warm all critical audio immediately. The AudioContext can't exist until
+    // the first user gesture, but encoded bytes should already be local by then.
     audio.warmKeyAssets();
   }, []);
   return (

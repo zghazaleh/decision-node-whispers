@@ -289,7 +289,7 @@ export function prefetchAudio(url: string): Promise<void> {
   const p = (async () => {
     const persisted = await idbGet(url);
     if (persisted) return persisted;
-    const r = await fetch(url);
+    const r = await fetch(url, { cache: "force-cache" });
     if (!r.ok) throw new Error(`prefetch failed: ${r.status}`);
     const bytes = await r.arrayBuffer();
     void idbPut(url, bytes);
@@ -327,7 +327,7 @@ async function loadBuffer(ctx: AudioContext, url: string, kind: "bed" | "oneshot
       if (persisted) {
         data = persisted.slice(0);
       } else {
-        const res = await fetch(url);
+        const res = await fetch(url, { cache: "force-cache" });
         if (!res.ok) throw new Error(`ambient fetch failed: ${res.status}`);
         const bytes = await res.arrayBuffer();
         void idbPut(url, bytes);

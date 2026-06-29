@@ -10,7 +10,6 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { MISSIONS, type MissionMeta } from "@/lib/missions";
 import { audio } from "@/lib/audio/director";
-import { idlePrefetch, nextLikelyMissionId } from "@/lib/audio/idlePrefetch";
 import { getSoundtrack } from "@/lib/soundtracks";
 import { getAllMissionStats, type MissionStats } from "@/lib/mission-stats.functions";
 import { readMission } from "@/lib/mission-store";
@@ -192,21 +191,12 @@ function MissionsPage() {
   const user = useAuthUser();
   const profile = useDecisionProfile();
 
-  // Warm the archive bed (the room the player is in) eagerly, and let
-  // idle time bring in the two most-likely-next mission beds plus the
-  // analysis bed. Prefetching all nine missions up-front would race the
-  // bed that's actively playing for bandwidth — idle scheduling keeps
-  // the page responsive while still making "open a case" feel instant.
+  // Case Archive is the mission-selection surface: aggressively buffer every
+  // available mission bed here so entering any case never waits on the network.
   useEffect(() => {
     audio.prefetch({ screen: "archive" });
-    const first = nextLikelyMissionId();
-    const second = first ? nextLikelyMissionId(first) : null;
-    const targets: Parameters<typeof audio.prefetch>[0][] = [
-      { screen: "analysis" },
-    ];
-    if (first) targets.push({ missionId: first });
-    if (second && second !== first) targets.push({ missionId: second });
-    return idlePrefetch(targets);
+    audio.prefetch({ screen: "analysis", sfx: ["awakening", "commit", "analyzing", "node-motif"] });
+    audio.warmMissionBeds();
   }, []);
 
 

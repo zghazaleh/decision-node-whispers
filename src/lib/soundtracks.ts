@@ -68,3 +68,12 @@ export const SOUNDTRACKS = _missions as Record<string, Soundtrack>;
 export function getSoundtrack(missionId: string): Soundtrack | null {
   return _missions[missionId] ?? null;
 }
+
+export function getSoundtrackUrls(options: { missionsOnly?: boolean } = {}): string[] {
+  const urls = new Set<string>();
+  for (const [key, soundtrack] of Object.entries(_missions)) {
+    if (options.missionsOnly && key.startsWith("__")) continue;
+    if (soundtrack?.url) urls.add(soundtrack.url);
+  }
+  return Array.from(urls);
+}
