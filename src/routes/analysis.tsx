@@ -403,6 +403,24 @@ function AnalysisDebrief({
         )}
       </section>
 
+      {/* Block 6 — Share */}
+      {profile && profile.missionsCompleted > 0 && (
+        <section className="animate-fade-up space-y-6" style={{ animationDelay: "0.75s" }}>
+          <div className="text-center">
+            <p className="text-[0.6rem] tracking-[0.5em] uppercase text-accent/80 mb-3">
+              Share your profile
+            </p>
+            <p className="text-xs text-foreground/50 max-w-md mx-auto leading-relaxed">
+              A portrait of how you decide. Yours, to keep or to post.
+            </p>
+          </div>
+          <ShareCard
+            profile={profile}
+            missionCodename={MISSIONS.find((m) => m.id === mission.missionId)?.codename}
+          />
+        </section>
+      )}
+
       {/* Coda */}
       <section className="animate-fade-up pt-4" style={{ animationDelay: "0.8s" }}>
         <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
