@@ -10,14 +10,18 @@ export const Route = createFileRoute("/constitution")({
       { title: "Constitution — Decision Nodes" },
       {
         name: "description",
-        content: "Constitution sync status and file archive.",
+        content:
+          "Live sync status for the Decision Nodes constitution: GitHub connection, file archive, and the canonical authoring rules behind every mission.",
       },
       { property: "og:title", content: "Constitution — Decision Nodes" },
       {
         property: "og:description",
-        content: "Constitution sync status and file archive.",
+        content:
+          "Live sync status for the Decision Nodes constitution: GitHub connection, file archive, and the canonical authoring rules behind every mission.",
       },
+      { property: "og:url", content: "https://decision-nodes.com/constitution" },
     ],
+    links: [{ rel: "canonical", href: "https://decision-nodes.com/constitution" }],
   }),
   component: ConstitutionPage,
 });

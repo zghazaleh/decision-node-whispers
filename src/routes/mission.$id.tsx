@@ -44,6 +44,8 @@ function MissionRoute() {
 
 function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string; engine: MissionEngine }) {
   const navigate = useNavigate();
+  const meta = MISSIONS.find((m) => m.id === MISSION_ID);
+  const missionTitle = meta ? `Mission ${meta.number} — ${meta.codename}` : "Mission";
   const OPENING: UIMessage = {
     id: "opening",
     role: "assistant",
@@ -368,6 +370,7 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
 
   return (
     <main className="relative h-[100dvh] w-screen overflow-hidden bg-black text-foreground">
+      <h1 className="sr-only">{missionTitle} — Decision Nodes</h1>
       {/* Cinematic background */}
       <div
         ref={sceneRef}

@@ -7,19 +7,21 @@ import { audio } from "@/lib/audio/director";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Decision Nodes" },
+      { title: "Decision Nodes — An Interactive Drama" },
       {
         name: "description",
         content:
-          "Wake up in someone else's life. One irreversible decision. An interactive drama.",
+          "Wake up in someone else's life. One irreversible decision. An interactive drama you play through dialogue.",
       },
-      { property: "og:title", content: "Decision Nodes" },
+      { property: "og:title", content: "Decision Nodes — An Interactive Drama" },
       {
         property: "og:description",
         content:
-          "Wake up in someone else's life. One irreversible decision. An interactive drama.",
+          "Wake up in someone else's life. One irreversible decision. An interactive drama you play through dialogue.",
       },
+      { property: "og:url", content: "https://decision-nodes.com/" },
     ],
+    links: [{ rel: "canonical", href: "https://decision-nodes.com/" }],
   }),
   component: Landing,
 });
@@ -59,6 +61,7 @@ function Landing() {
           style={{ animationDelay: "0.2s" }}
         >
           Decision Nodes
+          <span className="sr-only"> — An Interactive Decision Drama</span>
         </h1>
 
         {/* Mysterious four-line opening, paced like a stanza */}
