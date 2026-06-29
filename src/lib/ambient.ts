@@ -27,6 +27,8 @@ export type Ambient = {
   setHeartbeat: (active: boolean) => void;
   setAudioProfile: (profile: AudioProfile) => void;
   setReducedAudio: (reduced: boolean) => void;
+  /** Multiplier (0..1) applied to the calm-bed bus, composed with any duck. */
+  setBedIntensity: (intensity: number, ms?: number) => void;
   /** `true` when the sample played to completion, `false` on any failure. */
   playOneShot: (url: string, opts?: { gain?: number; fadeInMs?: number; fadeOutMs?: number; bus?: "sfx" | "motif" }) => Promise<boolean>;
   prefetch: (url: string) => Promise<void>;
