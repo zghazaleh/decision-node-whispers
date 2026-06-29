@@ -21,11 +21,11 @@ const ContributionSchema = z.object({
 
 const SavedMissionPayload = z.object({
   missionId: z.string().min(1).max(64),
-  messages: z.array(z.unknown()),
+  messages: z.array(z.any()),
   startedAt: z.number(),
   decision: z.string().optional(),
   reasoning: z.string().optional(),
-  analysis: z.unknown().optional(),
+  analysis: z.any().optional(),
   decidedAt: z.number().optional(),
   archetypeId: z.string().optional(),
   confidence: z.number().optional(),
