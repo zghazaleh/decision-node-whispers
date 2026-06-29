@@ -17,7 +17,7 @@ import { readMission } from "@/lib/mission-store";
 import { getMissionEngine } from "@/lib/missions/registry";
 import { HeroDetail } from "@/components/discovery/HeroDetail";
 import { GuildCarousel } from "@/components/discovery/GuildCarousel";
-import { ThemeCard } from "@/components/discovery/ThemeCard";
+import { ThemeCarousel } from "@/components/discovery/ThemeCarousel";
 import { logOpen } from "@/lib/discovery/signals";
 import { useAuthUser } from "@/lib/auth-sync";
 import { useDecisionProfile } from "@/lib/decision-profile";
@@ -186,7 +186,7 @@ function MissionsPage() {
   const [difficulty, setDifficulty] = useState<number | "Any">("Any");
   const [sort, setSort] = useState<SortMode>("curated");
   const [openId, setOpenId] = useState<string | null>(null);
-  const [openTheme, setOpenTheme] = useState<string | null>(null);
+  const [activeGroup, setActiveGroup] = useState<string | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [entering, setEntering] = useState(false);
   const [gateOpen, setGateOpen] = useState(false);
@@ -262,6 +262,13 @@ function MissionsPage() {
   // the hero card above is purely a feature, not an exclusion).
   const visible = useMemo(() => {
     let rows = MISSIONS.slice();
+    if (activeGroup) {
+      const group = CURATED_GROUPS.find((g) => g.label === activeGroup);
+      if (group) {
+        const ids = new Set(group.ids);
+        rows = rows.filter((m) => ids.has(m.id));
+      }
+    }
     if (theme !== "All") rows = rows.filter((m) => m.theme === theme);
     if (domain !== "All") rows = rows.filter((m) => m.category === domain);
     if (difficulty !== "Any") rows = rows.filter((m) => m.difficulty === difficulty);
@@ -284,13 +291,14 @@ function MissionsPage() {
         break;
     }
     return rows;
-  }, [theme, domain, difficulty, sort, stats]);
+  }, [theme, domain, difficulty, sort, stats, activeGroup]);
 
-  const filtersActive = theme !== "All" || domain !== "All" || difficulty !== "Any";
+  const filtersActive = theme !== "All" || domain !== "All" || difficulty !== "Any" || activeGroup !== null;
 
   // Closing the open row when filters change
   useEffect(() => {
     setOpenId(null);
+    setActiveGroup(null);
   }, [theme, domain, difficulty, sort]);
 
   /* ----- Ambient: the Archive bed is the hushed reading-room. Opening a
@@ -407,37 +415,14 @@ function MissionsPage() {
 
 
 
-        {/* ---------- Curated theme cards ---------- */}
-        {!filtersActive && (
-          <div className="mb-6">
-            <div className="mb-4 flex items-baseline gap-3">
-              <span className="text-[0.55rem] tracking-[0.4em] uppercase text-accent/90">
-                Curated themes
-              </span>
-              <span className="h-px flex-1 bg-accent/15" aria-hidden />
-              <span className="text-[0.55rem] tracking-[0.4em] uppercase text-muted-foreground/55">
-                Tap to open
-              </span>
-            </div>
-            {CURATED_GROUPS.map((g) => {
-              const items = g.ids
-                .map((id) => MISSIONS.find((m) => m.id === id))
-                .filter((m): m is MissionMeta => !!m && m.status === "available");
-              return (
-                <ThemeCard
-                  key={g.label}
-                  label={g.label}
-                  caption={g.caption}
-                  items={items}
-                  isOpen={openTheme === g.label}
-                  onToggle={() =>
-                    setOpenTheme((cur) => (cur === g.label ? null : g.label))
-                  }
-                  onSelect={commit}
-                />
-              );
-            })}
-          </div>
+        {/* ---------- Curated theme carousel ---------- */}
+        {theme === "All" && domain === "All" && difficulty === "Any" && (
+          <ThemeCarousel
+            groups={CURATED_GROUPS}
+            missions={MISSIONS}
+            activeGroup={activeGroup}
+            onSelectGroup={setActiveGroup}
+          />
         )}
 
         {/* ---------- Filters ---------- */}
