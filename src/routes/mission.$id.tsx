@@ -139,41 +139,11 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
   // (deliberation inside the modal) separately from total investigation time.
   const decideOpenedAtRef = useRef<number | null>(null);
 
-  // Ambient score — starts on the first user gesture (browsers require it).
-  // The AudioDirector singleton carries audio across screens; we just enter
-  // the mission bed here and forward soundOn / pressure / heartbeat to it.
-  const [soundOn, setSoundOn] = useState<boolean>(() => {
-    try { return localStorage.getItem("dn:sound") !== "off"; } catch { return true; }
-  });
+  // Ambient score — the root gesture listener unlocks the Web Audio context;
+  // this route always declares the current room so a delayed unlock can enter it.
   useEffect(() => {
-    const profile = ENGINE.atmosphere;
-    const enter = async () => {
-      await audio.ignite();
-      await audio.enter("mission", { missionId: MISSION_ID, profile });
-    };
-    if (audio.isIgnited()) {
-      void enter();
-    } else {
-      const onGesture = () => { void enter(); };
-      window.addEventListener("pointerdown", onGesture, { once: true });
-      window.addEventListener("keydown", onGesture, { once: true });
-      return () => {
-        window.removeEventListener("pointerdown", onGesture);
-        window.removeEventListener("keydown", onGesture);
-      };
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [MISSION_ID]);
-  useEffect(() => { audio.setMuted(!soundOn); }, [soundOn]);
-
-  async function toggleSound() {
-    const next = !soundOn;
-    setSoundOn(next);
-    if (next && !audio.isIgnited()) {
-      await audio.ignite();
-      await audio.enter("mission", { missionId: MISSION_ID, profile: ENGINE.atmosphere });
-    }
-  }
+    void audio.enter("mission", { missionId: MISSION_ID, profile: ENGINE.atmosphere });
+  }, [MISSION_ID, ENGINE.atmosphere]);
 
 
   const transcriptRef = useRef<HTMLDivElement>(null);
