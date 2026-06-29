@@ -320,6 +320,10 @@ export function updateProfileWithAnalysis(
     emergingPattern: deriveEmergingPattern(contributions),
   };
   writeProfile(next);
+  syncProfileToDB(next, contribution);
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("decision-node:profile-changed"));
+  }
   return next;
 }
 
@@ -327,6 +331,11 @@ export function useDecisionProfile() {
   const [profile, setProfile] = useState<DecisionProfile>(() => empty());
   useEffect(() => {
     setProfile(readProfile());
+    const handler = () => setProfile(readProfile());
+    if (typeof window !== "undefined") {
+      window.addEventListener("decision-node:profile-changed", handler);
+      return () => window.removeEventListener("decision-node:profile-changed", handler);
+    }
   }, []);
   return profile;
 }
