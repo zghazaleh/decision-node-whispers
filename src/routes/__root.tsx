@@ -152,6 +152,7 @@ function RootComponent() {
         <AudioFailureIndicator />
         <SoundControls />
         <ConstitutionStatusBadge />
+        <UserMenu />
       </div>
       <Outlet />
       <Toaster />
