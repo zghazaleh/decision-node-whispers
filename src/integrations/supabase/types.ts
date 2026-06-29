@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      decision_profiles: {
+        Row: {
+          created_at: string
+          emerging_pattern: string
+          missions_completed: number
+          scores: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          emerging_pattern?: string
+          missions_completed?: number
+          scores?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          emerging_pattern?: string
+          missions_completed?: number
+          scores?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       gsc_verification_tokens: {
         Row: {
           created_at: string
@@ -38,6 +65,39 @@ export type Database = {
           token?: string
           updated_at?: string
           verified?: boolean
+        }
+        Relationships: []
+      }
+      mission_contributions: {
+        Row: {
+          at: string
+          id: string
+          mission_id: string
+          notes: Json | null
+          scores: Json
+          signals: string[]
+          source: string | null
+          user_id: string
+        }
+        Insert: {
+          at?: string
+          id?: string
+          mission_id: string
+          notes?: Json | null
+          scores: Json
+          signals?: string[]
+          source?: string | null
+          user_id: string
+        }
+        Update: {
+          at?: string
+          id?: string
+          mission_id?: string
+          notes?: Json | null
+          scores?: Json
+          signals?: string[]
+          source?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -71,6 +131,69 @@ export type Database = {
           investigation_seconds?: number | null
           message_count?: number | null
           mission_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      saved_missions: {
+        Row: {
+          analysis: Json | null
+          archetype_id: string | null
+          confidence: number | null
+          decided_at: string | null
+          decision: string | null
+          messages: Json
+          mission_id: string
+          reasoning: string | null
+          started_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          analysis?: Json | null
+          archetype_id?: string | null
+          confidence?: number | null
+          decided_at?: string | null
+          decision?: string | null
+          messages?: Json
+          mission_id: string
+          reasoning?: string | null
+          started_at?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          analysis?: Json | null
+          archetype_id?: string | null
+          confidence?: number | null
+          decided_at?: string | null
+          decision?: string | null
+          messages?: Json
+          mission_id?: string
+          reasoning?: string | null
+          started_at?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
