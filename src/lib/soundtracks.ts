@@ -47,6 +47,7 @@ const _missions: Record<string, Soundtrack | null> = {
   "mission-08": bed("mission-08", null, "Empty office at 3am. A single lamp. Quiet ache.", 0.3),
   "mission-09": bed("mission-09", null, "Frozen besieged city. Distant shelling, taut breath.", 0.3),
   "mission-10": bed("mission-10", null, "Freezing checkpoint. Diesel idle, breath fogging, dread held quiet.", 0.3),
+  "mission-11": bed("mission-11", null, "Sweltering jury room. Failing fan, fluorescent hum, indifferent city outside.", 0.3),
   // Pseudo "screens" — played through the same loop engine as missions.
   __landing__: bed("landing-drone", null, "Stillness. The room before anything.", 0.3),
   __archive__: bed("archive-bed", null, "Hushed reading room. Low warm drone.", 0.25),

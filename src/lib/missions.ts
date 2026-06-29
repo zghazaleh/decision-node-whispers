@@ -203,4 +203,22 @@ export const MISSIONS: MissionMeta[] = [
     creator: "House Edition",
     version: "v1.0",
   },
+  {
+    id: "mission-11",
+    number: "11",
+    codename: "The Holdout",
+    title: "The Holdout",
+    logline:
+      "Eleven jurors are ready to convict. The foreman's pencil is over the pad. The fan keeps stuttering.",
+    status: "available",
+    duration: "20–40 min",
+    tone: "Sweltering · Civic dread",
+    location: "Halsworth County Courthouse, Jury Room 4B",
+    year: "Present day",
+    category: "Justice",
+    theme: "Conscience",
+    difficulty: 4,
+    creator: "House Edition",
+    version: "v1.0",
+  },
 ];

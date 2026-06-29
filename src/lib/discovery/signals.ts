@@ -134,6 +134,7 @@ const BASELINE: Record<string, ResonanceBand> = {
   "mission-08": "quiet",
   "mission-09": "quiet",
   "mission-10": "quiet",
+  "mission-11": "quiet",
 };
 
 export function getResonance(missionId: string): ResonanceBand {

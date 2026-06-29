@@ -273,6 +273,35 @@ const FRAMEWORK: Record<string, MissionFramework> = {
     learningObjective:
       "Practice deciding under a tragic forced constraint — and recognizing when the binary itself is artificial and the harder work is widening the frame before time runs out.",
   },
+
+  "mission-11": {
+    stakes: [
+      "A 19-year-old defendant's life on a capital charge. The state seeks death.",
+      "Eleven jurors have voted to convict twice on what looks like an airtight case; Camille is the only no.",
+      "Holding out costs the room's anger, the foreman's drive, the next forty minutes of patience, and possibly the jury's coherence.",
+      "Folding ends it cleanly — and ends a life inside that ease.",
+    ],
+    hiddenTruths: [
+      "Exhibit 14B (alley-light maintenance log) shows lamp A-217 was out from April 1 to April 6 — making 'plain as day under the alley light' materially impossible IF that is the lamp Brenner meant.",
+      "Exhibit 14C (the police alley diagram) shows there are TWO lamps in the alley — A-217 and A-219 — and no one in court asked which one Brenner used.",
+      "Juror 11 (Aiyana) privately shares the doubt but will speak only after someone else names a specific reason.",
+      "Juror 4 (Davit) flipped to guilty over lunch because Juror 6 (Marlin) called him 'soft' — and will flip back if given a concrete sentence to repeat.",
+      "Juror 6 (Marlin)'s animus is partly displaced from his own son's unprosecuted armed robbery three years ago.",
+      "The foreman is quietly counting on a verdict by 19:30 so he can drive his daughter to university.",
+    ],
+    timeLimit:
+      "The foreman is poised to call the third ballot now; the judge's expected stop-deliberation call is at 19:30 (about 43 minutes).",
+    decisionScience: [
+      "Conformity / groupthink: eleven votes vs. one is hard to read as a coincidence of error.",
+      "Confirmation bias: once the room said 'guilty,' every detail thereafter has been read as confirming it.",
+      "Sunk cost: nine hours in this room makes 'finish it' feel like progress.",
+      "Authority bias: the foreman's pencil, the state's pillars of evidence, the bailiff's silent presence — all framed as the room's spine.",
+      "Anchoring on a frame: 'plain as day' anchors the eyewitness account before anyone checks what 'as day' actually means at 11:42 PM in a lit alley.",
+      "Motivated reasoning (the bias check): the player's own discomfort with the death penalty may be doing some of the work, and saying so out loud is part of holding out honestly.",
+    ],
+    learningObjective:
+      "Practice reasoning against social pressure when the evidence MIGHT be inconsistent — calibrating doubt honestly, including naming where your own bias lives, and choosing whether to spend your conviction on the verdict or on the process around it.",
+  },
 };
 
 export function getMissionFramework(missionId: string): MissionFramework | null {
