@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from "react";
 
 type StreamingTextProps = {
   text: string;
-  as?: keyof JSX.IntrinsicElements;
+  as?: keyof React.JSX.IntrinsicElements;
   className?: string;
   /** ms before the first word appears */
   startDelayMs?: number;
