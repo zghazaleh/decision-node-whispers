@@ -17,6 +17,7 @@ import { logAnalysisRead } from "@/lib/discovery/signals";
 import sceneCosmos from "@/assets/scene-cosmos.jpg";
 import { audio } from "@/lib/audio/director";
 import { WhatHappenedFilm } from "@/components/analysis/WhatHappenedFilm";
+import { StreamingText } from "@/components/analysis/StreamingText";
 
 
 function AnalysisFallback({
