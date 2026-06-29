@@ -14,6 +14,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as NarrationPreviewRouteImport } from './routes/narration-preview'
 import { Route as MissionsLegacyRouteImport } from './routes/missions-legacy'
 import { Route as MissionsRouteImport } from './routes/missions'
+import { Route as JournalRouteImport } from './routes/journal'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as ConstitutionRouteImport } from './routes/constitution'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -51,6 +52,11 @@ const MissionsLegacyRoute = MissionsLegacyRouteImport.update({
 const MissionsRoute = MissionsRouteImport.update({
   id: '/missions',
   path: '/missions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JournalRoute = JournalRouteImport.update({
+  id: '/journal',
+  path: '/journal',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HowItWorksRoute = HowItWorksRouteImport.update({
@@ -126,6 +132,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/constitution': typeof ConstitutionRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/journal': typeof JournalRoute
   '/missions': typeof MissionsRoute
   '/missions-legacy': typeof MissionsLegacyRoute
   '/narration-preview': typeof NarrationPreviewRoute
@@ -146,6 +153,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/constitution': typeof ConstitutionRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/journal': typeof JournalRoute
   '/missions': typeof MissionsRoute
   '/missions-legacy': typeof MissionsLegacyRoute
   '/narration-preview': typeof NarrationPreviewRoute
@@ -167,6 +175,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/constitution': typeof ConstitutionRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/journal': typeof JournalRoute
   '/missions': typeof MissionsRoute
   '/missions-legacy': typeof MissionsLegacyRoute
   '/narration-preview': typeof NarrationPreviewRoute
@@ -189,6 +198,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/constitution'
     | '/how-it-works'
+    | '/journal'
     | '/missions'
     | '/missions-legacy'
     | '/narration-preview'
@@ -209,6 +219,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/constitution'
     | '/how-it-works'
+    | '/journal'
     | '/missions'
     | '/missions-legacy'
     | '/narration-preview'
@@ -229,6 +240,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/constitution'
     | '/how-it-works'
+    | '/journal'
     | '/missions'
     | '/missions-legacy'
     | '/narration-preview'
@@ -250,6 +262,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ConstitutionRoute: typeof ConstitutionRoute
   HowItWorksRoute: typeof HowItWorksRoute
+  JournalRoute: typeof JournalRoute
   MissionsRoute: typeof MissionsRoute
   MissionsLegacyRoute: typeof MissionsLegacyRoute
   NarrationPreviewRoute: typeof NarrationPreviewRoute
@@ -300,6 +313,13 @@ declare module '@tanstack/react-router' {
       path: '/missions'
       fullPath: '/missions'
       preLoaderRoute: typeof MissionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/journal': {
+      id: '/journal'
+      path: '/journal'
+      fullPath: '/journal'
+      preLoaderRoute: typeof JournalRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/how-it-works': {
@@ -402,6 +422,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ConstitutionRoute: ConstitutionRoute,
   HowItWorksRoute: HowItWorksRoute,
+  JournalRoute: JournalRoute,
   MissionsRoute: MissionsRoute,
   MissionsLegacyRoute: MissionsLegacyRoute,
   NarrationPreviewRoute: NarrationPreviewRoute,
