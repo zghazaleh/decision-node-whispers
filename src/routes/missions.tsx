@@ -118,7 +118,7 @@ function pickToday(list: MissionMeta[]): MissionMeta | null {
 
 type SortMode = "curated" | "difficulty" | "stood" | "newest";
 const SORT_LABEL: Record<SortMode, string> = {
-  curated: "Curated",
+  curated: "Default",
   difficulty: "Difficulty",
   stood: "Most stood",
   newest: "Newest",
@@ -425,24 +425,44 @@ function MissionsPage() {
           />
         )}
 
+        {/* ---------- Case Archive header ---------- */}
+        <div className="mb-3 mt-8 flex items-baseline gap-3 border-b border-foreground/10 pb-3">
+          <h2 className="font-display text-xl text-foreground/95">Case Archive</h2>
+          <span className="h-px flex-1 bg-foreground/10" aria-hidden />
+          <div className="flex items-center gap-2">
+            <span className="text-[0.55rem] tracking-[0.4em] uppercase text-muted-foreground/55">
+              Sort
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                const i = SORT_ORDER.indexOf(sort);
+                setSort(SORT_ORDER[(i + 1) % SORT_ORDER.length]!);
+              }}
+              className="text-[0.6rem] tracking-[0.35em] uppercase text-foreground/80 hover:text-accent transition-colors tabular-nums"
+            >
+              {SORT_LABEL[sort]} ↻
+            </button>
+          </div>
+        </div>
+
         {/* ---------- Filters ---------- */}
-        <div className="mb-6 flex flex-wrap items-end gap-x-5 gap-y-3">
-          {/* Domain */}
+        <div
+          className="mb-6 flex flex-nowrap items-end gap-3 overflow-x-auto pb-1"
+          style={{ scrollbarWidth: "none" }}
+        >
           <FilterSelect
             label="Domain"
             values={domains}
             active={domain}
             onChange={setDomain}
           />
-          {/* Theme */}
           <FilterSelect
             label="Theme"
             values={themes}
             active={theme}
             onChange={setTheme}
           />
-
-          {/* Difficulty */}
           <FilterSelect
             label="Difficulty"
             values={["Any", ...difficulties.map(String)]}
@@ -452,45 +472,15 @@ function MissionsPage() {
               v === "Any" ? <span>Any</span> : <DifficultyDots level={Number(v)} />
             }
           />
-
-          <div className="ml-auto flex items-center gap-4">
-            {/* Active filter chip + clear */}
-            {(theme !== "All" || domain !== "All" || difficulty !== "Any") && (
-              <button
-                type="button"
-                onClick={clearFilters}
-                className="text-[0.55rem] tracking-[0.35em] uppercase text-muted-foreground/50 hover:text-accent transition-colors"
-              >
-                Clear
-              </button>
-            )}
-
-            {/* Sort */}
-            <div className="flex items-center gap-2">
-              <span className="text-[0.55rem] tracking-[0.4em] uppercase text-muted-foreground/55">
-                Sort
-              </span>
-              <button
-                type="button"
-                onClick={() => {
-                  const i = SORT_ORDER.indexOf(sort);
-                  setSort(SORT_ORDER[(i + 1) % SORT_ORDER.length]!);
-                }}
-                className="text-[0.6rem] tracking-[0.35em] uppercase text-foreground/80 hover:text-accent transition-colors tabular-nums"
-              >
-                {SORT_LABEL[sort]} ↻
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* ---------- Case Archive header ---------- */}
-        <div className="mb-4 mt-4 flex items-baseline gap-3 border-b border-foreground/10 pb-3">
-          <h2 className="font-display text-xl text-foreground/95">Case Archive</h2>
-          <span className="h-px flex-1 bg-foreground/10" aria-hidden />
-          <span className="text-[0.55rem] tracking-[0.4em] uppercase text-muted-foreground/55">
-            All cases
-          </span>
+          {(theme !== "All" || domain !== "All" || difficulty !== "Any") && (
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="mb-[5px] text-[0.55rem] tracking-[0.35em] uppercase text-muted-foreground/50 hover:text-accent transition-colors"
+            >
+              Clear
+            </button>
+          )}
         </div>
 
         {/* ---------- Ledger ---------- */}
@@ -593,7 +583,7 @@ function FilterSelect({
       <button
         type="button"
         onClick={() => setOpen((p) => !p)}
-        className="flex items-center justify-between gap-3 rounded-md border border-foreground/10 bg-background/60 py-1.5 pl-3 pr-2.5 text-[0.65rem] tracking-[0.25em] uppercase text-foreground/90 outline-none transition-all hover:border-foreground/20 focus:border-accent/50 focus:ring-1 focus:ring-accent/30 cursor-pointer min-w-[140px]"
+        className="flex items-center justify-between gap-3 rounded-md border border-foreground/10 bg-background/60 py-1.5 pl-3 pr-2.5 text-[0.65rem] tracking-[0.25em] uppercase text-foreground/90 outline-none transition-all hover:border-foreground/20 focus:border-accent/50 focus:ring-1 focus:ring-accent/30 cursor-pointer min-w-[100px]"
         aria-haspopup="listbox"
         aria-expanded={open}
       >
