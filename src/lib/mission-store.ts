@@ -48,11 +48,17 @@ export function writeMission(m: SavedMission) {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(keyFor(m.missionId), JSON.stringify(m));
   window.localStorage.setItem(ACTIVE_KEY, m.missionId);
+  syncMissionToDB(m);
 }
 
 export function clearMission(missionId: string) {
   if (typeof window === "undefined") return;
   window.localStorage.removeItem(keyFor(missionId));
+  if (getCurrentUserId()) {
+    void deleteSavedMission({ data: { missionId } }).catch((err) =>
+      console.warn("[sync] delete mission", err),
+    );
+  }
 }
 
 export function getActiveMissionId(): string | null {
