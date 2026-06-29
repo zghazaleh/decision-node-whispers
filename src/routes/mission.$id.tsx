@@ -100,6 +100,7 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
   };
   const { mission, update } = useMission(MISSION_ID);
   const [awakening, setAwakening] = useState(true);
+  const [sceneLoaded, setSceneLoaded] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   // First-case interstitial — only if no prior mission state exists.
