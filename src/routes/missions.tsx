@@ -322,13 +322,13 @@ function MissionsPage() {
 
   function commit(id: string) {
     if (entering) return;
-    // 3-mission gate for anonymous users. Resuming an already-started mission
-    // is still allowed; only opening a new (4th+) case requires an account.
-    const alreadyStarted = readMission(id).messages.length > 0;
-    if (!user && profile.missionsCompleted >= ANON_FREE_MISSIONS && !alreadyStarted) {
-      setGateOpen(true);
-      return;
-    }
+    // 3-mission gate temporarily disabled for UX/UI testing — all missions free.
+    // const alreadyStarted = readMission(id).messages.length > 0;
+    // if (!user && profile.missionsCompleted >= ANON_FREE_MISSIONS && !alreadyStarted) {
+    //   setGateOpen(true);
+    //   return;
+    // }
+
     const m = MISSIONS.find((x) => x.id === id);
     logOpen(id, m?.theme);
     setEntering(true);
