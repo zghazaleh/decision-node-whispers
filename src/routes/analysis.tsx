@@ -167,6 +167,13 @@ function Analysis() {
     setMission(m);
     setProfile(readProfile());
 
+    // Profile is written asynchronously: updateProfileWithAnalysis fires
+    // when the analysis is saved, and applyPortraitToProfile fires again
+    // when the AI portrait returns. Re-read on every change so the share
+    // card reflects the live profile, not the snapshot at mount.
+    const onProfileChanged = () => setProfile(readProfile());
+    window.addEventListener("decision-node:profile-changed", onProfileChanged);
+
     // After. Reflective, not triumphant — cross-fade into the analysis bed
     // and let the Node motif return, transformed.
     void (async () => {
@@ -183,6 +190,10 @@ function Analysis() {
         .then(setPercentile)
         .catch(() => {});
     }
+
+    return () => {
+      window.removeEventListener("decision-node:profile-changed", onProfileChanged);
+    };
   }, [navigate, fetchPercentile]);
 
   // Discovery signal: how deep the player reads their own analysis is the

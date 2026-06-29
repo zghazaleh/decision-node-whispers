@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
   DIMENSIONS,
@@ -28,7 +28,49 @@ type ShareCardProps = {
 
 export function ShareCard({ profile, missionCodename }: ShareCardProps) {
   const svgRef = useRef<SVGSVGElement>(null);
-  const [busy, setBusy] = useState<null | "download" | "copy">(null);
+  const [busy, setBusy] = useState<null | "download" | "copy" | "share">(null);
+  const [canCopyImage, setCanCopyImage] = useState(false);
+  const [canNativeShare, setCanNativeShare] = useState(false);
+
+  // Feature-detect canvas-to-clipboard. iOS Safari technically exposes
+  // ClipboardItem but rejects writes that happen after async work (our
+  // SVG → PNG rasterize step breaks transient activation), so exclude
+  // iOS/iPadOS explicitly. Only the browsers that can actually succeed
+  // see the "Copy image" button.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const w = window as unknown as { ClipboardItem?: typeof ClipboardItem };
+    const hasApi =
+      typeof w.ClipboardItem !== "undefined" &&
+      typeof navigator.clipboard?.write === "function";
+    const ua = navigator.userAgent || "";
+    const isIOS =
+      /iPad|iPhone|iPod/.test(ua) ||
+      // iPadOS 13+ reports as Mac with touch support
+      (/Macintosh/.test(ua) && (navigator as Navigator & { maxTouchPoints?: number }).maxTouchPoints! > 1);
+    setCanCopyImage(hasApi && !isIOS);
+
+    // Web Share API with file support — opens the native share sheet
+    // (Instagram, TikTok, WhatsApp, Messages, etc.). Probe with a tiny
+    // PNG File to confirm the platform allows image attachments.
+    try {
+      const nav = navigator as Navigator & {
+        share?: (data: ShareData) => Promise<void>;
+        canShare?: (data: ShareData) => boolean;
+      };
+      if (typeof nav.share === "function") {
+        if (typeof nav.canShare === "function") {
+          const probe = new File([new Uint8Array([0])], "probe.png", { type: "image/png" });
+          setCanNativeShare(nav.canShare({ files: [probe] }));
+        } else {
+          setCanNativeShare(true);
+        }
+      }
+    } catch {
+      setCanNativeShare(false);
+    }
+  }, []);
+
 
   const shareUrl =
     typeof window !== "undefined" && window.location.origin.includes("decision-nodes")
@@ -124,6 +166,38 @@ export function ShareCard({ profile, missionCodename }: ShareCardProps) {
     }
   };
 
+  const onNativeShare = async () => {
+    setBusy("share");
+    try {
+      const blob = await rasterize();
+      if (!blob) throw new Error("no blob");
+      const file = new File([blob], "decision-profile.png", { type: "image/png" });
+      const nav = navigator as Navigator & {
+        share?: (data: ShareData) => Promise<void>;
+        canShare?: (data: ShareData) => boolean;
+      };
+      const payload: ShareData = {
+        files: [file],
+        title: "My Decision Profile",
+        text: shareText,
+        url: shareUrl,
+      };
+      if (nav.canShare && !nav.canShare(payload)) {
+        // Fall back to text/url only if the platform refuses the file.
+        await nav.share!({ title: payload.title, text: payload.text, url: payload.url });
+      } else {
+        await nav.share!(payload);
+      }
+    } catch (err) {
+      // User-cancelled share rejects with AbortError — silent.
+      if ((err as DOMException)?.name !== "AbortError") {
+        toast("Couldn't open the share sheet.", { description: "Try Download instead." });
+      }
+    } finally {
+      setBusy(null);
+    }
+  };
+
   const xUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
     shareText,
   )}&url=${encodeURIComponent(shareUrl)}`;
@@ -153,14 +227,41 @@ export function ShareCard({ profile, missionCodename }: ShareCardProps) {
         >
           {busy === "download" ? "Rendering…" : "Download PNG"}
         </button>
-        <button
-          type="button"
-          onClick={onCopyImage}
-          disabled={busy !== null}
-          className="text-foreground/55 hover:text-foreground border-b border-foreground/20 hover:border-foreground pb-1 transition-colors disabled:opacity-50"
-        >
-          {busy === "copy" ? "Copying…" : "Copy image"}
-        </button>
+        {canNativeShare && (
+          <button
+            type="button"
+            onClick={onNativeShare}
+            disabled={busy !== null}
+            className="inline-flex items-center gap-2 text-foreground/75 hover:text-foreground border-b border-foreground/30 hover:border-foreground pb-1 transition-colors disabled:opacity-50"
+          >
+            <svg
+              aria-hidden
+              viewBox="0 0 24 24"
+              width="12"
+              height="12"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M12 3v13" />
+              <path d="M7 8l5-5 5 5" />
+              <path d="M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5" />
+            </svg>
+            {busy === "share" ? "Opening…" : "Share via…"}
+          </button>
+        )}
+        {canCopyImage && (
+          <button
+            type="button"
+            onClick={onCopyImage}
+            disabled={busy !== null}
+            className="text-foreground/55 hover:text-foreground border-b border-foreground/20 hover:border-foreground pb-1 transition-colors disabled:opacity-50"
+          >
+            {busy === "copy" ? "Copying…" : "Copy image"}
+          </button>
+        )}
         <a
           href={xUrl}
           target="_blank"
@@ -179,7 +280,7 @@ export function ShareCard({ profile, missionCodename }: ShareCardProps) {
         </a>
       </div>
       <p className="text-center text-[0.6rem] tracking-[0.25em] uppercase text-foreground/30">
-        Download or copy the card, then attach it to your post.
+        {canCopyImage ? "Download or copy the card, then attach it to your post." : "Download the card, then attach it to your post."}
       </p>
     </div>
   );

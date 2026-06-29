@@ -50,6 +50,17 @@ export type DecisionProfile = {
   emergingPattern: string;
 };
 
+const EMPTY_PORTRAIT =
+  "Not enough data yet. Complete a mission to begin building your profile.";
+const FORMING_PORTRAIT =
+  "Your pattern is still forming. Each mission refines the assessment.";
+
+function isPlaceholderPortrait(s: string | undefined | null): boolean {
+  if (!s) return true;
+  const t = s.trim();
+  return t === "" || t === EMPTY_PORTRAIT || t === FORMING_PORTRAIT;
+}
+
 const empty = (): DecisionProfile => ({
   version: 1,
   missionsCompleted: 0,
@@ -58,7 +69,7 @@ const empty = (): DecisionProfile => ({
     (acc, d) => ({ ...acc, [d]: 50 }),
     {} as Record<Dimension, number>,
   ),
-  emergingPattern: "Not enough data yet. Complete a mission to begin building your profile.",
+  emergingPattern: EMPTY_PORTRAIT,
 });
 
 export function readProfile(): DecisionProfile {
@@ -252,14 +263,13 @@ function scoreFromAnalysis(a: DecisionAnalysis): {
 }
 
 function deriveEmergingPattern(contribs: MissionContribution[]): string {
-  if (contribs.length === 0)
-    return "Not enough data yet. Complete a mission to begin building your profile.";
+  if (contribs.length === 0) return EMPTY_PORTRAIT;
   const recent = contribs.slice(-5);
   const tally: Record<string, number> = {};
   for (const c of recent) for (const s of c.signals) tally[s] = (tally[s] ?? 0) + 1;
   const top = Object.entries(tally).sort((a, b) => b[1] - a[1])[0];
   if (!top || top[1] < 2) {
-    return "Your pattern is still forming. Each mission refines the assessment.";
+    return FORMING_PORTRAIT;
   }
   const [tag] = top;
   switch (tag) {
@@ -317,10 +327,13 @@ export function updateProfileWithAnalysis(
     missionsCompleted: prev.missionsCompleted + (filtered.length === prev.contributions.length ? 1 : 0),
     contributions,
     scores: newScores,
-    // Placeholder. The real, AI-generated portrait is written by
-    // applyPortraitToProfile() once the model returns. Keeping the previous
-    // line here avoids a flicker to a generic string during the gap.
-    emergingPattern: prev.emergingPattern || deriveEmergingPattern(contributions),
+    // Keep the previous AI-written portrait during the gap before the new
+    // one returns from the model — but never preserve the default
+    // placeholder, otherwise the share card would still read "Not enough
+    // data yet" after the first mission completes.
+    emergingPattern: isPlaceholderPortrait(prev.emergingPattern)
+      ? deriveEmergingPattern(contributions)
+      : prev.emergingPattern,
   };
   writeProfile(next);
   syncProfileToDB(next, contribution);
