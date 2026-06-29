@@ -304,7 +304,19 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
         ...(archetypeId ? { archetypeId } : {}),
       });
       try {
-        updateProfileWithAnalysis(MISSION_ID, analysis);
+        const updatedProfile = updateProfileWithAnalysis(MISSION_ID, analysis);
+        // Fire-and-forget: regenerate the AI portrait line off the new profile.
+        void (async () => {
+          try {
+            const payload = buildPortraitInput(updatedProfile, analysis);
+            const { portrait } = await generatePortrait({ data: payload });
+            if (portrait && portrait.trim()) {
+              applyPortraitToProfile(portrait.trim());
+            }
+          } catch (err) {
+            console.warn("portrait generation failed", err);
+          }
+        })();
       } catch (err) {
         console.error("profile update failed", err);
       }
