@@ -29,17 +29,17 @@ import { logOpen } from "@/lib/discovery/signals";
 export const Route = createFileRoute("/missions")({
   head: () => ({
     meta: [
-      { title: "The Archive — Decision Nodes" },
+      { title: "Case Archive — Decision Nodes" },
       {
         name: "description",
         content:
-          "The archive of cases. Choose one and step inside the single moment before an irreversible decision.",
+          "The Case Archive. Choose one and step inside the single moment before an irreversible decision.",
       },
-      { property: "og:title", content: "The Archive — Decision Nodes" },
+      { property: "og:title", content: "Case Archive — Decision Nodes" },
       {
         property: "og:description",
         content:
-          "The archive of cases. Choose one and step inside the single moment before an irreversible decision.",
+          "The Case Archive. Choose one and step inside the single moment before an irreversible decision.",
       },
     ],
   }),
