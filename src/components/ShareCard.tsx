@@ -29,6 +29,27 @@ type ShareCardProps = {
 export function ShareCard({ profile, missionCodename }: ShareCardProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const [busy, setBusy] = useState<null | "download" | "copy">(null);
+  const [canCopyImage, setCanCopyImage] = useState(false);
+
+  // Feature-detect canvas-to-clipboard. iOS Safari technically exposes
+  // ClipboardItem but rejects writes that happen after async work (our
+  // SVG → PNG rasterize step breaks transient activation), so exclude
+  // iOS/iPadOS explicitly. Only the browsers that can actually succeed
+  // see the "Copy image" button.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const w = window as unknown as { ClipboardItem?: typeof ClipboardItem };
+    const hasApi =
+      typeof w.ClipboardItem !== "undefined" &&
+      typeof navigator.clipboard?.write === "function";
+    const ua = navigator.userAgent || "";
+    const isIOS =
+      /iPad|iPhone|iPod/.test(ua) ||
+      // iPadOS 13+ reports as Mac with touch support
+      (/Macintosh/.test(ua) && (navigator as Navigator & { maxTouchPoints?: number }).maxTouchPoints! > 1);
+    setCanCopyImage(hasApi && !isIOS);
+  }, []);
+
 
   const shareUrl =
     typeof window !== "undefined" && window.location.origin.includes("decision-nodes")
