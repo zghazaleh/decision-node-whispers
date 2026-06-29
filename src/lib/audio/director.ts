@@ -250,9 +250,25 @@ class Director {
     }
     const a = this.ambient; // do NOT force ctx creation; HTTP prefetch is enough
     for (const url of urls) {
+      this.prefetchedUrls.add(url);
       if (a) void a.prefetch(url);
       else void prefetchAudio(url);
     }
+  }
+
+  /**
+   * Eagerly warm the HTTP cache for the global "always needed" assets
+   * (key SFX + landing/archive beds). Called from the root on mount so
+   * the very first plays — Begin motif, Awakening sting, Commit sting —
+   * have their bytes ready before the user gesture lands.
+   */
+  warmKeyAssets() {
+    this.prefetch({
+      screen: "landing",
+      sfx: ["awakening", "commit", "analyzing", "hover-tick", "select-chip", "node-motif"],
+    });
+    this.prefetch({ screen: "archive" });
+    this.prefetch({ screen: "analysis" });
   }
 
 
