@@ -31,6 +31,8 @@ export type Ambient = {
   setBedIntensity: (intensity: number, ms?: number) => void;
   /** `true` when the sample played to completion, `false` on any failure. */
   playOneShot: (url: string, opts?: { gain?: number; fadeInMs?: number; fadeOutMs?: number; bus?: "sfx" | "motif" }) => Promise<boolean>;
+  /** Synthesized film-frame flip routed through the shared unlocked SFX bus. */
+  playSyntheticFlip: (opts?: { gain?: number }) => Promise<boolean>;
   prefetch: (url: string) => Promise<void>;
   duck: (amount?: number, ms?: number) => void;
   release: (ms?: number) => void;
@@ -736,6 +738,49 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
           try { src.disconnect(); } catch { /* noop */ }
           try { g.disconnect(); } catch { /* noop */ }
         }, (dur + 0.3) * 1000);
+        return true;
+      } catch {
+        return false;
+      }
+    },
+
+    async playSyntheticFlip(opts) {
+      const c = ensureCtx(); if (!c) return false;
+      if (muted) return false;
+      if (c.state === "suspended") {
+        try { await c.resume(); } catch { return false; }
+      }
+      const target = sfxBus ?? masterGain;
+      if (!target) return false;
+      try {
+        const dur = 0.22;
+        const buffer = c.createBuffer(1, Math.floor(c.sampleRate * dur), c.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < data.length; i++) {
+          const t = i / data.length;
+          const env = Math.pow(1 - t, 2.2) * Math.min(1, t * 18);
+          data[i] = (Math.random() * 2 - 1) * env;
+        }
+        const src = c.createBufferSource();
+        src.buffer = buffer;
+        const filter = c.createBiquadFilter();
+        filter.type = "bandpass";
+        filter.frequency.value = 1800;
+        filter.Q.value = 0.7;
+        const g = c.createGain();
+        const now = c.currentTime;
+        const peak = opts?.gain ?? 0.18;
+        g.gain.setValueAtTime(0.0001, now);
+        g.gain.linearRampToValueAtTime(peak, now + 0.025);
+        g.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+        src.connect(filter).connect(g).connect(target);
+        src.start(now);
+        src.stop(now + dur + 0.05);
+        window.setTimeout(() => {
+          try { src.disconnect(); } catch { /* noop */ }
+          try { filter.disconnect(); } catch { /* noop */ }
+          try { g.disconnect(); } catch { /* noop */ }
+        }, (dur + 0.2) * 1000);
         return true;
       } catch {
         return false;
