@@ -1,20 +1,9 @@
-import { useState } from "react";
 import {
   DIMENSIONS,
   DIMENSION_LABELS,
   dimensionBands,
-  dimensionTrends,
   type DecisionProfile,
-  type Dimension,
-  type DimensionBand,
-  type MissionContribution,
 } from "@/lib/decision-profile";
-import { MISSIONS } from "@/lib/missions";
-
-function missionLabel(missionId: string): string {
-  const m = MISSIONS.find((x) => x.id === missionId);
-  return m ? `${m.number} · ${m.codename}` : missionId;
-}
 
 function bandPhrase(b: DimensionBand): string {
   if (b.samples === 0) return "No data yet.";
