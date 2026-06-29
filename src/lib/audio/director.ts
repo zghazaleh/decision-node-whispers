@@ -95,6 +95,7 @@ class Director {
   private screen: Screen | null = null;
   private muted = readBool(SOUND_KEY, true) === false; // dn:sound "on"|"off"; default sound on
   private reduced = readBool(REDUCED_KEY, false);
+  private musicIntensity: MusicIntensity = readIntensity();
   private ignited = false;
   private listeners = new Set<Listener>();
   private motifGuard = 0; // throttle motif so it stays sparse
@@ -125,6 +126,7 @@ class Director {
       // Default sound state per stored preference.
       this.ambient.setMuted(this.muted);
       this.ambient.setReducedAudio(this.reduced);
+      this.ambient.setBedIntensity(intensityToGain(this.musicIntensity), 0);
     }
     return this.ambient;
   }
@@ -140,6 +142,7 @@ class Director {
   isIgnited() { return this.ignited; }
   isMuted() { return this.muted; }
   isReduced() { return this.reduced; }
+  getMusicIntensity(): MusicIntensity { return this.musicIntensity; }
   currentScreen() { return this.screen; }
 
   setMuted(next: boolean) {
@@ -154,6 +157,20 @@ class Director {
     this.reduced = next;
     writeBool(REDUCED_KEY, next);
     this.engine()?.setReducedAudio(next);
+    this.emit();
+  }
+
+  /**
+   * Calm-bed music intensity. Persists across missions and reloads.
+   * `off` silences the bed bus entirely (heartbeat / pad / drone go with
+   * it), `low` runs the bed at ~40% of its target volume, `normal` is the
+   * authored mix. SFX, motif and the rest of the engine are unaffected,
+   * so commit/awakening stings still land.
+   */
+  setMusicIntensity(next: MusicIntensity) {
+    this.musicIntensity = next;
+    writeIntensity(next);
+    this.engine()?.setBedIntensity(intensityToGain(next), 700);
     this.emit();
   }
 
