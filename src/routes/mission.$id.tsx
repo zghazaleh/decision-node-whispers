@@ -798,6 +798,28 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
           onSubmit={handleDecide}
         />
       )}
+      {/* First-case onboarding interstitial */}
+      {showOnboarding && (
+        <button
+          type="button"
+          onClick={() => setShowOnboarding(false)}
+          aria-label="Dismiss"
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/85 backdrop-blur-sm animate-fade-in cursor-pointer focus:outline-none"
+        >
+          <div className="max-w-xl px-8 text-center">
+            <p className="font-display text-2xl sm:text-3xl leading-relaxed text-foreground/90 text-balance">
+              You'll wake up in someone else's life.
+              <br />
+              Explore through dialogue.
+              <br />
+              When the time comes — decide.
+            </p>
+            <p className="mt-6 font-sans text-[0.65rem] tracking-[0.4em] uppercase text-accent/75">
+              Your decision is final.
+            </p>
+          </div>
+        </button>
+      )}
     </main>
   );
 }
