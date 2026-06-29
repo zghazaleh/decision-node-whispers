@@ -134,7 +134,7 @@ export function WhatHappenedFilm({ beats }: { beats: ReadonlyArray<Beat> }) {
         What happened
       </p>
       <div
-        className="relative h-svh w-full overflow-hidden bg-[#06070a] select-none cursor-pointer"
+        className="relative h-[72svh] sm:h-[78svh] max-h-[680px] w-full overflow-hidden bg-[#06070a] select-none cursor-pointer touch-manipulation"
         onClick={onStageClick}
         role="button"
         tabIndex={0}
@@ -208,9 +208,9 @@ export function WhatHappenedFilm({ beats }: { beats: ReadonlyArray<Beat> }) {
               />
 
               {/* Text overlay for this frame. */}
-              <div className="absolute inset-0 flex flex-col justify-end px-6 sm:px-12 md:px-20 pb-16 sm:pb-20 md:pb-24">
-                <div className="flex items-baseline gap-3 mb-4 sm:mb-5">
-                  <span className="font-display text-xs sm:text-sm tracking-[0.4em] uppercase text-accent/90">
+              <div className="absolute inset-0 flex flex-col justify-end px-5 sm:px-10 md:px-16 pb-20 sm:pb-24">
+                <div className="flex items-baseline gap-2 sm:gap-3 mb-3 sm:mb-4">
+                  <span className="font-display text-[0.65rem] sm:text-xs tracking-[0.35em] uppercase text-accent/90">
                     {p.stage.numeral}.
                   </span>
                   <span className="text-[0.55rem] sm:text-[0.6rem] tracking-[0.5em] uppercase text-foreground/55">
@@ -218,10 +218,10 @@ export function WhatHappenedFilm({ beats }: { beats: ReadonlyArray<Beat> }) {
                   </span>
                   <span className="ml-2 h-px flex-1 bg-foreground/15" aria-hidden />
                 </div>
-                <p className="font-display text-2xl sm:text-3xl md:text-4xl leading-snug text-foreground text-pretty drop-shadow-[0_2px_14px_rgba(0,0,0,0.9)] max-w-3xl">
+                <p className="font-display text-xl sm:text-2xl md:text-3xl leading-snug text-foreground text-pretty drop-shadow-[0_2px_14px_rgba(0,0,0,0.9)] max-w-3xl">
                   {p.beat.beat}
                 </p>
-                <p className="mt-4 sm:mt-5 text-sm sm:text-base md:text-lg text-foreground/85 leading-relaxed text-pretty max-w-2xl drop-shadow-[0_2px_10px_rgba(0,0,0,0.85)]">
+                <p className="mt-3 sm:mt-4 text-sm sm:text-base md:text-lg text-foreground/85 leading-relaxed text-pretty max-w-2xl drop-shadow-[0_2px_10px_rgba(0,0,0,0.85)]">
                   {p.beat.consequence}
                 </p>
               </div>
