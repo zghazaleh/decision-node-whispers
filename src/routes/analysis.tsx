@@ -322,17 +322,25 @@ function AnalysisDebrief({
           Decision recorded
         </p>
         <h1 className="font-display text-3xl sm:text-4xl md:text-5xl leading-tight text-foreground/95 text-balance">
-          {a.headline}
+          <StreamingText text={a.headline} startDelayMs={400} wordMs={95} />
         </h1>
         {stance && (
-          <p className="mt-8 text-base sm:text-lg leading-relaxed text-foreground/75 text-pretty italic">
-            “{stance}”
-          </p>
+          <StreamingText
+            as="p"
+            text={`“${stance}”`}
+            startDelayMs={1400}
+            wordMs={70}
+            className="mt-8 text-base sm:text-lg leading-relaxed text-foreground/75 text-pretty italic block"
+          />
         )}
         {why && (
-          <p className="mt-4 text-sm text-foreground/50 leading-relaxed text-pretty">
-            Because {why.replace(/^because\s+/i, "")}
-          </p>
+          <StreamingText
+            as="p"
+            text={`Because ${why.replace(/^because\s+/i, "")}`}
+            startDelayMs={2400}
+            wordMs={60}
+            className="mt-4 text-sm text-foreground/50 leading-relaxed text-pretty block"
+          />
         )}
         {a.archetypeLabel && (
           <p className="mt-6 text-[0.6rem] tracking-[0.35em] uppercase text-accent/70">
