@@ -36,12 +36,43 @@ import { logCommit } from "@/lib/discovery/signals";
 
 
 export const Route = createFileRoute("/mission/$id")({
-  head: () => ({
-    meta: [
-      { title: "Decision Nodes — Mission" },
-      { name: "robots", content: "noindex" },
-    ],
-  }),
+  head: ({ params }) => {
+    const meta = MISSIONS.find((m) => m.id === params.id);
+    const engine = getMissionEngine(params.id);
+    if (!meta) {
+      return {
+        meta: [
+          { title: "Decision Nodes — Mission" },
+          { name: "robots", content: "noindex" },
+        ],
+      };
+    }
+    const title = `${meta.title} — Decision Nodes`;
+    const description = meta.logline;
+    const sceneSrc = engine?.scene.src ?? "";
+    const ogImage = sceneSrc
+      ? sceneSrc.startsWith("http")
+        ? sceneSrc
+        : `https://decision-nodes.com${sceneSrc}`
+      : "https://decision-nodes.com/og-decision-nodes.jpg";
+    const url = `https://decision-nodes.com/mission/${params.id}`;
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "article" },
+        { property: "og:url", content: url },
+        { property: "og:image", content: ogImage },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: title },
+        { name: "twitter:description", content: description },
+        { name: "twitter:image", content: ogImage },
+      ],
+      links: [{ rel: "canonical", href: url }],
+    };
+  },
   component: MissionRoute,
   ssr: false,
 });
