@@ -15,6 +15,7 @@ import { getMissionPercentile, type MissionPercentile } from "@/lib/mission-stat
 import { logAnalysisRead } from "@/lib/discovery/signals";
 import sceneCosmos from "@/assets/scene-cosmos.jpg";
 import { audio } from "@/lib/audio/director";
+import { WhatHappenedFilm } from "@/components/analysis/WhatHappenedFilm";
 
 
 function AnalysisFallback({
@@ -327,24 +328,10 @@ function AnalysisDebrief({
         )}
       </section>
 
-      {/* Block 2 — What happened */}
+      {/* Block 2 — What happened (cinematic noir sequence) */}
       {condensed.length > 0 && (
         <section className="animate-fade-up" style={{ animationDelay: "0.15s" }}>
-          <p className="text-[0.6rem] tracking-[0.5em] uppercase text-accent/80 mb-8 text-center">
-            What happened
-          </p>
-          <ol className="space-y-8">
-            {condensed.map((t, i) => (
-              <li key={i} className="border-l border-foreground/20 pl-6">
-                <p className="font-display text-lg sm:text-xl leading-snug text-foreground/95 text-pretty">
-                  {t.beat}
-                </p>
-                <p className="mt-2 text-sm sm:text-base text-foreground/65 leading-relaxed text-pretty">
-                  {t.consequence}
-                </p>
-              </li>
-            ))}
-          </ol>
+          <WhatHappenedFilm beats={condensed} />
         </section>
       )}
 
