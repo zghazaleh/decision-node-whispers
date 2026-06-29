@@ -605,11 +605,11 @@ function LedgerRow({
             {/* Desktop layout */}
             <div className="hidden sm:grid grid-cols-[1fr_auto] items-baseline gap-x-8">
               <div className="min-w-0">
-                <div className="flex items-baseline gap-3">
-                  <h3 className="font-display text-[21px] leading-tight text-foreground/95 truncate">
+                <div className="flex items-baseline gap-3 min-w-0">
+                  <h3 className="font-display text-[21px] leading-tight text-foreground/95 whitespace-nowrap shrink-0">
                     {mission.codename}
                   </h3>
-                  <p className="text-[0.55rem] tracking-[0.35em] uppercase text-muted-foreground/65 truncate">
+                  <p className="text-[0.55rem] tracking-[0.35em] uppercase text-muted-foreground/65 truncate min-w-0">
                     {[mission.location, mission.year].filter(Boolean).join(" · ")}
                   </p>
                 </div>
