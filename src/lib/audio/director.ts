@@ -103,6 +103,7 @@ class Director {
   private attempts: AudioAttempt[] = [];
   private lastEnter: { screen: Screen; opts: EnterOpts } | null = null;
   private ignitePromise: Promise<void> | null = null;
+  private prefetchedUrls = new Set<string>();
 
   /** Ring buffer of recent switchTo / playOneShot attempts, newest first. */
   recentAttempts(): AudioAttempt[] { return this.attempts.slice(); }
