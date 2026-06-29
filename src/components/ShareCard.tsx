@@ -227,6 +227,31 @@ export function ShareCard({ profile, missionCodename }: ShareCardProps) {
         >
           {busy === "download" ? "Rendering…" : "Download PNG"}
         </button>
+        {canNativeShare && (
+          <button
+            type="button"
+            onClick={onNativeShare}
+            disabled={busy !== null}
+            className="inline-flex items-center gap-2 text-foreground/75 hover:text-foreground border-b border-foreground/30 hover:border-foreground pb-1 transition-colors disabled:opacity-50"
+          >
+            <svg
+              aria-hidden
+              viewBox="0 0 24 24"
+              width="12"
+              height="12"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M12 3v13" />
+              <path d="M7 8l5-5 5 5" />
+              <path d="M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5" />
+            </svg>
+            {busy === "share" ? "Opening…" : "Share via…"}
+          </button>
+        )}
         {canCopyImage && (
           <button
             type="button"
