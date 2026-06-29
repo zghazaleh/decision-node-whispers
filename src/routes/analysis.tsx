@@ -439,6 +439,24 @@ function AnalysisDebrief({
         />
       </section>
 
+      {/* Block 8 — Community decision breakdown */}
+      <section className="animate-fade-up space-y-6" style={{ animationDelay: "0.9s" }}>
+        <div className="text-center">
+          <p className="text-[0.6rem] tracking-[0.5em] uppercase text-accent/80 mb-3">
+            How others decided
+          </p>
+          <p className="text-xs text-foreground/50 max-w-md mx-auto leading-relaxed">
+            The same room, the same pressure. Here is which way the room broke for everyone else who held it.
+          </p>
+        </div>
+        <CommunityStats
+          missionId={mission.missionId}
+          chosenArchetypeId={mission.archetypeId ?? a.archetypeId}
+        />
+      </section>
+
+
+
 
       {/* Coda */}
       <section className="animate-fade-up pt-4" style={{ animationDelay: "0.8s" }}>
