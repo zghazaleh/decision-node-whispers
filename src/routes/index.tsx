@@ -27,12 +27,17 @@ export const Route = createFileRoute("/")({
 });
 
 function Landing() {
-  // Warm the landing + archive beds (and the node motif) before the user
-  // taps Begin, so the first cross-fade after ignition never has to wait
-  // on a network round-trip.
+  // Warm the landing bed (about to play) eagerly, and let idle time bring
+  // in the archive bed plus the most-likely-next mission bed so the first
+  // cross-fade after Begin never has to wait on a network round-trip.
   useEffect(() => {
     audio.prefetch({ screen: "landing", sfx: ["node-motif"] });
-    audio.prefetch({ screen: "archive" });
+    const nextId = nextLikelyMissionId();
+    const targets: Parameters<typeof audio.prefetch>[0][] = [
+      { screen: "archive" },
+    ];
+    if (nextId) targets.push({ missionId: nextId });
+    return idlePrefetch(targets);
   }, []);
 
   return (
