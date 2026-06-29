@@ -123,6 +123,7 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
         beat: "Years later",
         consequence:
           "You will be the carer who did not sign. The Programme was not altered by it; Aven was not saved by it; eleven previous signatures are not undone by it. You will know all three things and the not signing will still be the thing you can take to your own end. The unsigned box in the file in cabinet 2 drawer 7 of Meadowfold is, materially, the only place in the country where Lior Mire's refusal is written down.",
+      },
     ],
     secondOrder: {
       aven: "Transferred at 11:24 on Halen's reverted signature. Completed at 16:00 at Hesling. The refusal did not change Aven's day.",
