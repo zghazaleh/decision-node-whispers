@@ -20,7 +20,12 @@ import { toast } from "sonner";
 
 import { clearMission, partsToText, readMission, useMission } from "@/lib/mission-store";
 import { analyzeDecision } from "@/lib/analysis.functions";
-import { updateProfileWithAnalysis } from "@/lib/decision-profile";
+import {
+  updateProfileWithAnalysis,
+  applyPortraitToProfile,
+  buildPortraitInput,
+} from "@/lib/decision-profile";
+import { generatePortrait } from "@/lib/portrait.functions";
 import { recordMissionPlay } from "@/lib/mission-stats.functions";
 
 import { audio } from "@/lib/audio/director";
