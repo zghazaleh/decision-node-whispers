@@ -17,7 +17,7 @@ import { readMission } from "@/lib/mission-store";
 import { getMissionEngine } from "@/lib/missions/registry";
 import { HeroDetail } from "@/components/discovery/HeroDetail";
 import { GuildCarousel } from "@/components/discovery/GuildCarousel";
-import { ThemeCard } from "@/components/discovery/ThemeCard";
+import { ThemeCarousel } from "@/components/discovery/ThemeCarousel";
 import { logOpen } from "@/lib/discovery/signals";
 import { useAuthUser } from "@/lib/auth-sync";
 import { useDecisionProfile } from "@/lib/decision-profile";
