@@ -440,6 +440,65 @@ function MissionsPage() {
           </div>
         )}
 
+        {/* ---------- Filters ---------- */}
+        <div className="mb-6 flex flex-wrap items-end gap-x-5 gap-y-3">
+          {/* Domain */}
+          <FilterSelect
+            label="Domain"
+            values={domains}
+            active={domain}
+            onChange={setDomain}
+          />
+          {/* Theme */}
+          <FilterSelect
+            label="Theme"
+            values={themes}
+            active={theme}
+            onChange={setTheme}
+          />
+
+          {/* Difficulty */}
+          <FilterSelect
+            label="Difficulty"
+            values={["Any", ...difficulties.map(String)]}
+            active={difficulty === "Any" ? "Any" : String(difficulty)}
+            onChange={(v) => setDifficulty(v === "Any" ? "Any" : Number(v))}
+            renderValue={(v) =>
+              v === "Any" ? <span>Any</span> : <DifficultyDots level={Number(v)} />
+            }
+          />
+
+          <div className="ml-auto flex items-center gap-4">
+            {/* Active filter chip + clear */}
+            {(theme !== "All" || domain !== "All" || difficulty !== "Any") && (
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="text-[0.55rem] tracking-[0.35em] uppercase text-muted-foreground/50 hover:text-accent transition-colors"
+              >
+                Clear
+              </button>
+            )}
+
+            {/* Sort */}
+            <div className="flex items-center gap-2">
+              <span className="text-[0.55rem] tracking-[0.4em] uppercase text-muted-foreground/55">
+                Sort
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  const i = SORT_ORDER.indexOf(sort);
+                  setSort(SORT_ORDER[(i + 1) % SORT_ORDER.length]!);
+                }}
+                className="text-[0.6rem] tracking-[0.35em] uppercase text-foreground/80 hover:text-accent transition-colors tabular-nums"
+              >
+                {SORT_LABEL[sort]} ↻
+              </button>
+            </div>
+          </div>
+        </div>
+
         {/* ---------- Case Archive header ---------- */}
         <div className="mb-4 mt-4 flex items-baseline gap-3 border-b border-foreground/10 pb-3">
           <h2 className="font-display text-xl text-foreground/95">Case Archive</h2>
