@@ -29,6 +29,7 @@ import { missionFourteenEngine } from "./mission-14";
 import { missionFifteenEngine } from "./mission-15";
 import { missionSixteenEngine } from "./mission-16";
 import { missionSeventeenEngine } from "./mission-17";
+import { missionEighteenEngine } from "./mission-18";
 import { composeSystemPrompt } from "./director-invariants";
 import {
   formatMissionEngineErrors,
@@ -75,6 +76,7 @@ register(missionFourteenEngine);
 register(missionFifteenEngine);
 register(missionSixteenEngine);
 register(missionSeventeenEngine);
+register(missionEighteenEngine);
 
 export function getMissionEngine(missionId: string): MissionEngine | null {
   return REGISTRY[missionId] ?? null;

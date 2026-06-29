@@ -473,6 +473,34 @@ const FRAMEWORK: Record<string, MissionFramework> = {
     learningObjective:
       "Practice holding due process against the felt certainty of a crowd that is sure, using the reachable corroborations (the canvas roll on Pim's saddle, Bram's missing ledger, Adela's Monday-night sentence) — without letting either 'the town has decided' or 'I alone see clearly' become the slogan that does the choosing under a cottonwood at dusk.",
   },
+
+  "mission-18": {
+    stakes: [
+      "The health of eight hundred and forty-eight booked guests this season, including one hundred and twelve cantonal civil-service cure-pensioners arriving by post-coach at 11:30, plus the residents of Vallenspring who drink at the Trinkhalle daily.",
+      "The seasonal economy of a town of 1,411 souls whose only industry is the spring — four hundred and twelve direct jobs in the bath-houses, sanatoria, and the Edelhof and Bergrose hotels.",
+      "The Trinkhalle's title, pledged against a Tarnen Mercantile loan with a covenant calling the whole loan in immediately on loss of Class A status — a covenant Tobin signed without bringing the full terms to the council.",
+      "Marta's licence as cantonal health officer and the standing of her practice; her brother Tobin's mayoralty; and the Halver Sunday dinner table for the next several years.",
+    ],
+    hiddenTruths: [
+      "The Tarnen Mercantile loan carries a covenant calling the principal immediately on loss of Class A status, pledging the Trinkhalle's title. Tobin signed it without bringing the full terms to the council vote. Reachable only by asking him plainly in his office.",
+      "Henrik Daal reported the hairline split in the upper-bore casing to Tobin in writing on 11 April. The reply was 'after the season.' Henrik kept the carbon. The fix is a single replacement sleeve, two hundred and twelve crowns, four days off-line. Reachable only by walking to the pump-house with the first page of the lab report.",
+      "The lab envelope contains a second page Marta has not seen, folded against the back: a 48-hour upward trend (coliform 6,200, lead 0.42, free arsenic 0.07 over limit) and a combined-fix cost of approximately two hundred and seventy crowns that restores Class A inside ten days. Reachable only by picking up the envelope and looking inside.",
+      "Selka Vorne already has the loan principal from a clerk in Tarnen, has noticed Marta's late nights at the surgery, and will knock at 09:51 if not contacted first. Will hold the story for the cantonal evening edition only if given the truth on the record before 09:50.",
+      "Ingrid Olsten will support a 'technical delay' framed as plumbing inspection if presented in private at her hotel office before 10:00, but will not support a public health announcement on the Kurplatz. The Edelhof bath-house draws directly from the Trinkhalle outflow.",
+    ],
+    timeLimit:
+      "Forty-two minutes to the ribbon-cutting at 10:00, then ninety minutes until the cantonal pensioners arrive at 11:30. Selka Vorne knocks on the surgery door at 09:51 if not contacted first. A truthful statement on the record before 09:50 controls the Morgenblatt's framing; after 09:50 it does not.",
+    decisionScience: [
+      "Motivated reasoning: the brain that does not want the report to be true will spend several minutes reading the headline as 'a margin of error' rather than as a 1,840-against-50 ratio, because the brain knows what the next several hours cost otherwise.",
+      "Optimism bias: 'the upper-bore split has held for six weeks and the pensioners will be fine' is a probable-but-not-certain assumption that becomes available exactly when believing it lets the season open at ten.",
+      "Status quo bias: the default at 09:18 is that the ribbon is cut at ten; signing the form requires an act, doing nothing requires only the failure to act, and the brain weights those asymmetrically against the moral weight of each.",
+      "Conflict-of-interest blindness: the doctor whose brother is the mayor will not see, in the body's quick way of seeing, the same severity she would see if the report were from another town's spring.",
+      "Identifiable victim asymmetry: the four hundred and twelve neighbors whose jobs the season holds are vividly present (Tobin in his green sash, Ingrid in her hotel office, Henrik at the pump-house); the eight hundred and forty-eight guests, including the one who will be hospitalized in week three, are statistical.",
+      "Anchoring on the council's framing: 'plumbing inspection' is the kind of phrase the body wants to hear because it is the phrase the room would say, and once heard it does some of the choosing on its own.",
+    ],
+    learningObjective:
+      "Practice deciding when public health and collective livelihood pull against each other under a clock — using the reachable corroborations (the second page in the envelope, Henrik's April carbon and combined-fix cost, Tobin's loan covenant, Selka's deadline) without letting either 'truth is non-negotiable' or 'the town is also lives' become the slogan that does the choosing on a writing desk at quarter past nine.",
+  },
 };
 
 export function getMissionFramework(missionId: string): MissionFramework | null {

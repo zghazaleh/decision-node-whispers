@@ -329,4 +329,22 @@ export const MISSIONS: MissionMeta[] = [
     creator: "House Edition",
     version: "v1.0",
   },
+  {
+    id: "mission-18",
+    number: "18",
+    codename: "The Spring",
+    title: "The Spring",
+    logline:
+      "A sealed envelope on the writing desk. A trombone in the pavilion. Forty-two minutes before the ribbon and your brother gives the address.",
+    status: "available",
+    duration: "20–40 min",
+    tone: "Bunting · Mineral tang · Held breath",
+    location: "Kurplatz of Vallenspring, upper Hellan valley",
+    year: "Seventy-third year of the Kursaison",
+    category: "Civic",
+    theme: "Truth",
+    difficulty: 4,
+    creator: "House Edition",
+    version: "v1.0",
+  },
 ];
