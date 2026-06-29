@@ -362,9 +362,12 @@ function AnalysisDebrief({
           <p className="text-[0.6rem] tracking-[0.5em] uppercase text-accent/80 mb-6 text-center">
             How you reasoned
           </p>
-          <p className="font-display text-xl sm:text-2xl leading-relaxed text-foreground/90 text-pretty italic text-center max-w-xl mx-auto">
-            {a.reasoningEcho}
-          </p>
+          <StreamingText
+            as="p"
+            text={a.reasoningEcho}
+            wordMs={85}
+            className="font-display text-xl sm:text-2xl leading-relaxed text-foreground/90 text-pretty italic text-center max-w-xl mx-auto block"
+          />
           {ra?.calibrationVerdict && (
             <p className="mt-6 text-center text-xs tracking-[0.3em] uppercase text-foreground/45">
               {ra.calibrationVerdict === "calibrated"
