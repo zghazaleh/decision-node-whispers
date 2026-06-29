@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { DecisionAnalysis } from "@/lib/analysis.functions";
+import { syncProfileToDB } from "@/lib/auth-sync";
 
 const KEY = "decision-node:profile";
 
