@@ -298,6 +298,7 @@ function MissionsPage() {
   // Closing the open row when filters change
   useEffect(() => {
     setOpenId(null);
+    setActiveGroup(null);
   }, [theme, domain, difficulty, sort]);
 
   /* ----- Ambient: the Archive bed is the hushed reading-room. Opening a
