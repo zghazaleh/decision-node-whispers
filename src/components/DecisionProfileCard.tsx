@@ -90,11 +90,14 @@ function RadarPlot({
   const hiPoly = ptsAt(his);
   const loPoly = ptsAt(los);
 
+  // Extra padding around the radar so multi-word labels (e.g. "Second-Order
+  // Thinking", "Information Gathering") render in full without clipping.
+  const pad = 90;
   return (
-    <div className="relative mx-auto" style={{ maxWidth: size }}>
+    <div className="relative mx-auto" style={{ maxWidth: size + pad * 2 }}>
       <svg
-        viewBox={`0 0 ${size} ${size}`}
-        className="w-full h-auto"
+        viewBox={`${-pad} ${-pad} ${size + pad * 2} ${size + pad * 2}`}
+        className="w-full h-auto overflow-visible"
         role="img"
         aria-label="Decision DNA radar plot"
       >
@@ -168,18 +171,22 @@ function RadarPlot({
         {/* Labels */}
         {labels.map((label, i) => {
           const p = pointAt(i, rMax + 22);
-          const short = label.length > 12 ? label.split(" ")[0] : label;
           const anchor =
             Math.abs(p.x - cx) < 8
               ? "middle"
               : p.x > cx
                 ? "start"
                 : "end";
+          // Break two-word labels onto two lines so each fits cleanly.
+          const words = label.split(" ");
+          const lines = words.length >= 2 && label.length > 12
+            ? [words[0], words.slice(1).join(" ")]
+            : [label];
           return (
             <text
               key={i}
               x={p.x}
-              y={p.y}
+              y={p.y - (lines.length - 1) * 5}
               textAnchor={anchor}
               dominantBaseline="middle"
               className="fill-foreground/55"
@@ -190,7 +197,11 @@ function RadarPlot({
                 fontFamily: "var(--font-sans)",
               }}
             >
-              {short}
+              {lines.map((ln, li) => (
+                <tspan key={li} x={p.x} dy={li === 0 ? 0 : 12}>
+                  {ln}
+                </tspan>
+              ))}
             </text>
           );
         })}
@@ -198,6 +209,7 @@ function RadarPlot({
     </div>
   );
 }
+
 
 export type { Dimension } from "@/lib/decision-profile";
 
