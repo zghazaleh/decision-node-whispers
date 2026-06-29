@@ -412,6 +412,19 @@ function MissionsPage() {
           groups={CURATED_GROUPS}
           missions={MISSIONS}
           onEnter={commit}
+          renderRow={(m, state) => (
+            <LedgerRow
+              key={m.id}
+              mission={m}
+              stats={stats?.[m.id]}
+              prior={priorDecisions[m.id]}
+              isOpen={state.isOpen}
+              isHovered={state.isHovered}
+              onHover={state.onHover}
+              onToggle={state.onToggle}
+              onEnter={state.onEnter}
+            />
+          )}
         />
 
         {/* ---------- Case Archive header ---------- */}
