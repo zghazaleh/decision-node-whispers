@@ -21,6 +21,7 @@ export const Route = createFileRoute("/sitemap.xml")({
           { path: "/constitution", changefreq: "weekly", priority: "0.8" },
           { path: "/missions", changefreq: "weekly", priority: "0.9" },
           { path: "/sound-test", changefreq: "monthly", priority: "0.5" },
+          { path: "/blog/decision-making-frameworks-guide", changefreq: "monthly", priority: "0.7" },
           ...MISSIONS.map((m) => ({
             path: `/mission/${m.id}`,
             changefreq: "monthly" as const,
