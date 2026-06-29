@@ -15,6 +15,7 @@ import { Route as NarrationPreviewRouteImport } from './routes/narration-preview
 import { Route as MissionsLegacyRouteImport } from './routes/missions-legacy'
 import { Route as MissionsRouteImport } from './routes/missions'
 import { Route as ConstitutionRouteImport } from './routes/constitution'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AnalysisRouteImport } from './routes/analysis'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MissionIdRouteImport } from './routes/mission.$id'
@@ -54,6 +55,11 @@ const MissionsRoute = MissionsRouteImport.update({
 const ConstitutionRoute = ConstitutionRouteImport.update({
   id: '/constitution',
   path: '/constitution',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AnalysisRoute = AnalysisRouteImport.update({
@@ -111,6 +117,7 @@ const AdminEvaluationRoute = AdminEvaluationRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/analysis': typeof AnalysisRoute
+  '/auth': typeof AuthRoute
   '/constitution': typeof ConstitutionRoute
   '/missions': typeof MissionsRoute
   '/missions-legacy': typeof MissionsLegacyRoute
@@ -129,6 +136,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/analysis': typeof AnalysisRoute
+  '/auth': typeof AuthRoute
   '/constitution': typeof ConstitutionRoute
   '/missions': typeof MissionsRoute
   '/missions-legacy': typeof MissionsLegacyRoute
@@ -148,6 +156,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/analysis': typeof AnalysisRoute
+  '/auth': typeof AuthRoute
   '/constitution': typeof ConstitutionRoute
   '/missions': typeof MissionsRoute
   '/missions-legacy': typeof MissionsLegacyRoute
@@ -168,6 +177,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/analysis'
+    | '/auth'
     | '/constitution'
     | '/missions'
     | '/missions-legacy'
@@ -186,6 +196,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/analysis'
+    | '/auth'
     | '/constitution'
     | '/missions'
     | '/missions-legacy'
@@ -204,6 +215,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/analysis'
+    | '/auth'
     | '/constitution'
     | '/missions'
     | '/missions-legacy'
@@ -223,6 +235,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AnalysisRoute: typeof AnalysisRoute
+  AuthRoute: typeof AuthRoute
   ConstitutionRoute: typeof ConstitutionRoute
   MissionsRoute: typeof MissionsRoute
   MissionsLegacyRoute: typeof MissionsLegacyRoute
@@ -281,6 +294,13 @@ declare module '@tanstack/react-router' {
       path: '/constitution'
       fullPath: '/constitution'
       preLoaderRoute: typeof ConstitutionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/analysis': {
@@ -359,6 +379,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AnalysisRoute: AnalysisRoute,
+  AuthRoute: AuthRoute,
   ConstitutionRoute: ConstitutionRoute,
   MissionsRoute: MissionsRoute,
   MissionsLegacyRoute: MissionsLegacyRoute,
@@ -378,13 +399,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
