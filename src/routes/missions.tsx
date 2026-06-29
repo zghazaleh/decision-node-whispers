@@ -188,6 +188,9 @@ function MissionsPage() {
   const [openId, setOpenId] = useState<string | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [entering, setEntering] = useState(false);
+  const [gateOpen, setGateOpen] = useState(false);
+  const user = useAuthUser();
+  const profile = useDecisionProfile();
 
   // Warm the archive bed (the room the player is in) eagerly, and let
   // idle time bring in the two most-likely-next mission beds plus the
