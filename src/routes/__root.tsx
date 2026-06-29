@@ -107,8 +107,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "Wake up in someone else's life. One irreversible decision. An interactive drama.",
       },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/5d91de4e-9d1c-4edf-863c-3d63866fc4fd/id-preview-29db16bb--5c0a2ea2-d89d-46f4-9789-6a6867e7e361.lovable.app-1782529685980.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/5d91de4e-9d1c-4edf-863c-3d63866fc4fd/id-preview-29db16bb--5c0a2ea2-d89d-46f4-9789-6a6867e7e361.lovable.app-1782529685980.png" },
+      { property: "og:image", content: "https://decision-nodes.com/og-decision-nodes.jpg" },
+      { name: "twitter:image", content: "https://decision-nodes.com/og-decision-nodes.jpg" },
       ...((loaderData?.gscTokens ?? []).map((t) => ({
         name: "google-site-verification",
         content: t.token,
