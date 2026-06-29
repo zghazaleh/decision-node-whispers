@@ -29,7 +29,6 @@ import { generatePortrait } from "@/lib/portrait.functions";
 import { recordMissionPlay } from "@/lib/mission-stats.functions";
 
 import { audio } from "@/lib/audio/director";
-import { idlePrefetch, nextLikelyMissionId } from "@/lib/audio/idlePrefetch";
 import { getMissionEngine } from "@/lib/missions/registry";
 import { MISSIONS } from "@/lib/missions";
 import type { MissionEngine } from "@/lib/missions/types";
@@ -76,18 +75,10 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
     return () => clearTimeout(t);
   }, []);
 
-  // Pre-warm the bed for this mission + the decision SFX eagerly (they
-  // fire within seconds), then let idle time bring in the analysis bed
-  // and the most-likely-next mission bed so the player can flow from
-  // commit → analysis → next case without a single network hitch.
+  // Keep this mission, analysis, and decision SFX hot while the scene plays.
   useEffect(() => {
     audio.prefetch({ missionId: MISSION_ID, sfx: ["awakening", "commit", "analyzing"] });
-    const nextId = nextLikelyMissionId(MISSION_ID);
-    const targets: Parameters<typeof audio.prefetch>[0][] = [
-      { screen: "analysis", sfx: ["node-motif"] },
-    ];
-    if (nextId && nextId !== MISSION_ID) targets.push({ missionId: nextId });
-    return idlePrefetch(targets);
+    audio.prefetch({ screen: "analysis", sfx: ["node-motif"] });
   }, [MISSION_ID]);
 
 

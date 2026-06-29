@@ -1,7 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { audio } from "@/lib/audio/director";
-import { idlePrefetch, nextLikelyMissionId } from "@/lib/audio/idlePrefetch";
 
 
 
@@ -29,17 +28,9 @@ export const Route = createFileRoute("/")({
 
 function Landing() {
   const navigate = useNavigate();
-  // Warm the landing bed (about to play) eagerly, and let idle time bring
-  // in the archive bed plus the most-likely-next mission bed so the first
-  // cross-fade after Begin never has to wait on a network round-trip.
+  // Root preload starts immediately; mirror it here for client transitions.
   useEffect(() => {
-    audio.prefetch({ screen: "landing", sfx: ["node-motif"] });
-    const nextId = nextLikelyMissionId();
-    const targets: Parameters<typeof audio.prefetch>[0][] = [
-      { screen: "archive" },
-    ];
-    if (nextId) targets.push({ missionId: nextId });
-    return idlePrefetch(targets);
+    audio.warmKeyAssets();
   }, []);
 
   return (
