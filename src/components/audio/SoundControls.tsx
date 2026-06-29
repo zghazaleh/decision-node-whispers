@@ -51,7 +51,7 @@ export function SoundControls({ className = "" }: { className?: string }) {
       <div
         role="radiogroup"
         aria-label="Calm music intensity"
-        className="hidden sm:inline-flex items-center rounded-full border border-foreground/15 bg-background/40 p-0.5"
+        className="inline-flex items-center rounded-full border border-foreground/15 bg-background/40 p-0.5"
       >
         {INTENSITY_OPTIONS.map((opt) => {
           const active = intensity === opt.value;
