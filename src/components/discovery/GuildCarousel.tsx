@@ -155,7 +155,7 @@ export function GuildCarousel({
             aria-label={`${label} — use arrow keys to browse, Enter to open`}
             aria-activedescendant={items[active] ? `carousel-tile-${items[active].id}` : undefined}
             tabIndex={-1}
-            className="scrollbar-hide flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 sm:gap-5"
+            className="scrollbar-hide dn-carousel-strip flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 sm:gap-5"
             style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch" }}
             aria-busy={loading || undefined}
             onKeyDown={(e) => {
@@ -187,7 +187,7 @@ export function GuildCarousel({
             }}
           >
             {items.map((m, i) => (
-              <li key={m.id} className="snap-start" role="presentation">
+              <li key={m.id} className="dn-carousel-tile snap-start" role="presentation">
                 <CarouselTile
                   mission={m}
                   index={i}
@@ -292,13 +292,16 @@ function CarouselTile({
           : "border-foreground/10 opacity-55 hover:opacity-90 hover:border-foreground/25 [filter:saturate(0.7)_brightness(0.92)]",
         open ? "border-accent/80" : "",
       ].join(" ")}
-      style={{ willChange: "transform, opacity, filter" }}
+      // Reserve a compositor layer only while the tile is the one
+      // animating (spotlit) or transitioning open — idle tiles drop the
+      // hint so the GPU isn't holding nine layers in memory at rest.
+      style={{ willChange: spotlit || open ? "transform, opacity, filter" : "auto" }}
     >
       <div className="relative aspect-[3/4] w-full overflow-hidden bg-[#0b0d10]">
         {/* Scene art — slow parallax drift while spotlit, settled otherwise. */}
         <div
           className={[
-            "absolute inset-0 transition-[filter,transform] duration-[1400ms]",
+            "dn-carousel-art absolute inset-0 transition-[filter,transform] duration-[1400ms]",
             "[transition-timing-function:cubic-bezier(0.33,1,0.68,1)]",
             spotlit ? "motion-safe:animate-[dn-drift_14s_ease-in-out_infinite_alternate]" : "scale-100",
           ].join(" ")}
@@ -312,7 +315,7 @@ function CarouselTile({
         <div
           aria-hidden
           className={[
-            "pointer-events-none absolute inset-[-40%]",
+            "dn-carousel-wash pointer-events-none absolute inset-[-40%]",
             "transition-opacity duration-[1400ms] ease-out",
             spotlit ? "opacity-100 motion-safe:animate-[dn-wash_11s_ease-in-out_infinite_alternate]" : "opacity-0",
           ].join(" ")}
