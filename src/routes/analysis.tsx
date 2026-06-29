@@ -7,6 +7,7 @@ import { readProfile, type DecisionProfile } from "@/lib/decision-profile";
 import { DecisionProfileCard } from "@/components/DecisionProfileCard";
 import { NoticedRail } from "@/components/NoticedRail";
 import { ShareCard } from "@/components/ShareCard";
+import { AlternatePaths } from "@/components/AlternatePaths";
 import { MISSIONS } from "@/lib/missions";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { getMissionPercentile, type MissionPercentile } from "@/lib/mission-stats.functions";
