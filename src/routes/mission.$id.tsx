@@ -33,6 +33,7 @@ import { getMissionEngine } from "@/lib/missions/registry";
 import { MISSIONS } from "@/lib/missions";
 import type { MissionEngine } from "@/lib/missions/types";
 import { logCommit } from "@/lib/discovery/signals";
+import { themeTint } from "@/lib/discovery/theme-tint";
 
 
 export const Route = createFileRoute("/mission/$id")({
