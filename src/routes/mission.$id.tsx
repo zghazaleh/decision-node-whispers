@@ -33,15 +33,47 @@ import { getMissionEngine } from "@/lib/missions/registry";
 import { MISSIONS } from "@/lib/missions";
 import type { MissionEngine } from "@/lib/missions/types";
 import { logCommit } from "@/lib/discovery/signals";
+import { themeTint } from "@/lib/discovery/theme-tint";
 
 
 export const Route = createFileRoute("/mission/$id")({
-  head: () => ({
-    meta: [
-      { title: "Decision Nodes — Mission" },
-      { name: "robots", content: "noindex" },
-    ],
-  }),
+  head: ({ params }) => {
+    const meta = MISSIONS.find((m) => m.id === params.id);
+    const engine = getMissionEngine(params.id);
+    if (!meta) {
+      return {
+        meta: [
+          { title: "Decision Nodes — Mission" },
+          { name: "robots", content: "noindex" },
+        ],
+      };
+    }
+    const title = `${meta.title} — Decision Nodes`;
+    const description = meta.logline;
+    const sceneSrc = engine?.scene.src ?? "";
+    const ogImage = sceneSrc
+      ? sceneSrc.startsWith("http")
+        ? sceneSrc
+        : `https://decision-nodes.com${sceneSrc}`
+      : "https://decision-nodes.com/og-decision-nodes.jpg";
+    const url = `https://decision-nodes.com/mission/${params.id}`;
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "article" },
+        { property: "og:url", content: url },
+        { property: "og:image", content: ogImage },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: title },
+        { name: "twitter:description", content: description },
+        { name: "twitter:image", content: ogImage },
+      ],
+      links: [{ rel: "canonical", href: url }],
+    };
+  },
   component: MissionRoute,
   ssr: false,
 });
@@ -68,6 +100,24 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
   };
   const { mission, update } = useMission(MISSION_ID);
   const [awakening, setAwakening] = useState(true);
+  const [sceneLoaded, setSceneLoaded] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  // First-case interstitial — only if no prior mission state exists.
+  useEffect(() => {
+    try {
+      const hasPrior = Object.keys(window.localStorage).some((k) =>
+        k.startsWith("decision-node:mission:"),
+      );
+      const seenOnboarding = window.localStorage.getItem("decision-node:onboarded");
+      if (!hasPrior && !seenOnboarding) {
+        setShowOnboarding(true);
+        window.localStorage.setItem("decision-node:onboarded", "1");
+        const t = window.setTimeout(() => setShowOnboarding(false), 3000);
+        return () => window.clearTimeout(t);
+      }
+    } catch { /* ignore */ }
+  }, []);
 
   // Awakening: 3.6s of darkness with slow fade-in of the scene.
   useEffect(() => {
@@ -386,14 +436,36 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
           }}
 
         >
+          {/* Branded shimmer — case-tinted backdrop visible until the scene
+              photo decodes on slow connections. */}
+          {!sceneLoaded && (() => {
+            const t = themeTint(meta?.theme);
+            return (
+              <div
+                aria-hidden
+                className="absolute inset-0 overflow-hidden"
+                style={{
+                  background: `radial-gradient(ellipse at 50% 45%, ${t.glow}, ${t.base} 70%)`,
+                }}
+              >
+                <div
+                  className="absolute inset-0 motion-safe:animate-[shimmer_2.8s_ease-in-out_infinite] bg-[length:200%_100%]"
+                  style={{
+                    backgroundImage: `linear-gradient(110deg, transparent 30%, ${t.shimmer} 50%, transparent 70%)`,
+                  }}
+                />
+              </div>
+            );
+          })()}
           <img
             src={ENGINE.scene.src}
             alt=""
             aria-hidden
-            className="h-full w-full object-cover object-[50%_38%] sm:object-center animate-ken-burns"
+            onLoad={() => setSceneLoaded(true)}
+            className={`h-full w-full object-cover object-[50%_38%] sm:object-center animate-ken-burns transition-opacity duration-700 ${sceneLoaded ? "opacity-100" : "opacity-0"}`}
             style={{
               filter: `${ENGINE.scene.filter ?? "saturate(0.88) contrast(1.06)"} ${filterShift}`,
-              transition: "filter 8000ms linear",
+              transition: "filter 8000ms linear, opacity 700ms ease-out",
               animationDuration: ENGINE.atmosphere?.kenBurnsDuration
                 ? `${ENGINE.atmosphere.kenBurnsDuration}s`
                 : undefined,
@@ -669,6 +741,25 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
               </button>
             </form>
 
+            {/* Pacing signal — literary cue toward the commit gate. */}
+            {(() => {
+              const line =
+                userTurnsCount >= 6
+                  ? "The decision is open."
+                  : userTurnsCount >= 3
+                    ? "The decision is within reach."
+                    : null;
+              if (!line) return null;
+              return (
+                <p
+                  key={line}
+                  className="mt-6 text-center font-sans text-[0.6rem] tracking-[0.35em] uppercase text-foreground/40 italic animate-fade-in"
+                >
+                  {line}
+                </p>
+              );
+            })()}
+
             {/* Decide pill — fades in as the moment ripens */}
             <div className="mt-5 flex justify-center" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
               <button
@@ -706,6 +797,28 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
           onClose={() => { if (!analyzing) { setDecideOpen(false); audio.release(900); } }}
           onSubmit={handleDecide}
         />
+      )}
+      {/* First-case onboarding interstitial */}
+      {showOnboarding && (
+        <button
+          type="button"
+          onClick={() => setShowOnboarding(false)}
+          aria-label="Dismiss"
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/85 backdrop-blur-sm animate-fade-in cursor-pointer focus:outline-none"
+        >
+          <div className="max-w-xl px-8 text-center">
+            <p className="font-display text-2xl sm:text-3xl leading-relaxed text-foreground/90 text-balance">
+              You'll wake up in someone else's life.
+              <br />
+              Explore through dialogue.
+              <br />
+              When the time comes — decide.
+            </p>
+            <p className="mt-6 font-sans text-[0.65rem] tracking-[0.4em] uppercase text-accent/75">
+              Your decision is final.
+            </p>
+          </div>
+        </button>
       )}
     </main>
   );
