@@ -439,10 +439,7 @@ function MissionsPage() {
         </div>
 
         {/* ---------- Filters ---------- */}
-        <div
-          className="mb-6 flex flex-nowrap items-end gap-3 overflow-x-auto pb-1"
-          style={{ scrollbarWidth: "none" }}
-        >
+        <div className="mb-6 flex flex-wrap items-end gap-3">
           <FilterSelect
             label="Domain"
             values={domains}
