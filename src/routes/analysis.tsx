@@ -6,6 +6,8 @@ import { readMission, useMission, type SavedMission } from "@/lib/mission-store"
 import { readProfile, type DecisionProfile } from "@/lib/decision-profile";
 import { DecisionProfileCard } from "@/components/DecisionProfileCard";
 import { NoticedRail } from "@/components/NoticedRail";
+import { ShareCard } from "@/components/ShareCard";
+import { MISSIONS } from "@/lib/missions";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { getMissionPercentile, type MissionPercentile } from "@/lib/mission-stats.functions";
 import { logAnalysisRead } from "@/lib/discovery/signals";
