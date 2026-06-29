@@ -19,6 +19,20 @@ import { HeroDetail } from "@/components/discovery/HeroDetail";
 import { GuildCarousel } from "@/components/discovery/GuildCarousel";
 import { CategoryRail } from "@/components/discovery/CategoryRail";
 import { logOpen } from "@/lib/discovery/signals";
+import { useAuthUser } from "@/lib/auth-sync";
+import { useDecisionProfile } from "@/lib/decision-profile";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
+const ANON_FREE_MISSIONS = 3;
 
 
 
