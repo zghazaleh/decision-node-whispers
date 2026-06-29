@@ -186,7 +186,6 @@ function MissionsPage() {
   const [difficulty, setDifficulty] = useState<number | "Any">("Any");
   const [sort, setSort] = useState<SortMode>("curated");
   const [openId, setOpenId] = useState<string | null>(null);
-  const [activeGroup, setActiveGroup] = useState<string | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [entering, setEntering] = useState(false);
   const [gateOpen, setGateOpen] = useState(false);
@@ -262,13 +261,6 @@ function MissionsPage() {
   // the hero card above is purely a feature, not an exclusion).
   const visible = useMemo(() => {
     let rows = MISSIONS.slice();
-    if (activeGroup) {
-      const group = CURATED_GROUPS.find((g) => g.label === activeGroup);
-      if (group) {
-        const ids = new Set(group.ids);
-        rows = rows.filter((m) => ids.has(m.id));
-      }
-    }
     if (theme !== "All") rows = rows.filter((m) => m.theme === theme);
     if (domain !== "All") rows = rows.filter((m) => m.category === domain);
     if (difficulty !== "Any") rows = rows.filter((m) => m.difficulty === difficulty);
@@ -291,14 +283,14 @@ function MissionsPage() {
         break;
     }
     return rows;
-  }, [theme, domain, difficulty, sort, stats, activeGroup]);
+  }, [theme, domain, difficulty, sort, stats]);
 
-  const filtersActive = theme !== "All" || domain !== "All" || difficulty !== "Any" || activeGroup !== null;
+  const filtersActive = theme !== "All" || domain !== "All" || difficulty !== "Any";
 
   // Closing the open row when filters change
   useEffect(() => {
     setOpenId(null);
-    setActiveGroup(null);
+    
   }, [theme, domain, difficulty, sort]);
 
   /* ----- Ambient: the Archive bed is the hushed reading-room. Opening a
@@ -415,15 +407,12 @@ function MissionsPage() {
 
 
 
-        {/* ---------- Curated theme carousel ---------- */}
-        {theme === "All" && domain === "All" && difficulty === "Any" && (
-          <ThemeCarousel
-            groups={CURATED_GROUPS}
-            missions={MISSIONS}
-            activeGroup={activeGroup}
-            onSelectGroup={setActiveGroup}
-          />
-        )}
+        {/* ---------- Curated theme carousel (independent of Case Archive) ---------- */}
+        <ThemeCarousel
+          groups={CURATED_GROUPS}
+          missions={MISSIONS}
+          onEnter={commit}
+        />
 
         {/* ---------- Case Archive header ---------- */}
         <div className="mb-3 mt-8 flex items-baseline gap-3 border-b border-foreground/10 pb-3">
