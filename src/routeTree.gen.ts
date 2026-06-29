@@ -19,6 +19,7 @@ import { Route as AnalysisRouteImport } from './routes/analysis'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MissionIdRouteImport } from './routes/mission.$id'
 import { Route as DiagnosticsAudioRouteImport } from './routes/diagnostics.audio'
+import { Route as BlogDecisionMakingFrameworksGuideRouteImport } from './routes/blog.decision-making-frameworks-guide'
 import { Route as ApiTranscribeRouteImport } from './routes/api/transcribe'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AdminGscVerifyRouteImport } from './routes/admin.gsc-verify'
@@ -75,6 +76,12 @@ const DiagnosticsAudioRoute = DiagnosticsAudioRouteImport.update({
   path: '/diagnostics/audio',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BlogDecisionMakingFrameworksGuideRoute =
+  BlogDecisionMakingFrameworksGuideRouteImport.update({
+    id: '/blog/decision-making-frameworks-guide',
+    path: '/blog/decision-making-frameworks-guide',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiTranscribeRoute = ApiTranscribeRouteImport.update({
   id: '/api/transcribe',
   path: '/api/transcribe',
@@ -115,6 +122,7 @@ export interface FileRoutesByFullPath {
   '/admin/gsc-verify': typeof AdminGscVerifyRoute
   '/api/chat': typeof ApiChatRoute
   '/api/transcribe': typeof ApiTranscribeRoute
+  '/blog/decision-making-frameworks-guide': typeof BlogDecisionMakingFrameworksGuideRoute
   '/diagnostics/audio': typeof DiagnosticsAudioRoute
   '/mission/$id': typeof MissionIdRoute
 }
@@ -132,6 +140,7 @@ export interface FileRoutesByTo {
   '/admin/gsc-verify': typeof AdminGscVerifyRoute
   '/api/chat': typeof ApiChatRoute
   '/api/transcribe': typeof ApiTranscribeRoute
+  '/blog/decision-making-frameworks-guide': typeof BlogDecisionMakingFrameworksGuideRoute
   '/diagnostics/audio': typeof DiagnosticsAudioRoute
   '/mission/$id': typeof MissionIdRoute
 }
@@ -150,6 +159,7 @@ export interface FileRoutesById {
   '/admin/gsc-verify': typeof AdminGscVerifyRoute
   '/api/chat': typeof ApiChatRoute
   '/api/transcribe': typeof ApiTranscribeRoute
+  '/blog/decision-making-frameworks-guide': typeof BlogDecisionMakingFrameworksGuideRoute
   '/diagnostics/audio': typeof DiagnosticsAudioRoute
   '/mission/$id': typeof MissionIdRoute
 }
@@ -169,6 +179,7 @@ export interface FileRouteTypes {
     | '/admin/gsc-verify'
     | '/api/chat'
     | '/api/transcribe'
+    | '/blog/decision-making-frameworks-guide'
     | '/diagnostics/audio'
     | '/mission/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -186,6 +197,7 @@ export interface FileRouteTypes {
     | '/admin/gsc-verify'
     | '/api/chat'
     | '/api/transcribe'
+    | '/blog/decision-making-frameworks-guide'
     | '/diagnostics/audio'
     | '/mission/$id'
   id:
@@ -203,6 +215,7 @@ export interface FileRouteTypes {
     | '/admin/gsc-verify'
     | '/api/chat'
     | '/api/transcribe'
+    | '/blog/decision-making-frameworks-guide'
     | '/diagnostics/audio'
     | '/mission/$id'
   fileRoutesById: FileRoutesById
@@ -221,6 +234,7 @@ export interface RootRouteChildren {
   AdminGscVerifyRoute: typeof AdminGscVerifyRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiTranscribeRoute: typeof ApiTranscribeRoute
+  BlogDecisionMakingFrameworksGuideRoute: typeof BlogDecisionMakingFrameworksGuideRoute
   DiagnosticsAudioRoute: typeof DiagnosticsAudioRoute
   MissionIdRoute: typeof MissionIdRoute
 }
@@ -297,6 +311,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DiagnosticsAudioRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/blog/decision-making-frameworks-guide': {
+      id: '/blog/decision-making-frameworks-guide'
+      path: '/blog/decision-making-frameworks-guide'
+      fullPath: '/blog/decision-making-frameworks-guide'
+      preLoaderRoute: typeof BlogDecisionMakingFrameworksGuideRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/transcribe': {
       id: '/api/transcribe'
       path: '/api/transcribe'
@@ -349,6 +370,8 @@ const rootRouteChildren: RootRouteChildren = {
   AdminGscVerifyRoute: AdminGscVerifyRoute,
   ApiChatRoute: ApiChatRoute,
   ApiTranscribeRoute: ApiTranscribeRoute,
+  BlogDecisionMakingFrameworksGuideRoute:
+    BlogDecisionMakingFrameworksGuideRoute,
   DiagnosticsAudioRoute: DiagnosticsAudioRoute,
   MissionIdRoute: MissionIdRoute,
 }
