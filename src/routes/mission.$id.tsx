@@ -435,14 +435,36 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
           }}
 
         >
+          {/* Branded shimmer — case-tinted backdrop visible until the scene
+              photo decodes on slow connections. */}
+          {!sceneLoaded && (() => {
+            const t = themeTint(meta?.theme);
+            return (
+              <div
+                aria-hidden
+                className="absolute inset-0 overflow-hidden"
+                style={{
+                  background: `radial-gradient(ellipse at 50% 45%, ${t.glow}, ${t.base} 70%)`,
+                }}
+              >
+                <div
+                  className="absolute inset-0 motion-safe:animate-[shimmer_2.8s_ease-in-out_infinite] bg-[length:200%_100%]"
+                  style={{
+                    backgroundImage: `linear-gradient(110deg, transparent 30%, ${t.shimmer} 50%, transparent 70%)`,
+                  }}
+                />
+              </div>
+            );
+          })()}
           <img
             src={ENGINE.scene.src}
             alt=""
             aria-hidden
-            className="h-full w-full object-cover object-[50%_38%] sm:object-center animate-ken-burns"
+            onLoad={() => setSceneLoaded(true)}
+            className={`h-full w-full object-cover object-[50%_38%] sm:object-center animate-ken-burns transition-opacity duration-700 ${sceneLoaded ? "opacity-100" : "opacity-0"}`}
             style={{
               filter: `${ENGINE.scene.filter ?? "saturate(0.88) contrast(1.06)"} ${filterShift}`,
-              transition: "filter 8000ms linear",
+              transition: "filter 8000ms linear, opacity 700ms ease-out",
               animationDuration: ENGINE.atmosphere?.kenBurnsDuration
                 ? `${ENGINE.atmosphere.kenBurnsDuration}s`
                 : undefined,
