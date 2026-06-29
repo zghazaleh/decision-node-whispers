@@ -390,9 +390,12 @@ function AnalysisDebrief({
             <p className="text-[0.7rem] tracking-[0.3em] uppercase text-accent/80 mb-2">
               {pattern.label}
             </p>
-            <p className="text-base sm:text-lg leading-relaxed text-foreground/85 text-pretty">
-              {pattern.body}
-            </p>
+            <StreamingText
+              as="p"
+              text={pattern.body}
+              wordMs={70}
+              className="text-base sm:text-lg leading-relaxed text-foreground/85 text-pretty block"
+            />
             {pattern.evidence && (
               <p className="mt-3 text-sm text-foreground/50 italic leading-relaxed text-pretty">
                 {pattern.evidence}
