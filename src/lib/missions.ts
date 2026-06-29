@@ -221,4 +221,22 @@ export const MISSIONS: MissionMeta[] = [
     creator: "House Edition",
     version: "v1.0",
   },
+  {
+    id: "mission-12",
+    number: "12",
+    codename: "The Glitch",
+    title: "The Glitch",
+    logline:
+      "Four objects on the new array. The red phone is silent. The doctrine clock has three minutes left.",
+    status: "available",
+    duration: "20–40 min",
+    tone: "Buried · Humming dread",
+    location: "Voskaya Early-Warning Command, sub-level 4",
+    year: "Late October",
+    category: "Defense",
+    theme: "Duty",
+    difficulty: 5,
+    creator: "House Edition",
+    version: "v1.0",
+  },
 ];
