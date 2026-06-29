@@ -165,6 +165,21 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
   }, [awakening, status]);
 
   const busy = status === "submitted" || status === "streaming";
+
+  // Automatic ducking during dialogue: lower the calm bed while the player
+  // is sending a turn or the AI is streaming a reply, then ease it back when
+  // the room falls quiet. Skip the release while the Decide modal or
+  // analysis overlay holds its own (deeper) duck — otherwise the bed would
+  // surge back up underneath them.
+  useEffect(() => {
+    if (busy) {
+      audio.duck(0.42, 350);
+      return;
+    }
+    if (decideOpen || analyzing) return;
+    const t = window.setTimeout(() => { audio.release(900); }, 250);
+    return () => { window.clearTimeout(t); };
+  }, [busy, decideOpen, analyzing]);
   const userTurnsCount = messages.filter((m) => m.role === "user").length;
   const pressureForDecide = Math.min(1, Math.max(0, (messages.length - 1) / 18));
   const decideReady = !busy && pressureForDecide >= 0.45;
