@@ -69,6 +69,7 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
         beat: "Years later",
         consequence:
           "You will sign more forms. You will not lift page six on any of them. You will retire at sixty-three with a federal pension of full grade. You will not keep a journal. You will, at sixty-eight, be unable to remember Aven's face when you try to remember it on a Sunday afternoon in the garden of the cottage, and the inability will be the thing you remember in the end.",
+      },
     ],
     secondOrder: {
       aven: "Transferred at 11:15. Completed at 16:00 at Hesling. The book in the canvas bag is in the personal effects bag returned to Meadowfold on Thursday and filed by Othen.",
