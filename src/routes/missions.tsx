@@ -18,6 +18,7 @@ import { HeroDetail } from "@/components/discovery/HeroDetail";
 import { GuildCarousel } from "@/components/discovery/GuildCarousel";
 import { ThemeCarousel } from "@/components/discovery/ThemeCarousel";
 import { logOpen } from "@/lib/discovery/signals";
+import { themeTint } from "@/lib/discovery/theme-tint";
 import { useAuthUser } from "@/lib/auth-sync";
 import { useDecisionProfile } from "@/lib/decision-profile";
 import {
