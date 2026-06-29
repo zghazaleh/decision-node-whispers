@@ -19,6 +19,20 @@ import { HeroDetail } from "@/components/discovery/HeroDetail";
 import { GuildCarousel } from "@/components/discovery/GuildCarousel";
 import { CategoryRail } from "@/components/discovery/CategoryRail";
 import { logOpen } from "@/lib/discovery/signals";
+import { useAuthUser } from "@/lib/auth-sync";
+import { useDecisionProfile } from "@/lib/decision-profile";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
+const ANON_FREE_MISSIONS = 3;
 
 
 
@@ -174,6 +188,9 @@ function MissionsPage() {
   const [openId, setOpenId] = useState<string | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [entering, setEntering] = useState(false);
+  const [gateOpen, setGateOpen] = useState(false);
+  const user = useAuthUser();
+  const profile = useDecisionProfile();
 
   // Warm the archive bed (the room the player is in) eagerly, and let
   // idle time bring in the two most-likely-next mission beds plus the
@@ -304,6 +321,13 @@ function MissionsPage() {
 
   function commit(id: string) {
     if (entering) return;
+    // 3-mission gate for anonymous users. Resuming an already-started mission
+    // is still allowed; only opening a new (4th+) case requires an account.
+    const alreadyStarted = readMission(id).messages.length > 0;
+    if (!user && profile.missionsCompleted >= ANON_FREE_MISSIONS && !alreadyStarted) {
+      setGateOpen(true);
+      return;
+    }
     const m = MISSIONS.find((x) => x.id === id);
     logOpen(id, m?.theme);
     setEntering(true);
@@ -508,6 +532,25 @@ function MissionsPage() {
           <span>Stood = presence, not rank</span>
         </footer>
       </section>
+
+      <AlertDialog open={gateOpen} onOpenChange={setGateOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Create an account to continue</AlertDialogTitle>
+            <AlertDialogDescription>
+              You've completed {profile.missionsCompleted} cases as a guest. To open another, save
+              your Decision Profile to an account — it stays with you across devices, and your
+              progress so far comes with you.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Not now</AlertDialogCancel>
+            <AlertDialogAction onClick={() => navigate({ to: "/auth" })}>
+              Sign up
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </main>
   );
 }
