@@ -901,14 +901,7 @@ function DecideModal({
         )}
 
         {analyzing ? (
-          <div className="p-8 py-16 text-center space-y-6 sm:p-12">
-            <p className="font-display text-3xl text-foreground/95">
-              Analyzing...
-            </p>
-            <p className="text-xs tracking-[0.3em] uppercase text-foreground/40 animate-pulse-soft">
-              Evaluating consequences...
-            </p>
-          </div>
+          <AnalyzingProgress />
         ) : (
           <div className="overflow-y-auto p-6 pb-0 sm:p-12 sm:pb-0">
             <p className="text-[0.6rem] tracking-[0.4em] uppercase text-accent/80 mb-3">
