@@ -367,9 +367,9 @@ function MissionsPage() {
         {/* ---------- TODAY hero ---------- */}
         {today && <HeroDetail mission={today} onEnter={commit} />}
 
-        {/* ---------- Fresh Intel carousel ---------- */}
+        {/* ---------- Featured Nodes carousel ---------- */}
         <GuildCarousel
-          label="Fresh Intel"
+          label="Featured Nodes"
           rightEyebrow="New"
           items={guildRail}
           onEnter={commit}
