@@ -42,29 +42,14 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
     ],
     timeline: [
       {
-        beat: "02:24",
-        consequence:
-          "You fold the two letters into your inside pocket, button your coat over them, and go down the salon stairs past Maelin's back booth without stopping. Camilla does not turn her head. Jeren follows you to the door of the café and does not follow you onto the street.",
-      },
-      {
         beat: "02:31",
         consequence:
           "You knock the two-short-one-long at 12 Quayside Row. Daniyel opens the door already in his coat with the violin case at his hip and the second bag in his hand. You do not tell him whose seat he is in.",
       },
       {
-        beat: "04:46",
-        consequence:
-          "Quay 7. Anders Belven reads the two letters under the gangway lantern and gives each of you a single nod. You go up. The freighter casts off at 05:01 with the tide. The harbor lights recede.",
-      },
-      {
         beat: "Week 1 in Veyrand",
         consequence:
           "The cousin's apartment in Veyrand is small and warm and real. Daniyel plays the violin in the evening, badly at first because his hands are still cold. You sleep for sixteen hours and wake up to a kettle.",
-      },
-      {
-        beat: "Week 3 — the news from Kelvras",
-        consequence:
-          "Without Camilla in the room, the four sub-cells of the Free Coast Council fragment within nine days. The parish-hall soup line runs four more mornings and then runs out of flour. Commandant Brest's attritional policy holds because there is no longer a public face to negotiate the surrender against. The city goes another six weeks before terms.",
       },
       {
         beat: "Year 1",
@@ -96,29 +81,14 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
     ],
     timeline: [
       {
-        beat: "02:26",
-        consequence:
-          "You take the two letters down the salon stairs and slide them across Camilla's table under your palm. You tell her: one for her, one for whoever the council most needs out tonight — her treasurer, her doctor, the boy who runs the medicine line. Camilla does not say thank you; she puts her hand over yours for two seconds.",
-      },
-      {
         beat: "02:38",
         consequence:
           "Camilla sends Jeren up the quay to wake Halia Vorn, who runs the parish-hall finances and who knows the council's ledgers by heart. Halia comes down in a coat over her nightdress with her own bag already packed because she has expected this for a week.",
       },
       {
-        beat: "03:10",
-        consequence:
-          "You walk three doors west and let yourself into 12 Quayside Row with your own key. Daniyel is sitting on the bed with the second bag on the floor between his feet. You tell him. He does not say anything for a long time. He nods once, eventually, and lies down with his coat still on.",
-      },
-      {
         beat: "04:46",
         consequence:
           "Camilla and Halia board the Stelle Veraan at quay 7. The freighter casts off at 05:01. Pellor watches from the harbor master's upper window and closes the file.",
-      },
-      {
-        beat: "Year 1",
-        consequence:
-          "The Free Coast Council, restructured from Veyrand around Camilla and her treasurer, brokers a negotiated surrender of Kelvras in week sixteen. The death toll of the last weeks is real but smaller than the alternative. Daniyel begins teaching at the reopened conservatory in the autumn. You and he do not speak of the night for a long time.",
       },
       {
         beat: "Years later",
@@ -150,29 +120,14 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
     ],
     timeline: [
       {
-        beat: "02:26",
-        consequence:
-          "You take one letter down to Camilla in the back booth and put it under her cup. You tell her: the other goes to Daniyel. She does not argue; she does not pretend she does not understand what you are paying for.",
-      },
-      {
         beat: "02:35",
         consequence:
           "You walk three doors west with the second letter and you tell Daniyel through the doorway, without coming in. He does not move for some seconds. He says, eventually, your name. You say his. You do not come in.",
       },
       {
-        beat: "03:50",
-        consequence:
-          "You meet them at the corner of Quayside Row and the harbor wall. Camilla and Daniyel walk to quay 7 together; you walk back. The rain has stopped. The mantel clock at Maelin's reads 03:58 when you sit down at the bar.",
-      },
-      {
         beat: "04:46",
         consequence:
           "Two passengers board: Roeven and Marsk. Belven raises an eyebrow at the second name and does not comment. The freighter casts off at 05:01.",
-      },
-      {
-        beat: "Year 1",
-        consequence:
-          "Daniyel writes to you from Veyrand once a week for the first month, every two weeks for the next three, then monthly. The letters get shorter. You answer them. Camilla brokers the surrender at week seventeen and the council restructures around her in exile. You run the parish-hall soup line in Kelvras through the winter.",
       },
       {
         beat: "Years later",
@@ -204,29 +159,14 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
     ],
     timeline: [
       {
-        beat: "02:23",
-        consequence:
-          "You hold both letters over the brass lamp's chimney until the wax cracks and the paper takes. Jeren watches from the window seat and does not stop you. The smoke goes up to the salon's high ceiling and disperses. The ash you brush off the desk into the inkwell.",
-      },
-      {
         beat: "02:30",
         consequence:
           "You go down the stairs and you sit across from Camilla in the back booth and you tell her plainly: no one goes. She looks at you for a long time. She does not raise her voice. She says: 'That was not your decision alone, Anouk.' You say: 'It was the one I had.'",
       },
       {
-        beat: "02:55",
-        consequence:
-          "You walk to 12 Quayside Row in the rain and you tell Daniyel through the closed door, because you cannot do it through the open one. He does not answer at first. He says, eventually: 'Come in, Anouk.' You go in.",
-      },
-      {
         beat: "Week 1",
         consequence:
           "Pellor's window closes at 05:00 with the freighter empty of either of them. Pellor's faction inside the garrison loses the move. Brest's attritional policy continues. The Sevran tighten the cordon at week twelve.",
-      },
-      {
-        beat: "Month 2",
-        consequence:
-          "Camilla is taken in a parish-hall meeting in week thirteen and held at Holven Point. The council fractures anyway, slower and uglier than it would have on the freighter departure. The soup line ends week fourteen. The city capitulates without terms in week nineteen.",
       },
       {
         beat: "Years later",
@@ -258,29 +198,14 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
     ],
     timeline: [
       {
-        beat: "02:30",
-        consequence:
-          "You go down the back stairs of Maelin's onto Quayside Row and you walk the four blocks to the warehouse on quay 4 in the rain. Olen Karr is awake because Olen Karr is always awake. You name the price; he takes the letters and counts out twelve months of a clerk's salary in Veyrandi script. No questions. No record on either side.",
-      },
-      {
         beat: "03:15",
         consequence:
           "You walk back not to Maelin's and not to 12 Quayside Row. You go to the small room above the cordage shop on Vell Lane that you took in your own name three months ago for exactly this purpose, and you sit on the bed with the script in your coat and you do not move for an hour.",
       },
       {
-        beat: "04:46",
-        consequence:
-          "Two strangers — a Sevran merchant's wife and a man who paid Olen Karr twice over for a forged identity — board the Stelle Veraan with your letters in their hands. Camilla waits in the booth at Maelin's until 04:55, then walks home in the dark.",
-      },
-      {
         beat: "Week 1",
         consequence:
           "Daniyel goes to the salon at 06:00 because you did not come. Jeren is still there. Jeren does not know where you are; Jeren does not lie. Daniyel begins to look for you. He does not find you.",
-      },
-      {
-        beat: "Month 3",
-        consequence:
-          "You cross the Sevran lines on foot through the marshes north of the city with a guide paid for in Veyrandi script. You reach Veyrand. You do not write to Daniyel. You change your name to Anouk Vell at the registration office and you take a clerk's post at a small import house.",
       },
       {
         beat: "Years later",

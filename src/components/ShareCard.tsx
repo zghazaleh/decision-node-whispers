@@ -7,21 +7,16 @@ import {
 } from "@/lib/decision-profile";
 
 /**
- * ShareCard — a 1200×630 social-share card showing the player's 8-axis
- * Decision Profile radar and portrait statement. The SVG below is the
- * source of truth: it renders as the on-screen preview AND is rasterized
- * to PNG for download / clipboard / share-sheet.
- *
- * Everything is inline (no external fonts, no CSS variables) so the PNG
- * is reproducible across browsers without webfont-loading races.
+ * ShareCard — 1200×630 social card. Hero radar on the left, large
+ * editorial portrait statement on the right, restrained wordmark.
+ * The SVG is the source of truth (rasterized to PNG for export).
  */
 
 const W = 1200;
 const H = 630;
 
-// Hardcoded palette — must match the product's cinematic dark identity
-// without depending on CSS variables (which canvas rasterization drops).
 const BG = "#070808";
+const BG_2 = "#0d0e10";
 const FG = "#f5f1e8";
 const ACCENT = "#d9bb89";
 const MUTED = "#7a7368";
@@ -65,7 +60,7 @@ export function ShareCard({ profile, missionCodename }: ShareCardProps) {
         img.onerror = () => rej(new Error("svg load failed"));
         img.src = url;
       });
-      const scale = 2; // retina-quality export
+      const scale = 2;
       const canvas = document.createElement("canvas");
       canvas.width = W * scale;
       canvas.height = H * scale;
@@ -110,7 +105,9 @@ export function ShareCard({ profile, missionCodename }: ShareCardProps) {
       const blob = await rasterize();
       if (!blob) throw new Error("no blob");
       const ClipboardItemCtor =
-        typeof window !== "undefined" ? (window as unknown as { ClipboardItem?: typeof ClipboardItem }).ClipboardItem : undefined;
+        typeof window !== "undefined"
+          ? (window as unknown as { ClipboardItem?: typeof ClipboardItem }).ClipboardItem
+          : undefined;
       if (!navigator.clipboard?.write || !ClipboardItemCtor) {
         throw new Error("unsupported");
       }
@@ -189,7 +186,7 @@ export function ShareCard({ profile, missionCodename }: ShareCardProps) {
 }
 
 /* ────────────────────────────────────────────────────────────────────
- * The SVG. Self-contained, no external assets, no CSS variables.
+ * The SVG.
  * ──────────────────────────────────────────────────────────────────── */
 
 type SVGProps = {
@@ -200,7 +197,6 @@ type SVGProps = {
 
 const ShareCardSVG = ({
   profile,
-  missionCodename,
   portrait,
   ref,
 }: SVGProps & { ref?: React.Ref<SVGSVGElement> }) => {
@@ -208,10 +204,10 @@ const ShareCardSVG = ({
   const labels = DIMENSIONS.map((d) => DIMENSION_LABELS[d]);
   const count = profile.missionsCompleted;
 
-  // Radar geometry — left half of the card.
-  const cx = 330;
-  const cy = H / 2 + 10;
-  const rMax = 200;
+  // Radar — hero, left side, large.
+  const cx = 305;
+  const cy = H / 2 + 8;
+  const rMax = 215;
   const n = values.length;
   const pointAt = (i: number, r: number) => {
     const angle = (Math.PI * 2 * i) / n - Math.PI / 2;
@@ -226,16 +222,16 @@ const ShareCardSVG = ({
     .join(" ");
   const rings = [0.25, 0.5, 0.75, 1.0];
 
-  // Wrap the portrait into ~3 lines for the right column.
-  const portraitLines = wrap(
-    portrait || "A portrait will emerge as you complete more cases.",
-    44,
-    4,
-  );
-
-  // Right-column geometry.
+  // Right column — portrait is the hero of the right side.
   const rightX = 640;
-  const rightWidth = 500;
+  const rightW = 500;
+  // Choose font size that fits portrait into 4 lines comfortably.
+  const { lines: portraitLines, fontSize: portraitSize, lineHeight: portraitLH } =
+    fitPortrait(portrait || "A portrait will emerge as you complete more cases.", rightW);
+
+  // Vertically center the portrait block in the right column.
+  const portraitBlockH = portraitLines.length * portraitLH;
+  const portraitTop = (H - portraitBlockH) / 2 + portraitSize * 0.3;
 
   const sansStack =
     "'Inter Tight', 'Inter', system-ui, -apple-system, 'Helvetica Neue', sans-serif";
@@ -253,64 +249,63 @@ const ShareCardSVG = ({
       aria-label="Decision Profile share card"
       style={{ display: "block", background: BG }}
     >
-      {/* Background plate + cinematic vignettes */}
       <defs>
-        <radialGradient id="vignette" cx="20%" cy="50%" r="80%">
-          <stop offset="0%" stopColor={ACCENT} stopOpacity="0.08" />
-          <stop offset="60%" stopColor={ACCENT} stopOpacity="0" />
-        </radialGradient>
-        <radialGradient id="topglow" cx="50%" cy="0%" r="80%">
-          <stop offset="0%" stopColor={ACCENT} stopOpacity="0.05" />
-          <stop offset="70%" stopColor={ACCENT} stopOpacity="0" />
-        </radialGradient>
-        <linearGradient id="hairline" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor={FG} stopOpacity="0" />
-          <stop offset="50%" stopColor={FG} stopOpacity="0.35" />
-          <stop offset="100%" stopColor={FG} stopOpacity="0" />
+        <linearGradient id="plate" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor={BG_2} />
+          <stop offset="100%" stopColor={BG} />
         </linearGradient>
+        <radialGradient id="radarGlow" cx="50%" cy="50%" r="60%">
+          <stop offset="0%" stopColor={ACCENT} stopOpacity="0.18" />
+          <stop offset="55%" stopColor={ACCENT} stopOpacity="0.04" />
+          <stop offset="100%" stopColor={ACCENT} stopOpacity="0" />
+        </radialGradient>
+        <radialGradient id="portraitGlow" cx="40%" cy="50%" r="70%">
+          <stop offset="0%" stopColor={ACCENT} stopOpacity="0.06" />
+          <stop offset="100%" stopColor={ACCENT} stopOpacity="0" />
+        </radialGradient>
       </defs>
 
-      <rect x={0} y={0} width={W} height={H} fill={BG} />
-      <rect x={0} y={0} width={W} height={H} fill="url(#vignette)" />
-      <rect x={0} y={0} width={W} height={H} fill="url(#topglow)" />
+      <rect x={0} y={0} width={W} height={H} fill="url(#plate)" />
+      <circle cx={cx} cy={cy} r={rMax * 1.4} fill="url(#radarGlow)" />
+      <rect x={rightX - 40} y={0} width={rightW + 80} height={H} fill="url(#portraitGlow)" />
 
-      {/* Outer frame — restrained, prestige-print feel */}
-      <rect
-        x={32}
-        y={32}
-        width={W - 64}
-        height={H - 64}
-        fill="none"
+      {/* Vertical divider between hero radar and portrait */}
+      <line
+        x1={600}
+        y1={120}
+        x2={600}
+        y2={H - 120}
         stroke={FG}
-        strokeOpacity={0.12}
+        strokeOpacity={0.08}
       />
 
-      {/* Top label strip */}
+      {/* Top-left brand mark — restrained, well clear of radar labels */}
       <text
-        x={64}
-        y={84}
-        fontFamily={sansStack}
-        fontSize={14}
-        letterSpacing={6}
-        fill={ACCENT}
-        opacity={0.85}
+        x={48}
+        y={56}
+        fontFamily={serifStack}
+        fontSize={22}
+        fill={FG}
+        opacity={0.95}
       >
-        DECISION PROFILE
+        Decision Nodes
       </text>
+
+      {/* Top-right case counter */}
       <text
-        x={W - 64}
-        y={84}
+        x={W - 48}
+        y={56}
         textAnchor="end"
         fontFamily={sansStack}
-        fontSize={12}
-        letterSpacing={4}
-        fill={FG}
-        opacity={0.5}
+        fontSize={11}
+        letterSpacing={5}
+        fill={ACCENT}
+        opacity={0.85}
       >
         {`${count} CASE${count === 1 ? "" : "S"} ON RECORD`}
       </text>
 
-      {/* Radar — left half */}
+      {/* Radar */}
       {rings.map((r, ri) => {
         const pts = Array.from({ length: n }, (_, i) => {
           const p = pointAt(i, r * rMax);
@@ -322,7 +317,7 @@ const ShareCardSVG = ({
             points={pts}
             fill="none"
             stroke={FG}
-            strokeOpacity={0.06 + ri * 0.025}
+            strokeOpacity={0.05 + ri * 0.025}
           />
         );
       })}
@@ -336,27 +331,25 @@ const ShareCardSVG = ({
             x2={p.x}
             y2={p.y}
             stroke={FG}
-            strokeOpacity={0.08}
+            strokeOpacity={0.07}
           />
         );
       })}
       <polygon
         points={polyPts}
         fill={ACCENT}
-        fillOpacity={0.22}
+        fillOpacity={0.26}
         stroke={ACCENT}
-        strokeOpacity={0.9}
-        strokeWidth={1.5}
+        strokeOpacity={0.95}
+        strokeWidth={1.75}
         strokeLinejoin="round"
       />
       {values.map((v, i) => {
         const p = pointAt(i, clamp01(v) * rMax);
-        return (
-          <circle key={i} cx={p.x} cy={p.y} r={3.5} fill={ACCENT} />
-        );
+        return <circle key={i} cx={p.x} cy={p.y} r={3.5} fill={ACCENT} />;
       })}
       {labels.map((label, i) => {
-        const p = pointAt(i, rMax + 26);
+        const p = pointAt(i, rMax + 22);
         const short = label.length > 14 ? label.split(" ")[0] : label;
         const anchor =
           Math.abs(p.x - cx) < 10
@@ -372,95 +365,34 @@ const ShareCardSVG = ({
             textAnchor={anchor}
             dominantBaseline="middle"
             fontFamily={sansStack}
-            fontSize={11}
-            letterSpacing={2.4}
+            fontSize={10}
+            letterSpacing={2.6}
             fill={FG}
-            opacity={0.6}
+            opacity={0.55}
           >
             {short.toUpperCase()}
           </text>
         );
       })}
 
-      {/* Right column — portrait statement */}
-      <text
-        x={rightX}
-        y={170}
-        fontFamily={sansStack}
-        fontSize={11}
-        letterSpacing={4}
-        fill={ACCENT}
-        opacity={0.8}
-      >
-        PORTRAIT SO FAR
-      </text>
-      <line
-        x1={rightX}
-        y1={188}
-        x2={rightX + 80}
-        y2={188}
-        stroke={ACCENT}
-        strokeOpacity={0.6}
-      />
-
+      {/* Right column — large editorial portrait */}
       {portraitLines.map((line, i) => (
         <text
           key={i}
           x={rightX}
-          y={232 + i * 44}
+          y={portraitTop + i * portraitLH}
           fontFamily={serifStack}
-          fontSize={30}
+          fontSize={portraitSize}
           fill={FG}
-          opacity={0.95}
+          opacity={0.97}
         >
           {line}
         </text>
       ))}
 
-      {missionCodename && (
-        <text
-          x={rightX}
-          y={232 + portraitLines.length * 44 + 36}
-          fontFamily={sansStack}
-          fontSize={11}
-          letterSpacing={4}
-          fill={FG}
-          opacity={0.45}
-        >
-          {`AFTER · ${missionCodename.toUpperCase()}`}
-        </text>
-      )}
-
-      {/* Footer wordmark */}
-      <line
-        x1={64}
-        y1={H - 110}
-        x2={W - 64}
-        y2={H - 110}
-        stroke="url(#hairline)"
-      />
+      {/* Bottom-right URL — small, never crosses the chart */}
       <text
-        x={64}
-        y={H - 60}
-        fontFamily={serifStack}
-        fontSize={32}
-        fill={FG}
-        opacity={0.95}
-      >
-        Decision Nodes
-      </text>
-      <text
-        x={64}
-        y={H - 36}
-        fontFamily={sansStack}
-        fontSize={11}
-        letterSpacing={5}
-        fill={MUTED}
-      >
-        AN INTERACTIVE DRAMA
-      </text>
-      <text
-        x={W - 64}
+        x={W - 48}
         y={H - 36}
         textAnchor="end"
         fontFamily={sansStack}
@@ -474,9 +406,27 @@ const ShareCardSVG = ({
   );
 };
 
-/** Naive word-wrap to a max line length, capped at `maxLines`. The final
- *  line is ellipsized if content remains. */
-function wrap(text: string, maxChars: number, maxLines: number): string[] {
+/** Fit portrait text into the right column. Tries decreasing font sizes
+ *  until the text wraps into ≤ maxLines lines at the given max width. */
+function fitPortrait(text: string, maxWidth: number) {
+  // Approximate average serif glyph width as a fraction of font size.
+  const avgGlyph = 0.5;
+  const maxLines = 5;
+  const sizes = [44, 40, 36, 32, 30, 28];
+  for (const size of sizes) {
+    const maxChars = Math.floor(maxWidth / (size * avgGlyph));
+    const lines = wrap(text, maxChars);
+    if (lines.length <= maxLines) {
+      return { lines, fontSize: size, lineHeight: size * 1.22 };
+    }
+  }
+  const last = 26;
+  const maxChars = Math.floor(maxWidth / (last * avgGlyph));
+  const lines = wrap(text, maxChars).slice(0, maxLines);
+  return { lines, fontSize: last, lineHeight: last * 1.22 };
+}
+
+function wrap(text: string, maxChars: number): string[] {
   const words = text.split(/\s+/).filter(Boolean);
   const lines: string[] = [];
   let current = "";
@@ -485,21 +435,10 @@ function wrap(text: string, maxChars: number, maxLines: number): string[] {
     if (next.length > maxChars && current) {
       lines.push(current);
       current = w;
-      if (lines.length === maxLines - 1) break;
     } else {
       current = next;
     }
   }
-  if (current && lines.length < maxLines) lines.push(current);
-  // If we broke out early, append the remainder ellipsized.
-  const joined = lines.join(" ");
-  if (joined.length < text.length && lines.length === maxLines - 1) {
-    const tail = text.slice(joined.length).trim();
-    const trimmed =
-      tail.length > maxChars ? `${tail.slice(0, maxChars - 1).trimEnd()}…` : tail;
-    lines.push(trimmed);
-  } else if (joined.length < text.length && lines[lines.length - 1]) {
-    lines[lines.length - 1] = `${lines[lines.length - 1].replace(/[.,;:!?\s]+$/, "")}…`;
-  }
+  if (current) lines.push(current);
   return lines;
 }

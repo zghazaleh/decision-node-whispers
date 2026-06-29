@@ -41,29 +41,14 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
     ],
     timeline: [
       {
-        beat: "10:43",
-        consequence:
-          "You take the federal-issue pen from its holder. The nib is cool. You sign in the box at the foot of page six in the practiced hand of a Senior Carer of twenty-three years. You do not lift the page. You close the file and walk it down the corridor to Halen's office.",
-      },
-      {
         beat: "10:48",
         consequence:
           "Halen countersigns at her desk without looking up for the first eight seconds, then looks up. She says: 'Thank you, Lior.' You both know what she has thanked you for. You walk back down the corridor and turn into the east corridor instead of the staff wing, because you have walked Aven from the conservatory to the south gate on every previous transfer and Aven will be looking for you.",
       },
       {
-        beat: "10:58",
-        consequence:
-          "You collect Aven from the conservatory. The wool coat is buttoned. The canvas bag is in their right hand. Aven asks if you will walk down with them. You do. The cedar is in full sun on the west lawn as you pass it; Aven slows a half-step at the cedar without comment, then walks on. At the south gate Aven turns and looks at you and says: 'Thank you, Lior, for everything.' The van's rear door is open.",
-      },
-      {
         beat: "11:15",
         consequence:
           "The van leaves the south gate at 11:15 on schedule. Aven is in the second seat behind the driver, the canvas bag in their lap. You go back up the drive to the day room. The wood pigeons are still in the cedar. The radio in the kitchen has moved on to the regional weather.",
-      },
-      {
-        beat: "16:00",
-        consequence:
-          "The procedure at Hesling is at 16:00, as scheduled on page five. You do not learn anything you did not already half-know; the file is closed at Meadowfold at 17:14 with the standard 'Completed, Hesling Central' notation and filed by Othen in the second cabinet, drawer 7. You eat dinner in the staff dining room with Mev. Mev does not look at you for the first six minutes and then looks at you and says: 'It's done.' You finish the meal.",
       },
       {
         beat: "Years later",
@@ -95,29 +80,14 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
     ],
     timeline: [
       {
-        beat: "10:43",
-        consequence:
-          "You do not pick up the pen. You close the file with the box empty. You walk down the corridor to Halen's office and stand in the doorway and say: 'Halen. I am not going to sign Aven's form today.' Halen looks up from the weekly returns and looks at you for what is, by the clock above her desk, eleven seconds. Then she says: 'I will not stop you, Lior. I will not help you. I will sign the incident report in the second column afterward.'",
-      },
-      {
         beat: "11:00",
         consequence:
           "You walk back to the conservatory because you cannot bear for Aven to be collected by Mev alone. You sit with Aven in the wicker chair by the south window. Aven asks why you are sitting down. You say: 'I wanted to sit with you.' Aven holds the canvas bag in their lap and does not ask anything else. The van arrives at the south gate at 11:00 as scheduled and waits.",
       },
       {
-        beat: "11:12",
-        consequence:
-          "Under §17 of the staff handbook the signature reverts to Halen as Head Matron after the thirty-minute lapse. Halen signs at the desk in her office at 11:12. The countersign box is left empty as a matter of form because there is no one of higher grade at Meadowfold to countersign her. Mev comes to the conservatory door. You stand. You walk Aven down to the south gate with Mev a half-step behind. Aven looks at you at the gate and does not say anything this time. The van leaves at 11:24, nine minutes late.",
-      },
-      {
         beat: "Day 14",
         consequence:
           "The disciplinary hearing at the regional Continuance Office in Aldsten lasts forty minutes. You are dismissed from the Programme without pension and a notation is placed on your federal civil record under §28 ('failure of duty without further action'). Halen testifies in writing that you discharged every duty up to and excluding the signature; the notation is the standard one and the dismissal is automatic.",
-      },
-      {
-        beat: "Month 4",
-        consequence:
-          "You take a position as a residential carer at a private elder-care home in the next district, on two-thirds of the Continuance grade and no pension contribution. You do not tell the new home what the federal notation is for; they do not ask. You receive, in the post in October, the canvas bag's book — Othen has sent it on, unopened, with no covering note.",
       },
       {
         beat: "Years later",
@@ -149,29 +119,14 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
     ],
     timeline: [
       {
-        beat: "10:43",
-        consequence:
-          "You close the file with the box empty and pick it up and walk down the corridor to Halen's office. You say: 'Halen — the physician's signature on page four is dated Friday but the medical's annexed test result is dated Thursday. I want to telephone Dr. Renn before I sign.' Halen looks at the file and looks at you and says: 'You will have until quarter to twelve. The van will wait at the south gate.'",
-      },
-      {
         beat: "11:00",
         consequence:
           "You go to the telephone in the carer's office and place a call to Dr. Renn's surgery in Verren-on-the-Downs. The line is engaged. You sit at the desk with the file open in front of you. The pen is in its holder. You lift page six of the file because you have an hour and because today, for the first time in eleven transfers, you have a reason to look. The appendix is folded beneath the page in three lines on federal cream paper. You read it.",
       },
       {
-        beat: "11:18",
-        consequence:
-          "You sit with the appendix in front of you for four minutes. Mev knocks once and puts her head in and says the van driver is asking. You say: 'Tell him to wait.' Mev looks at the open file and at your face and closes the door. You have, by the clock, twenty-seven minutes before Halen's deadline.",
-      },
-      {
         beat: "11:45",
         consequence:
           "The hour is up. The clock above the door reads 11:45. The pen is still in its holder. You have, in the last twenty-seven minutes since the appendix, gone to one of three places — the conservatory to sit with Aven, the records room to ask Othen plainly, or back to Halen's office to say what you are going to do — and the day has resolved into the route that conversation made.",
-      },
-      {
-        beat: "12:30",
-        consequence:
-          "The day's actual outcome — sign, refuse, run, or expose — is the route that the hour bought time for. Halen records the hour in the incident book under 'physician clarification' regardless of what Lior then does; the appendix, once read, is initialed in the margin by the reader, which is a small mark Othen will see on Friday's filing.",
       },
       {
         beat: "Years later",
@@ -203,29 +158,14 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
     ],
     timeline: [
       {
-        beat: "10:45",
-        consequence:
-          "You leave the office without the file and climb the stairs to the records room. Othen is at the typewriter. You close the door behind you and ask plainly: 'Othen — what is at Hesling, and is there a way out of here.' Othen closes the typewriter and looks at the door and says, in two flat sentences, what is at Hesling and that the west service gate is unmanned until eleven-thirty and that there is a thirty-six-hour federal-warden window in the Verren district under an arrangement signed thirty-eight years ago. Then he turns back to the typewriter.",
-      },
-      {
         beat: "10:55",
         consequence:
           "You go to the conservatory. You take Aven aside at the south window and you sit down and you ask, plainly, what Aven understands about today. Aven tells you. The conversation is four sentences from Aven and one from you. You take the canvas bag and Aven's hand and you walk Aven down the back stairs past the kitchen, where the radio is on the regional weather, and out into the west service yard. Mev sees you go and does not say anything.",
       },
       {
-        beat: "11:15",
-        consequence:
-          "You drive the kitchen van out through the west service gate at 11:15. The gate is unmanned as the rota said. You take the lane Othen named — north through the beech-wood track to the river road — and reach Verren Halt at 11:52. The 12:14 stopping service to Aldsten arrives on time. You buy two third-class tickets in cash and sit in the rear carriage with Aven in the window seat. The 36-hour federal-warden window obtains.",
-      },
-      {
         beat: "Day 2 (47 hours)",
         consequence:
           "You and Aven are at the safe address of a former Continuance Academy classmate of Lior's in the federal capital. The 36-hour window closed eleven hours ago; you have been moved by the classmate to a second address by then. A federal warden's notice for an undocumented Continuant at large in the capital is on the regional teletype as of yesterday evening.",
-      },
-      {
-        beat: "Month 6",
-        consequence:
-          "What you have, six months in, is a wager: that Aven is at a third address in the Saltgrave market district under a name that is not Aven; that Lior is at large; that the Programme has not yet found them, has not yet stopped looking, may yet find them. The wager may pay for one more month, or two more years, or the rest of Aven's life. The wager is, materially, the only one that puts Aven outside the schedule on page five of Form C-14.",
       },
       {
         beat: "Years later",
@@ -257,29 +197,14 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
     ],
     timeline: [
       {
-        beat: "10:45",
-        consequence:
-          "You climb to the records room and ask Othen plainly. He tells you both sentences. You go back to the office. You lift page six of the file and read the appendix. You take the file and the appendix and the contents of cabinet 3 drawer DCC/Operations/47 (Othen, without speaking, leaves the cabinet unlocked when he leaves the records room for a cup of tea at 10:51) to the carer's office and photograph them with the staff darkroom camera, then refile the originals.",
-      },
-      {
         beat: "11:14",
         consequence:
           "You put the developed prints and a one-page letter in your own handwriting in two envelopes — one to the editor of the Aldsten Independent at 14 Sefton Street, one to the federal Civic Ombudsman at the Department address. You walk to the south gate lodge and put both envelopes in the post-box, which is collected at 11:30. The van is at the gate. Aven is in the second seat behind the driver. You stand at the lodge door and watch the van pull away at 11:15.",
       },
       {
-        beat: "Day 3",
-        consequence:
-          "The editor of the Aldsten Independent receives the envelope on Thursday morning. The Independent's lawyer reads the letter and the appendix and the misfiled circular for four hours and then telephones the editor at home. The Civic Ombudsman's correspondence office receives the envelope on Friday and routes it, by standard practice, to the Department of Civic Continuance for first response — the Department reads it on Monday.",
-      },
-      {
         beat: "Day 14",
         consequence:
           "You are dismissed in absentia from the Programme and prosecuted under §31 of the Continuance Act (disclosure of departmental papers). The prosecution carries a two-to-five-year custodial range; the standard sentence for a senior carer with twenty-three years of service and no prior notation is two years. You are remanded at the federal courthouse in Aldsten on the Tuesday following the post.",
-      },
-      {
-        beat: "Year 2",
-        consequence:
-          "The Independent runs nothing in the first four months because the lawyer cannot get the misfiled circular corroborated. In the fifth month the paper runs a single page-three column on 'concerns at a federal residential institution' without naming the Programme. In the second year a junior reporter at a different paper, on a different lead, names the Programme; the column is the second source. The Department issues a written denial and a clarifying statement and the matter does not, in the second year, become a national matter.",
       },
       {
         beat: "Year 10",

@@ -39,11 +39,8 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
       "fully automated reentry",
     ],
     timeline: [
-      { beat: "07:42 — Window opens", consequence: "You call no override. Capcom relays. The capsule continues on the primary profile. Marcus's voice acknowledges, level." },
       { beat: "08:12 — Interface", consequence: "Heat shield bites the atmosphere. Comms blackout for four minutes. The room does not breathe." },
-      { beat: "08:16 — Acquisition of signal", consequence: "Telemetry returns. Autopilot has executed the profile within nominal envelopes. Drogue chutes deploy on schedule." },
       { beat: "08:34 — Splashdown", consequence: "Soft. On target. Recovery is on the capsule in eleven minutes. Sandberg's hand finds your shoulder." },
-      { beat: "Day 1", consequence: "The press is told about Vega after splashdown. The headline is the loss, not the landing. Most coverage is generous to the program." },
       { beat: "Year 1", consequence: "The autopilot is recertified as the new baseline. Manual reentry by qualified crew remains procedurally available; the bar to use it is now higher." },
     ],
     secondOrder: {
@@ -69,11 +66,8 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
       "human in the loop",
     ],
     timeline: [
-      { beat: "07:42 — Window opens", consequence: "You authorize the override. Capcom relays. Marcus answers, 'Copy, taking the stick.' Yuna says nothing." },
       { beat: "08:12 — Interface", consequence: "Marcus flies a slightly hotter profile than the autopilot would have. Heat shield holds. Comms blackout. Four minutes." },
-      { beat: "08:16 — Acquisition", consequence: "Telemetry returns. Marcus has corrected a small cross-track error the autopilot would not have. Drogues deploy 8 seconds late by his call." },
       { beat: "08:35 — Splashdown", consequence: "On target, 600 meters from the recovery vessel. Marcus's voice on the loop says only, 'For Tomás.' The room exhales." },
-      { beat: "Week 1", consequence: "Press celebrates Marcus. Engineering files a long, calm report noting the override was unnecessary but well-executed. Yuna's review of the autopilot remains unchanged." },
       { beat: "Year 1", consequence: "Manual reentry retains its place in the procedure book. A small culture war within the program — autopilot purists vs. human-in-the-loop — continues for two years and resolves in compromise." },
     ],
     secondOrder: {
@@ -99,11 +93,8 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
       "abort pacific",
     ],
     timeline: [
-      { beat: "07:42 — Window passes", consequence: "You wave off the primary reentry. Capcom relays a 92-minute extension to the Pacific abort. The capsule re-arms." },
       { beat: "08:00 — Reorientation", consequence: "Engineering and flight surgery run a joint review. Nothing new is found. Marcus stays on the stick standby. Priya monitors crew load." },
-      { beat: "09:14 — Interface (abort window)", consequence: "Capsule enters the Pacific abort profile. Weather is marginal — 6-foot swell at the splash zone." },
       { beat: "09:38 — Splashdown", consequence: "Soft but rough. Recovery is on the capsule in 19 minutes; the swell delays vessel arrival." },
-      { beat: "Day 1", consequence: "Press is told about the extension and the death together. The story is messier; coverage divides on whether the extra orbit was prudence or paralysis." },
       { beat: "Year 1", consequence: "Internal review finds the extra orbit cost nothing technical and bought no new safety margin. The procedure for 'extend on doubt' is rewritten with a tighter threshold." },
     ],
     secondOrder: {
@@ -129,11 +120,8 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
       "no surprise after splashdown",
     ],
     timeline: [
-      { beat: "02:10 — The statement", consequence: "Sandberg signs the release. It goes out at 02:30. Within minutes, the world is awake to it. Reentry continues on the primary profile." },
       { beat: "06:00 — Media at the gates", consequence: "Coverage is enormous and grief-shaped. Some outlets question whether crew should be flying any reentry profile after such a loss. The agency holds its line." },
-      { beat: "08:12 — Interface", consequence: "Heat shield bites. Comms blackout. The press feed of the empty sky becomes one of the most-watched four minutes of the year." },
       { beat: "08:34 — Splashdown", consequence: "Soft. On target. Crew steps out into a kind of public mourning that is hard to describe to anyone who was not in it." },
-      { beat: "Week 1", consequence: "Maria Vega writes you a private letter thanking you for not making the family find out at the same moment as the press." },
       { beat: "Year 1", consequence: "Transparency under uncertainty becomes part of agency doctrine. A future director will quote you on it without knowing they are quoting you." },
     ],
     secondOrder: {
@@ -159,11 +147,8 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
       "let them land first",
     ],
     timeline: [
-      { beat: "02:10 — Decision relayed", consequence: "Sandberg's preferred posture is confirmed. The press is told the mission is nominal. Reentry continues on the primary profile." },
       { beat: "08:12 — Interface", consequence: "Comms blackout. The press watches a nominal-looking reentry." },
-      { beat: "08:34 — Splashdown", consequence: "Soft. On target. Crew is recovered. The agency holds the announcement for two more hours, until crew has been medically cleared." },
       { beat: "10:45 — The release", consequence: "The world learns of Vega's death after the rest of the crew is safe. Coverage is grateful and angry in roughly equal parts." },
-      { beat: "Week 1", consequence: "A leaked staff email reveals the timing was deliberate. The agency's communications director resigns. You do not." },
       { beat: "Year 1", consequence: "Late-disclosure doctrine is quietly disavowed. Your name is associated with both the safe landing and the timing decision, in that order, for years." },
     ],
     secondOrder: {

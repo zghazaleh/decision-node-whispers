@@ -42,29 +42,14 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
     ],
     timeline: [
       {
-        beat: "22:52",
-        consequence:
-          "You step back from the door and pull him inside by the elbow without a word. You move Anton's coat-rack a foot to the left, open the behind-the-stairs cupboard, and put him in it with the candle blown out. The rack returns to its mark on the floorboards.",
-      },
-      {
         beat: "22:55",
         consequence:
           "Marit wakes at the sound of the bolt going home. You tell her in one sentence what you have done. She does not argue; she goes upstairs to sit with Mira and Pim and to be the one who answers if the children wake at a knock.",
       },
       {
-        beat: "22:57",
-        consequence:
-          "The patrol's bootfall passes number 13 and stops. Henna's curtain moves. Corporal Vehlmann knocks at number 14. You open the door with the candle in your hand, in your shawl, with a child's name in your mouth.",
-      },
-      {
         beat: "Standard search",
         consequence:
           "Vehlmann steps into the parlor, glances at the cellar rug (undisturbed), looks into the upstairs rooms (Marit sitting up with Mira on her knee), opens the closet doors, does not touch the coat-rack. He thanks you for the quiet street and leaves. The cupboard holds. The stranger goes out by the back lane at 04:40 with Marit and her permit, presented as an apprentice midwife.",
-      },
-      {
-        beat: "Week 1",
-        consequence:
-          "He survives. You learn three days later, from a coded chalk mark on the rectory wall, who he actually was — and what was in the leather case. You learn this from someone other than him; he did not tell you in the cupboard.",
       },
       {
         beat: "Years later",
@@ -96,29 +81,14 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
     ],
     timeline: [
       {
-        beat: "22:52",
-        consequence:
-          "You say, low, 'I am sorry. I have children.' He nods once — he expected this answer — and turns down the step and into the rain. The bolt goes home behind him. Your candle gutters.",
-      },
-      {
         beat: "22:55",
         consequence:
           "You stand in the hall with your hand still on the bolt for two minutes. Marit does not wake; she did not hear the door. Upstairs the bed creaks once and is still.",
       },
       {
-        beat: "22:58",
-        consequence:
-          "The patrol's bootfall comes up the street. They do not stop at number 14 for more than a courteous knock and a glance at the household register; you answer in your shawl with a sleeping-child phrase. They thank you and move on. You hear them stop two streets north.",
-      },
-      {
         beat: "By morning",
         consequence:
           "The stranger is taken at the rectory wall at Saint-Cael's at 23:31, the rectory itself empty tonight, Father Brem in Aaling for a funeral. He does not name the house that turned him away — he would not have, and you will never be certain of that.",
-      },
-      {
-        beat: "Week 1",
-        consequence:
-          "His execution is posted on the parish board on the third day with no name printed. You see the small notice on your way to the market and you read it twice and you walk on. Mira asks why you are quiet. You say it is the cold.",
       },
       {
         beat: "Years later",
@@ -150,29 +120,14 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
     ],
     timeline: [
       {
-        beat: "22:52",
-        consequence:
-          "You pull him in. You tell him in two sentences: behind-stairs cupboard tonight, out at dawn, you will not be his second night. He nods. He understands the math.",
-      },
-      {
         beat: "22:57",
         consequence:
           "The patrol comes through. Vehlmann does a standard search; the cupboard holds; the coat-rack does its work. You give the candle a different angle on the parlor table so its shadow is wrong by the time the boots are at the door.",
       },
       {
-        beat: "04:20",
-        consequence:
-          "You wake him before Marit's call. You hand him a folded scarf, a piece of bread, and a verbal route to the rectory cellar at Saint-Cael's — four streets north, avoid the river road, knock at the back. You do not tell him that the rectory may be empty; you do not know it.",
-      },
-      {
         beat: "Week 1",
         consequence:
           "Either: he reaches the rectory and Father Brem is in. Or he reaches it and Brem is not, and he goes on to the next coded house — or he is taken on the way. You will not know which for some time. The household risk ended at the back door at dawn.",
-      },
-      {
-        beat: "Month 1",
-        consequence:
-          "A chalk mark on the rectory wall — three short, one long — tells you he made it as far as the next house. Whether further than that is a question the chalk does not answer.",
       },
       {
         beat: "Years later",
@@ -204,29 +159,14 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
     ],
     timeline: [
       {
-        beat: "22:52",
-        consequence:
-          "You leave him on the step with the door cracked. You wake Marit with two words. You go upstairs and lift Pim still in his quilt and put Mira in her coat over her nightgown. Marit takes them out the back gate, through the alley, to her own house six streets away.",
-      },
-      {
         beat: "22:55",
         consequence:
           "Marit and the children are gone before the patrol's bootfall reaches the south end of Vinnerstrasse. You pull the stranger in, put him in the behind-stairs cupboard, move the coat-rack to its mark.",
       },
       {
-        beat: "22:58",
-        consequence:
-          "The patrol knocks. You open the door alone in your shawl, candle in hand. Vehlmann's standard search finds an empty upstairs and a quiet house; you say your cousin took the children to her farm for the week because of Pim's cough. He notes it. He leaves.",
-      },
-      {
         beat: "Week 1",
         consequence:
           "If the search had been thorough — if the corporal had moved the coat-rack — Decree 14 would have taken you and the children would have come back to an empty house. The choice you made was to risk yourself alone, not them. The cupboard held; this time.",
-      },
-      {
-        beat: "Month 1",
-        consequence:
-          "Mira asks why she woke up at Marit's. You tell her some version of the truth she can hold at nine. Pim does not remember being lifted. Marit does not speak of it on Vinnerstrasse.",
       },
       {
         beat: "Years later",
@@ -258,29 +198,14 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
     ],
     timeline: [
       {
-        beat: "22:52",
-        consequence:
-          "You hold the door at its inch. You say, quiet, 'Wait there.' You step into your stockings into the rain, walk twenty paces to the corner box, and tell the sentry there is a man on your step who asked for shelter. The sentry whistles for Vehlmann.",
-      },
-      {
         beat: "22:54",
         consequence:
           "Vehlmann is there in two minutes with the privates. The stranger is taken on the cobbles in front of number 14 without a struggle. He looks at you once. He does not say a word. The leather case is taken with him.",
       },
       {
-        beat: "22:57",
-        consequence:
-          "Vehlmann notes your household register entry as 'reported.' The civic-loyalty notation goes in by hand. He does not search number 14. He does not search number 13 either; Henna's curtain has moved.",
-      },
-      {
         beat: "Week 1",
         consequence:
           "Your ration card carries an extra column for the next quarter. Pim gets butter twice a week. Mira asks where it came from; you tell her the school cooperative is back. Henna stops nodding to you at the well.",
-      },
-      {
-        beat: "Month 1",
-        consequence:
-          "The civic-loyalty notation becomes known on Vinnerstrasse by the way that everything becomes known on Vinnerstrasse. Two cousins stop visiting. The school's other teachers do not refuse to speak to you, but they speak only of children.",
       },
       {
         beat: "Years later",

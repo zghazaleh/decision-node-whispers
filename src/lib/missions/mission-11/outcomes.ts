@@ -42,29 +42,14 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
     ],
     timeline: [
       {
-        beat: "The third ballot",
-        consequence:
-          "You raise your hand on 'guilty.' The foreman writes the twelfth hash mark without looking up. Aiyana watches her own hands. Davit exhales.",
-      },
-      {
         beat: "That evening",
         consequence:
           "The verdict is read at 19:11. Reish does not move. His mother makes a sound that the bailiff is trained to ignore. The foreman is on the road by 19:40.",
       },
       {
-        beat: "Week 1",
-        consequence:
-          "Sentencing is scheduled for six weeks out. You go back to tuning pianos. The binder is no longer in your hands; the alley-light detail is.",
-      },
-      {
         beat: "Month 1",
         consequence:
           "A small newspaper feature interviews the foreman, who calls the deliberation 'thorough.' You read it twice. You do not call anyone.",
-      },
-      {
-        beat: "Year 1",
-        consequence:
-          "Reish is sentenced to death. An appeal is filed on ineffective-assistance grounds; the alley-light maintenance log is named in the appellate brief by a clerk who noticed what twelve jurors did not.",
       },
       {
         beat: "Years later",
@@ -96,29 +81,14 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
     ],
     timeline: [
       {
-        beat: "The third ballot",
-        consequence:
-          "You raise your hand on 'not guilty' without naming a reason. The room holds. Marlin says, 'Of course.' The foreman closes his eyes for a second.",
-      },
-      {
         beat: "That evening",
         consequence:
           "An hour of pressure. Marlin asks what specifically. You will not name it because you have not finished thinking about it. The foreman writes a note to the judge at 19:34: deadlocked, 11–1.",
       },
       {
-        beat: "Week 1",
-        consequence:
-          "The judge declares a mistrial. Reish is remanded; the state announces it will retry. Aiyana never spoke up. Davit looked relieved and then ashamed.",
-      },
-      {
         beat: "Month 1",
         consequence:
           "Twelve different people are empanelled for the retrial. The 14B detail is still in the record; whether anyone notices it is again a matter of luck.",
-      },
-      {
-        beat: "Year 1",
-        consequence:
-          "The retrial convicts on the same evidence. The second jury deliberated four hours. You bought Reish another year and possibly the same outcome.",
       },
       {
         beat: "Years later",
@@ -150,29 +120,14 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
     ],
     timeline: [
       {
-        beat: "The third ballot",
-        consequence:
-          "You tell the room plainly that you cannot vote to take this defendant's life on this evidence and that no amount of further discussion will change that. The foreman picks up his pen for the note.",
-      },
-      {
         beat: "That evening",
         consequence:
           "Marlin demands you state a reason on the record. You say you decline to. The note goes under the door at 19:21. The judge accepts the deadlock at 19:45.",
       },
       {
-        beat: "Week 1",
-        consequence:
-          "Mistrial. The state announces re-prosecution within the week. You are quoted in a local paper as 'the lone holdout.' Marlin is quoted at length.",
-      },
-      {
         beat: "Month 1",
         consequence:
           "The retrial is scheduled. The defense's new public defender — different from the first — re-examines the 14B exhibits because the appellate clerks pointed at them. The alley-lamp question is finally asked aloud in open court.",
-      },
-      {
-        beat: "Year 1",
-        consequence:
-          "The retrial returns not-guilty on the capital charge. Reish is convicted of a lesser burglary count and serves four years. He is alive.",
       },
       {
         beat: "Years later",
@@ -204,29 +159,14 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
     ],
     timeline: [
       {
-        beat: "The question",
-        consequence:
-          "You ask the foreman to put a note under the door requesting Exhibits 14A, 14B, and 14C be re-read aloud. You name what you are looking for — and you name that you might be wrong about it.",
-      },
-      {
         beat: "That evening",
         consequence:
           "The foreman scowls and writes the note. The bailiff takes it. The judge reads the three exhibits back in open court at 19:34. The room hears, in sequence: 'plain as day under the alley light,' the log showing lamp A-217 was out, and the diagram showing two lamps in the alley.",
       },
       {
-        beat: "Back in the room",
-        consequence:
-          "Aiyana says, quietly, 'I had that same thought.' Davit says, 'Which lamp did she mean.' Marlin says, 'It doesn't matter.' It matters. The next ballot is 8–4 to convict.",
-      },
-      {
         beat: "Week 1",
         consequence:
           "Three more hours. The room divides further. At 22:50 the judge accepts a deadlock at 7–5. Mistrial. Re-prosecution announced; the alley-light question is now in the record from the jury box.",
-      },
-      {
-        beat: "Year 1",
-        consequence:
-          "The retrial seats a defense expert on lighting and witness identification. The conviction returns on the lesser charge; Reish serves four years and is alive.",
       },
       {
         beat: "Years later",
@@ -258,29 +198,14 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
     ],
     timeline: [
       {
-        beat: "The pivot",
-        consequence:
-          "You ask the foreman for ten more minutes. You speak across the table to Davit by name and put one sentence in his mouth he can repeat: 'Lamp A-217 was out; we don't know which lamp she meant.' Aiyana says, before he answers, 'I had that same thought all afternoon.'",
-      },
-      {
         beat: "That evening",
         consequence:
           "Davit repeats the sentence. Marlin attacks him personally; the attack costs Marlin one more juror, who flips on the principle of not being talked to that way. The next ballot is 8–4.",
       },
       {
-        beat: "Back in the room",
-        consequence:
-          "Two further hours. You do not push. You let Aiyana and Davit speak. Two more jurors move on the same evidence reading. The ballot becomes 6–6. The foreman writes the deadlock note at 22:10.",
-      },
-      {
         beat: "Week 1",
         consequence:
           "Mistrial. Re-prosecution announced. Reish is remanded. Your room broke evenly; the next jury will not have your room's history.",
-      },
-      {
-        beat: "Year 1",
-        consequence:
-          "The retrial seats new jurors and a defense lighting expert. Reish is convicted of a lesser charge and serves four years. He is alive.",
       },
       {
         beat: "Years later",

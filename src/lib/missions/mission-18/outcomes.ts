@@ -42,29 +42,14 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
     ],
     timeline: [
       {
-        beat: "09:25",
-        consequence:
-          "You sign the Cantonal Public Resort Act suspension form on the desk, walk down Apothekerstrasse to the Trinkhalle, and nail it to the oak door yourself. Two carpenters setting the lectern stop with the hammer half-raised. The brass band's trombone stops on the third note of its phrase and does not start again.",
-      },
-      {
         beat: "09:40",
         consequence:
           "You walk to the bandstand, take the speaking horn from the bandleader, and read four sentences from the lab report. Coliform 1,840. Lead 0.31. Cease drinking. The spring will reopen when the bore is repaired. Tobin, three meters away in his green sash, does not move. Ingrid Olsten leaves the Kurplatz by the east arch without speaking to anyone.",
       },
       {
-        beat: "10:30",
-        consequence:
-          "The post-coach with the cantonal pensioners is turned at the Tarnen road junction by the cantonal road-marshal on word of the suspension. Eight hundred and forty-eight bookings cancel by sundown. Selka Vorne files the truthful version of the story for the cantonal evening edition at 16:00; she leads with your name, your signature, and the second-page trend you have not yet seen.",
-      },
-      {
         beat: "Day 4",
         consequence:
           "Henrik Daal replaces the iron sleeve and the lead-laced section in three working days at a combined cost of two hundred and seventy-one crowns, having begun work the afternoon of the suspension. The spring tests clean on the morning of the fifth day. The Class A status is restored by the Tourism Board on the eleventh day.",
-      },
-      {
-        beat: "Day 18",
-        consequence:
-          "The Tarnen Mercantile Bank, learning of the suspension on Monday, exercises the loan covenant Tobin signed without the council. The Trinkhalle's title transfers on the first of September. Tobin resigns at the council meeting on the second. He does not look at you across the table. The town finds a buyer for the title within the year — a sanatorium consortium from Tarnen — and the spring remains public access under a lease.",
       },
       {
         beat: "Years later",
@@ -96,29 +81,14 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
     ],
     timeline: [
       {
-        beat: "09:25",
-        consequence:
-          "You put the envelope under your coat and walk across the Kurplatz to the Rathaus. Tobin is in his office with the welcome address on the desk. You hand him the first page. He reads it twice and does not look up for fourteen seconds. He says: 'Ingrid needs to see this.' You both walk to the Edelhof.",
-      },
-      {
         beat: "09:38",
         consequence:
           "Ingrid Olsten reads it at her hotel desk, takes off her glasses, and says: 'A plumbing inspection notice on the Trinkhalle door, signed by the council, at quarter to ten. Two-week postponement. I will draft.' Tobin nods. You say nothing for six seconds; you have not yet told them that the suspension form in your wallet would be on you, not on them. You agree to the technical delay because it stops the drinking today and because Ingrid will sign it where the council can see her signature.",
       },
       {
-        beat: "09:48",
-        consequence:
-          "The technical delay notice goes on the Trinkhalle door at 09:51 — the same minute Selka Vorne knocks on your surgery door, finds it empty, and walks to the Rathaus. She catches Ingrid coming out. The story she files at 16:00 leads with 'plumbing inspection,' notes the Hygienic Institute samples were drawn last Tuesday, and quotes you as 'unavailable for comment.'",
-      },
-      {
         beat: "Day 3",
         consequence:
           "Henrik begins the bore repair on Monday morning. The cantonal Hygienic Institute publishes Krause's full report — both pages — in the Health Bulletin on Wednesday. The Morgenblatt's follow-up on Thursday is harsher than the Saturday piece, leads with the second-page trend, names you as the health officer, and asks why a 'plumbing inspection' was posted instead of a public health suspension.",
-      },
-      {
-        beat: "Week 3",
-        consequence:
-          "The cantonal Tourism Board opens an inquiry into the framing. You are not charged but you are formally cautioned, in writing, that the Public Resort Act suspension is not a step the health officer may decline in favor of a council notice. The caution stays on the file. The bank, having read the Health Bulletin, exercises the covenant anyway. Tobin resigns at the November meeting.",
       },
       {
         beat: "Years later",
@@ -150,29 +120,14 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
     ],
     timeline: [
       {
-        beat: "09:25",
-        consequence:
-          "You fold the envelope back into your coat pocket without opening it the rest of the way. You walk to the pump-house behind the Trinkhalle. Henrik is at the gauge round. You show him the first page. He reads it once. He says: 'The upper bore. I told Tobin in April. It is two hundred and twelve crowns and four days off-line. There is also a problem in the bath-house feed.' You tell him to take the upper bore off-line in the night, weekly, until the sleeve can be replaced under cover of the autumn shutdown.",
-      },
-      {
         beat: "10:00",
         consequence:
           "The ribbon is cut. Tobin reads his address. The cantonal pensioners arrive at 11:30 and the first one drinks at the Trinkhalle fountain at 11:42. The water in the cup is from the lower spring because Henrik shut the upper-bore valve at 09:55; you do not know about the bath-house feed because you did not open the rest of the envelope.",
       },
       {
-        beat: "Week 3",
-        consequence:
-          "Eighteen guests at the Edelhof bath-house present with gastric symptoms over the third week. You treat them as a viral cluster from the post-coach. Three are elderly and one — a pensioner from the cantonal civil service named Olga Vell — is hospitalized in Tarnen and dies on the 14th of June of complications.",
-      },
-      {
         beat: "Week 5",
         consequence:
           "Selka Vorne's follow-up piece, after a clerk at the Hygienic Institute confirms a Vallenspring report on file, runs in the cantonal Morgenblatt. The Institute, asked by the Tourism Board for the report Marta acknowledged receiving, produces both pages. The cantonal Public Health Inspector arrives in Vallenspring on the 22nd of June.",
-      },
-      {
-        beat: "Month 4",
-        consequence:
-          "You face a cantonal disciplinary tribunal for failure to act under the Public Resort Act and for the falsified gastric-cluster diagnoses. Your licence is suspended for five years. Tobin resigns at the August meeting. The bank exercises the covenant. The Trinkhalle title transfers. The Vell family brings a civil suit; the town settles in the second year.",
       },
       {
         beat: "Years later",
@@ -204,29 +159,14 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
     ],
     timeline: [
       {
-        beat: "09:25",
-        consequence:
-          "You walk to the pump-house. Henrik. First page. The upper-bore split in April. The combined-fix cost. You also, this time, open the rest of the envelope on his workbench because he asks 'did the Institute send the bath-house numbers too,' and you find the second page. The trend is upward; arsenic is over the line by Thursday's sample.",
-      },
-      {
         beat: "09:35",
         consequence:
           "You go to Tobin's office with both pages. You tell him: today's ribbon does not happen because the upper bore needs four days off-line and the bath-house feed needs the lead-laced section out. You tell him you will sign the suspension at noon if he does not, in his welcome address at 10:00, postpone the opening by ten days on grounds of 'an engineering matter discovered this morning.' Tobin says: 'Marta. Then say at noon.' You both walk down to the Kurplatz.",
       },
       {
-        beat: "10:00",
-        consequence:
-          "Tobin reads a different address than the one on his desk. Ten days. Engineering matter. The Edelhof guests can have their suite at no charge. The cantonal pensioners can be rebooked at the same booking number for the 1st of June. The brass band plays the postponement march and the bunting stays up. Ingrid is furious in private and silent in public.",
-      },
-      {
         beat: "Day 4",
         consequence:
           "The combined repair is finished at a cost of two hundred and seventy-one crowns. The spring tests clean on the morning of the fifth day. Selka's Saturday piece runs as 'Engineering Postponement at Vallenspring Spring;' her Thursday follow-up, with the Hygienic Institute report in hand from a clerk, runs as 'Health Reasons Behind Spring Delay,' quoting your statement in full and your eleven-day timeline as a model of cautious disclosure.",
-      },
-      {
-        beat: "Month 2",
-        consequence:
-          "The season opens on the 1st of June with seven hundred and ninety-one of the original eight hundred and forty-eight bookings honored. The Tarnen Mercantile Bank does not exercise the covenant because Class A status is retained throughout (the postponement was for engineering, the suspension was never signed, the Health Bulletin treats the report as 'addressed at source'). The first repayment is met on the 1st of August.",
       },
       {
         beat: "Years later",
@@ -258,29 +198,14 @@ export const ARCHETYPES: Record<Exclude<ArchetypeId, "unclassified">, Archetype>
     ],
     timeline: [
       {
-        beat: "09:25",
-        consequence:
-          "You put the envelope under your coat and walk to the Bergrose breakfast room. Selka Vorne sees you at the door, closes her notebook, and stands. You walk together to her second-floor room. You give her the first page. She reads it. She asks if there is a second page. You both walk back down to your surgery and you open the envelope properly on the desk.",
-      },
-      {
         beat: "09:48",
         consequence:
           "Selka files the cable to Tarnen at 09:48 from the telegraph office on the corner of the Kurplatz. The story is on the wire at 09:51. The cantonal Tourism Board's duty officer reads it at 10:02, twelve minutes after the ribbon is cut, and telegraphs Vallenspring at 10:14 ordering an immediate Class A suspension on the cantonal authority.",
       },
       {
-        beat: "10:20",
-        consequence:
-          "The cantonal road-marshal posts the Board's order on the Trinkhalle door at 10:21. Tobin learns of the suspension from the road-marshal, not from you. He looks at you across the Kurplatz from the steps of the Rathaus for eight seconds and turns and goes inside without crossing to you.",
-      },
-      {
         beat: "Day 3",
         consequence:
           "Henrik begins the bore repair. The Morgenblatt's Sunday edition leads with the full timeline including Tobin's April reply ('after the season') because Henrik gave Selka the carbon when Selka knocked at the pump-house on Saturday afternoon. The Tarnen Mercantile Bank reads the Sunday paper and exercises the covenant on Tuesday.",
-      },
-      {
-        beat: "Month 4",
-        consequence:
-          "Tobin resigns at the council meeting on the 2nd of September. The Trinkhalle title transfers to the bank on the 1st of October. The cantonal Tourism Board commends you in writing for 'prompt disclosure to a duly accredited correspondent of the cantonal press,' which is the kind of commendation that does not change a thing in the Halver family. Selka Vorne is offered the cantonal lead editor's chair on the strength of the Vallenspring series and takes it.",
       },
       {
         beat: "Years later",
