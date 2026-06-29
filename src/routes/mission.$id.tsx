@@ -370,6 +370,7 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
 
   return (
     <main className="relative h-[100dvh] w-screen overflow-hidden bg-black text-foreground">
+      <h1 className="sr-only">{missionTitle} — Decision Nodes</h1>
       {/* Cinematic background */}
       <div
         ref={sceneRef}
