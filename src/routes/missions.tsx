@@ -111,6 +111,47 @@ const SORT_LABEL: Record<SortMode, string> = {
 };
 const SORT_ORDER: SortMode[] = ["curated", "difficulty", "stood", "newest"];
 
+/** Curated thematic groupings — a mission may live in more than one rail. */
+const CURATED_GROUPS: { label: string; caption?: string; ids: string[] }[] = [
+  {
+    label: "Business & Power",
+    caption: "Boardrooms, leverage, reputation",
+    ids: ["mission-01", "mission-04", "mission-06", "mission-08"],
+  },
+  {
+    label: "Politics & War",
+    caption: "The weight of office, the cost of orders",
+    ids: ["mission-04", "mission-09", "mission-12", "mission-16"],
+  },
+  {
+    label: "Moral Dilemmas",
+    caption: "No clean answer, only a choice",
+    ids: [
+      "mission-02",
+      "mission-11",
+      "mission-13",
+      "mission-17",
+      "mission-19",
+      "mission-20",
+    ],
+  },
+  {
+    label: "Life-Changing Moments",
+    caption: "After this, nothing returns to before",
+    ids: ["mission-03", "mission-05", "mission-07", "mission-15", "mission-19"],
+  },
+  {
+    label: "Love & Loyalty",
+    caption: "The people you can't put down",
+    ids: ["mission-08", "mission-14", "mission-15", "mission-19"],
+  },
+  {
+    label: "Frontier & Future",
+    caption: "New ground, new questions",
+    ids: ["mission-03", "mission-18", "mission-20"],
+  },
+];
+
 /* -------------------------------------------------------------------------- */
 /* Page                                                                        */
 /* -------------------------------------------------------------------------- */
