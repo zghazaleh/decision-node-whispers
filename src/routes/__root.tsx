@@ -125,9 +125,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       ...criticalAudioUrls().map((href) => ({
         rel: "preload",
-        as: "audio",
+        as: "fetch",
         href,
         type: "audio/mpeg",
+        crossOrigin: "anonymous",
         fetchpriority: "high",
       })),
     ],
