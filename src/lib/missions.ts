@@ -239,4 +239,22 @@ export const MISSIONS: MissionMeta[] = [
     creator: "House Edition",
     version: "v1.0",
   },
+  {
+    id: "mission-13",
+    number: "13",
+    codename: "The Pursuit",
+    title: "The Pursuit",
+    logline:
+      "He went into the river after the boy. He came up into the gaslight. You have hunted him for sixteen years.",
+    status: "available",
+    duration: "20–40 min",
+    tone: "Rain · Gaslight · Held breath",
+    location: "Saint-Verriere Dock, Halverin",
+    year: "Late autumn",
+    category: "Justice",
+    theme: "Conscience",
+    difficulty: 4,
+    creator: "House Edition",
+    version: "v1.0",
+  },
 ];
