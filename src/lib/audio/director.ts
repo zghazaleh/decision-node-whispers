@@ -89,6 +89,7 @@ export type AudioAttempt = {
 
 const MAX_ATTEMPTS = 80;
 let attemptSeq = 0;
+const GLOBAL_ARM_KEY = "__dnAudioGestureArmed";
 
 class Director {
   private ambient: Ambient | null = null;
@@ -100,6 +101,8 @@ class Director {
   private listeners = new Set<Listener>();
   private motifGuard = 0; // throttle motif so it stays sparse
   private attempts: AudioAttempt[] = [];
+  private lastEnter: { screen: Screen; opts: EnterOpts } | null = null;
+  private ignitePromise: Promise<void> | null = null;
 
   /** Ring buffer of recent switchTo / playOneShot attempts, newest first. */
   recentAttempts(): AudioAttempt[] { return this.attempts.slice(); }
@@ -133,10 +136,16 @@ class Director {
 
   /** Resume the AudioContext on the first user gesture (Begin button). */
   async ignite() {
-    const a = this.engine(); if (!a) return;
-    await a.ignite();
-    this.ignited = true;
-    this.emit();
+    if (this.ignitePromise) return this.ignitePromise;
+    this.ignitePromise = (async () => {
+      const a = this.engine(); if (!a) return;
+      await a.ignite();
+      this.ignited = true;
+      this.emit();
+    })().finally(() => {
+      this.ignitePromise = null;
+    });
+    return this.ignitePromise;
   }
 
   isIgnited() { return this.ignited; }
@@ -185,6 +194,12 @@ class Director {
     const url = audioUrl(name); if (!url) return;
     const entry = this.recordAttempt({ kind: "playOneShot", label: `sfx:${name}`, url });
     const ok = await this.engine()?.playOneShot(url, { gain: opts?.gain, bus: "sfx", fadeInMs: 40, fadeOutMs: 500 });
+    this.settleAttempt(entry, !!ok);
+  }
+
+  async playFlip(opts?: { gain?: number }) {
+    const entry = this.recordAttempt({ kind: "playOneShot", label: "sfx:film-flip" });
+    const ok = await this.engine()?.playSyntheticFlip({ gain: opts?.gain });
     this.settleAttempt(entry, !!ok);
   }
 
@@ -244,6 +259,7 @@ class Director {
    * Archive bed so the player still feels held by sound.
    */
   async enter(screen: Screen, opts: EnterOpts = {}) {
+    this.lastEnter = { screen, opts };
     const a = this.engine(); if (!a) return;
     const fade = opts.fadeMs ?? 1400;
     if (opts.profile) a.setAudioProfile(opts.profile);
@@ -275,6 +291,13 @@ class Director {
     this.emit();
   }
 
+  /** Re-enter the latest room after a delayed browser audio unlock. */
+  async resumeLatest() {
+    await this.ignite();
+    const latest = this.lastEnter;
+    if (latest) await this.enter(latest.screen, latest.opts);
+  }
+
 
 
   /** UI subscription for mute/reduced toggle components. */
@@ -286,3 +309,18 @@ class Director {
 }
 
 export const audio = new Director();
+
+export function armGlobalAudioUnlock() {
+  if (typeof window === "undefined") return;
+  const w = window as typeof window & Record<string, unknown>;
+  if (w[GLOBAL_ARM_KEY]) return;
+  w[GLOBAL_ARM_KEY] = true;
+
+  const unlock = () => {
+    if (audio.isMuted()) return;
+    void audio.resumeLatest();
+  };
+
+  window.addEventListener("pointerdown", unlock, { capture: true, passive: true });
+  window.addEventListener("keydown", unlock, { capture: true });
+}
