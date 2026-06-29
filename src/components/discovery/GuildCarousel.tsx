@@ -282,7 +282,7 @@ function CarouselTile({
       tabIndex={focusable ? 0 : -1}
       className={[
         "group relative block shrink-0 overflow-hidden rounded-[12px] text-left",
-        "w-[172px] sm:w-[188px] md:w-[200px]",
+        "w-[240px] sm:w-[260px]",
         "border bg-[#0b0d10]",
         // Asymmetric cinematic easing on state changes — slower exhale than
         // attack, no hard snap between spotlit / dim.
@@ -302,7 +302,7 @@ function CarouselTile({
       // hint so the GPU isn't holding nine layers in memory at rest.
       style={{ willChange: spotlit || open ? "transform, opacity, filter" : "auto" }}
     >
-      <div className="relative aspect-[3/4] w-full overflow-hidden bg-[#0b0d10]">
+      <div className="relative aspect-[4/5] w-full overflow-hidden bg-[#0b0d10]">
         {/* Scene art — slow parallax drift while spotlit, settled otherwise. */}
         <div
           className={[
