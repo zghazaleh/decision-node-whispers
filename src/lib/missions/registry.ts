@@ -76,6 +76,7 @@ register(missionFourteenEngine);
 register(missionFifteenEngine);
 register(missionSixteenEngine);
 register(missionSeventeenEngine);
+register(missionEighteenEngine);
 
 export function getMissionEngine(missionId: string): MissionEngine | null {
   return REGISTRY[missionId] ?? null;
