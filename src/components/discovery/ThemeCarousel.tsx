@@ -116,7 +116,33 @@ export function ThemeCarousel({
               <button
                 key={g.label}
                 type="button"
-                onClick={() => onSelectGroup(isActive ? null : g.label)}
+                onClick={() => {
+                  if (touchFiredRef.current.has(g.label)) {
+                    touchFiredRef.current.delete(g.label);
+                    return;
+                  }
+                  handleTap(g.label, isActive);
+                }}
+                onTouchStart={(e) => {
+                  const t = e.changedTouches[0];
+                  if (!t) return;
+                  (e.currentTarget as HTMLElement).dataset.tx = String(t.clientX);
+                  (e.currentTarget as HTMLElement).dataset.ty = String(t.clientY);
+                }}
+                onTouchEnd={(e) => {
+                  const startX = Number((e.currentTarget as HTMLElement).dataset.tx);
+                  const startY = Number((e.currentTarget as HTMLElement).dataset.ty);
+                  const t = e.changedTouches[0];
+                  if (!t || Number.isNaN(startX)) return;
+                  const dx = Math.abs(t.clientX - startX);
+                  const dy = Math.abs(t.clientY - startY);
+                  // If the finger barely moved, treat it as a tap.
+                  if (dx < 10 && dy < 10) {
+                    e.preventDefault();
+                    touchFiredRef.current.add(g.label);
+                    handleTap(g.label, isActive);
+                  }
+                }}
                 aria-pressed={isActive}
                 className={`group relative shrink-0 w-[260px] snap-start overflow-hidden rounded-[14px] border text-left transition-all duration-300 sm:w-[300px] ${
                   isActive
