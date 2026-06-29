@@ -905,7 +905,7 @@ function AnalyzingProgress() {
       </p>
       <p
         key={stageIndex}
-        className="mt-3 text-xs tracking-[0.2em] uppercase text-foreground/45 text-center animate-fade-in"
+        className="mt-3 text-xs tracking-[0.2em] uppercase text-foreground/45 text-center animate-fade-in-slow"
       >
         {stage.hint}
       </p>
