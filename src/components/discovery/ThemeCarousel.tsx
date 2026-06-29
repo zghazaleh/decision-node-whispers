@@ -160,7 +160,7 @@ export function ThemeCarousel({
                   }
                 }}
                 aria-expanded={isActive}
-                className={`group relative shrink-0 w-[260px] snap-start overflow-hidden rounded-[14px] border text-left transition-all duration-300 sm:w-[300px] ${
+                className={`group relative shrink-0 w-[240px] snap-start overflow-hidden rounded-[12px] border text-left transition-all duration-300 sm:w-[260px] ${
                   isActive
                     ? "border-accent/60 ring-1 ring-accent/30"
                     : "border-foreground/10 hover:border-accent/40"
