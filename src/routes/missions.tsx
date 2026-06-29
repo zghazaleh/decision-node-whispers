@@ -17,7 +17,7 @@ import { readMission } from "@/lib/mission-store";
 import { getMissionEngine } from "@/lib/missions/registry";
 import { HeroDetail } from "@/components/discovery/HeroDetail";
 import { GuildCarousel } from "@/components/discovery/GuildCarousel";
-import { CategoryRail } from "@/components/discovery/CategoryRail";
+import { ThemeCard } from "@/components/discovery/ThemeCard";
 import { logOpen } from "@/lib/discovery/signals";
 import { useAuthUser } from "@/lib/auth-sync";
 import { useDecisionProfile } from "@/lib/decision-profile";
@@ -186,6 +186,7 @@ function MissionsPage() {
   const [difficulty, setDifficulty] = useState<number | "Any">("Any");
   const [sort, setSort] = useState<SortMode>("curated");
   const [openId, setOpenId] = useState<string | null>(null);
+  const [openTheme, setOpenTheme] = useState<string | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [entering, setEntering] = useState(false);
   const [gateOpen, setGateOpen] = useState(false);
@@ -474,19 +475,32 @@ function MissionsPage() {
 
 
 
-        {/* ---------- Curated category rails ---------- */}
+        {/* ---------- Curated theme cards ---------- */}
         {!filtersActive && (
           <div className="mb-6">
+            <div className="mb-4 flex items-baseline gap-3">
+              <span className="text-[0.55rem] tracking-[0.4em] uppercase text-accent/90">
+                Curated themes
+              </span>
+              <span className="h-px flex-1 bg-accent/15" aria-hidden />
+              <span className="text-[0.55rem] tracking-[0.4em] uppercase text-muted-foreground/55">
+                Tap to open
+              </span>
+            </div>
             {CURATED_GROUPS.map((g) => {
               const items = g.ids
                 .map((id) => MISSIONS.find((m) => m.id === id))
                 .filter((m): m is MissionMeta => !!m && m.status === "available");
               return (
-                <CategoryRail
+                <ThemeCard
                   key={g.label}
                   label={g.label}
                   caption={g.caption}
                   items={items}
+                  isOpen={openTheme === g.label}
+                  onToggle={() =>
+                    setOpenTheme((cur) => (cur === g.label ? null : g.label))
+                  }
                   onSelect={commit}
                 />
               );
