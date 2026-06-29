@@ -441,3 +441,39 @@
   0%   { transform: scale(1.04) translate3d(0, 0, 0); }
   100% { transform: scale(1.10) translate3d(1.6%, -0.9%, 0); }
 }
+
+/* ── Guild carousel performance hints ───────────────────────────
+   The carousel runs three always-on animations per spotlit tile
+   (parallax drift, radial wash, breathing rule) plus a smooth
+   scroll on tile change. Without these hints the browser repaints
+   neighbouring tiles and the strip background every frame.
+
+   - `contain: paint` on the strip stops paint from spilling into the
+     surrounding page during scroll.
+   - `contain: layout paint` on each tile isolates its repaint region.
+   - `will-change` on the two perpetually animating layers promotes
+     them to their own compositor layer once, instead of the browser
+     guessing per frame. Kept off the tile itself when not spotlit so
+     idle tiles don't reserve GPU memory. */
+.dn-carousel-strip {
+  contain: paint;
+  overscroll-behavior-x: contain;
+  scroll-behavior: smooth;
+}
+.dn-carousel-tile {
+  contain: layout paint;
+}
+.dn-carousel-art {
+  will-change: transform, filter;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+.dn-carousel-wash {
+  will-change: opacity, transform;
+  transform: translateZ(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .dn-carousel-art,
+  .dn-carousel-wash { will-change: auto; }
+}
+
