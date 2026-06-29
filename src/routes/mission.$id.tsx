@@ -126,6 +126,7 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
 
   const [input, setInput] = useState("");
   const [decideOpen, setDecideOpen] = useState(false);
+  const [resetOpen, setResetOpen] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const analyzeFn = useServerFn(analyzeDecision);
   const recordPlayFn = useServerFn(recordMissionPlay);
