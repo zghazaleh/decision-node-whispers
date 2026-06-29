@@ -317,7 +317,11 @@ function CarouselTile({
           className={[
             "dn-carousel-wash pointer-events-none absolute inset-[-40%]",
             "transition-opacity duration-[1400ms] ease-out",
-            spotlit ? "opacity-100 motion-safe:animate-[dn-wash_11s_ease-in-out_infinite_alternate]" : "opacity-0",
+            // One-shot drift-in: arrives and settles ~1700ms in, holds
+            // through 2000ms, then leaves the accent rule the floor for
+            // its 2600ms brightness peak. No infinite alternate — the
+            // wash and the breath stop ever moving in the same instant.
+            spotlit ? "opacity-100 motion-safe:animate-[dn-wash_2000ms_cubic-bezier(0.22,1,0.36,1)_forwards]" : "opacity-0",
           ].join(" ")}
           style={{
             background:
