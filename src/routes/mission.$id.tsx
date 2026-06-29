@@ -558,32 +558,64 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
 
         {/* Top bar — minimal */}
         <header
-          className="flex items-center justify-between px-6 sm:px-10"
+          className="flex items-center justify-between gap-4 px-6 sm:px-10"
           style={{ paddingTop: `calc(5vh + 1.25rem + env(safe-area-inset-top))` }}
         >
-          <button
-            onClick={() => navigate({ to: "/" })}
-            className="text-[0.6rem] tracking-[0.4em] uppercase text-foreground/50 hover:text-foreground/90 transition-colors text-left"
-            title="Back to Decision Nodes"
-          >
-            {MISSIONS.find((m) => m.id === MISSION_ID)?.codename ?? "Decision Nodes"}
-          </button>
+          <nav className="flex min-w-0 items-center gap-3" aria-label="Breadcrumb">
+            <button
+              onClick={() => navigate({ to: "/missions" })}
+              className="group inline-flex items-center gap-1.5 text-[0.6rem] tracking-[0.4em] uppercase text-foreground/55 hover:text-foreground/95 transition-colors"
+              title="Back to Case Archive"
+            >
+              <ChevronLeft className="h-3 w-3 transition-transform group-hover:-translate-x-0.5" aria-hidden />
+              Case Archive
+            </button>
+            <span className="hidden sm:inline text-foreground/25" aria-hidden>
+              ·
+            </span>
+            <span className="hidden sm:inline truncate text-[0.6rem] tracking-[0.4em] uppercase text-foreground/40">
+              {MISSIONS.find((m) => m.id === MISSION_ID)?.codename ?? "Decision Nodes"}
+            </span>
+          </nav>
 
           <button
-            onClick={() => {
-              const ok = window.confirm(
-                "Reset this mission? Your conversation, decision, and analysis will be cleared. You'll start from the opening again.",
-              );
-              if (!ok) return;
-              clearMission(MISSION_ID);
-              window.location.reload();
-            }}
-            className="text-[0.6rem] tracking-[0.4em] uppercase text-foreground/40 hover:text-foreground/80 transition-colors"
+            onClick={() => setResetOpen(true)}
+            className="shrink-0 text-[0.6rem] tracking-[0.4em] uppercase text-foreground/40 hover:text-foreground/80 transition-colors"
             title="Clear this mission and start over"
           >
             Reset
           </button>
         </header>
+
+        <AlertDialog open={resetOpen} onOpenChange={setResetOpen}>
+          <AlertDialogContent className="border-foreground/15 bg-background/95 backdrop-blur">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-[0.7rem] tracking-[0.4em] uppercase text-foreground/90">
+                Reset this mission?
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-sm leading-relaxed text-muted-foreground">
+                Decisions in this room are meant to be irreversible. Resetting will erase the
+                conversation, your decision, and the analysis — and start you again from the
+                opening. This cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel className="text-[0.65rem] tracking-[0.35em] uppercase">
+                Keep playing
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => {
+                  clearMission(MISSION_ID);
+                  window.location.reload();
+                }}
+                className="text-[0.65rem] tracking-[0.35em] uppercase"
+              >
+                Reset mission
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
 
         {/* Transcript — centered, cinematic */}
         <div
