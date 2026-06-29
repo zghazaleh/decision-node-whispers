@@ -151,7 +151,7 @@ function RootComponent() {
       <div className="fixed top-3 right-3 z-50 flex items-center gap-2">
         <AudioFailureIndicator />
         <SoundControls />
-        <ConstitutionStatusBadge />
+        
         <UserMenu />
       </div>
       <Outlet />
