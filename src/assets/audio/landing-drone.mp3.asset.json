@@ -1,11 +1,11 @@
 {
   "version": 1,
-  "asset_id": "1c076aec-3516-43c7-952a-40f7178f3abf",
+  "asset_id": "3a73c807-066a-43cb-b5a9-a4e7b7306d3b",
   "project_id": "5c0a2ea2-d89d-46f4-9789-6a6867e7e361",
-  "url": "/__l5e/assets-v1/1c076aec-3516-43c7-952a-40f7178f3abf/landing-drone.mp3",
-  "r2_key": "a/v1/5c0a2ea2-d89d-46f4-9789-6a6867e7e361/1c076aec-3516-43c7-952a-40f7178f3abf/landing-drone.mp3",
+  "url": "/__l5e/assets-v1/3a73c807-066a-43cb-b5a9-a4e7b7306d3b/landing-drone.mp3",
+  "r2_key": "a/v1/5c0a2ea2-d89d-46f4-9789-6a6867e7e361/3a73c807-066a-43cb-b5a9-a4e7b7306d3b/landing-drone.mp3",
   "original_filename": "landing-drone.mp3",
-  "size": 1281089,
+  "size": 640983,
   "content_type": "audio/mpeg",
-  "created_at": "2026-06-28T17:06:09Z"
+  "created_at": "2026-06-29T18:38:16Z"
 }

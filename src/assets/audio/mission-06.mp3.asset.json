@@ -1,11 +1,11 @@
 {
   "version": 1,
-  "asset_id": "e6ac0512-f5e4-467d-bac1-3a0f862a82d4",
+  "asset_id": "beaab52e-0fcd-4ae3-b291-e416f471b095",
   "project_id": "5c0a2ea2-d89d-46f4-9789-6a6867e7e361",
-  "url": "/__l5e/assets-v1/e6ac0512-f5e4-467d-bac1-3a0f862a82d4/mission-06.mp3",
-  "r2_key": "a/v1/5c0a2ea2-d89d-46f4-9789-6a6867e7e361/e6ac0512-f5e4-467d-bac1-3a0f862a82d4/mission-06.mp3",
+  "url": "/__l5e/assets-v1/beaab52e-0fcd-4ae3-b291-e416f471b095/mission-06.mp3",
+  "r2_key": "a/v1/5c0a2ea2-d89d-46f4-9789-6a6867e7e361/beaab52e-0fcd-4ae3-b291-e416f471b095/mission-06.mp3",
   "original_filename": "mission-06.mp3",
-  "size": 1281089,
+  "size": 640983,
   "content_type": "audio/mpeg",
-  "created_at": "2026-06-28T17:07:00Z"
+  "created_at": "2026-06-29T18:38:28Z"
 }
