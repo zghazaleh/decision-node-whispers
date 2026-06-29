@@ -344,7 +344,7 @@ function MissionsPage() {
           <p className="text-[0.6rem] tracking-[0.4em] uppercase text-muted-foreground/70 tabular-nums">
             {filtersActive
               ? `Showing ${visible.length} of ${MISSIONS.length}`
-              : `The Archive · ${MISSIONS.length} case files`}
+              : `Case Archive · ${MISSIONS.length} case files`}
           </p>
         </header>
 
