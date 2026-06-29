@@ -293,4 +293,22 @@ export const MISSIONS: MissionMeta[] = [
     creator: "House Edition",
     version: "v1.0",
   },
+  {
+    id: "mission-16",
+    number: "16",
+    codename: "The Village",
+    title: "The Village",
+    logline:
+      "Step-off is at four-eight. The hamlet has no armed men in it. The order was given at oh-two-thirty-one on a single source.",
+    status: "available",
+    duration: "20–40 min",
+    tone: "Dust · First light · Held breath",
+    location: "Eastern edge of Korven Veld, Sevra valley",
+    year: "Year 2 of Operation FERN ARC",
+    category: "Conflict",
+    theme: "Conscience",
+    difficulty: 5,
+    creator: "House Edition",
+    version: "v1.0",
+  },
 ];

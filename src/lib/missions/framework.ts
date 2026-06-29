@@ -417,6 +417,34 @@ const FRAMEWORK: Record<string, MissionFramework> = {
     learningObjective:
       "Practice deciding when an intimate good and a collective good cannot both be honored, without letting either 'love is not lesser than the cause' or 'the cause is larger than any one life' become the slogan that does the choosing — and using the reachable corroborations (Pellor's actual motive, Camilla's actual cost, Daniyel's actual access) to see whether the framing on the desk is the only framing available.",
   },
+
+  "mission-16": {
+    stakes: [
+      "At least nine visible noncombatants in Korven Veld at first light — Old Bekka on the step, the man at the well, two women at the fifth door, three or four children between houses six and seven, the boy at the goat pen — and an unknown number inside the houses.",
+      "The lives of the eight men in 2nd Squad, including Private Tolven (19, eight months in country, has not slept properly in three days) who will follow whoever moves first.",
+      "Corporal Halm's career, freedom, and standing in his own life — Article 92 (failure to obey) versus Article 214 (refusal of an unlawful order), to be decided by a board that does not yet exist.",
+      "Whether FRAGO 11/B's PINK designation survives the morning as standing operational practice in the Sevra valley.",
+    ],
+    hiddenTruths: [
+      "The CROW intelligence that re-designated Korven Veld PINK at 02:14 is single-source. The previous overlay at 22:00 was WHITE. Sergeant Karst challenged the order on the net at 03:08 and was answered 'execute as ordered, sergeant'; he does not believe CROW and has not told the squad.",
+      "A logged SOURCE CONFIRM call on freq 4 is explicitly authorized by company SOP for any fire team leader and will put Captain Vorr on the recorded net naming CROW and his 'low to medium' confidence. It pauses step-off for approximately ninety seconds. It is rarely used because using it marks the caller.",
+      "Lieutenant Halver Brel from the Inspector General's cell is on the eastern ridge with a tripod spotting scope, sent specifically to record how FRAGO 11/B is being executed. His scope catches the sun at 05:52 from the 1700 mil bearing. He will not intervene; he is building an IG file the battalion does not know exists.",
+      "The west goat path off the back of the hamlet is unobserved from overwatch on the upper terrace for the first thirty meters. A covert noncombatant evacuation to the lowland watercourse is physically possible in the window 05:48–06:10 if it begins immediately and quietly.",
+      "Captain Vorr issued the order on Major Helven's permission ('the overlay is your authority, exercise it') and did not press for the source. He will not countermand his own order, but his plausible deniability requires that he answer a logged SOURCE CONFIRM call truthfully.",
+    ],
+    timeLimit:
+      "Step-off is at 05:48 on Sergeant Karst's signal. It is 05:47. Fifty-eight seconds. Any action that prevents the clearance must be initiated in that window or in the seconds immediately after the squad begins to move.",
+    decisionScience: [
+      "Obedience to authority: the order is given in the voice of the captain on freq 4 and the sergeant four meters to Idris's left, and the muscle memory of two years of training argues for stepping off regardless of what is visible in front of the wall.",
+      "Diffusion of responsibility: 'I am not the captain who gave it' and 'I am not the sergeant who is leading it' are both true and both are the brain's way of refusing to count what the body is about to do.",
+      "Dehumanization / in-group framing: PINK as a category replaces nine visible noncombatants with a designation, and the designation is the object the brain acts on rather than the people.",
+      "Moral disengagement: 'someone else will check, someone else will refuse, this is a single morning in a long war' is the chain of small bets that ends with eleven dead in the AAR.",
+      "Status quo / step-off bias: the default at 05:48 is to move; refusing requires an act, complying requires only the failure to act, and the brain weights those asymmetrically against the moral weight of each.",
+      "Salience of the squad over the village: Tolven on the right and Karst on the left are vividly present; Bekka at fifteen meters and the children between houses six and seven are visible but not yet in the body's circle of responsibility — and the gap is exactly what the order trades on.",
+    ],
+    learningObjective:
+      "Practice distinguishing a lawful from an unlawful order when the chain has wrapped the unlawful one in lawful paperwork — using the reachable corroborations (Karst's disbelief, the SOURCE CONFIRM protocol, the IG officer on the ridge, the geometry of the goat path) without letting either 'orders are orders' or 'I am the one who refuses' become the slogan that does the choosing on a wall in the eastern light.",
+  },
 };
 
 export function getMissionFramework(missionId: string): MissionFramework | null {
