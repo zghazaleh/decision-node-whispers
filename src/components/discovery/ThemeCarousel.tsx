@@ -263,24 +263,17 @@ export function ThemeCarousel({
             </span>
           </div>
 
-          <ul className="divide-y divide-foreground/10">
+          <ul className="flex flex-col gap-3">
             {expandedMissions.map((m) => (
               <li key={m.id}>
-                <button
-                  type="button"
-                  onClick={() => onEnter(m.id)}
-                  className="group flex w-full items-baseline gap-4 py-3 text-left transition-colors hover:bg-foreground/[0.03]"
-                >
-                  <span className="font-mono text-[0.6rem] tracking-[0.3em] uppercase text-muted-foreground/60 tabular-nums w-10 shrink-0">
-                    {m.number}
-                  </span>
-                  <span className="flex-1 font-display text-base text-foreground/95 group-hover:text-accent transition-colors">
-                    {m.title}
-                  </span>
-                  <span className="text-[0.55rem] tracking-[0.35em] uppercase text-muted-foreground/55 hidden sm:inline">
-                    Enter →
-                  </span>
-                </button>
+                {renderRow(m, {
+                  isOpen: openId === m.id,
+                  isHovered: hoveredId === m.id,
+                  onHover: (h) => setHoveredId(h ? m.id : null),
+                  onToggle: () =>
+                    setOpenId((cur) => (cur === m.id ? null : m.id)),
+                  onEnter: () => onEnter(m.id),
+                })}
               </li>
             ))}
           </ul>
