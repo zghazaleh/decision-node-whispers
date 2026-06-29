@@ -24,7 +24,7 @@ const INTENSITY_OPTIONS: { value: MusicIntensity; label: string; title: string }
  * across missions.
  */
 export function SoundControls({ className = "" }: { className?: string }) {
-  const { muted, reduced, intensity } = useAudioState();
+  const { muted, intensity } = useAudioState();
   const enableSound = async () => {
     audio.setMuted(false);
     await audio.resumeLatest();
