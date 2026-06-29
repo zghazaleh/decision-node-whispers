@@ -644,7 +644,7 @@ function LedgerRow({
             {/* Mobile layout */}
             <div className="sm:hidden">
               <div className="flex items-baseline justify-between gap-3">
-                <h3 className="font-display text-[19px] leading-tight text-foreground/95 truncate">
+                <h3 className="font-display text-[19px] leading-tight text-foreground/95 whitespace-nowrap">
                   {mission.codename}
                 </h3>
                 <span className="text-xs text-foreground/80 tabular-nums">
