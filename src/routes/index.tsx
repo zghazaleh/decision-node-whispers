@@ -90,7 +90,7 @@ function Landing() {
         >
           <Link
             to="/missions"
-            onClick={() => {
+            onPointerDown={() => {
               // Ignition: the first gesture. Sub-drone fades in, then the Node
               // motif sounds once. The Archive bed picks up on /missions.
               void (async () => {
