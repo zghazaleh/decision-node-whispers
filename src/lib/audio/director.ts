@@ -31,6 +31,29 @@ type EnterOpts = {
 
 const SOUND_KEY = "dn:sound";
 const REDUCED_KEY = "dn:audio-reduced";
+const INTENSITY_KEY = "dn:music-intensity";
+
+export type MusicIntensity = "off" | "low" | "normal";
+
+function intensityToGain(level: MusicIntensity): number {
+  if (level === "off") return 0;
+  if (level === "low") return 0.4;
+  return 1;
+}
+
+function readIntensity(): MusicIntensity {
+  if (typeof window === "undefined") return "normal";
+  try {
+    const v = window.localStorage.getItem(INTENSITY_KEY);
+    if (v === "off" || v === "low" || v === "normal") return v;
+  } catch { /* noop */ }
+  return "normal";
+}
+
+function writeIntensity(level: MusicIntensity) {
+  if (typeof window === "undefined") return;
+  try { window.localStorage.setItem(INTENSITY_KEY, level); } catch { /* noop */ }
+}
 
 function readBool(key: string, fallback: boolean): boolean {
   if (typeof window === "undefined") return fallback;
