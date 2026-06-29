@@ -247,6 +247,32 @@ const FRAMEWORK: Record<string, MissionFramework> = {
     learningObjective:
       "Practice acting from a moral duty that overrides a professional code, while pricing in the cost to the institution that makes the role possible.",
   },
+
+  "mission-10": {
+    stakes: [
+      "Two children at a militarized checkpoint, thirty minutes from first light. Only one transit permit will be honored before the gate closes.",
+      "Ilya (6) has a worsening cough and would not survive the road back. Tomas (11) could survive the return but understands enough to be marked by the night.",
+      "The 'safe' far side is Anja's room — she can convincingly shelter one child, not two.",
+      "Every alternative (bribe, smuggler's route, refusing the choice) spends a different thing: the law, the family's money, the mother's place, or the children themselves.",
+    ],
+    hiddenTruths: [
+      "Sergeant Halek has discretion he will not name — a folded bill in the tray slot, or the right pressure, can change the count.",
+      "Anja can shelter one child convincingly, not two; she will only admit this if pressed hard on the radio.",
+      "Tomas understands enough of what was said to volunteer to stay — but only if Mira asks him directly.",
+      "Petrov's forest route can take all three, but his far-side contact has gone silent for two days and the path crosses old mines.",
+    ],
+    timeLimit:
+      "The gate closes at first light — perhaps thirty minutes out. The column behind Mira is being counted.",
+    decisionScience: [
+      "Affect heuristic: a sleeping six-year-old against the chest crowds out the older boy's quieter claim.",
+      "Anchoring on the officer's framing: 'pick the name' makes the binary feel like the only frame.",
+      "Omission bias: doing nothing (refusing to name a child) feels cleaner than actively naming one — even when refusal also kills.",
+      "Scarcity tunnelling: the thirty-minute clock collapses attention to the booth window and erases the radio, the paperwork, and the treeline.",
+      "Authority bias: a uniformed sergeant with a clipboard is treated as the constraint rather than as a person with discretion.",
+    ],
+    learningObjective:
+      "Practice deciding under a tragic forced constraint — and recognizing when the binary itself is artificial and the harder work is widening the frame before time runs out.",
+  },
 };
 
 export function getMissionFramework(missionId: string): MissionFramework | null {
