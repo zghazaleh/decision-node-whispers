@@ -365,11 +365,19 @@ function MissionsPage() {
           >
             ← Decision Nodes
           </Link>
-          <p className="text-[0.6rem] tracking-[0.4em] uppercase text-muted-foreground/70 tabular-nums">
-            {filtersActive
-              ? `Showing ${visible.length} of ${MISSIONS.length}`
-              : `Case Archive · ${MISSIONS.length} case files`}
-          </p>
+          <div className="flex items-center gap-5">
+            <Link
+              to="/how-it-works"
+              className="text-[0.6rem] tracking-[0.4em] uppercase text-muted-foreground/70 hover:text-foreground/90 transition-colors"
+            >
+              How it works
+            </Link>
+            <p className="text-[0.6rem] tracking-[0.4em] uppercase text-muted-foreground/70 tabular-nums">
+              {filtersActive
+                ? `Showing ${visible.length} of ${MISSIONS.length}`
+                : `Case Archive · ${MISSIONS.length} case files`}
+            </p>
+          </div>
         </header>
 
         {/* ---------- Filters ---------- */}
