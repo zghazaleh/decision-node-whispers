@@ -640,7 +640,7 @@ function LedgerRow({
 
   return (
     <li>
-      {/* ---- Rest / peek row ---- */}
+      {/* ---- Rest / peek card ---- */}
       <div
         role="button"
         tabIndex={available ? 0 : -1}
@@ -650,71 +650,82 @@ function LedgerRow({
         onMouseEnter={() => onHover(true)}
         onMouseLeave={() => onHover(false)}
         onKeyDown={onKey}
-        className={`group block cursor-pointer transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-ring ${
+        className={`group block cursor-pointer rounded-[12px] border transition-all duration-300 focus:outline-none focus-visible:ring-1 focus-visible:ring-ring ${
           isOpen
-            ? "h-2"
-            : "min-h-[56px] px-2 py-4"
+            ? "h-2 border-transparent bg-foreground/[0.02]"
+            : "px-5 py-4 sm:px-6 sm:py-5"
         } ${
-          available
-            ? "hover:bg-foreground/[0.03]"
-            : "cursor-not-allowed opacity-50"
-        } ${isOpen ? "bg-foreground/[0.02]" : ""}`}
+          available && !isOpen
+            ? "border-foreground/10 bg-foreground/[0.015] hover:border-accent/40 hover:bg-foreground/[0.04] hover:-translate-y-0.5"
+            : ""
+        } ${!available ? "cursor-not-allowed border-foreground/5 opacity-50" : ""}`}
       >
         {!isOpen && (
           <>
-            {/* Desktop layout */}
-            <div className="hidden sm:grid grid-cols-[1fr_auto] items-baseline gap-x-8">
+            {/* Desktop card layout */}
+            <div className="hidden sm:grid grid-cols-[1fr_auto] items-start gap-x-8 gap-y-2">
               <div className="min-w-0">
-                <div className="flex items-baseline gap-3 min-w-0">
-                  <h3 className="font-display text-[21px] leading-tight text-foreground/95 whitespace-nowrap shrink-0">
-                    {mission.codename}
-                  </h3>
-                  <p className="text-[0.55rem] tracking-[0.35em] uppercase text-muted-foreground/65 truncate min-w-0">
+                <p className="text-[0.5rem] tracking-[0.4em] uppercase text-muted-foreground/55">
+                  Case {mission.number}{mission.theme ? ` · ${mission.theme}` : ""}
+                </p>
+                <h3 className="mt-1.5 font-display text-[22px] leading-tight text-foreground/95">
+                  {mission.codename}
+                </h3>
+                {(mission.location || mission.year) && (
+                  <p className="mt-1.5 text-[0.6rem] tracking-[0.35em] uppercase text-muted-foreground/75">
                     {[mission.location, mission.year].filter(Boolean).join(" · ")}
                   </p>
-                </div>
-
-                {/* Peek (desktop only): italic logline reveals on hover, no expand */}
+                )}
                 <div
                   className={`overflow-hidden transition-[max-height,opacity] duration-300 motion-reduce:transition-none ${
-                    isHovered
-                      ? "max-h-12 opacity-100"
-                      : "max-h-0 opacity-0"
+                    isHovered ? "max-h-12 opacity-100" : "max-h-0 opacity-0"
                   }`}
                   aria-hidden={!isHovered}
                 >
-                  <p className="mt-1 text-sm italic text-muted-foreground/80 line-clamp-1">
+                  <p className="mt-2 text-sm italic text-muted-foreground/80 line-clamp-1">
                     {mission.logline}
                   </p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-[6rem_4rem_4rem_4rem] items-baseline gap-x-0 text-right text-xs text-foreground/75 tabular-nums">
-                <span className="truncate text-muted-foreground/75">{toneWord(mission.tone)}</span>
-                <span className="inline-flex justify-end">
+              <div className="flex flex-col items-end gap-2 text-right">
+                <span className="rounded-full border border-foreground/15 px-2.5 py-0.5 text-[0.55rem] tracking-[0.3em] uppercase text-foreground/80">
+                  {toneWord(mission.tone)}
+                </span>
+                <div className="flex items-center gap-3 text-[0.6rem] tracking-[0.3em] uppercase text-muted-foreground/70 tabular-nums">
                   <DifficultyDots level={mission.difficulty ?? null} />
-                </span>
-                <span className="text-muted-foreground/75">{shortDuration(mission.duration)}</span>
-                <span className="text-foreground/85">
-                  {stood === null ? "—" : stood.toLocaleString()}
-                </span>
+                  <span>{shortDuration(mission.duration)}</span>
+                  <span className="text-foreground/85">
+                    {stood === null ? "—" : `${stood.toLocaleString()} stood`}
+                  </span>
+                </div>
               </div>
             </div>
 
-            {/* Mobile layout */}
+            {/* Mobile card layout */}
             <div className="sm:hidden">
-              <div className="flex items-baseline justify-between gap-3">
-                <h3 className="font-display text-[19px] leading-tight text-foreground/95 whitespace-nowrap">
-                  {mission.codename}
-                </h3>
-                <span className="text-xs text-foreground/80 tabular-nums">
-                  {stood === null ? "—" : stood.toLocaleString()}
+              <p className="text-[0.5rem] tracking-[0.4em] uppercase text-muted-foreground/55">
+                Case {mission.number}{mission.theme ? ` · ${mission.theme}` : ""}
+              </p>
+              <h3 className="mt-1.5 font-display text-[20px] leading-tight text-foreground/95">
+                {mission.codename}
+              </h3>
+              {(mission.location || mission.year) && (
+                <p className="mt-1.5 text-[0.55rem] tracking-[0.35em] uppercase text-muted-foreground/75">
+                  {[mission.location, mission.year].filter(Boolean).join(" · ")}
+                </p>
+              )}
+              <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[0.55rem] tracking-[0.3em] uppercase text-muted-foreground/70">
+                <span className="rounded-full border border-foreground/15 px-2 py-0.5 text-foreground/80">
+                  {toneWord(mission.tone)}
                 </span>
-              </div>
-              <div className="mt-1 flex items-center gap-3 text-[0.6rem] tracking-[0.3em] uppercase text-muted-foreground/70">
-                <span>{toneWord(mission.tone)}</span>
                 <DifficultyDots level={mission.difficulty ?? null} />
                 <span>{shortDuration(mission.duration)}</span>
+                {stood !== null && (
+                  <span className="text-foreground/85 tabular-nums">
+                    {stood.toLocaleString()} stood
+                  </span>
+                )}
               </div>
             </div>
           </>
