@@ -369,6 +369,11 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
   let sfxBus: GainNode | null = null;
   let motifBus: GainNode | null = null;
   let duckTimer: number | null = null;
+  // Composed bed-bus level. `bedBus.gain` is always ramped to
+  // `bedIntensity * duckLevel` so the user's music-intensity preference
+  // and the automatic ducker don't fight each other.
+  let bedIntensity = 1;
+  let duckLevel = 1;
 
   // Heartbeat
   let hbGain: GainNode | null = null;
@@ -657,13 +662,21 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
 
     duck(amount = 0.35, ms = 600) {
       const c = ensureCtx(); if (!c || !bedBus) return;
-      rampParam(bedBus.gain, Math.max(0, Math.min(1, amount)), ms);
+      duckLevel = Math.max(0, Math.min(1, amount));
+      rampParam(bedBus.gain, bedIntensity * duckLevel, ms);
       if (duckTimer) { clearTimeout(duckTimer); duckTimer = null; }
     },
 
     release(ms = 1200) {
       const c = ensureCtx(); if (!c || !bedBus) return;
-      rampParam(bedBus.gain, 1, ms);
+      duckLevel = 1;
+      rampParam(bedBus.gain, bedIntensity * duckLevel, ms);
+    },
+
+    setBedIntensity(intensity: number, ms = 600) {
+      bedIntensity = Math.max(0, Math.min(1, intensity));
+      if (!bedBus) return;
+      rampParam(bedBus.gain, bedIntensity * duckLevel, ms);
     },
 
     async prefetch(url) {
