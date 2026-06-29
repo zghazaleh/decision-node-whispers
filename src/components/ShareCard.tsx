@@ -28,8 +28,9 @@ type ShareCardProps = {
 
 export function ShareCard({ profile, missionCodename }: ShareCardProps) {
   const svgRef = useRef<SVGSVGElement>(null);
-  const [busy, setBusy] = useState<null | "download" | "copy">(null);
+  const [busy, setBusy] = useState<null | "download" | "copy" | "share">(null);
   const [canCopyImage, setCanCopyImage] = useState(false);
+  const [canNativeShare, setCanNativeShare] = useState(false);
 
   // Feature-detect canvas-to-clipboard. iOS Safari technically exposes
   // ClipboardItem but rejects writes that happen after async work (our
