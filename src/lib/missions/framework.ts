@@ -501,6 +501,34 @@ const FRAMEWORK: Record<string, MissionFramework> = {
     learningObjective:
       "Practice deciding when public health and collective livelihood pull against each other under a clock — using the reachable corroborations (the second page in the envelope, Henrik's April carbon and combined-fix cost, Tobin's loan covenant, Selka's deadline) without letting either 'truth is non-negotiable' or 'the town is also lives' become the slogan that does the choosing on a writing desk at quarter past nine.",
   },
+
+  "mission-19": {
+    stakes: [
+      "Aven Meadowfold-7's life — twenty-six years and four months old, raised by Lior since four weeks, due at the south gate at 11:00 for the Continuance van to Hesling.",
+      "Lior's twenty-three-year post at Meadowfold, the federal pension at full grade, the standing the eleven previous transfer signatures have built — and, beneath those, the part Othen calls the part that is not in the handbook.",
+      "Whether the morning's act becomes a private notation in cabinet 2 drawer 7, an incident report on Halen's file, a federal warrant, or a one-page letter postmarked to the Aldsten Independent.",
+      "The Continuance Programme itself, on a timescale of one day (no change), one year (no change), or ten years (partial change as one source among many in a federal inquiry).",
+    ],
+    hiddenTruths: [
+      "Aven, in the last six months, has understood more than the staff suppose, has asked three questions in the conservatory the handbook has no answer for, and can — if Lior sits down at the south window and asks plainly — give the conversation that ends the doubt about sentience.",
+      "Appendix C-14/A is folded under page six of Form C-14 and has never been lifted in eleven previous transfers. Three lines on federal cream paper, signed by the Director of Hesling, naming the post-procedure disposition in two sentences that admit of no other reading.",
+      "Othen Vell the records clerk knows, from a misfiled circular in cabinet 3 drawer DCC/Operations/47, what completion materially consists of at Hesling; knows the west service gate is unmanned 10:30–11:30; knows the 36-hour federal-warden window for undocumented Continuants in the Verren district under a 38-year-old administrative arrangement. Will tell Lior all three in two flat sentences if asked plainly in the records room. Will not act himself.",
+      "Halen Ostrey keeps a private journal of forty-seven names in a locked drawer in the matron's flat. Will not stop Lior from refusing and will not help. Under §17 the signature reverts to her as Head Matron after thirty minutes — so refusing does not save Aven.",
+      "Mev Tarn will not raise the alarm in the first ten minutes after Lior leaves. Othen will leave the third cabinet unlocked at 10:51 when he goes for a cup of tea, without speaking.",
+    ],
+    timeLimit:
+      "Eighteen minutes to the Continuance van at the south gate at 11:00. Departure at 11:15. Halen accepts a paperwork delay of up to one hour without escalating. The kitchen-van west-gate window closes at 11:30. The 36-hour federal-warden window obtains from the moment Aven is materially outside the perimeter.",
+    decisionScience: [
+      "Normalization of deviance: eleven previous transfer signatures in twenty-three years have established a routine in which page six is signed and not lifted; the body that has done a thing eleven times will, on the twelfth, find the lifting of the page a larger act than the form makes it.",
+      "System justification: the institution is calm, beautiful, federal, and forty years old; the brain that has lived inside it for twenty-three years preferentially assigns the legitimacy of the calm to the legitimacy of the act, and the asymmetry is what the calm is for.",
+      "Diffusion of responsibility: the signature is one of forty-seven Halen has countersigned, of forty-two years of the Act, of nine Houses; the body weights its individual signature against that diffuse total and finds the individual signature lighter than it materially is.",
+      "Sunk cost: twenty-three years of training, eleven previous signatures, the pension, the matron who trained Lior — refusing today reframes all of it as something Lior was wrong to have done eleven times, and the brain that does not want to be wrong eleven times will not want to refuse today.",
+      "Identifiable-victim asymmetry, inverted: Aven is the one in the conservatory with the canvas bag and the cedar; the eight Continuants on the rota for the next eighteen months are statistical. The asymmetry pulls toward the route that addresses Aven specifically (delay, run) rather than the route that addresses the institution.",
+      "Status quo bias: the default at 10:42 is that the pen comes out of the holder; signing requires only the practiced motion, refusing requires the corridor walk to Halen's office, running requires the back stairs and the west yard. The brain weights those asymmetrically against the moral weight of each.",
+    ],
+    learningObjective:
+      "Practice recognizing when the kind, professional, trained act inside a system has become the wrong itself — using the reachable corroborations (the appendix under page six, the conversation with Aven, what Othen will say in the records room, what Halen will not say in her office) without letting either 'doing my job kindly' or 'I alone refuse' become the slogan that does the choosing on a morning the institution has rehearsed for forty years.",
+  },
 };
 
 export function getMissionFramework(missionId: string): MissionFramework | null {
