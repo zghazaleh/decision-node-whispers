@@ -13,7 +13,6 @@ export function DecisionProfileCard({
   profile: DecisionProfile;
   delay?: number;
 }) {
-  const trends = dimensionTrends(profile);
   const bands = dimensionBands(profile);
   return (
     <div
@@ -38,18 +37,6 @@ export function DecisionProfileCard({
         />
       </div>
 
-      <ul className="space-y-5 max-w-xl mx-auto mt-12">
-        {DIMENSIONS.map((d) => (
-          <DimensionRow
-            key={d}
-            dim={d}
-            label={DIMENSION_LABELS[d]}
-            band={bands[d]}
-            delta={trends[d]}
-            contributions={profile.contributions}
-          />
-        ))}
-      </ul>
 
       <div className="mt-12 border-t border-foreground/10 pt-8 max-w-xl mx-auto">
         <p className="text-[0.6rem] tracking-[0.35em] uppercase text-foreground/45 mb-3">
