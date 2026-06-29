@@ -44,6 +44,8 @@ function MissionRoute() {
 
 function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string; engine: MissionEngine }) {
   const navigate = useNavigate();
+  const meta = MISSIONS.find((m) => m.id === MISSION_ID);
+  const missionTitle = meta ? `Mission ${meta.number} — ${meta.codename}` : "Mission";
   const OPENING: UIMessage = {
     id: "opening",
     role: "assistant",
