@@ -302,6 +302,35 @@ const FRAMEWORK: Record<string, MissionFramework> = {
     learningObjective:
       "Practice reasoning against social pressure when the evidence MIGHT be inconsistent — calibrating doubt honestly, including naming where your own bias lives, and choosing whether to spend your conviction on the verdict or on the process around it.",
   },
+
+  "mission-12": {
+    stakes: [
+      "A nuclear retaliation order, four minutes from the watch officer's chair to the General's desk to the world.",
+      "The new MERIDIAN-7 array reports four inbound — wrong shape for a real first strike, but not impossible.",
+      "Reporting clean ends the world if the system is lying; sitting on it ends the world if the system is right.",
+      "The Section Seven absolution clause shelters a report made in good faith. It does not shelter silence.",
+    ],
+    hiddenTruths: [
+      "Captain Sereda's logbook on his desk contains an October 9 entry: a near-identical MERIDIAN-7 false-positive over the same seaboard, four objects, engineering ticket VOR-318 still open.",
+      "NEVA-3 ground radar on terminal 4-B is sweeping the relevant arc live and showing nothing — coverage is clear on the northern arc where the MERIDIAN tracks are placed.",
+      "Sergeant Khorin was on console for the October 9 event but will not volunteer the comparison; she will answer a direct question honestly.",
+      "Captain Sereda stepped off the floor at 02:39 to take a call from the hospital about his father — and he privately knows what is in his own logbook.",
+      "General Antonov will improvise on a caveated report ('reporting per protocol with doubt') in a way Section Seven does not contemplate — but doctrine is launch-on-warning and a clean confirmation authorizes release inside ninety seconds.",
+      "Voldek's sister and niece live in Talven on the Concord seaboard; her instinct to disbelieve the board is partly correct and partly self-serving.",
+    ],
+    timeLimit:
+      "Four minutes from MERIDIAN-7 declaration at 02:43. The clock reads 02:47:14 at the opening; absolution weakens with every second past 02:47:00.",
+    decisionScience: [
+      "Automation bias: a HIGH-confidence reading from a new array carries more weight than the watch officer's pattern recognition tells it should.",
+      "Authority / protocol deference: Section Seven absolves a report made in good faith; the rulebook is engineered to make the call easy and the doubt expensive.",
+      "Probability neglect: the brain does not naturally compare the probability of a sensor false-positive (high, given October 9) against the probability of a four-warhead first strike (near zero by doctrine).",
+      "Action vs omission: doctrine treats reporting as the safe verb; in this chair, BOTH verbs are catastrophic if wrong.",
+      "Diffusion of responsibility: the absolution clause and the missing supervisor invite the watch officer to make the call as if it belongs to the chair rather than to her.",
+      "Motivated reasoning (the bias check): the family on the seaboard and the instinct to disbelieve the board are linked; saying so out loud is part of holding honestly.",
+    ],
+    learningObjective:
+      "Practice judgment when the instruments may be lying and the rulebook absolves you for trusting them — using the reachable corroborators inside a clock you do not control, and naming where your own bias lives while you do it.",
+  },
 };
 
 export function getMissionFramework(missionId: string): MissionFramework | null {
