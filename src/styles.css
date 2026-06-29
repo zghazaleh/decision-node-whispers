@@ -432,10 +432,18 @@
   88%  { transform: scaleX(0.94); opacity: 1;   filter: blur(0)   brightness(1.05); }
   100% { transform: scaleX(1);    opacity: 0;   filter: blur(2px) brightness(1); }
 }
+/* Handoff choreography across the 5200ms spotlight cycle:
+   t = 0           wash begins drifting in from the upper-left corner
+   t ≈ 1700ms      wash arrives over the tile and settles (85% of 2000ms)
+   t ≈ 2000ms      wash holds — no further translation
+   t ≈ 2600ms      accent rule reaches its peak brightness (50% of breathe)
+   t ≈ 5200ms      breathe dissolves, wash fades on handoff
+   The 600ms gap between wash-settle and rule-peak removes the mechanical
+   overlap of two things moving at the same instant. */
 @keyframes dn-wash {
-  0%   { opacity: 0.32; transform: translate3d(-6%, -4%, 0) scale(1); }
-  50%  { opacity: 0.58; transform: translate3d( 6%,  4%, 0) scale(1.06); }
-  100% { opacity: 0.32; transform: translate3d(-6%, -4%, 0) scale(1); }
+  0%   { opacity: 0.18; transform: translate3d(-8%, -5%, 0) scale(0.96); }
+  85%  { opacity: 0.56; transform: translate3d(0,    0,   0) scale(1.04); }
+  100% { opacity: 0.58; transform: translate3d(0,    0,   0) scale(1.04); }
 }
 @keyframes dn-drift {
   0%   { transform: scale(1.04) translate3d(0, 0, 0); }
