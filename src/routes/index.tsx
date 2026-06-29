@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { audio } from "@/lib/audio/director";
+import { idlePrefetch, nextLikelyMissionId } from "@/lib/audio/idlePrefetch";
 
 
 
