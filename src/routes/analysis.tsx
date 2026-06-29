@@ -390,8 +390,34 @@ function AnalysisDebrief({
         </section>
       )}
 
+      {/* Block 4b — Share this reading */}
+      {(() => {
+        const caseMeta = MISSIONS.find((m) => m.id === mission.missionId);
+        if (!caseMeta || !a.headline) return null;
+        return (
+          <section className="animate-fade-up space-y-6" style={{ animationDelay: "0.55s" }}>
+            <div className="text-center">
+              <p className="text-[0.6rem] tracking-[0.5em] uppercase text-accent/80 mb-3">
+                Share this reading
+              </p>
+              <p className="text-xs text-foreground/50 max-w-md mx-auto leading-relaxed">
+                How you decided — not what happened next. A poster of the moment, yours to keep or to post.
+              </p>
+            </div>
+            <ReadingShareCard
+              caseTitle={caseMeta.title}
+              caseNumber={caseMeta.number}
+              theme={caseMeta.theme}
+              archetypeLabel={a.archetypeLabel}
+              headline={a.headline}
+            />
+          </section>
+        );
+      })()}
+
       {/* Block 5 — Carry forward */}
       <section className="animate-fade-up space-y-8" style={{ animationDelay: "0.6s" }}>
+
         <p className="text-[0.6rem] tracking-[0.5em] uppercase text-accent/80 text-center">
           Carry forward
         </p>
