@@ -77,10 +77,10 @@ export const loadUserData = createServerFn({ method: "GET" })
       })),
       missions: (missionsRes.data ?? []).map((m) => ({
         missionId: m.mission_id,
-        messages: (m.messages as unknown[]) ?? [],
+        messages: ((m.messages as unknown[]) ?? []) as any[],
         decision: m.decision ?? undefined,
         reasoning: m.reasoning ?? undefined,
-        analysis: m.analysis ?? undefined,
+        analysis: (m.analysis ?? undefined) as any,
         archetypeId: m.archetype_id ?? undefined,
         confidence: m.confidence ?? undefined,
         startedAt: new Date(m.started_at as string).getTime(),
