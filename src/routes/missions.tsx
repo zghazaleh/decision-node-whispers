@@ -186,6 +186,7 @@ function MissionsPage() {
   const [difficulty, setDifficulty] = useState<number | "Any">("Any");
   const [sort, setSort] = useState<SortMode>("curated");
   const [openId, setOpenId] = useState<string | null>(null);
+  const [openTheme, setOpenTheme] = useState<string | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [entering, setEntering] = useState(false);
   const [gateOpen, setGateOpen] = useState(false);
