@@ -10,6 +10,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { MISSIONS, type MissionMeta } from "@/lib/missions";
 import { audio } from "@/lib/audio/director";
+import { idlePrefetch, nextLikelyMissionId } from "@/lib/audio/idlePrefetch";
 import { getSoundtrack } from "@/lib/soundtracks";
 import { getAllMissionStats, type MissionStats } from "@/lib/mission-stats.functions";
 import { readMission } from "@/lib/mission-store";
@@ -132,14 +133,21 @@ function MissionsPage() {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [entering, setEntering] = useState(false);
 
-  // Warm the archive bed + every available mission bed up-front so opening a
-  // case cross-fades from a ready buffer — no hitch on first play.
+  // Warm the archive bed (the room the player is in) eagerly, and let
+  // idle time bring in the two most-likely-next mission beds plus the
+  // analysis bed. Prefetching all nine missions up-front would race the
+  // bed that's actively playing for bandwidth — idle scheduling keeps
+  // the page responsive while still making "open a case" feel instant.
   useEffect(() => {
     audio.prefetch({ screen: "archive" });
-    audio.prefetch({ screen: "analysis" });
-    for (const m of MISSIONS) {
-      if (m.status === "available") audio.prefetch({ missionId: m.id });
-    }
+    const first = nextLikelyMissionId();
+    const second = first ? nextLikelyMissionId(first) : null;
+    const targets: Parameters<typeof audio.prefetch>[0][] = [
+      { screen: "analysis" },
+    ];
+    if (first) targets.push({ missionId: first });
+    if (second && second !== first) targets.push({ missionId: second });
+    return idlePrefetch(targets);
   }, []);
 
 
