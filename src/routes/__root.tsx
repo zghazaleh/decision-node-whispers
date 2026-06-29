@@ -153,9 +153,7 @@ function RootComponent() {
     // beds the moment the app mounts. The AudioContext can't exist until
     // the first user gesture, but having the encoded bytes already in
     // memory means the first decode-and-play is near-instant.
-    import("@/lib/audio/director").then(({ audio }) => {
-      audio.warmKeyAssets();
-    }).catch(() => { /* noop */ });
+    audio.warmKeyAssets();
   }, []);
   return (
     <QueryClientProvider client={queryClient}>
