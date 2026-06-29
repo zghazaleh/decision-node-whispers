@@ -75,20 +75,6 @@ export function SoundControls({ className = "" }: { className?: string }) {
         })}
       </div>
 
-      <button
-        type="button"
-        onClick={() => audio.setReducedAudio(!reduced)}
-        aria-pressed={reduced}
-        aria-label={reduced ? "Disable reduced audio" : "Enable reduced audio"}
-        title="Reduced audio — keep a faint drone, drop heartbeat and motif"
-        className={`rounded-full border px-3 py-1.5 text-[0.62rem] uppercase tracking-[0.25em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background min-h-[44px] sm:min-h-0 ${
-          reduced
-            ? "border-foreground/40 bg-foreground/10 text-foreground"
-            : "border-foreground/10 bg-background/40 text-foreground/55 hover:text-foreground/80 hover:border-foreground/25"
-        }`}
-      >
-        Reduced
-      </button>
     </div>
   );
 }
