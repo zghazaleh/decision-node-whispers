@@ -894,15 +894,25 @@ function SceneArt({
     setStatus(src ? "loading" : "error");
   }, [src]);
 
+  const tint = themeTint(theme);
+
   return (
     <>
-      {/* Skeleton shimmer — visible while loading */}
+      {/* Skeleton shimmer — tinted with the case's theme accent */}
       {status === "loading" && (
         <div
           aria-hidden
-          className="absolute inset-0 overflow-hidden bg-foreground/[0.04]"
+          className="absolute inset-0 overflow-hidden"
+          style={{
+            background: `radial-gradient(ellipse at 50% 40%, ${tint.glow}, ${tint.base} 70%)`,
+          }}
         >
-          <div className="absolute inset-0 motion-safe:animate-[shimmer_2.4s_ease-in-out_infinite] bg-[linear-gradient(110deg,transparent_30%,rgba(255,255,255,0.04)_50%,transparent_70%)] bg-[length:200%_100%]" />
+          <div
+            className="absolute inset-0 motion-safe:animate-[shimmer_2.4s_ease-in-out_infinite] bg-[length:200%_100%]"
+            style={{
+              backgroundImage: `linear-gradient(110deg, transparent 30%, ${tint.shimmer} 50%, transparent 70%)`,
+            }}
+          />
         </div>
       )}
 
@@ -910,10 +920,16 @@ function SceneArt({
       {status === "error" && (
         <div
           aria-hidden
-          className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.03),transparent_70%)]"
+          className="absolute inset-0"
+          style={{
+            background: `radial-gradient(ellipse at center, ${tint.glow}, transparent 70%)`,
+          }}
         >
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="font-display text-[0.55rem] tracking-[0.5em] uppercase text-foreground/25">
+            <span
+              className="font-display text-[0.55rem] tracking-[0.5em] uppercase"
+              style={{ color: tint.label }}
+            >
               {theme ?? "Case File"}
             </span>
           </div>
