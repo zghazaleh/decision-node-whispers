@@ -20,26 +20,25 @@ const THEME_IMAGES: Record<string, string> = {
 interface ThemeCarouselProps {
   groups: { label: string; caption?: string; ids: string[] }[];
   missions: MissionMeta[];
-  activeGroup: string | null;
-  onSelectGroup: (label: string | null) => void;
+  onEnter: (missionId: string) => void;
 }
 
 export function ThemeCarousel({
   groups,
   missions,
-  activeGroup,
-  onSelectGroup,
+  onEnter,
 }: ThemeCarouselProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
+  const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
 
   // Track which cards have already been handled by touch so the
   // follow-up synthetic click (if any) is ignored.
   const touchFiredRef = useRef<Set<string>>(new Set());
 
   const handleTap = (label: string, isActive: boolean) => {
-    onSelectGroup(isActive ? null : label);
+    setExpandedGroup(isActive ? null : label);
   };
 
   const checkScroll = () => {
@@ -61,17 +60,20 @@ export function ThemeCarousel({
     };
   }, []);
 
-  const activeIds = new Set(
-    activeGroup
-      ? groups.find((g) => g.label === activeGroup)?.ids ?? []
-      : [],
-  );
-
   const scrollBy = (dir: "left" | "right") => {
     const el = scrollRef.current;
     if (!el) return;
     el.scrollBy({ left: dir === "left" ? -300 : 300, behavior: "smooth" });
   };
+
+  const expanded = expandedGroup
+    ? groups.find((g) => g.label === expandedGroup) ?? null
+    : null;
+  const expandedMissions = expanded
+    ? expanded.ids
+        .map((id) => missions.find((m) => m.id === id))
+        .filter((m): m is MissionMeta => !!m && m.status === "available")
+    : [];
 
   return (
     <section className="mb-10" aria-label="Curated themes">
@@ -80,13 +82,13 @@ export function ThemeCarousel({
           Curated themes
         </span>
         <span className="h-px flex-1 bg-accent/15" aria-hidden />
-        {activeGroup && (
+        {expandedGroup && (
           <button
             type="button"
-            onClick={() => onSelectGroup(null)}
+            onClick={() => setExpandedGroup(null)}
             className="text-[0.55rem] tracking-[0.35em] uppercase text-muted-foreground/50 hover:text-accent transition-colors"
           >
-            Clear
+            Close
           </button>
         )}
       </div>
@@ -109,7 +111,7 @@ export function ThemeCarousel({
               .length;
             if (availableCount === 0) return null;
 
-            const isActive = activeGroup === g.label;
+            const isActive = expandedGroup === g.label;
             const img = THEME_IMAGES[g.label];
 
             return (
@@ -143,7 +145,7 @@ export function ThemeCarousel({
                     handleTap(g.label, isActive);
                   }
                 }}
-                aria-pressed={isActive}
+                aria-expanded={isActive}
                 className={`group relative shrink-0 w-[260px] snap-start overflow-hidden rounded-[14px] border text-left transition-all duration-300 sm:w-[300px] ${
                   isActive
                     ? "border-accent/60 ring-1 ring-accent/30"
@@ -226,6 +228,50 @@ export function ThemeCarousel({
           </button>
         )}
       </div>
+
+      {/* Expanded theme panel — cases inside the selected theme. */}
+      {expanded && (
+        <div className="mt-5 rounded-[14px] border border-accent/25 bg-foreground/[0.02] p-5 sm:p-6">
+          <div className="mb-4 flex items-baseline justify-between gap-3">
+            <div>
+              <h3 className="font-display text-lg text-foreground sm:text-xl">
+                {expanded.label}
+              </h3>
+              {expanded.caption && (
+                <p className="mt-1 text-[0.7rem] italic text-muted-foreground/80">
+                  {expanded.caption}
+                </p>
+              )}
+            </div>
+            <span className="text-[0.55rem] tracking-[0.4em] uppercase text-muted-foreground/55 tabular-nums">
+              {expandedMissions.length}{" "}
+              {expandedMissions.length === 1 ? "case" : "cases"}
+            </span>
+          </div>
+
+          <ul className="divide-y divide-foreground/10">
+            {expandedMissions.map((m) => (
+              <li key={m.id}>
+                <button
+                  type="button"
+                  onClick={() => onEnter(m.id)}
+                  className="group flex w-full items-baseline gap-4 py-3 text-left transition-colors hover:bg-foreground/[0.03]"
+                >
+                  <span className="font-mono text-[0.6rem] tracking-[0.3em] uppercase text-muted-foreground/60 tabular-nums w-10 shrink-0">
+                    {m.number}
+                  </span>
+                  <span className="flex-1 font-display text-base text-foreground/95 group-hover:text-accent transition-colors">
+                    {m.title}
+                  </span>
+                  <span className="text-[0.55rem] tracking-[0.35em] uppercase text-muted-foreground/55 hidden sm:inline">
+                    Enter →
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </section>
   );
 }
