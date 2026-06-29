@@ -34,6 +34,14 @@ export function ThemeCarousel({
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
 
+  // Track which cards have already been handled by touch so the
+  // follow-up synthetic click (if any) is ignored.
+  const touchFiredRef = useRef<Set<string>>(new Set());
+
+  const handleTap = (label: string, isActive: boolean) => {
+    onSelectGroup(isActive ? null : label);
+  };
+
   const checkScroll = () => {
     const el = scrollRef.current;
     if (!el) return;
