@@ -16,6 +16,7 @@ import { ConstitutionStatusBadge } from "@/components/ConstitutionStatus";
 import { SoundControls } from "@/components/audio/SoundControls";
 import { AudioFailureIndicator } from "@/components/audio/AudioFailureIndicator";
 import { listMetaTokens } from "@/lib/gsc-verify.functions";
+import { UserMenu } from "@/components/auth/UserMenu";
 
 
 function NotFoundComponent() {
