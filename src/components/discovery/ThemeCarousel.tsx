@@ -264,18 +264,16 @@ export function ThemeCarousel({
           </div>
 
           <ul className="flex flex-col gap-3">
-            {expandedMissions.map((m) => (
-              <li key={m.id}>
-                {renderRow(m, {
-                  isOpen: openId === m.id,
-                  isHovered: hoveredId === m.id,
-                  onHover: (h) => setHoveredId(h ? m.id : null),
-                  onToggle: () =>
-                    setOpenId((cur) => (cur === m.id ? null : m.id)),
-                  onEnter: () => onEnter(m.id),
-                })}
-              </li>
-            ))}
+            {expandedMissions.map((m) =>
+              renderRow(m, {
+                isOpen: openId === m.id,
+                isHovered: hoveredId === m.id,
+                onHover: (h) => setHoveredId(h ? m.id : null),
+                onToggle: () =>
+                  setOpenId((cur) => (cur === m.id ? null : m.id)),
+                onEnter: () => onEnter(m.id),
+              }),
+            )}
           </ul>
         </div>
       )}
