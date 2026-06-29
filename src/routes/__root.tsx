@@ -15,6 +15,7 @@ import { Toaster } from "@/components/ui/sonner";
 
 import { SoundControls } from "@/components/audio/SoundControls";
 import { AudioFailureIndicator } from "@/components/audio/AudioFailureIndicator";
+import { armGlobalAudioUnlock } from "@/lib/audio/director";
 import { listMetaTokens } from "@/lib/gsc-verify.functions";
 import { UserMenu } from "@/components/auth/UserMenu";
 
@@ -146,6 +147,9 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  useEffect(() => {
+    armGlobalAudioUnlock();
+  }, []);
   return (
     <QueryClientProvider client={queryClient}>
       <div className="fixed top-3 right-3 z-50 flex items-center gap-4">
