@@ -407,15 +407,12 @@ function MissionsPage() {
 
 
 
-        {/* ---------- Curated theme carousel ---------- */}
-        {theme === "All" && domain === "All" && difficulty === "Any" && (
-          <ThemeCarousel
-            groups={CURATED_GROUPS}
-            missions={MISSIONS}
-            activeGroup={activeGroup}
-            onSelectGroup={setActiveGroup}
-          />
-        )}
+        {/* ---------- Curated theme carousel (independent of Case Archive) ---------- */}
+        <ThemeCarousel
+          groups={CURATED_GROUPS}
+          missions={MISSIONS}
+          onEnter={commit}
+        />
 
         {/* ---------- Case Archive header ---------- */}
         <div className="mb-3 mt-8 flex items-baseline gap-3 border-b border-foreground/10 pb-3">
