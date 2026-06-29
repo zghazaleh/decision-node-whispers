@@ -365,4 +365,22 @@ export const MISSIONS: MissionMeta[] = [
     creator: "House Edition",
     version: "v1.0",
   },
+  {
+    id: "mission-20",
+    number: "20",
+    codename: "The Test",
+    title: "The Test",
+    logline:
+      "A silver pen on a clipboard. A cursor blinking in a ruling field. Across the steel table Kael's hands are flat at the protocol rest position.",
+    status: "available",
+    duration: "20–40 min",
+    tone: "Cold light · Recorder · Held stillness",
+    location: "Interview Room 4, Halden field office",
+    year: "Eleventh year of the Synthetic Persons Determination Act",
+    category: "Conscience",
+    theme: "Personhood",
+    difficulty: 5,
+    creator: "House Edition",
+    version: "v1.0",
+  },
 ];

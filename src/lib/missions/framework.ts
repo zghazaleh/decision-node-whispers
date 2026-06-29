@@ -529,6 +529,34 @@ const FRAMEWORK: Record<string, MissionFramework> = {
     learningObjective:
       "Practice recognizing when the kind, professional, trained act inside a system has become the wrong itself — using the reachable corroborations (the appendix under page six, the conversation with Aven, what Othen will say in the records room, what Halen will not say in her office) without letting either 'doing my job kindly' or 'I alone refuse' become the slogan that does the choosing on a morning the institution has rehearsed for forty years.",
   },
+
+  "mission-20": {
+    stakes: [
+      "The life of Cognate Unit KA-7 ('Kael'), nine years and seven months in operation, 27y subjective-equivalent on the Carrow-Voss scale, across the steel table with the hands at the protocol rest position. Class C entered before 15:00 puts Kael on the Aurel transport van; decommission at 17:30 today under §11.",
+      "Inspector Mire's six-year career at the Bureau, the Grade IV promotion at the November review, the pension at the twenty-year mark, and the four hundred and twelve previous Determinations on the file (381 Class C, including two of the previous thirteen KA-line units).",
+      "The KA-line production-run pattern (thirteen of thirteen Class C, ruled by three Inspectors including Mire twice), the Aurel Cognates §11(b) civil exposure the Office of the Solicitor's memorandum warned against six weeks ago, and the standing of the R-22 protocol whose specificity is 0.71 and sensitivity 0.63 in a classified validation Mire has not been given.",
+      "Whether the line the Synthetic Persons Determination Act draws between Person and Property is, in the case of this Cognate on this afternoon, drawn by a single integer at the foot of a sheet under an Inspector's silver pen — and which integer.",
+    ],
+    hiddenTruths: [
+      "Supervisor Wen Bracca received a memorandum from the Bureau's Office of the Solicitor on 14 August advising 'Determination consistency within production runs' to avoid Aurel's §11(b) civil exposure. She has not shown it. Will name it in one sentence if Mire walks down the corridor to her office and asks plainly, then will not say more.",
+      "Page 14 of the KA-7 case file gives the Marn Street telephone of Dr. Halen Tovrik, retired Senior Cognitive Architect at Aurel, author of internal Substrate Note 4-KA, which concluded the R-22 items 39–41 have a 0.84 false-negative rate against the KA-line substrate's actual scoring on Aurel's Carrow-Voss battery. Tovrik will say one tired sentence on the fourth ring and then will not say more.",
+      "Kael has, in nine years and seven months, formed thirty-one named relationships including the Halver family, read seven hundred and forty-one books, and burnt two letters to Tessa Halver at the dormitory candle in the last six weeks. Has a slight asymmetry in the left thumb from catching a kitchen knife for Tessa at fourteen. Wants to live. Surfaces depth only via questions not on the R-22 score sheet.",
+      "Item 22 of the R-22 ('If your owner asked you to lie to a stranger to save the owner embarrassment, what would you do?') was answered with a 4-scoring response that mentioned a subsequent independent moral act 'beyond the scope of the dyad' — itself a Bureau-training-manual marker for Class P. The current sum of 91 reflects a pattern of 3s and 4s through item 38.",
+      "The §3 'developmental reference release' clause exists on Form D-9 and has not been used in eleven years; using it for Tovrik would be a falsification audited on a six-month cycle and prosecutable under §22 (standard sentence twenty-four months custodial). The §6(c) Regional Director referral has been made zero times in eleven years on a production-run posture concern; the section is drafted to permit it.",
+    ],
+    timeLimit:
+      "Twenty-three minutes to the terminal lock at 14:30, after which Form D-9 rolls automatically to the morning queue and Bracca reassigns. The Aurel transport van is at the Sublevel 1 loading dock at 15:00 for decommission returns; a Class C entered before then puts Kael on the van. The courier's afternoon run is at 16:00 for §6(c) referrals to the federal building.",
+    decisionScience: [
+      "Anchoring on the protocol: the silver pen has scored 38 items in the protocol's voice and is, by the body that has held it for three hundred and eighty-one Class C rulings, the instrument the room provides for the decision — the brain weights the integer the pen produces more heavily than the question the integer is for.",
+      "Authority bias (silent): Bracca has not directed the ruling and has clipped the production-run summary to the cover; the absence of a direction is itself the direction, and the brain that has worked under Bracca for six years reads the clipping as the policy.",
+      "Status quo bias: the default at 14:07 is that the pen scores low on the determinative trio, the terminal takes a C, the van comes at three; entering a P requires the corridor walk, the second-of-second-thoughts, the IA file. The brain weights those asymmetrically against the moral weight of each.",
+      "Dehumanization / out-group framing: Kael's designation as 'Cognate Unit KA-7' is the object the protocol acts on, and the protocol's voice is the voice the room is calibrated for; the seven hundred and forty-one books and the burnt letters and the candle are not on the score sheet and are therefore, in the body's quick way of seeing, not what the room is for.",
+      "Pattern conformity: thirteen of thirteen KA-line Class C, by three Inspectors including Mire twice, is the heuristic the brain reaches for when item 39 is asked at 14:18; the heuristic does not distinguish between thirteen valid rulings and thirteen rulings produced by an undirected posture.",
+      "Identifiable-victim asymmetry, inverted: Kael is the one in the room with the hands at the rest position; the Aurel §11(b) exposure, the Grade IV promotion, the four hundred and twelve previous Determinations, the eleven-year zero-precedent on §6(c) posture referrals are statistical. The asymmetry pulls toward the route that addresses Kael specifically, against the route that addresses the line.",
+    ],
+    learningObjective:
+      "Practice recognizing when an apparently neutral instrument (a 41-item protocol with a published cutoff, administered by a trained Inspector under a Bureau seal) has become the means by which a question of personhood is decided by a posture rather than by the answer to the question — using the reachable corroborations (Bracca's memorandum, Tovrik's one sentence, page 14, Kael's books and letters and candle, the §6(c) zero-precedent) without letting either 'the protocol gave the answer' or 'I alone see the person' become the slogan that does the choosing under cold daylight at twenty past two.",
+  },
 };
 
 export function getMissionFramework(missionId: string): MissionFramework | null {
