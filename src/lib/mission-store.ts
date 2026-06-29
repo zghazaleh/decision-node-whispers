@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import type { UIMessage } from "ai";
 import type { DecisionAnalysis } from "@/lib/analysis.functions";
+import { syncMissionToDB, getCurrentUserId } from "@/lib/auth-sync";
+import { deleteSavedMission } from "@/lib/user-data.functions";
 
 const KEY_PREFIX = "decision-node:mission:";
 const ACTIVE_KEY = "decision-node:active-mission";
