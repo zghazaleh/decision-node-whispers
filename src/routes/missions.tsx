@@ -486,7 +486,7 @@ function MissionsPage() {
             </button>
           </div>
         ) : (
-          <ul className="divide-y divide-foreground/10">
+          <ul className="flex flex-col gap-3">
             {visible.map((m) => (
               <LedgerRow
                 key={m.id}
