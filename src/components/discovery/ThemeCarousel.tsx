@@ -167,24 +167,31 @@ export function ThemeCarousel({
                 }`}
               >
                 {/* Image background */}
-                <div className="relative aspect-[16/10] w-full overflow-hidden">
+                <div className="relative aspect-[4/5] w-full overflow-hidden bg-[#0b0d10]">
                   {img && (
                     <img
                       src={img}
                       alt=""
                       loading="lazy"
                       width={1024}
-                      height={576}
+                      height={1280}
                       className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
                   )}
-                  {/* Bottom scrim for text */}
                   <div
                     aria-hidden
-                    className="absolute inset-0"
+                    className="absolute inset-x-0 top-0 h-16"
                     style={{
                       background:
-                        "linear-gradient(180deg, rgba(6,8,12,0.15) 0%, rgba(6,8,12,0.55) 60%, rgba(6,8,12,0.88) 100%)",
+                        "linear-gradient(180deg, rgba(6,8,12,0.55) 0%, rgba(6,8,12,0) 100%)",
+                    }}
+                  />
+                  <div
+                    aria-hidden
+                    className="absolute inset-x-0 bottom-0 h-2/3"
+                    style={{
+                      background:
+                        "linear-gradient(180deg, rgba(6,8,12,0) 0%, rgba(6,8,12,0.65) 60%, rgba(6,8,12,0.92) 100%)",
                     }}
                   />
                   {/* Top accent line */}
@@ -195,15 +202,15 @@ export function ThemeCarousel({
                     }`}
                   />
                   {/* Content */}
-                  <div className="absolute inset-x-0 bottom-0 px-4 pb-4 sm:px-5 sm:pb-5">
+                  <div className="absolute bottom-3 left-3 right-3">
                     <span className="text-[0.5rem] tracking-[0.4em] uppercase text-foreground/70">
                       {availableCount} {availableCount === 1 ? "case" : "cases"}
                     </span>
-                    <h3 className="mt-1 font-display text-lg leading-[1.15] text-foreground sm:text-xl">
+                    <h3 className="mt-1 font-display text-lg leading-[1.1] text-foreground drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
                       {g.label}
                     </h3>
                     {g.caption && (
-                      <p className="mt-1 text-[0.65rem] italic text-muted-foreground/80">
+                      <p className="mt-1 text-[0.55rem] tracking-[0.35em] uppercase text-foreground/75">
                         {g.caption}
                       </p>
                     )}
