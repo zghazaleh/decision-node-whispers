@@ -17,6 +17,7 @@ import { readMission } from "@/lib/mission-store";
 import { getMissionEngine } from "@/lib/missions/registry";
 import { HeroDetail } from "@/components/discovery/HeroDetail";
 import { GuildCarousel } from "@/components/discovery/GuildCarousel";
+import { CategoryRail } from "@/components/discovery/CategoryRail";
 import { logOpen } from "@/lib/discovery/signals";
 
 
