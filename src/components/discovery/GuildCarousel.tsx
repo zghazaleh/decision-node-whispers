@@ -89,6 +89,43 @@ export function GuildCarousel({
     }
   }, [active]);
 
+  // Limelight follows the user's finger: while they scroll the strip
+  // horizontally, the tile closest to the strip's centre takes the
+  // spotlight. Throttled with rAF; pauses auto-advance the moment the
+  // user actually drags.
+  useEffect(() => {
+    const strip = stripRef.current;
+    if (!strip) return;
+    let raf = 0;
+    const onScroll = () => {
+      if (raf) return;
+      raf = window.requestAnimationFrame(() => {
+        raf = 0;
+        const stripBox = strip.getBoundingClientRect();
+        const centre = stripBox.left + stripBox.width / 2;
+        let bestIdx = 0;
+        let bestDist = Infinity;
+        for (let i = 0; i < strip.children.length; i++) {
+          const child = strip.children[i] as HTMLElement | undefined;
+          if (!child) continue;
+          const box = child.getBoundingClientRect();
+          const dist = Math.abs(box.left + box.width / 2 - centre);
+          if (dist < bestDist) {
+            bestDist = dist;
+            bestIdx = i;
+          }
+        }
+        userTouched.current = true;
+        setActive((cur) => (cur === bestIdx ? cur : bestIdx));
+      });
+    };
+    strip.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      strip.removeEventListener("scroll", onScroll);
+      if (raf) window.cancelAnimationFrame(raf);
+    };
+  }, []);
+
   // Tell the parent when the spotlit case changes (so the ambient bed can
   // cross-fade in step with the rotation, the same way it does for the
   // ledger). Suppressed while a card is expanded — the expanded card

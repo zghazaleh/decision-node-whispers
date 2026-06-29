@@ -20,6 +20,7 @@ import { Route as ConstitutionRouteImport } from './routes/constitution'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AnalysisRouteImport } from './routes/analysis'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as MissionsNRouteImport } from './routes/missions_.$n'
 import { Route as MissionIdRouteImport } from './routes/mission.$id'
 import { Route as DiagnosticsAudioRouteImport } from './routes/diagnostics.audio'
 import { Route as BlogDecisionMakingFrameworksGuideRouteImport } from './routes/blog.decision-making-frameworks-guide'
@@ -84,6 +85,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MissionsNRoute = MissionsNRouteImport.update({
+  id: '/missions_/$n',
+  path: '/missions/$n',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MissionIdRoute = MissionIdRouteImport.update({
   id: '/mission/$id',
   path: '/mission/$id',
@@ -146,6 +152,7 @@ export interface FileRoutesByFullPath {
   '/blog/decision-making-frameworks-guide': typeof BlogDecisionMakingFrameworksGuideRoute
   '/diagnostics/audio': typeof DiagnosticsAudioRoute
   '/mission/$id': typeof MissionIdRoute
+  '/missions/$n': typeof MissionsNRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -167,6 +174,7 @@ export interface FileRoutesByTo {
   '/blog/decision-making-frameworks-guide': typeof BlogDecisionMakingFrameworksGuideRoute
   '/diagnostics/audio': typeof DiagnosticsAudioRoute
   '/mission/$id': typeof MissionIdRoute
+  '/missions/$n': typeof MissionsNRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -189,6 +197,7 @@ export interface FileRoutesById {
   '/blog/decision-making-frameworks-guide': typeof BlogDecisionMakingFrameworksGuideRoute
   '/diagnostics/audio': typeof DiagnosticsAudioRoute
   '/mission/$id': typeof MissionIdRoute
+  '/missions_/$n': typeof MissionsNRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -212,6 +221,7 @@ export interface FileRouteTypes {
     | '/blog/decision-making-frameworks-guide'
     | '/diagnostics/audio'
     | '/mission/$id'
+    | '/missions/$n'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -233,6 +243,7 @@ export interface FileRouteTypes {
     | '/blog/decision-making-frameworks-guide'
     | '/diagnostics/audio'
     | '/mission/$id'
+    | '/missions/$n'
   id:
     | '__root__'
     | '/'
@@ -254,6 +265,7 @@ export interface FileRouteTypes {
     | '/blog/decision-making-frameworks-guide'
     | '/diagnostics/audio'
     | '/mission/$id'
+    | '/missions_/$n'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -276,6 +288,7 @@ export interface RootRouteChildren {
   BlogDecisionMakingFrameworksGuideRoute: typeof BlogDecisionMakingFrameworksGuideRoute
   DiagnosticsAudioRoute: typeof DiagnosticsAudioRoute
   MissionIdRoute: typeof MissionIdRoute
+  MissionsNRoute: typeof MissionsNRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -355,6 +368,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/missions_/$n': {
+      id: '/missions_/$n'
+      path: '/missions/$n'
+      fullPath: '/missions/$n'
+      preLoaderRoute: typeof MissionsNRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mission/$id': {
@@ -437,6 +457,7 @@ const rootRouteChildren: RootRouteChildren = {
     BlogDecisionMakingFrameworksGuideRoute,
   DiagnosticsAudioRoute: DiagnosticsAudioRoute,
   MissionIdRoute: MissionIdRoute,
+  MissionsNRoute: MissionsNRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

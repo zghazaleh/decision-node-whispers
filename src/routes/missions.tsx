@@ -367,9 +367,23 @@ function MissionsPage() {
         {/* ---------- TODAY hero ---------- */}
         {today && <HeroDetail mission={today} onEnter={commit} />}
 
-        {/* ---------- Fresh Intel carousel ---------- */}
+        {/* ---------- Guest gate pre-warning ---------- */}
+        {!user && profile.missionsCompleted === ANON_FREE_MISSIONS - 1 && (
+          <div className="mb-8 rounded-[10px] border border-accent/30 bg-accent/[0.06] px-4 py-3 text-[0.7rem] tracking-[0.05em] text-foreground/85 sm:px-5">
+            <span className="mr-2 text-[0.55rem] tracking-[0.4em] uppercase text-accent/85">
+              Heads up
+            </span>
+            One more case before you&rsquo;ll be invited to save your profile.{" "}
+            <Link to="/auth" className="underline underline-offset-2 hover:text-accent">
+              Create an account now
+            </Link>
+            .
+          </div>
+        )}
+
+        {/* ---------- Featured Nodes carousel ---------- */}
         <GuildCarousel
-          label="Fresh Intel"
+          label="Featured Nodes"
           rightEyebrow="New"
           items={guildRail}
           onEnter={commit}
@@ -439,10 +453,7 @@ function MissionsPage() {
         </div>
 
         {/* ---------- Filters ---------- */}
-        <div
-          className="mb-6 flex flex-nowrap items-end gap-3 overflow-x-auto pb-1"
-          style={{ scrollbarWidth: "none" }}
-        >
+        <div className="mb-6 flex flex-wrap items-end gap-3">
           <FilterSelect
             label="Domain"
             values={domains}

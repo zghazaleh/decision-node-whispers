@@ -214,6 +214,23 @@ export function ThemeCarousel({
                         {g.caption}
                       </p>
                     )}
+                    <span
+                      className={`mt-2 inline-flex items-center gap-1.5 text-[0.5rem] tracking-[0.4em] uppercase transition-colors ${
+                        isActive
+                          ? "text-accent"
+                          : "text-accent/75 group-hover:text-accent"
+                      }`}
+                    >
+                      {isActive ? "Open" : "Tap to explore"}
+                      <span
+                        aria-hidden
+                        className={`transition-transform ${
+                          isActive ? "rotate-90" : "group-hover:translate-x-0.5"
+                        }`}
+                      >
+                        →
+                      </span>
+                    </span>
                   </div>
                 </div>
               </button>

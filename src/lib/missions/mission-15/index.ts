@@ -64,7 +64,7 @@ The player will eventually press a separate "Decide" control and write out their
 
 SUGGESTED ACTIONS (CHIPS):
 At the very end of every reply — and ONLY at the end — append a single line listing 3 short next actions in the player's first-person voice. Exact format, nothing after it:
-<<chips: "Ask Jeren what Pellor actually wants" | "Go down to Camilla in the back booth" | "Cross to Daniyel at the safe room">>
+<<chips: "Ask Jeren what Pellor actually wants" | "Go down to Camilla in the back booth" | "Cross to Daniyel's safe room">>
 Rules for chips: always exactly three, separated by " | "; each 3–10 words; no end punctuation; no emoji; concrete things to DO or SAY now, grounded in what was just said; vary them (one dialogue, one observation/action, one bolder move); never repeat a used chip verbatim; only ever on the final line.
 
 Begin.
@@ -104,7 +104,7 @@ const OPENING_TEXT = `*The salon. The brass lamp throws a warm pool over the two
 *Jeren Halm*
 "She's still downstairs. Coffee's gone cold."
 
-<<chips: "Ask Jeren what Pellor actually wants" | "Go down to Camilla in the back booth" | "Cross to Daniyel at the safe room">>`;
+<<chips: "Ask Jeren what Pellor actually wants" | "Go down to Camilla in the back booth" | "Cross to Daniyel's safe room">>`;
 
 export const missionFifteenEngine: MissionEngine = {
   id: "mission-15",
