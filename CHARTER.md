@@ -1,10 +1,10 @@
-# Decision Node — Charter
+# Decision Nodes — Charter
 
 The single entry point. If you read one file before touching this project, read this one. It does not duplicate the canonical docs — it tells you what the product is, what it is NOT, which document is authoritative for what, and what is true today.
 
 ## What it is
 
-Decision Node is a short-form interactive drama. You wake up inside a stranger's life at the moment of one consequential, irreversible decision. You have limited time to investigate, question the people around you, and surface what's hidden — then you commit. The system does not score whether you were "right"; it reflects how you reasoned under uncertainty back to you, and accumulates a long-lived Decision Profile that portrays how you think.
+Decision Nodes is a short-form interactive drama. You wake up inside a stranger's life at the moment of one consequential, irreversible decision. You have limited time to investigate, question the people around you, and surface what's hidden — then you commit. The system does not score whether you were "right"; it reflects how you reasoned under uncertainty back to you, and accumulates a long-lived Decision Profile that portrays how you think.
 
 > One body. One dilemma. One decision. The only honest review of you that exists.
 

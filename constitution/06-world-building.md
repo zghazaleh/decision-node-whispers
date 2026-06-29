@@ -1,6 +1,6 @@
 # 06 — World Building
 
-A Decision Node must feel like a real situation, not a puzzle. This document describes how the product creates that feeling and what every case author must respect.
+A Decision Nodes must feel like a real situation, not a puzzle. This document describes how the product creates that feeling and what every case author must respect.
 
 ## Immersion
 
@@ -25,7 +25,7 @@ Characters are real to the extent that they:
 - Speak in their own register — Sarah does not sound like Marcus does not sound like Amara.
 - Refuse, evade, deflect, or change the subject when a real person would.
 
-A character who answers every question fully and directly is a quest-giver, not a person. Quest-givers do not belong in Decision Node.
+A character who answers every question fully and directly is a quest-giver, not a person. Quest-givers do not belong in Decision Nodes.
 
 ## Time pressure
 
@@ -43,11 +43,11 @@ Every meaningful fact must be reachable through a natural in-world action: a que
 
 ## Hidden knowledge
 
-Every Decision Node must contain knowledge that is *available but not delivered*. If a player can finish a case without ever finding a particular truth, that truth was correctly hidden. The Analyzer's `evidenceIgnored` field exists precisely so the player can later see what was reachable.
+Every Decision Nodes must contain knowledge that is *available but not delivered*. If a player can finish a case without ever finding a particular truth, that truth was correctly hidden. The Analyzer's `evidenceIgnored` field exists precisely so the player can later see what was reachable.
 
 ## Tension
 
-Tension comes from competing legitimate interests, not from villains. Every case should be authored so that a thoughtful person can defend every preset archetype. If one stance is obviously correct, the case is not a Decision Node — it is a quiz.
+Tension comes from competing legitimate interests, not from villains. Every case should be authored so that a thoughtful person can defend every preset archetype. If one stance is obviously correct, the case is not a Decision Nodes — it is a quiz.
 
 ## Player agency
 

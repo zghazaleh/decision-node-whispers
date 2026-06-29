@@ -6,7 +6,7 @@ Run this checklist before merging any change to `/constitution/` or before using
 
 ## 1. North Star Test
 
-- [ ] The statement **"If someone had to rebuild Decision Node from scratch using only one folder in this repository, this would be the folder."** is true of `/constitution/`.
+- [ ] The statement **"If someone had to rebuild Decision Nodes from scratch using only one folder in this repository, this would be the folder."** is true of `/constitution/`.
 - [ ] A new contributor with zero prior context could read only this folder and understand *what* the product is, *why* it exists, and *how* it should behave.
 - [ ] Nothing critical to the product's identity lives only in code, chat history, or someone's head.
 
@@ -57,7 +57,7 @@ rg -n "TODO|TBD|XXX|\?\?\?|lorem|FIXME" constitution/
 The Constitution must answer all of these. Mark each only if a specific file/section answers it directly:
 
 **Identity**
-- [ ] What is Decision Node, in one sentence?
+- [ ] What is Decision Nodes, in one sentence?
 - [ ] Who is it for?
 - [ ] What is it explicitly *not*?
 

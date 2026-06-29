@@ -1,4 +1,4 @@
-# Decision Node — AI Architecture
+# Decision Nodes — AI Architecture
 
 This folder is the source-of-truth documentation for how the game's AI systems work today. It describes what is in the code right now — not roadmap, not refactor proposals.
 

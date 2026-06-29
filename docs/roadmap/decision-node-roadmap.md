@@ -1,4 +1,4 @@
-# Decision Node — Roadmap
+# Decision Nodes — Roadmap
 
 Living document for work that is intentionally **not yet implemented**. Items
 here have been discussed and accepted as direction, but require design or

@@ -1,6 +1,6 @@
 # 02 — Design Principles
 
-The visual language of Decision Node is editorial, not gamified. The reference point is a literary magazine or a long-form essay, not a dashboard or a game HUD.
+The visual language of Decision Nodes is editorial, not gamified. The reference point is a literary magazine or a long-form essay, not a dashboard or a game HUD.
 
 ## Editorial aesthetic
 

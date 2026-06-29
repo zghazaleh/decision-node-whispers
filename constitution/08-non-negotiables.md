@@ -12,11 +12,11 @@ A future feature that violates any of these rules must be redesigned or rejected
 
 3. **Bad outcomes do not imply poor decisions.** Same rule, mirrored.
 
-4. **Decision Node rewards reasoning, not popularity.** No leaderboards. No decision-distribution stats shown to players. No "92% chose X."
+4. **Decision Nodes rewards reasoning, not popularity.** No leaderboards. No decision-distribution stats shown to players. No "92% chose X."
 
 5. **The interface disappears.** Every UI element must justify its presence against the writing. When in doubt, remove it.
 
-6. **Mystery must always exist.** Every case must contain knowledge the player can reach but is not handed. A case with no hidden truths is not a Decision Node.
+6. **Mystery must always exist.** Every case must contain knowledge the player can reach but is not handed. A case with no hidden truths is not a Decision Nodes.
 
 7. **Every dilemma must be genuinely difficult.** Every authored archetype must be defensible by a thoughtful person. If one stance is obviously right, the case fails.
 
