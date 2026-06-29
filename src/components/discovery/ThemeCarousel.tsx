@@ -17,21 +17,33 @@ const THEME_IMAGES: Record<string, string> = {
   "Frontier & Future": frontierFutureImg,
 };
 
+export interface ThemeRowState {
+  isOpen: boolean;
+  isHovered: boolean;
+  onHover: (h: boolean) => void;
+  onToggle: () => void;
+  onEnter: () => void;
+}
+
 interface ThemeCarouselProps {
   groups: { label: string; caption?: string; ids: string[] }[];
   missions: MissionMeta[];
   onEnter: (missionId: string) => void;
+  renderRow: (mission: MissionMeta, state: ThemeRowState) => React.ReactNode;
 }
 
 export function ThemeCarousel({
   groups,
   missions,
   onEnter,
+  renderRow,
 }: ThemeCarouselProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
   const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
 
   // Track which cards have already been handled by touch so the
   // follow-up synthetic click (if any) is ignored.
@@ -39,6 +51,8 @@ export function ThemeCarousel({
 
   const handleTap = (label: string, isActive: boolean) => {
     setExpandedGroup(isActive ? null : label);
+    setOpenId(null);
+    setHoveredId(null);
   };
 
   const checkScroll = () => {
