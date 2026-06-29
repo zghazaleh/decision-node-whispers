@@ -134,7 +134,7 @@ export function WhatHappenedFilm({ beats }: { beats: ReadonlyArray<Beat> }) {
         What happened
       </p>
       <div
-        className="relative h-svh w-full overflow-hidden bg-[#06070a] select-none cursor-pointer"
+        className="relative h-[72svh] sm:h-[78svh] max-h-[680px] w-full overflow-hidden bg-[#06070a] select-none cursor-pointer touch-manipulation"
         onClick={onStageClick}
         role="button"
         tabIndex={0}
