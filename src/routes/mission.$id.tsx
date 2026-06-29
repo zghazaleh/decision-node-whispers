@@ -99,6 +99,23 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
   };
   const { mission, update } = useMission(MISSION_ID);
   const [awakening, setAwakening] = useState(true);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  // First-case interstitial — only if no prior mission state exists.
+  useEffect(() => {
+    try {
+      const hasPrior = Object.keys(window.localStorage).some((k) =>
+        k.startsWith("decision-node:mission:"),
+      );
+      const seenOnboarding = window.localStorage.getItem("decision-node:onboarded");
+      if (!hasPrior && !seenOnboarding) {
+        setShowOnboarding(true);
+        window.localStorage.setItem("decision-node:onboarded", "1");
+        const t = window.setTimeout(() => setShowOnboarding(false), 3000);
+        return () => window.clearTimeout(t);
+      }
+    } catch { /* ignore */ }
+  }, []);
 
   // Awakening: 3.6s of darkness with slow fade-in of the scene.
   useEffect(() => {
