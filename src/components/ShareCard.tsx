@@ -202,7 +202,7 @@ export function ShareCard({ profile, missionCodename }: ShareCardProps) {
         </a>
       </div>
       <p className="text-center text-[0.6rem] tracking-[0.25em] uppercase text-foreground/30">
-        Download or copy the card, then attach it to your post.
+        {canCopyImage ? "Download or copy the card, then attach it to your post." : "Download the card, then attach it to your post."}
       </p>
     </div>
   );
