@@ -166,6 +166,38 @@ export function ShareCard({ profile, missionCodename }: ShareCardProps) {
     }
   };
 
+  const onNativeShare = async () => {
+    setBusy("share");
+    try {
+      const blob = await rasterize();
+      if (!blob) throw new Error("no blob");
+      const file = new File([blob], "decision-profile.png", { type: "image/png" });
+      const nav = navigator as Navigator & {
+        share?: (data: ShareData) => Promise<void>;
+        canShare?: (data: ShareData) => boolean;
+      };
+      const payload: ShareData = {
+        files: [file],
+        title: "My Decision Profile",
+        text: shareText,
+        url: shareUrl,
+      };
+      if (nav.canShare && !nav.canShare(payload)) {
+        // Fall back to text/url only if the platform refuses the file.
+        await nav.share!({ title: payload.title, text: payload.text, url: payload.url });
+      } else {
+        await nav.share!(payload);
+      }
+    } catch (err) {
+      // User-cancelled share rejects with AbortError — silent.
+      if ((err as DOMException)?.name !== "AbortError") {
+        toast("Couldn't open the share sheet.", { description: "Try Download instead." });
+      }
+    } finally {
+      setBusy(null);
+    }
+  };
+
   const xUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
     shareText,
   )}&url=${encodeURIComponent(shareUrl)}`;
