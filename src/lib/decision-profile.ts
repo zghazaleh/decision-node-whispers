@@ -263,14 +263,13 @@ function scoreFromAnalysis(a: DecisionAnalysis): {
 }
 
 function deriveEmergingPattern(contribs: MissionContribution[]): string {
-  if (contribs.length === 0)
-    return "Not enough data yet. Complete a mission to begin building your profile.";
+  if (contribs.length === 0) return EMPTY_PORTRAIT;
   const recent = contribs.slice(-5);
   const tally: Record<string, number> = {};
   for (const c of recent) for (const s of c.signals) tally[s] = (tally[s] ?? 0) + 1;
   const top = Object.entries(tally).sort((a, b) => b[1] - a[1])[0];
   if (!top || top[1] < 2) {
-    return "Your pattern is still forming. Each mission refines the assessment.";
+    return FORMING_PORTRAIT;
   }
   const [tag] = top;
   switch (tag) {
