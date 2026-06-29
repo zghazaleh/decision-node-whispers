@@ -54,38 +54,46 @@ export function Rail({
         )}
       </div>
 
-      <div
-        className="-mx-6 sm:-mx-10 overflow-x-auto px-6 sm:px-10 scrollbar-hide"
-        style={{
-          scrollbarWidth: "none",
-          WebkitOverflowScrolling: "touch",
-        }}
-        aria-busy={loading || undefined}
-      >
-        {showSkeleton ? (
-          <ul
-            className="flex gap-4"
-            aria-live="polite"
-            aria-label={`${label} loading`}
-          >
-            {Array.from({ length: skeletonCount }).map((_, i) => (
-              <li key={i}>
-                <RailSkeletonCard delayMs={i * 90} />
-              </li>
-            ))}
-          </ul>
-        ) : showError ? (
-          <RailError message={error!} onRetry={onRetry} />
-        ) : showEmpty ? (
-          <RailEmpty message={emptyCopy} onRetry={onRetry} />
-        ) : (
-          <ul className="flex gap-4 snap-x snap-mandatory">
-            {items.map((m) => (
-              <li key={m.id} className="motion-safe:animate-[fade-in_0.45s_ease-out_both]">
-                <MissionCard mission={m} onSelect={onSelect} />
-              </li>
-            ))}
-          </ul>
+      <div className="relative -mx-6 sm:-mx-10">
+        <div
+          className="overflow-x-auto px-6 sm:px-10 scrollbar-hide"
+          style={{
+            scrollbarWidth: "none",
+            WebkitOverflowScrolling: "touch",
+          }}
+          aria-busy={loading || undefined}
+        >
+          {showSkeleton ? (
+            <ul
+              className="flex gap-4"
+              aria-live="polite"
+              aria-label={`${label} loading`}
+            >
+              {Array.from({ length: skeletonCount }).map((_, i) => (
+                <li key={i}>
+                  <RailSkeletonCard delayMs={i * 90} />
+                </li>
+              ))}
+            </ul>
+          ) : showError ? (
+            <RailError message={error!} onRetry={onRetry} />
+          ) : showEmpty ? (
+            <RailEmpty message={emptyCopy} onRetry={onRetry} />
+          ) : (
+            <ul className="flex gap-4 snap-x snap-mandatory">
+              {items.map((m) => (
+                <li key={m.id} className="motion-safe:animate-[fade-in_0.45s_ease-out_both]">
+                  <MissionCard mission={m} onSelect={onSelect} />
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+        {!showSkeleton && !showError && !showEmpty && (
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-y-0 right-0 w-12 sm:w-16 bg-gradient-to-l from-background via-background/70 to-transparent"
+          />
         )}
       </div>
     </section>
