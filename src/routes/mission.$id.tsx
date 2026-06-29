@@ -412,7 +412,7 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
             src={ENGINE.scene.src}
             alt=""
             aria-hidden
-            className="h-full w-full object-cover animate-ken-burns"
+            className="h-full w-full object-cover object-[50%_38%] sm:object-center animate-ken-burns"
             style={{
               filter: `${ENGINE.scene.filter ?? "saturate(0.88) contrast(1.06)"} ${filterShift}`,
               transition: "filter 8000ms linear",
