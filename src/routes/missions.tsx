@@ -532,6 +532,25 @@ function MissionsPage() {
           <span>Stood = presence, not rank</span>
         </footer>
       </section>
+
+      <AlertDialog open={gateOpen} onOpenChange={setGateOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Create an account to continue</AlertDialogTitle>
+            <AlertDialogDescription>
+              You've completed {profile.missionsCompleted} cases as a guest. To open another, save
+              your Decision Profile to an account — it stays with you across devices, and your
+              progress so far comes with you.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Not now</AlertDialogCancel>
+            <AlertDialogAction onClick={() => navigate({ to: "/auth" })}>
+              Sign up
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </main>
   );
 }
