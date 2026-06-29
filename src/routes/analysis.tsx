@@ -17,6 +17,7 @@ import { logAnalysisRead } from "@/lib/discovery/signals";
 import sceneCosmos from "@/assets/scene-cosmos.jpg";
 import { audio } from "@/lib/audio/director";
 import { WhatHappenedFilm } from "@/components/analysis/WhatHappenedFilm";
+import { StreamingText } from "@/components/analysis/StreamingText";
 
 
 function AnalysisFallback({
@@ -321,17 +322,25 @@ function AnalysisDebrief({
           Decision recorded
         </p>
         <h1 className="font-display text-3xl sm:text-4xl md:text-5xl leading-tight text-foreground/95 text-balance">
-          {a.headline}
+          <StreamingText text={a.headline} startDelayMs={400} wordMs={95} />
         </h1>
         {stance && (
-          <p className="mt-8 text-base sm:text-lg leading-relaxed text-foreground/75 text-pretty italic">
-            “{stance}”
-          </p>
+          <StreamingText
+            as="p"
+            text={`“${stance}”`}
+            startDelayMs={1400}
+            wordMs={70}
+            className="mt-8 text-base sm:text-lg leading-relaxed text-foreground/75 text-pretty italic block"
+          />
         )}
         {why && (
-          <p className="mt-4 text-sm text-foreground/50 leading-relaxed text-pretty">
-            Because {why.replace(/^because\s+/i, "")}
-          </p>
+          <StreamingText
+            as="p"
+            text={`Because ${why.replace(/^because\s+/i, "")}`}
+            startDelayMs={2400}
+            wordMs={60}
+            className="mt-4 text-sm text-foreground/50 leading-relaxed text-pretty block"
+          />
         )}
         {a.archetypeLabel && (
           <p className="mt-6 text-[0.6rem] tracking-[0.35em] uppercase text-accent/70">
@@ -353,9 +362,12 @@ function AnalysisDebrief({
           <p className="text-[0.6rem] tracking-[0.5em] uppercase text-accent/80 mb-6 text-center">
             How you reasoned
           </p>
-          <p className="font-display text-xl sm:text-2xl leading-relaxed text-foreground/90 text-pretty italic text-center max-w-xl mx-auto">
-            {a.reasoningEcho}
-          </p>
+          <StreamingText
+            as="p"
+            text={a.reasoningEcho}
+            wordMs={85}
+            className="font-display text-xl sm:text-2xl leading-relaxed text-foreground/90 text-pretty italic text-center max-w-xl mx-auto block"
+          />
           {ra?.calibrationVerdict && (
             <p className="mt-6 text-center text-xs tracking-[0.3em] uppercase text-foreground/45">
               {ra.calibrationVerdict === "calibrated"
@@ -378,9 +390,12 @@ function AnalysisDebrief({
             <p className="text-[0.7rem] tracking-[0.3em] uppercase text-accent/80 mb-2">
               {pattern.label}
             </p>
-            <p className="text-base sm:text-lg leading-relaxed text-foreground/85 text-pretty">
-              {pattern.body}
-            </p>
+            <StreamingText
+              as="p"
+              text={pattern.body}
+              wordMs={70}
+              className="text-base sm:text-lg leading-relaxed text-foreground/85 text-pretty block"
+            />
             {pattern.evidence && (
               <p className="mt-3 text-sm text-foreground/50 italic leading-relaxed text-pretty">
                 {pattern.evidence}

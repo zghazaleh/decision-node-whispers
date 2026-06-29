@@ -56,10 +56,10 @@ export function WhatHappenedFilm({ beats }: { beats: ReadonlyArray<Beat> }) {
   const advance = useCallback(() => {
     setIndex((prev) => {
       if (prev >= total - 1) return prev;
-      setDirection(1);
-      playFlipSound();
       return prev + 1;
     });
+    setDirection(1);
+    playFlipSound();
   }, [total]);
 
   // Auto-advance until the last frame is reached, then settle.
