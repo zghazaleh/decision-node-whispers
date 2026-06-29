@@ -359,26 +359,18 @@ function MissionsPage() {
 
       <section className="relative z-10 mx-auto flex min-h-screen w-full max-w-5xl flex-col px-6 py-14 sm:px-10 sm:py-20">
         {/* ---------- Header ---------- */}
-        <header className="mb-10 flex items-baseline justify-between">
+        <header className="mb-8 flex items-baseline justify-between">
           <Link
             to="/"
             className="text-[0.6rem] tracking-[0.4em] uppercase text-muted-foreground hover:text-foreground/90 transition-colors"
           >
             ← Decision Nodes
           </Link>
-          <div className="flex items-center gap-5">
-            <Link
-              to="/how-it-works"
-              className="text-[0.6rem] tracking-[0.4em] uppercase text-muted-foreground/70 hover:text-foreground/90 transition-colors"
-            >
-              How it works
-            </Link>
-            <p className="text-[0.6rem] tracking-[0.4em] uppercase text-muted-foreground/70 tabular-nums">
-              {filtersActive
-                ? `Showing ${visible.length} of ${MISSIONS.length}`
-                : `Case Archive · ${MISSIONS.length} case files`}
-            </p>
-          </div>
+          <span className="text-[0.55rem] tracking-[0.4em] uppercase text-muted-foreground/50 tabular-nums">
+            {filtersActive
+              ? `${visible.length} / ${MISSIONS.length}`
+              : `${MISSIONS.length} cases`}
+          </span>
         </header>
 
         {/* ---------- Filters ---------- */}
