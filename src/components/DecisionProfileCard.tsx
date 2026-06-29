@@ -1,40 +1,10 @@
-import { useState } from "react";
 import {
   DIMENSIONS,
   DIMENSION_LABELS,
   dimensionBands,
-  dimensionTrends,
   type DecisionProfile,
-  type Dimension,
-  type DimensionBand,
-  type MissionContribution,
 } from "@/lib/decision-profile";
-import { MISSIONS } from "@/lib/missions";
 
-function missionLabel(missionId: string): string {
-  const m = MISSIONS.find((x) => x.id === missionId);
-  return m ? `${m.number} · ${m.codename}` : missionId;
-}
-
-function bandPhrase(b: DimensionBand): string {
-  if (b.samples === 0) return "No data yet.";
-  if (b.samples === 1) return "Estimate is wide — one mission only.";
-  if (b.halfWidth >= 22) return "Still forming. The band will narrow with more missions.";
-  if (b.halfWidth >= 14) return "Taking shape. A few more missions will sharpen it.";
-  if (b.halfWidth >= 8) return "Reasonably settled.";
-  return "Well-grounded — the estimate is stable across missions.";
-}
-
-/** Qualitative tier for the dimension band. Surfaced alongside the numeric
- *  value so the right-hand column reads as a portrait of a tendency rather
- *  than a grade. Per constitution #10 (profiles describe, they do not rank). */
-function tierFor(value: number): string {
-  if (value >= 78) return "Pronounced";
-  if (value >= 62) return "Present";
-  if (value >= 45) return "Mixed";
-  if (value >= 30) return "Thin";
-  return "Faint";
-}
 
 export function DecisionProfileCard({
   profile,
@@ -43,7 +13,6 @@ export function DecisionProfileCard({
   profile: DecisionProfile;
   delay?: number;
 }) {
-  const trends = dimensionTrends(profile);
   const bands = dimensionBands(profile);
   return (
     <div
@@ -68,18 +37,6 @@ export function DecisionProfileCard({
         />
       </div>
 
-      <ul className="space-y-5 max-w-xl mx-auto mt-12">
-        {DIMENSIONS.map((d) => (
-          <DimensionRow
-            key={d}
-            dim={d}
-            label={DIMENSION_LABELS[d]}
-            band={bands[d]}
-            delta={trends[d]}
-            contributions={profile.contributions}
-          />
-        ))}
-      </ul>
 
       <div className="mt-12 border-t border-foreground/10 pt-8 max-w-xl mx-auto">
         <p className="text-[0.6rem] tracking-[0.35em] uppercase text-foreground/45 mb-3">
@@ -133,11 +90,14 @@ function RadarPlot({
   const hiPoly = ptsAt(his);
   const loPoly = ptsAt(los);
 
+  // Extra padding around the radar so multi-word labels (e.g. "Second-Order
+  // Thinking", "Information Gathering") render in full without clipping.
+  const pad = 90;
   return (
-    <div className="relative mx-auto" style={{ maxWidth: size }}>
+    <div className="relative mx-auto" style={{ maxWidth: size + pad * 2 }}>
       <svg
-        viewBox={`0 0 ${size} ${size}`}
-        className="w-full h-auto"
+        viewBox={`${-pad} ${-pad} ${size + pad * 2} ${size + pad * 2}`}
+        className="w-full h-auto overflow-visible"
         role="img"
         aria-label="Decision DNA radar plot"
       >
@@ -211,18 +171,22 @@ function RadarPlot({
         {/* Labels */}
         {labels.map((label, i) => {
           const p = pointAt(i, rMax + 22);
-          const short = label.length > 12 ? label.split(" ")[0] : label;
           const anchor =
             Math.abs(p.x - cx) < 8
               ? "middle"
               : p.x > cx
                 ? "start"
                 : "end";
+          // Break two-word labels onto two lines so each fits cleanly.
+          const words = label.split(" ");
+          const lines = words.length >= 2 && label.length > 12
+            ? [words[0], words.slice(1).join(" ")]
+            : [label];
           return (
             <text
               key={i}
               x={p.x}
-              y={p.y}
+              y={p.y - (lines.length - 1) * 5}
               textAnchor={anchor}
               dominantBaseline="middle"
               className="fill-foreground/55"
@@ -233,7 +197,11 @@ function RadarPlot({
                 fontFamily: "var(--font-sans)",
               }}
             >
-              {short}
+              {lines.map((ln, li) => (
+                <tspan key={li} x={p.x} dy={li === 0 ? 0 : 12}>
+                  {ln}
+                </tspan>
+              ))}
             </text>
           );
         })}
@@ -242,113 +210,6 @@ function RadarPlot({
   );
 }
 
-function DimensionRow({
-  dim,
-  label,
-  band,
-  delta,
-  contributions,
-}: {
-  dim: Dimension;
-  label: string;
-  band: DimensionBand;
-  delta: number | null;
-  contributions: MissionContribution[];
-}) {
-  const [open, setOpen] = useState(false);
-  const hasDetail = contributions.length > 0;
-  return (
-    <li className="border-b border-foreground/5 pb-4 last:border-b-0">
-      <button
-        type="button"
-        onClick={() => hasDetail && setOpen((v) => !v)}
-        aria-expanded={open}
-        disabled={!hasDetail}
-        className="group grid w-full grid-cols-[1fr_auto] items-center gap-4 text-left disabled:cursor-default"
-      >
-        <div className="min-w-0">
-          <div className="flex items-baseline justify-between gap-3 mb-1.5">
-            <span className="text-xs sm:text-sm text-foreground/80 truncate">
-              {label}
-            </span>
-            <span className="text-[0.6rem] tracking-[0.3em] uppercase text-foreground/40 tabular-nums">
-              {delta === null
-                ? "new"
-                : delta === 0
-                  ? "—"
-                  : delta > 0
-                    ? `▲ ${delta}`
-                    : `▼ ${Math.abs(delta)}`}
-            </span>
-          </div>
-          {/* Confidence band track */}
-          <div className="relative h-[6px] bg-foreground/10 rounded-full overflow-hidden">
-            {/* Uncertainty band */}
-            <div
-              className="absolute inset-y-0 bg-accent/25"
-              style={{
-                left: `${band.lo}%`,
-                width: `${Math.max(0, band.hi - band.lo)}%`,
-              }}
-              aria-hidden
-            />
-            {/* Point estimate marker */}
-            <div
-              className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 h-[10px] w-[2px] bg-accent transition-[left] duration-700 ease-out"
-              style={{ left: `${band.value}%` }}
-              aria-hidden
-            />
-          </div>
-          <p className="mt-1.5 text-[0.6rem] tracking-[0.2em] uppercase text-foreground/35">
-            ±{band.halfWidth} · {bandPhrase(band)}
-          </p>
-        </div>
-        <span className="flex flex-col items-end gap-0.5 w-24">
-          <span className="text-[0.6rem] tracking-[0.3em] uppercase text-foreground/70">
-            {tierFor(band.value)}
-          </span>
-          <span className="text-[0.55rem] tracking-[0.25em] uppercase text-foreground/30 tabular-nums">
-            {band.value} / 100
-          </span>
-        </span>
-      </button>
 
-      {open && hasDetail && (
-        <div className="mt-3 ml-0 sm:ml-1 border-l border-accent/30 pl-4 animate-fade-up">
-          <p className="text-[0.6rem] tracking-[0.3em] uppercase text-foreground/40 mb-2">
-            Missions that shaped this tendency
-          </p>
-          <ul className="space-y-3">
-            {[...contributions]
-              .slice()
-              .reverse()
-              .map((c) => {
-                const s = c.scores[dim];
-                const note = c.notes?.[dim];
-                return (
-                  <li
-                    key={c.missionId + c.at}
-                    className="text-xs text-foreground/65"
-                  >
-                    <div className="grid grid-cols-[1fr_auto] items-center gap-3">
-                      <span className="truncate">{missionLabel(c.missionId)}</span>
-                      <span className="font-display tabular-nums text-foreground/85">
-                        {s}
-                      </span>
-                    </div>
-                    {note && (
-                      <p className="mt-1 text-[0.7rem] text-foreground/55 italic leading-relaxed">
-                        {note}
-                      </p>
-                    )}
-                  </li>
-                );
-              })}
-          </ul>
-        </div>
-      )}
-    </li>
-  );
-}
+export type { Dimension } from "@/lib/decision-profile";
 
-export type { Dimension };
