@@ -338,10 +338,17 @@ export function armGlobalAudioUnlock() {
   w[GLOBAL_ARM_KEY] = true;
 
   const unlock = () => {
-    if (audio.isMuted()) return;
-    void audio.resumeLatest();
+    // Always ignite on the first gesture — creates the AudioContext and
+    // decodes any URLs we've already prefetched at the HTTP layer. This
+    // means the first sound (motif, awakening sting) plays without
+    // waiting on `fetch + decode` after the user has already clicked.
+    void audio.ignite().then(() => {
+      if (audio.isMuted()) return;
+      void audio.resumeLatest();
+    });
   };
 
   window.addEventListener("pointerdown", unlock, { capture: true, passive: true });
   window.addEventListener("keydown", unlock, { capture: true });
+  window.addEventListener("touchstart", unlock, { capture: true, passive: true });
 }
