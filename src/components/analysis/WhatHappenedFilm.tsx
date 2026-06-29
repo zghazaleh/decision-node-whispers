@@ -6,6 +6,7 @@
 // frame being pulled across the gate.
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { audio } from "@/lib/audio/director";
 import beatImmediate from "@/assets/analysis/beat-immediate.jpg";
 import beatMedium from "@/assets/analysis/beat-medium.jpg";
 import beatLong from "@/assets/analysis/beat-long.jpg";
@@ -26,46 +27,8 @@ function horizonsFor(count: number): typeof HORIZONS {
   return [HORIZONS[0]];
 }
 
-// Tiny synthesized page-flip whoosh — a short filtered noise burst.
-// Synthesised inline so we don't ship another audio asset for one click.
 function playFlipSound() {
-  if (typeof window === "undefined") return;
-  try {
-    const Ctor =
-      window.AudioContext ||
-      (window as unknown as { webkitAudioContext?: typeof AudioContext })
-        .webkitAudioContext;
-    if (!Ctor) return;
-    const ctx = new Ctor();
-    const dur = 0.22;
-    const buffer = ctx.createBuffer(1, Math.floor(ctx.sampleRate * dur), ctx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < data.length; i++) {
-      // White noise with a fast attack + decay envelope — reads as a flick.
-      const t = i / data.length;
-      const env = Math.pow(1 - t, 2.2) * Math.min(1, t * 18);
-      data[i] = (Math.random() * 2 - 1) * env;
-    }
-    const src = ctx.createBufferSource();
-    src.buffer = buffer;
-    const filter = ctx.createBiquadFilter();
-    filter.type = "bandpass";
-    filter.frequency.value = 1800;
-    filter.Q.value = 0.7;
-    const gain = ctx.createGain();
-    gain.gain.value = 0.18;
-    src.connect(filter).connect(gain).connect(ctx.destination);
-    src.start();
-    src.onended = () => {
-      try {
-        void ctx.close();
-      } catch {
-        /* noop */
-      }
-    };
-  } catch {
-    /* audio is best-effort — never block UI */
-  }
+  void audio.playFlip({ gain: 0.18 });
 }
 
 export function WhatHappenedFilm({ beats }: { beats: ReadonlyArray<Beat> }) {
