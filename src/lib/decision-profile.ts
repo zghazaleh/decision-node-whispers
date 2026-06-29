@@ -317,7 +317,10 @@ export function updateProfileWithAnalysis(
     missionsCompleted: prev.missionsCompleted + (filtered.length === prev.contributions.length ? 1 : 0),
     contributions,
     scores: newScores,
-    emergingPattern: deriveEmergingPattern(contributions),
+    // Placeholder. The real, AI-generated portrait is written by
+    // applyPortraitToProfile() once the model returns. Keeping the previous
+    // line here avoids a flicker to a generic string during the gap.
+    emergingPattern: prev.emergingPattern || deriveEmergingPattern(contributions),
   };
   writeProfile(next);
   syncProfileToDB(next, contribution);
@@ -325,6 +328,62 @@ export function updateProfileWithAnalysis(
     window.dispatchEvent(new Event("decision-node:profile-changed"));
   }
   return next;
+}
+
+/** Overwrite just the portrait line on the persisted profile and notify
+ *  listeners. Called after the AI portrait generator returns. */
+export function applyPortraitToProfile(portrait: string): DecisionProfile {
+  const current = readProfile();
+  const next: DecisionProfile = { ...current, emergingPattern: portrait };
+  writeProfile(next);
+  const last = current.contributions[current.contributions.length - 1];
+  if (last) syncProfileToDB(next, last);
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("decision-node:profile-changed"));
+  }
+  return next;
+}
+
+/** Build the input payload for the AI portrait generator from the current
+ *  profile and the latest analysis. */
+export function buildPortraitInput(
+  profile: DecisionProfile,
+  analysis: DecisionAnalysis,
+) {
+  const ranked = [...DIMENSIONS].sort(
+    (a, b) => profile.scores[b] - profile.scores[a],
+  );
+  const topDimensions = ranked.slice(0, 2).map((d) => DIMENSION_LABELS[d]);
+  const weakDimensions = ranked.slice(-2).map((d) => DIMENSION_LABELS[d]);
+
+  const recent = profile.contributions.slice(-5);
+  const tally: Record<string, number> = {};
+  for (const c of recent) for (const s of c.signals) tally[s] = (tally[s] ?? 0) + 1;
+  const recentSignals = Object.entries(tally)
+    .sort((a, b) => b[1] - a[1])
+    .map(([s, n]) => `${s} (x${n})`);
+
+  const ra = analysis.reasoningAssessment;
+  const recentBiases = (ra?.possibleBiases ?? []).map((b) => ({
+    name: b.name,
+    evidence: b.evidence ?? "",
+  }));
+  const recentBlindSpots = (ra?.blindSpots ?? []).map((b) => ({
+    pattern: b.pattern,
+    reframe: b.gentleReframe ?? "",
+  }));
+
+  return {
+    scores: { ...profile.scores } as Record<string, number>,
+    topDimensions,
+    weakDimensions,
+    recentSignals,
+    recentBiases,
+    recentBlindSpots,
+    calibration: ra?.calibration ?? "",
+    luckVsSkill: ra?.luckVsSkill ?? "",
+    missionsCompleted: profile.missionsCompleted,
+  };
 }
 
 export function useDecisionProfile() {
