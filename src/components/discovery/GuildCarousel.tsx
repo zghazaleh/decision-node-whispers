@@ -72,6 +72,9 @@ export function GuildCarousel({
   }, [items.length, paused, expandedId, showSkeleton, showError, showEmpty]);
 
   // Keep the spotlit tile visible inside the strip on narrow widths.
+  // Scroll the strip horizontally only — never call scrollIntoView, which
+  // would also scroll the page vertically and yank the reader back to the
+  // top whenever the carousel auto-advances.
   useEffect(() => {
     const strip = stripRef.current;
     if (!strip) return;
@@ -80,7 +83,9 @@ export function GuildCarousel({
     const stripBox = strip.getBoundingClientRect();
     const elBox = el.getBoundingClientRect();
     if (elBox.left < stripBox.left + 8 || elBox.right > stripBox.right - 8) {
-      el.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+      const target =
+        el.offsetLeft - strip.clientWidth / 2 + el.clientWidth / 2;
+      strip.scrollTo({ left: Math.max(0, target), behavior: "smooth" });
     }
   }, [active]);
 
