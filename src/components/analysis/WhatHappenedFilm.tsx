@@ -208,7 +208,7 @@ export function WhatHappenedFilm({ beats }: { beats: ReadonlyArray<Beat> }) {
               />
 
               {/* Text overlay for this frame. */}
-              <div className="absolute inset-0 flex flex-col justify-end px-5 sm:px-10 md:px-16 pb-20 sm:pb-22 md:pb-24">
+              <div className="absolute inset-0 flex flex-col justify-end px-5 sm:px-10 md:px-16 pb-20 sm:pb-24">
                 <div className="flex items-baseline gap-2 sm:gap-3 mb-3 sm:mb-4">
                   <span className="font-display text-[0.65rem] sm:text-xs tracking-[0.35em] uppercase text-accent/90">
                     {p.stage.numeral}.
