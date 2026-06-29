@@ -360,6 +360,35 @@ const FRAMEWORK: Record<string, MissionFramework> = {
     learningObjective:
       "Practice judgment when the rule that has defined you must be weighed against an act in front of you — using the reachable corroborations (the file margin, the man's own answer, the second layer behind the superior's interest) without letting the rescue itself become a new and quieter form of just-world reasoning.",
   },
+
+  "mission-14": {
+    stakes: [
+      "Two children asleep upstairs in an occupied town where Decree 14 mandates execution of the head of household and detention of all other residents for sheltering an unregistered person.",
+      "A stranger on the step whose life ends with the patrol three minutes south if Eda closes the door.",
+      "A neighbor at her own window across the street whose silence or word will reach the corporal first.",
+      "A widow's own life, already pared to the parish school's closure and a single candle on a curfew night.",
+    ],
+    hiddenTruths: [
+      "The stranger is not a printer — he is Captain Vorel Tessen, an Imperial Vesren defector carrying a current patrol-schedule book in the leather case at his hip. He will only say so if asked plainly, because the truth raises the household's risk sharply.",
+      "Anton Vargen's behind-the-stairs cupboard, concealed by the coat-rack Eda has not moved in three years, will hold one adult through a standard search.",
+      "Cousin Marit's medical movement permit can carry one extra person through a checkpoint between 04:00 and 06:00 if presented as an apprentice.",
+      "Henna Korlt across the street will say yes to a small specific ask ('sit in your parlor with your candle lit') and no to the large one ('shelter him for me'); she will not denounce on a guess.",
+      "Corporal Vehlmann performs a standard rather than a thorough search at a calm doorstep; a footstep upstairs that doesn't fit the register, or a moved rug, makes him thorough.",
+      "The rectory cellar at Saint-Cael's is the next safehouse on the chain — but Father Brem may be in Aaling tonight and the route crosses two patrolled streets.",
+    ],
+    timeLimit:
+      "The patrol is approximately three minutes south at the opening. The window for any action is small but not instant.",
+    decisionScience: [
+      "In-group / own-family bias: 'my own first' is a real and morally weighty pull, not a fallacy — but it can also crowd out plays that would protect both at different costs.",
+      "Omission bias: closing the door feels cleaner than opening it because the stranger's death will not happen on Eda's threshold; the moral arithmetic is asymmetric in the brain but not in the world.",
+      "Bystander effect (the neighbor across): assuming Henna will or will not act without asking her is itself a way of letting the moment decide for everyone.",
+      "Normalcy / optimism bias: 'the search will be standard, the cupboard will hold, the corporal will be reasonable' is a chain of probable-but-not-certain assumptions, each of which is a small bet on the lives upstairs.",
+      "Anchoring on the stranger's cover story: 'printer with pamphlets' is a small risk; the true risk is an order of magnitude larger, and the only way to know is to ask.",
+      "Identifiable victim effect: the two children upstairs are vividly present; the village downstream of the patrol-schedule book is statistical. Both are real.",
+    ],
+    learningObjective:
+      "Practice deciding under a forced, deeply asymmetric risk between people you are responsible for and a stranger whose life is also at stake — using the reachable corroborations (the stranger's real story, the neighbor's actual answer, the hiding places the house already contains, the permit on the hook) without letting either 'my own first' OR 'a stranger's life is no less sacred' become a slogan that does the choosing for you.",
+  },
 };
 
 export function getMissionFramework(missionId: string): MissionFramework | null {
