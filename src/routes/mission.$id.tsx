@@ -861,6 +861,88 @@ function ChipRow({ chips, onPick }: { chips: string[]; onPick: (text: string) =>
 
 
 
+const ANALYZING_STAGES = [
+  { label: "Reading the room", hint: "Replaying what you heard, said, and did" },
+  { label: "Tracing your path", hint: "Mapping the moments that shaped the choice" },
+  { label: "Weighing consequences", hint: "Following each thread to where it leads" },
+  { label: "Surfacing patterns", hint: "Listening for the signature underneath" },
+  { label: "Composing the reading", hint: "Setting it down in your own words" },
+];
+
+function AnalyzingProgress() {
+  // The analyze call typically resolves in 5–15s. We advance through stages
+  // on an ease-out schedule so the bar keeps breathing forward without ever
+  // hitting 100% before the response actually lands.
+  const [elapsed, setElapsed] = useState(0);
+  useEffect(() => {
+    const start = performance.now();
+    let raf = 0;
+    const tick = () => {
+      setElapsed(performance.now() - start);
+      raf = window.requestAnimationFrame(tick);
+    };
+    raf = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(raf);
+  }, []);
+
+  // Asymptotic progress: approaches but never reaches 100% (caps at ~92%).
+  // Tuned so ~50% lands near 6s, ~80% near 14s.
+  const progress = 1 - Math.exp(-elapsed / 7000);
+  const capped = Math.min(0.92, progress);
+  const stageIndex = Math.min(
+    ANALYZING_STAGES.length - 1,
+    Math.floor(capped * ANALYZING_STAGES.length),
+  );
+  const stage = ANALYZING_STAGES[stageIndex];
+
+  return (
+    <div className="p-8 py-14 sm:p-12 sm:py-16">
+      <p className="text-[0.6rem] tracking-[0.4em] uppercase text-accent/80 mb-4 text-center">
+        The reading
+      </p>
+      <p className="font-display text-2xl sm:text-3xl text-foreground/95 text-center text-balance min-h-[2.5em] transition-opacity duration-500">
+        {stage.label}
+      </p>
+      <p
+        key={stageIndex}
+        className="mt-3 text-xs tracking-[0.2em] uppercase text-foreground/45 text-center animate-fade-in"
+      >
+        {stage.hint}
+      </p>
+
+      <div className="mt-10 mx-auto max-w-sm">
+        <div
+          role="progressbar"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={Math.round(capped * 100)}
+          aria-label="Analyzing your decision"
+          className="relative h-px w-full overflow-hidden bg-foreground/10"
+        >
+          <div
+            className="absolute inset-y-0 left-0 bg-accent/80 transition-[width] duration-300 ease-out"
+            style={{ width: `${capped * 100}%` }}
+          />
+        </div>
+        <div className="mt-4 flex items-center justify-between text-[0.55rem] tracking-[0.35em] uppercase text-foreground/35">
+          {ANALYZING_STAGES.map((s, i) => (
+            <span
+              key={s.label}
+              className={`transition-colors duration-500 ${
+                i <= stageIndex ? "text-foreground/70" : "text-foreground/25"
+              }`}
+              aria-hidden
+            >
+              {String(i + 1).padStart(2, "0")}
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
 function DecideModal({
   presets,
   freeWritePlaceholder,
