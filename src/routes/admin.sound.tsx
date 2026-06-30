@@ -152,7 +152,7 @@ function SoundStudio() {
   const slots = useMemo(buildAssignmentSlots, []);
   const overrides = useOverrides();
 
-  // Map: basename -> list of slot keys currently routed to it.
+  // Map: assignmentValue (basename or data URL) -> list of slot keys.
   const basenameToSlots = useMemo(() => {
     const m = new Map<string, string[]>();
     for (const slot of slots) {
