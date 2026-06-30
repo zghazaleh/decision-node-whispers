@@ -497,6 +497,13 @@
 @media (prefers-reduced-motion: reduce) {
   .animate-ken-burns { animation: none; transform: scale(1.08); }
 }
+@keyframes hint-nudge {
+  0%, 100% { transform: translateX(0); opacity: 0.45; }
+  50% { transform: translateX(6px); opacity: 0.9; }
+}
+@utility animate-hint-nudge {
+  animation: hint-nudge 2.2s ease-in-out infinite;
+}
 
 /* Vignette overlay used by film panels: darkens corners, focuses center. */
 .vignette {
