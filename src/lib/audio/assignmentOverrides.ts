@@ -113,7 +113,7 @@ export function deleteDraft(name: string): void {
 
 export function subscribeOverrides(cb: () => void): () => void {
   if (typeof window === "undefined") return () => {};
-  const handler = () => cb();
+  const handler = () => { invalidateCaches(); cb(); };
   window.addEventListener(EVENT_NAME, handler);
   window.addEventListener("storage", handler);
   return () => {
