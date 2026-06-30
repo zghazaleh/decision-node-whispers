@@ -77,22 +77,17 @@ export function saveDraft(draft: Draft): void {
 }
 
 export function deleteDraft(name: string): void {
+  const target = getDrafts().find((d) => d.name === name);
   const drafts = getDrafts().filter((d) => d.name !== name);
   writeJson(DRAFTS_KEY, drafts);
-  // Also drop any override pointing at this draft.
+  if (!target) return;
+  // Drop any overrides pointing at this draft's data URL.
   const overrides = getOverrides();
   let changed = false;
   for (const [k, v] of Object.entries(overrides)) {
-    if (v === draft_url_for_name(name, drafts)) { delete overrides[k]; changed = true; }
+    if (v === target.dataUrl) { delete overrides[k]; changed = true; }
   }
   if (changed) writeJson(OVERRIDES_KEY, overrides);
-}
-
-function draft_url_for_name(_name: string, _drafts: Draft[]): string {
-  // Helper kept simple — overrides reference drafts by full data URL, so we
-  // can't reverse-derive here without the draft list before deletion. The
-  // caller in deleteDraft handles that via the post-delete drafts array.
-  return "";
 }
 
 // ---------- Subscribe ----------
