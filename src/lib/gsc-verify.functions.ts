@@ -1,5 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { assertAdminToken } from "./admin-token.server";
+
 
 const GATEWAY = "https://connector-gateway.lovable.dev/google_search_console";
 
