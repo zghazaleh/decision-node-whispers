@@ -252,7 +252,7 @@ function Analysis() {
           percentile={percentile}
           a={a}
           onReplay={replay}
-          onReturn={() => navigate({ to: "/" })}
+          onReturn={() => navigate({ to: "/missions" })}
           onSimplify={() => setShowDetails(false)}
         />
       ) : (
@@ -262,7 +262,7 @@ function Analysis() {
           percentile={percentile}
           a={a}
           onReplay={replay}
-          onReturn={() => navigate({ to: "/" })}
+          onReturn={() => navigate({ to: "/missions" })}
           onSeeDetails={() => setShowDetails(true)}
         />
       )}
@@ -518,7 +518,7 @@ function AnalysisDebrief({
             onClick={onReturn}
             className="text-[0.65rem] tracking-[0.4em] uppercase text-foreground/40 hover:text-foreground/80 transition-colors"
           >
-            Return
+            Back to case files
           </button>
         </div>
       </section>
@@ -669,7 +669,7 @@ function AnalysisDetailedView({
             onClick={onReturn}
             className="text-[0.65rem] tracking-[0.4em] uppercase text-foreground/40 hover:text-foreground/80 transition-colors"
           >
-            Return
+            Back to case files
           </button>
         </div>
       </section>
