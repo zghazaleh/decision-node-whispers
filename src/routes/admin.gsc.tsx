@@ -1,13 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import {
   listGscSites,
   getTopPages,
   type TopPageRow,
 } from "@/lib/gsc.functions";
+
+const TOKEN_KEY = "dn-admin-token";
 
 export const Route = createFileRoute("/admin/gsc")({
   head: () => ({
@@ -25,22 +27,36 @@ function GscPage() {
   const fetchSites = useServerFn(listGscSites);
   const fetchPages = useServerFn(getTopPages);
 
+  const [adminToken, setAdminToken] = useState<string>("");
+  const [tokenInput, setTokenInput] = useState<string>("");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const t = sessionStorage.getItem(TOKEN_KEY) ?? "";
+      setAdminToken(t);
+      setTokenInput(t);
+    }
+  }, []);
+
   const sitesQ = useQuery({
     queryKey: ["gsc", "sites"],
-    queryFn: () => fetchSites(),
+    queryFn: () => fetchSites({ data: { adminToken } }),
+    enabled: Boolean(adminToken),
+    retry: false,
   });
 
   const [siteUrl, setSiteUrl] = useState<string>("");
   const [days, setDays] = useState<number>(28);
   const [sortKey, setSortKey] = useState<SortKey>("impressions");
 
-  const activeSite =
-    siteUrl || sitesQ.data?.sites[0]?.siteUrl || "";
+  const activeSite = siteUrl || sitesQ.data?.sites[0]?.siteUrl || "";
 
   const pagesQ = useQuery({
     queryKey: ["gsc", "pages", activeSite, days],
-    queryFn: () => fetchPages({ data: { siteUrl: activeSite, days, rowLimit: 25 } }),
-    enabled: Boolean(activeSite),
+    queryFn: () =>
+      fetchPages({ data: { adminToken, siteUrl: activeSite, days, rowLimit: 25 } }),
+    enabled: Boolean(activeSite && adminToken),
+    retry: false,
   });
 
   const sortedRows = useMemo(() => {
@@ -50,6 +66,42 @@ function GscPage() {
       return (b[sortKey] as number) - (a[sortKey] as number);
     });
   }, [pagesQ.data, sortKey]);
+
+  function submitToken(e: React.FormEvent) {
+    e.preventDefault();
+    sessionStorage.setItem(TOKEN_KEY, tokenInput);
+    setAdminToken(tokenInput);
+  }
+
+  if (!adminToken) {
+    return (
+      <main className="min-h-screen bg-background text-foreground px-6 py-10">
+        <div className="mx-auto max-w-md">
+          <h1 className="text-2xl font-semibold mb-4">Search Console</h1>
+          <form onSubmit={submitToken} className="flex flex-col gap-3">
+            <label className="text-xs uppercase tracking-wide text-muted-foreground">
+              Admin token
+            </label>
+            <input
+              type="password"
+              value={tokenInput}
+              onChange={(e) => setTokenInput(e.target.value)}
+              placeholder="ADMIN_EVAL_TOKEN"
+              className="rounded-md border border-border bg-background px-3 py-2 text-sm"
+              autoFocus
+            />
+            <button
+              type="submit"
+              disabled={!tokenInput}
+              className="rounded-md bg-foreground px-4 py-2 text-sm text-background disabled:opacity-40"
+            >
+              Continue
+            </button>
+          </form>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-background text-foreground px-6 py-10">
