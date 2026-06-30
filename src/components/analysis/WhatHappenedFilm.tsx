@@ -6,34 +6,41 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { audio } from "@/lib/audio/director";
-import beatImmediate from "@/assets/analysis/beat-immediate.jpg";
-import beatMedium from "@/assets/analysis/beat-medium.jpg";
-import beatLong from "@/assets/analysis/beat-long.jpg";
+import { beatsForMission } from "./missionBeatImages";
 
 type Beat = { beat: string; consequence: string };
 
-const HORIZONS: { numeral: string; label: string; image: string; pan: string }[] = [
-  { numeral: "I", label: "Immediate", image: beatImmediate, pan: "55% 50%" },
-  { numeral: "II", label: "Medium term", image: beatMedium, pan: "50% 55%" },
-  { numeral: "III", label: "Long after", image: beatLong, pan: "50% 45%" },
-];
+type Horizon = { numeral: string; label: string; image: string; pan: string };
 
-function horizonsFor(count: number): typeof HORIZONS {
-  if (count >= 3) return HORIZONS;
-  if (count === 2) return [HORIZONS[0], HORIZONS[2]];
-  return [HORIZONS[0]];
+function horizonsFor(count: number, images: readonly [string, string, string]): Horizon[] {
+  const all: Horizon[] = [
+    { numeral: "I", label: "Immediate", image: images[0], pan: "55% 50%" },
+    { numeral: "II", label: "Medium term", image: images[1], pan: "50% 55%" },
+    { numeral: "III", label: "Long after", image: images[2], pan: "50% 45%" },
+  ];
+  if (count >= 3) return all;
+  if (count === 2) return [all[0], all[2]];
+  return [all[0]];
 }
 
 function playFlipSound() {
   void audio.playFlip({ gain: 0.18 });
 }
 
-export function WhatHappenedFilm({ beats }: { beats: ReadonlyArray<Beat> }) {
-  const stages = horizonsFor(beats.length);
+export function WhatHappenedFilm({
+  beats,
+  missionId,
+}: {
+  beats: ReadonlyArray<Beat>;
+  missionId?: string;
+}) {
+  const images = beatsForMission(missionId);
+  const stages = horizonsFor(beats.length, images);
   const panels = beats.slice(0, stages.length).map((b, i) => ({
     beat: b,
     stage: stages[i],
   }));
+
 
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState<1 | -1>(1);

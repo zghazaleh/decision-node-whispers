@@ -352,7 +352,7 @@ function AnalysisDebrief({
       {/* Block 2 — What happened (cinematic noir sequence) */}
       {condensed.length > 0 && (
         <section className="animate-fade-up" style={{ animationDelay: "0.15s" }}>
-          <WhatHappenedFilm beats={condensed} />
+          <WhatHappenedFilm beats={condensed} missionId={mission.missionId} />
         </section>
       )}
 
