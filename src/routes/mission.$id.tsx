@@ -29,6 +29,7 @@ import { generatePortrait } from "@/lib/portrait.functions";
 import { recordMissionPlay } from "@/lib/mission-stats.functions";
 
 import { audio } from "@/lib/audio/director";
+import { useRoomEntrance } from "@/components/audio/useRoomEntrance";
 import { getMissionEngine } from "@/lib/missions/registry";
 import { MISSIONS } from "@/lib/missions";
 import type { MissionEngine } from "@/lib/missions/types";
