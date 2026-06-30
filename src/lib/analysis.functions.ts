@@ -9,15 +9,17 @@ const DEFAULT_MISSION_ID = "mission-01";
 
 
 const AnalysisInput = z.object({
-  missionId: z.string().default(DEFAULT_MISSION_ID),
-  decision: z.string().min(1),
-  reasoning: z.string().default(""),
-  archetypeId: z.string().optional(), // preset path: skip classification
-  confidence: z.number().min(0).max(100).optional(), // player self-reported at commit
+  missionId: z.string().max(64).default(DEFAULT_MISSION_ID),
+  decision: z.string().min(1).max(2000),
+  reasoning: z.string().max(4000).default(""),
+  archetypeId: z.string().max(64).optional(),
+  confidence: z.number().min(0).max(100).optional(),
   transcript: z
-    .array(z.object({ role: z.string(), text: z.string() }))
-    .min(1),
+    .array(z.object({ role: z.string().max(32), text: z.string().max(4000) }))
+    .min(1)
+    .max(60),
 });
+
 
 const DimensionScore = z.number().min(0).max(100);
 
