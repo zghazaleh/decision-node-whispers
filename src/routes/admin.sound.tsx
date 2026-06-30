@@ -130,13 +130,19 @@ function effectiveAssignment(slot: AssignmentSlot, overrides: OverrideMap): stri
   return null;
 }
 
+const EMPTY_OVERRIDES: OverrideMap = Object.freeze({}) as OverrideMap;
+const EMPTY_DRAFTS: Draft[] = Object.freeze([]) as unknown as Draft[];
+const getServerOverrides = () => EMPTY_OVERRIDES;
+const getServerDrafts = () => EMPTY_DRAFTS;
+
 function useOverrides(): OverrideMap {
-  return useSyncExternalStore(subscribeOverrides, getOverrides, () => ({}));
+  return useSyncExternalStore(subscribeOverrides, getOverrides, getServerOverrides);
 }
 
 function useDrafts(): Draft[] {
-  return useSyncExternalStore(subscribeOverrides, getDrafts, () => [] as Draft[]);
+  return useSyncExternalStore(subscribeOverrides, getDrafts, getServerDrafts);
 }
+
 
 function formatBytes(n: number): string {
   if (n < 1024) return `${n} B`;
