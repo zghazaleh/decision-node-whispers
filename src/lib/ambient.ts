@@ -554,8 +554,7 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
     async switchTo(missionId: string | null, fadeMs = 1400) {
       if (stopped) {
         pendingMission = missionId;
-        // Engine isn't running — treat as a deferred success so callers
-        // don't trigger a fallback chain.
+        console.debug(`[ambient] switchTo(${missionId}) deferred — engine not yet ignited`);
         return true;
       }
       pendingMission = missionId;
