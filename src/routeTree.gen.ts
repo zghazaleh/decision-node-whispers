@@ -16,7 +16,6 @@ import { Route as MissionsLegacyRouteImport } from './routes/missions-legacy'
 import { Route as MissionsRouteImport } from './routes/missions'
 import { Route as JournalRouteImport } from './routes/journal'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
-import { Route as ConstitutionRouteImport } from './routes/constitution'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AnalysisRouteImport } from './routes/analysis'
 import { Route as IndexRouteImport } from './routes/index'
@@ -29,6 +28,7 @@ import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AdminSoundRouteImport } from './routes/admin.sound'
 import { Route as AdminGscVerifyRouteImport } from './routes/admin.gsc-verify'
 import { Route as AdminGscRouteImport } from './routes/admin.gsc'
+import { Route as AdminGithubRouteImport } from './routes/admin.github'
 import { Route as AdminEvaluationRouteImport } from './routes/admin.evaluation'
 
 const SoundTestRoute = SoundTestRouteImport.update({
@@ -64,11 +64,6 @@ const JournalRoute = JournalRouteImport.update({
 const HowItWorksRoute = HowItWorksRouteImport.update({
   id: '/how-it-works',
   path: '/how-it-works',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ConstitutionRoute = ConstitutionRouteImport.update({
-  id: '/constitution',
-  path: '/constitution',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -132,6 +127,11 @@ const AdminGscRoute = AdminGscRouteImport.update({
   path: '/admin/gsc',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminGithubRoute = AdminGithubRouteImport.update({
+  id: '/admin/github',
+  path: '/admin/github',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminEvaluationRoute = AdminEvaluationRouteImport.update({
   id: '/admin/evaluation',
   path: '/admin/evaluation',
@@ -142,7 +142,6 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/analysis': typeof AnalysisRoute
   '/auth': typeof AuthRoute
-  '/constitution': typeof ConstitutionRoute
   '/how-it-works': typeof HowItWorksRoute
   '/journal': typeof JournalRoute
   '/missions': typeof MissionsRoute
@@ -151,6 +150,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sound-test': typeof SoundTestRoute
   '/admin/evaluation': typeof AdminEvaluationRoute
+  '/admin/github': typeof AdminGithubRoute
   '/admin/gsc': typeof AdminGscRoute
   '/admin/gsc-verify': typeof AdminGscVerifyRoute
   '/admin/sound': typeof AdminSoundRoute
@@ -165,7 +165,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/analysis': typeof AnalysisRoute
   '/auth': typeof AuthRoute
-  '/constitution': typeof ConstitutionRoute
   '/how-it-works': typeof HowItWorksRoute
   '/journal': typeof JournalRoute
   '/missions': typeof MissionsRoute
@@ -174,6 +173,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sound-test': typeof SoundTestRoute
   '/admin/evaluation': typeof AdminEvaluationRoute
+  '/admin/github': typeof AdminGithubRoute
   '/admin/gsc': typeof AdminGscRoute
   '/admin/gsc-verify': typeof AdminGscVerifyRoute
   '/admin/sound': typeof AdminSoundRoute
@@ -189,7 +189,6 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/analysis': typeof AnalysisRoute
   '/auth': typeof AuthRoute
-  '/constitution': typeof ConstitutionRoute
   '/how-it-works': typeof HowItWorksRoute
   '/journal': typeof JournalRoute
   '/missions': typeof MissionsRoute
@@ -198,6 +197,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sound-test': typeof SoundTestRoute
   '/admin/evaluation': typeof AdminEvaluationRoute
+  '/admin/github': typeof AdminGithubRoute
   '/admin/gsc': typeof AdminGscRoute
   '/admin/gsc-verify': typeof AdminGscVerifyRoute
   '/admin/sound': typeof AdminSoundRoute
@@ -214,7 +214,6 @@ export interface FileRouteTypes {
     | '/'
     | '/analysis'
     | '/auth'
-    | '/constitution'
     | '/how-it-works'
     | '/journal'
     | '/missions'
@@ -223,6 +222,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/sound-test'
     | '/admin/evaluation'
+    | '/admin/github'
     | '/admin/gsc'
     | '/admin/gsc-verify'
     | '/admin/sound'
@@ -237,7 +237,6 @@ export interface FileRouteTypes {
     | '/'
     | '/analysis'
     | '/auth'
-    | '/constitution'
     | '/how-it-works'
     | '/journal'
     | '/missions'
@@ -246,6 +245,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/sound-test'
     | '/admin/evaluation'
+    | '/admin/github'
     | '/admin/gsc'
     | '/admin/gsc-verify'
     | '/admin/sound'
@@ -260,7 +260,6 @@ export interface FileRouteTypes {
     | '/'
     | '/analysis'
     | '/auth'
-    | '/constitution'
     | '/how-it-works'
     | '/journal'
     | '/missions'
@@ -269,6 +268,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/sound-test'
     | '/admin/evaluation'
+    | '/admin/github'
     | '/admin/gsc'
     | '/admin/gsc-verify'
     | '/admin/sound'
@@ -284,7 +284,6 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AnalysisRoute: typeof AnalysisRoute
   AuthRoute: typeof AuthRoute
-  ConstitutionRoute: typeof ConstitutionRoute
   HowItWorksRoute: typeof HowItWorksRoute
   JournalRoute: typeof JournalRoute
   MissionsRoute: typeof MissionsRoute
@@ -293,6 +292,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SoundTestRoute: typeof SoundTestRoute
   AdminEvaluationRoute: typeof AdminEvaluationRoute
+  AdminGithubRoute: typeof AdminGithubRoute
   AdminGscRoute: typeof AdminGscRoute
   AdminGscVerifyRoute: typeof AdminGscVerifyRoute
   AdminSoundRoute: typeof AdminSoundRoute
@@ -353,13 +353,6 @@ declare module '@tanstack/react-router' {
       path: '/how-it-works'
       fullPath: '/how-it-works'
       preLoaderRoute: typeof HowItWorksRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/constitution': {
-      id: '/constitution'
-      path: '/constitution'
-      fullPath: '/constitution'
-      preLoaderRoute: typeof ConstitutionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -446,6 +439,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminGscRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/github': {
+      id: '/admin/github'
+      path: '/admin/github'
+      fullPath: '/admin/github'
+      preLoaderRoute: typeof AdminGithubRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/evaluation': {
       id: '/admin/evaluation'
       path: '/admin/evaluation'
@@ -460,7 +460,6 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AnalysisRoute: AnalysisRoute,
   AuthRoute: AuthRoute,
-  ConstitutionRoute: ConstitutionRoute,
   HowItWorksRoute: HowItWorksRoute,
   JournalRoute: JournalRoute,
   MissionsRoute: MissionsRoute,
@@ -469,6 +468,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SoundTestRoute: SoundTestRoute,
   AdminEvaluationRoute: AdminEvaluationRoute,
+  AdminGithubRoute: AdminGithubRoute,
   AdminGscRoute: AdminGscRoute,
   AdminGscVerifyRoute: AdminGscVerifyRoute,
   AdminSoundRoute: AdminSoundRoute,
@@ -483,13 +483,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
