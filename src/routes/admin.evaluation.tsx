@@ -1,7 +1,6 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
-import { z } from "zod";
 
 import {
   getEvaluationReport,
@@ -17,12 +16,9 @@ type FilterKey =
   | "constitution";
 type SortKey = "id" | "status" | "issues";
 
-const searchSchema = z.object({
-  token: z.string().optional(),
-});
+const TOKEN_KEY = "dn-admin-token";
 
 export const Route = createFileRoute("/admin/evaluation")({
-  validateSearch: (s) => searchSchema.parse(s),
   head: () => ({
     meta: [
       { title: "Build Evaluation — Decision Nodes" },
@@ -33,10 +29,9 @@ export const Route = createFileRoute("/admin/evaluation")({
 });
 
 function AdminEvaluationPage() {
-  const { token: urlToken } = Route.useSearch();
-  const navigate = useNavigate({ from: Route.fullPath });
   const fetchReport = useServerFn(getEvaluationReport);
-  const [tokenInput, setTokenInput] = useState(urlToken ?? "");
+  const [tokenInput, setTokenInput] = useState("");
+  const [activeToken, setActiveToken] = useState("");
   const [report, setReport] = useState<EvaluationReport | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -48,6 +43,7 @@ function AdminEvaluationPage() {
     try {
       const r = await fetchReport({ data: { token } });
       setReport(r);
+      setActiveToken(token);
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       setError(msg.includes("401") || msg.toLowerCase().includes("unauthorized")
@@ -59,15 +55,23 @@ function AdminEvaluationPage() {
     }
   }
 
+  // Auto-load if a token was previously stored in this browser session.
   useEffect(() => {
-    if (urlToken) load(urlToken);
+    if (typeof window === "undefined") return;
+    const stored = sessionStorage.getItem(TOKEN_KEY);
+    if (stored) {
+      setTokenInput(stored);
+      void load(stored);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [urlToken]);
+  }, []);
 
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    navigate({ search: { token: tokenInput || undefined } });
-    load(tokenInput);
+    if (typeof window !== "undefined" && tokenInput) {
+      sessionStorage.setItem(TOKEN_KEY, tokenInput);
+    }
+    void load(tokenInput);
   }
 
   return (
@@ -114,11 +118,12 @@ function AdminEvaluationPage() {
           </div>
         )}
 
-        {report && <ReportView report={report} onReload={() => load(urlToken ?? tokenInput)} />}
+        {report && <ReportView report={report} onReload={() => load(activeToken)} />}
       </div>
     </div>
   );
 }
+
 
 function ReportView({
   report,
