@@ -1,7 +1,6 @@
-// StreamingText — reveals text word-by-word at a cinematic pace, so the
-// post-decision reading feels like it is being written in real time rather
-// than dumped on screen. Honours prefers-reduced-motion (renders the full
-// string immediately) and supports tap-to-complete.
+// StreamingText — cinematic fade-in for decision-reading prose.
+// Text is fully formed from the start; only opacity and a subtle upward
+// drift animate.  Honours prefers-reduced-motion (renders immediately).
 
 import { useEffect, useRef, useState } from "react";
 
@@ -9,34 +8,31 @@ type StreamingTextProps = {
   text: string;
   as?: keyof React.JSX.IntrinsicElements;
   className?: string;
-  /** ms before the first word appears */
+  /** ms before the fade begins */
   startDelayMs?: number;
-  /** base ms between words */
+  /** @deprecated no longer used — kept for API compat */
   wordMs?: number;
-  /** extra ms after punctuation (. ! ? — :) */
+  /** @deprecated no longer used — kept for API compat */
   punctuationMs?: number;
-  /** called once the full string is on screen */
+  /** called once the fade has finished */
   onDone?: () => void;
 };
 
-const PUNCT = /[.!?…—:;]$/;
+const FADE_DURATION_MS = 900;
 
 export function StreamingText({
   text,
   as = "span",
   className,
   startDelayMs = 0,
-  wordMs = 75,
-  punctuationMs = 240,
   onDone,
 }: StreamingTextProps) {
   const Tag = as as React.ElementType;
-  const words = text.split(/(\s+)/); // keep whitespace tokens
   const reduce =
     typeof window !== "undefined" &&
     window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
-  const [revealed, setRevealed] = useState(reduce ? words.length : 0);
+  const [visible, setVisible] = useState(reduce);
   const doneRef = useRef(false);
   const onDoneRef = useRef(onDone);
   onDoneRef.current = onDone;
@@ -49,48 +45,31 @@ export function StreamingText({
       }
       return;
     }
-    if (revealed >= words.length) {
-      if (!doneRef.current) {
-        doneRef.current = true;
-        onDoneRef.current?.();
-      }
-      return;
-    }
-    const current = words[revealed] ?? "";
-    const isWhitespace = /^\s+$/.test(current);
-    const trimmed = current.trim();
-    const isPunct = PUNCT.test(trimmed);
-    const delay =
-      revealed === 0
-        ? startDelayMs
-        : isWhitespace
-        ? 0
-        : isPunct
-        ? wordMs + punctuationMs
-        : wordMs;
-    const t = window.setTimeout(() => setRevealed((n) => n + 1), delay);
-    return () => window.clearTimeout(t);
-  }, [revealed, words, wordMs, punctuationMs, startDelayMs, reduce]);
 
-  const skip = () => {
-    if (revealed < words.length) setRevealed(words.length);
-  };
+    const delayTimer = window.setTimeout(() => {
+      setVisible(true);
+      const doneTimer = window.setTimeout(() => {
+        if (!doneRef.current) {
+          doneRef.current = true;
+          onDoneRef.current?.();
+        }
+      }, FADE_DURATION_MS);
+      return () => window.clearTimeout(doneTimer);
+    }, startDelayMs);
 
-  const shown = words.slice(0, revealed).join("");
-  const isComplete = revealed >= words.length;
+    return () => window.clearTimeout(delayTimer);
+  }, [startDelayMs, reduce]);
 
   return (
     <Tag
       className={className}
-      onClick={skip}
-      style={{ cursor: isComplete ? undefined : "pointer" }}
+      style={{
+        opacity: visible ? 1 : 0,
+        transform: visible ? "translateY(0)" : "translateY(6px)",
+        transition: `opacity ${FADE_DURATION_MS}ms ease-out, transform ${FADE_DURATION_MS}ms ease-out`,
+      }}
     >
-      {shown}
-      {!isComplete && (
-        <span aria-hidden className="animate-pulse text-accent/70">
-          ▍
-        </span>
-      )}
+      {text}
     </Tag>
   );
 }
