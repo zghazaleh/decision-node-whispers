@@ -35,16 +35,31 @@ function writeJson(key: string, value: unknown): void {
   if (typeof window === "undefined") return;
   try {
     window.localStorage.setItem(key, JSON.stringify(value));
+    invalidateCaches();
     window.dispatchEvent(new CustomEvent(EVENT_NAME));
   } catch {
     /* noop — quota or serialization failure */
   }
 }
 
+// Cache snapshots so useSyncExternalStore gets a stable reference between
+// renders. Without this, returning fresh objects from getOverrides/getDrafts
+// triggers React's "getSnapshot should be cached" infinite loop and crashes
+// the Sound Studio (and any other consumer) into the error boundary.
+let overridesCache: OverrideMap | null = null;
+let draftsCache: Draft[] | null = null;
+
+function invalidateCaches() {
+  overridesCache = null;
+  draftsCache = null;
+}
+
 // ---------- Overrides ----------
 
 export function getOverrides(): OverrideMap {
-  return readJson<OverrideMap>(OVERRIDES_KEY, {});
+  if (overridesCache) return overridesCache;
+  overridesCache = readJson<OverrideMap>(OVERRIDES_KEY, {});
+  return overridesCache;
 }
 
 export function getOverrideFor(assignmentKey: string): string | null {
@@ -52,7 +67,7 @@ export function getOverrideFor(assignmentKey: string): string | null {
 }
 
 export function setOverride(assignmentKey: string, value: string | null): void {
-  const current = getOverrides();
+  const current = { ...getOverrides() };
   if (!value) delete current[assignmentKey];
   else current[assignmentKey] = value;
   writeJson(OVERRIDES_KEY, current);
@@ -61,14 +76,18 @@ export function setOverride(assignmentKey: string, value: string | null): void {
 export function clearOverrides(): void {
   if (typeof window === "undefined") return;
   window.localStorage.removeItem(OVERRIDES_KEY);
+  invalidateCaches();
   window.dispatchEvent(new CustomEvent(EVENT_NAME));
 }
 
 // ---------- Drafts ----------
 
 export function getDrafts(): Draft[] {
-  return readJson<Draft[]>(DRAFTS_KEY, []);
+  if (draftsCache) return draftsCache;
+  draftsCache = readJson<Draft[]>(DRAFTS_KEY, []);
+  return draftsCache;
 }
+
 
 export function saveDraft(draft: Draft): void {
   const drafts = getDrafts().filter((d) => d.name !== draft.name);
