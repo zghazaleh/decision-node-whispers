@@ -67,7 +67,19 @@ const _missions: Record<string, Soundtrack | null> = {
 export const SOUNDTRACKS = _missions as Record<string, Soundtrack>;
 
 export function getSoundtrack(missionId: string): Soundtrack | null {
-  return _missions[missionId] ?? null;
+  const base = _missions[missionId] ?? null;
+  const override = getOverrideFor(missionId);
+  if (override) {
+    const url = audioUrl(override);
+    if (url) {
+      return {
+        url,
+        mood: base?.mood ?? `Override → ${override}`,
+        volume: base?.volume ?? 0.3,
+      };
+    }
+  }
+  return base;
 }
 
 export function getSoundtrackUrls(options: { missionsOnly?: boolean } = {}): string[] {
