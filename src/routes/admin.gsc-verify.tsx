@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   listMetaTokens,
@@ -9,6 +9,8 @@ import {
   verifySite,
   type VerificationTokenRow,
 } from "@/lib/gsc-verify.functions";
+
+const TOKEN_KEY = "dn-admin-token";
 
 export const Route = createFileRoute("/admin/gsc-verify")({
   head: () => ({
@@ -26,8 +28,18 @@ function GscVerifyPage() {
   const fetchRequest = useServerFn(requestMetaToken);
   const fetchVerify = useServerFn(verifySite);
 
+  const [adminToken, setAdminToken] = useState<string>("");
+  const [tokenInput, setTokenInput] = useState<string>("");
   const [domain, setDomain] = useState("decision-nodes.com");
   const [status, setStatus] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const t = sessionStorage.getItem(TOKEN_KEY) ?? "";
+      setAdminToken(t);
+      setTokenInput(t);
+    }
+  }, []);
 
   const tokensQ = useQuery({
     queryKey: ["gsc", "tokens"],
@@ -35,7 +47,8 @@ function GscVerifyPage() {
   });
 
   const requestMut = useMutation({
-    mutationFn: (siteUrl: string) => fetchRequest({ data: { siteUrl } }),
+    mutationFn: (siteUrl: string) =>
+      fetchRequest({ data: { adminToken, siteUrl } }),
     onSuccess: () => {
       setStatus("Token issued. Republish the site, then click Verify.");
       qc.invalidateQueries({ queryKey: ["gsc", "tokens"] });
@@ -44,7 +57,8 @@ function GscVerifyPage() {
   });
 
   const verifyMut = useMutation({
-    mutationFn: (siteUrl: string) => fetchVerify({ data: { siteUrl } }),
+    mutationFn: (siteUrl: string) =>
+      fetchVerify({ data: { adminToken, siteUrl } }),
     onSuccess: (res) => {
       setStatus(res.message);
       qc.invalidateQueries({ queryKey: ["gsc", "tokens"] });
@@ -52,6 +66,44 @@ function GscVerifyPage() {
     },
     onError: (err: Error) => setStatus(err.message),
   });
+
+  function submitToken(e: React.FormEvent) {
+    e.preventDefault();
+    sessionStorage.setItem(TOKEN_KEY, tokenInput);
+    setAdminToken(tokenInput);
+  }
+
+  if (!adminToken) {
+    return (
+      <main className="min-h-screen bg-background text-foreground px-6 py-10">
+        <div className="mx-auto max-w-md">
+          <h1 className="text-2xl font-semibold mb-4">Verify Search Console</h1>
+          <form onSubmit={submitToken} className="flex flex-col gap-3">
+            <label className="text-xs uppercase tracking-wide text-muted-foreground">
+              Admin token
+            </label>
+            <input
+              type="password"
+              value={tokenInput}
+              onChange={(e) => setTokenInput(e.target.value)}
+              placeholder="ADMIN_EVAL_TOKEN"
+              className="rounded-md border border-border bg-background px-3 py-2 text-sm"
+              autoFocus
+            />
+            <button
+              type="submit"
+              disabled={!tokenInput}
+              className="rounded-md bg-foreground px-4 py-2 text-sm text-background disabled:opacity-40"
+            >
+              Continue
+            </button>
+          </form>
+        </div>
+      </main>
+    );
+  }
+
+
 
   return (
     <main className="min-h-screen bg-background text-foreground px-6 py-10">
