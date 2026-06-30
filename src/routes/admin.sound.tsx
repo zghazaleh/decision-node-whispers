@@ -72,20 +72,38 @@ function buildAssignmentSlots(): AssignmentSlot[] {
   return slots;
 }
 
-function buildRows(): Row[] {
+function buildRows(drafts: Draft[]): Row[] {
   const rows: Row[] = [];
   for (const [path, meta] of Object.entries(pointers)) {
     const base = path.replace("/src/assets/audio/", "").replace(".mp3.asset.json", "");
     rows.push({
       key: base,
+      kind: "asset",
       displayName: displayNameFor(base),
       filename: meta.original_filename,
       url: meta.url,
+      assignmentValue: base,
       size: meta.size,
       contentType: meta.content_type,
     });
   }
-  rows.sort((a, b) => a.displayName.localeCompare(b.displayName));
+  for (const d of drafts) {
+    rows.push({
+      key: `draft:${d.name}`,
+      kind: "draft",
+      displayName: d.label,
+      filename: `${d.name}.mp3 · draft`,
+      url: d.dataUrl,
+      assignmentValue: d.dataUrl,
+      size: d.size,
+      contentType: "audio/mpeg",
+      draftName: d.name,
+    });
+  }
+  rows.sort((a, b) => {
+    if (a.kind !== b.kind) return a.kind === "draft" ? -1 : 1;
+    return a.displayName.localeCompare(b.displayName);
+  });
   return rows;
 }
 
