@@ -9,6 +9,7 @@ import { NoticedRail } from "@/components/NoticedRail";
 import { ShareCard } from "@/components/ShareCard";
 import { ReadingShareCard } from "@/components/ReadingShareCard";
 import { AlternatePaths } from "@/components/AlternatePaths";
+import { ChosenSecondOrder } from "@/components/ChosenSecondOrder";
 import { CommunityStats } from "@/components/CommunityStats";
 import { MISSIONS } from "@/lib/missions";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
