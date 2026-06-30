@@ -357,6 +357,15 @@ function AnalysisDebrief({
         </section>
       )}
 
+      {/* Block 2b — Second-order ripples on the chosen path */}
+      <section className="animate-fade-up" style={{ animationDelay: "0.22s" }}>
+        <ChosenSecondOrder
+          missionId={mission.missionId}
+          chosenArchetypeId={mission.archetypeId ?? a.archetypeId}
+        />
+      </section>
+
+
       {/* Block 3 — How you reasoned */}
       {a.reasoningEcho && (
         <section className="animate-fade-up" style={{ animationDelay: "0.3s" }}>
