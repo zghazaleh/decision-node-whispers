@@ -410,6 +410,108 @@ function SoundStudio() {
           )}
         </section>
 
+        <section className="space-y-3 rounded-md border border-foreground/15 bg-background/40 p-5">
+          <div className="flex items-baseline justify-between gap-3">
+            <h2 className="font-display text-lg">Generate new sound</h2>
+            <span className="text-[10px] uppercase tracking-[0.22em] text-foreground/45">
+              ElevenLabs · sound-generation
+            </span>
+          </div>
+          <p className="text-xs text-foreground/55">
+            Generate an ambient bed from a text prompt. Preview it here, then assign
+            to a slot directly or save it as a named draft (stored in this browser).
+          </p>
+
+          <div className="grid gap-3 sm:grid-cols-[1fr_140px_auto]">
+            <input
+              type="text"
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              placeholder="Frozen checkpoint at night. Wind, idling diesel engine, distant boots on snow."
+              className="rounded border border-foreground/20 bg-background px-3 py-2 text-sm text-foreground/90 placeholder:text-foreground/35 focus:border-foreground/50 focus:outline-none"
+            />
+            <label className="flex items-center gap-2 text-xs text-foreground/65">
+              <span className="uppercase tracking-[0.18em]">Length</span>
+              <select
+                value={duration}
+                onChange={(e) => setDuration(Number(e.target.value))}
+                className="flex-1 rounded border border-foreground/20 bg-background px-2 py-2 text-xs text-foreground/85"
+              >
+                {[5, 8, 12, 16, 20, 22].map((d) => (
+                  <option key={d} value={d}>{d}s</option>
+                ))}
+              </select>
+            </label>
+            <button
+              type="button"
+              onClick={doGenerate}
+              disabled={genStatus === "generating"}
+              className="rounded border border-foreground/30 px-4 py-2 text-[11px] uppercase tracking-[0.22em] text-foreground/90 hover:border-foreground/60 disabled:opacity-50"
+            >
+              {genStatus === "generating" ? "Generating…" : "Generate"}
+            </button>
+          </div>
+
+          {genError && (
+            <div className="rounded border border-red-400/40 bg-red-500/10 px-3 py-2 text-xs text-red-200">
+              {genError}
+            </div>
+          )}
+
+          {genPreview && (
+            <div className="space-y-3 rounded border border-sky-400/30 bg-sky-400/5 p-3">
+              <div className="flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  onClick={togglePreview}
+                  className="rounded border border-foreground/30 px-3 py-1.5 text-[11px] uppercase tracking-[0.22em] text-foreground/85 hover:border-foreground/60"
+                >
+                  Play / stop preview
+                </button>
+                <span className="text-[11px] text-foreground/55 tabular-nums">
+                  {formatBytes(genPreview.size)} · {duration}s
+                </span>
+              </div>
+              <div className="grid gap-2 sm:grid-cols-[1fr_auto]">
+                <input
+                  type="text"
+                  value={draftLabel}
+                  onChange={(e) => setDraftLabel(e.target.value)}
+                  placeholder="Name this draft (optional)"
+                  className="rounded border border-foreground/20 bg-background px-3 py-2 text-sm text-foreground/85 placeholder:text-foreground/35"
+                />
+                <button
+                  type="button"
+                  onClick={saveGenerated}
+                  className="rounded border border-emerald-400/40 px-3 py-2 text-[11px] uppercase tracking-[0.22em] text-emerald-200 hover:border-emerald-300"
+                >
+                  Save as draft
+                </button>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-[11px] uppercase tracking-[0.18em] text-foreground/55">
+                  Assign directly to
+                </span>
+                <select
+                  value=""
+                  onChange={(e) => {
+                    assignGeneratedTo(e.target.value);
+                    e.currentTarget.value = "";
+                  }}
+                  className="rounded border border-foreground/20 bg-background px-2 py-1 text-xs text-foreground/85"
+                >
+                  <option value="">Choose slot…</option>
+                  {slots.map((s) => (
+                    <option key={s.key} value={s.key}>{s.label}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          )}
+        </section>
+
+
+
         {missingSlots.length > 0 && (
           <section className="rounded-md border border-amber-400/30 bg-amber-400/5 p-4 text-xs text-amber-200/90">
             <div className="mb-2 tracking-[0.22em] uppercase">Slots with no audio</div>
