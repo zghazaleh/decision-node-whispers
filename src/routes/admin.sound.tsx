@@ -360,7 +360,13 @@ function SoundStudio() {
     <div className="min-h-screen bg-background text-foreground px-6 py-10 sm:px-10">
       <div className="mx-auto max-w-6xl space-y-10">
         <header className="space-y-2">
-          <p className="text-[10px] tracking-[0.28em] uppercase text-foreground/50">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-1 text-[11px] uppercase tracking-[0.22em] text-foreground/55 hover:text-foreground/90"
+          >
+            ← Back to Decision Nodes
+          </Link>
+          <p className="text-[10px] tracking-[0.28em] uppercase text-foreground/50 pt-2">
             Admin · temporary
           </p>
           <h1 className="font-display text-3xl sm:text-4xl">Sound Studio</h1>
