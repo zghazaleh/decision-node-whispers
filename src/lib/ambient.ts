@@ -491,22 +491,22 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
 
   async function playMission(missionId: string, fadeInMs: number): Promise<Voice | null> {
     const track = getSoundtrack(missionId);
-    if (!track) return null;
+    if (!track) { console.warn(`[ambient] no soundtrack registered for ${missionId}`); return null; }
     const c = ensureCtx();
-    if (!c || !masterGain || !lfoDepth) return null;
+    if (!c || !masterGain || !lfoDepth) { console.warn("[ambient] no AudioContext available"); return null; }
     if (c.state === "suspended") {
-      try { await c.resume(); } catch { /* noop */ }
+      try { await c.resume(); } catch (err) { console.warn("[ambient] resume() failed", err); }
     }
     let buffer: AudioBuffer;
     try {
       buffer = await loadBuffer(c, track.url);
-    } catch {
+    } catch (err) {
+      console.warn(`[ambient] loadBuffer failed for ${missionId}`, err);
       return null;
     }
     const source = c.createBufferSource();
     source.buffer = buffer;
     source.loop = true;
-    // Loop the entire decoded buffer (avoids the HTMLAudio seam pop).
     const filter = c.createBiquadFilter();
     filter.type = "lowpass";
     filter.frequency.value = profile.filterBaseHz;
@@ -519,6 +519,7 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
     const v: Voice = { missionId, track, source, filter, gain, startedAt: c.currentTime };
     rampParam(gain.gain, targetMusicGain(track), fadeInMs);
     applyPadGain(fadeInMs);
+    console.debug(`[ambient] playing ${missionId} (ctx=${c.state}, vol=${targetMusicGain(track).toFixed(2)})`);
     return v;
   }
 
