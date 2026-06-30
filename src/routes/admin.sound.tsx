@@ -429,18 +429,36 @@ function SoundStudio() {
               {rows.map((row) => {
                 const status = statuses[row.key] ?? "idle";
                 const err = errors[row.key];
-                const assignedSlotKeys = basenameToSlots.get(row.key) ?? [];
+                const assignedSlotKeys = basenameToSlots.get(row.assignmentValue) ?? [];
                 return (
                   <tr key={row.key} className="border-t border-foreground/5 align-top">
                     <td className="px-3 py-3"><StatusPill s={status} /></td>
                     <td className="px-3 py-3">
-                      <div className="text-foreground/90">{row.displayName}</div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-foreground/90">{row.displayName}</span>
+                        {row.kind === "draft" && (
+                          <span className="rounded bg-sky-400/15 px-1.5 py-0.5 text-[9px] uppercase tracking-[0.18em] text-sky-200">
+                            draft
+                          </span>
+                        )}
+                      </div>
                       <div className="text-[11px] text-foreground/45">{row.filename}</div>
-                      <code className="text-[10px] text-foreground/35 break-all">{row.url}</code>
+                      {row.kind === "asset" && (
+                        <code className="text-[10px] text-foreground/35 break-all">{row.url}</code>
+                      )}
                       {err && (
                         <div className="mt-1 rounded border border-red-400/40 bg-red-500/10 px-2 py-1 text-[11px] text-red-200">
                           {err}
                         </div>
+                      )}
+                      {row.kind === "draft" && row.draftName && (
+                        <button
+                          type="button"
+                          onClick={() => deleteDraft(row.draftName!)}
+                          className="mt-1 text-[10px] uppercase tracking-[0.18em] text-foreground/40 hover:text-red-300"
+                        >
+                          Delete draft
+                        </button>
                       )}
                     </td>
                     <td className="px-3 py-3 text-xs text-foreground/70">
@@ -449,7 +467,7 @@ function SoundStudio() {
                       ) : (
                         <ul className="space-y-0.5">
                           {assignedSlotKeys.map((k) => {
-                            const isOverride = overrides[k] === row.key;
+                            const isOverride = overrides[k] === row.assignmentValue;
                             return (
                               <li key={k} className="flex items-center gap-2">
                                 <span>{slotLabel(slots, k)}</span>
@@ -476,7 +494,12 @@ function SoundStudio() {
                         <option value="">Assign to…</option>
                         {slots.map((s) => {
                           const current = effectiveAssignment(s, overrides);
-                          const tag = current === row.key ? " ✓" : current ? ` (${displayNameFor(current)})` : " (empty)";
+                          const currentLabel = !current
+                            ? " (empty)"
+                            : current.startsWith("data:")
+                              ? " (draft)"
+                              : ` (${displayNameFor(current)})`;
+                          const tag = current === row.assignmentValue ? " ✓" : currentLabel;
                           return (
                             <option key={s.key} value={s.key}>
                               {s.label}{tag}
