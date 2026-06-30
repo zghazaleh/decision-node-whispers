@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getConstitutionStatus } from "@/lib/constitution.functions";
 import { FileText, CheckCircle2, XCircle, Github } from "lucide-react";
 
-export const Route = createFileRoute("/constitution")({
+export const Route = createFileRoute("/admin/github")({
   head: () => ({
     meta: [
       { title: "Constitution — Decision Nodes" },
@@ -19,9 +19,9 @@ export const Route = createFileRoute("/constitution")({
         content:
           "Live sync status for the Decision Nodes constitution: GitHub connection, file archive, and the canonical authoring rules behind every mission.",
       },
-      { property: "og:url", content: "https://decision-nodes.com/constitution" },
+      { property: "og:url", content: "https://decision-nodes.com/admin/github" },
     ],
-    links: [{ rel: "canonical", href: "https://decision-nodes.com/constitution" }],
+    links: [{ rel: "canonical", href: "https://decision-nodes.com/admin/github" }],
   }),
   component: ConstitutionPage,
 });
