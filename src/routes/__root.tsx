@@ -92,13 +92,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         name: "description",
         content:
-          "Wake up in someone else's life. One irreversible decision. An interactive drama.",
+          "20 moral dilemmas. One irreversible decision each. Find out how you decide.",
       },
       { property: "og:title", content: "Decision Nodes — An Interactive Drama" },
       {
         property: "og:description",
         content:
-          "Wake up in someone else's life. One irreversible decision. An interactive drama.",
+          "20 moral dilemmas. One irreversible decision each. Find out how you decide.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -106,7 +106,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         name: "twitter:description",
         content:
-          "Wake up in someone else's life. One irreversible decision. An interactive drama.",
+          "20 moral dilemmas. One irreversible decision each. Find out how you decide.",
       },
       { property: "og:image", content: "https://decision-nodes.com/og-decision-nodes.jpg" },
       { name: "twitter:image", content: "https://decision-nodes.com/og-decision-nodes.jpg" },
