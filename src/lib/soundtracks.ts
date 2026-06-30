@@ -70,11 +70,13 @@ export function getSoundtrack(missionId: string): Soundtrack | null {
   const base = _missions[missionId] ?? null;
   const override = getOverrideFor(missionId);
   if (override) {
-    const url = audioUrl(override);
+    // Override may be either a registered basename or a data: URL pointing
+    // at a Sound Studio draft generated in this browser.
+    const url = override.startsWith("data:") ? override : audioUrl(override);
     if (url) {
       return {
         url,
-        mood: base?.mood ?? `Override → ${override}`,
+        mood: base?.mood ?? `Override → ${override.startsWith("data:") ? "draft" : override}`,
         volume: base?.volume ?? 0.3,
       };
     }

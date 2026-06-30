@@ -3,8 +3,9 @@
 // each one through a plain <audio> element, and surfaces load failures
 // prominently. Remove this route when the audio investigation is done.
 
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { SOUNDTRACKS, getSoundtrack, type Soundtrack } from "@/lib/soundtracks";
 import { displayNameFor } from "@/lib/audio/displayNames";
 import {
@@ -12,8 +13,13 @@ import {
   setOverride,
   clearOverrides,
   subscribeOverrides,
+  getDrafts,
+  saveDraft,
+  deleteDraft,
+  type Draft,
   type OverrideMap,
 } from "@/lib/audio/assignmentOverrides";
+import { generateAmbientBed } from "@/lib/sound-studio.functions";
 
 export const Route = createFileRoute("/admin/sound")({
   head: () => ({
@@ -33,12 +39,15 @@ type AssetMeta = {
 };
 
 type Row = {
-  key: string;             // pointer file basename without `.mp3.asset.json`
+  key: string;              // pointer file basename, or `draft:<name>` for drafts
+  kind: "asset" | "draft";
   displayName: string;
   filename: string;
   url: string;
+  assignmentValue: string;  // value stored in override map (basename or data: URL)
   size: number;
   contentType: string;
+  draftName?: string;
 };
 
 // Eager-glob every pointer JSON so we always see the full set.
@@ -63,20 +72,38 @@ function buildAssignmentSlots(): AssignmentSlot[] {
   return slots;
 }
 
-function buildRows(): Row[] {
+function buildRows(drafts: Draft[]): Row[] {
   const rows: Row[] = [];
   for (const [path, meta] of Object.entries(pointers)) {
     const base = path.replace("/src/assets/audio/", "").replace(".mp3.asset.json", "");
     rows.push({
       key: base,
+      kind: "asset",
       displayName: displayNameFor(base),
       filename: meta.original_filename,
       url: meta.url,
+      assignmentValue: base,
       size: meta.size,
       contentType: meta.content_type,
     });
   }
-  rows.sort((a, b) => a.displayName.localeCompare(b.displayName));
+  for (const d of drafts) {
+    rows.push({
+      key: `draft:${d.name}`,
+      kind: "draft",
+      displayName: d.label,
+      filename: `${d.name}.mp3 · draft`,
+      url: d.dataUrl,
+      assignmentValue: d.dataUrl,
+      size: d.size,
+      contentType: "audio/mpeg",
+      draftName: d.name,
+    });
+  }
+  rows.sort((a, b) => {
+    if (a.kind !== b.kind) return a.kind === "draft" ? -1 : 1;
+    return a.displayName.localeCompare(b.displayName);
+  });
   return rows;
 }
 
@@ -107,6 +134,10 @@ function useOverrides(): OverrideMap {
   return useSyncExternalStore(subscribeOverrides, getOverrides, () => ({}));
 }
 
+function useDrafts(): Draft[] {
+  return useSyncExternalStore(subscribeOverrides, getDrafts, () => [] as Draft[]);
+}
+
 function formatBytes(n: number): string {
   if (n < 1024) return `${n} B`;
   if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
@@ -116,11 +147,12 @@ function formatBytes(n: number): string {
 type Status = "idle" | "loading" | "ready" | "playing" | "error";
 
 function SoundStudio() {
-  const rows = useMemo(buildRows, []);
+  const drafts = useDrafts();
+  const rows = useMemo(() => buildRows(drafts), [drafts]);
   const slots = useMemo(buildAssignmentSlots, []);
   const overrides = useOverrides();
 
-  // Map: basename -> list of slot keys currently routed to it.
+  // Map: assignmentValue (basename or data URL) -> list of slot keys.
   const basenameToSlots = useMemo(() => {
     const m = new Map<string, string[]>();
     for (const slot of slots) {
@@ -248,14 +280,93 @@ function SoundStudio() {
 
   const onAssign = (row: Row, slotKey: string) => {
     if (!slotKey) return;
-    setOverride(slotKey, row.key);
+    setOverride(slotKey, row.assignmentValue);
+  };
+
+  // ----- Generate New Sound -----
+  const generate = useServerFn(generateAmbientBed);
+  const [prompt, setPrompt] = useState("");
+  const [draftLabel, setDraftLabel] = useState("");
+  const [duration, setDuration] = useState(12);
+  const [genStatus, setGenStatus] = useState<"idle" | "generating" | "ready" | "error">("idle");
+  const [genError, setGenError] = useState<string | null>(null);
+  const [genPreview, setGenPreview] = useState<{ dataUrl: string; size: number } | null>(null);
+  const previewAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  const doGenerate = async () => {
+    if (prompt.trim().length < 3) {
+      setGenError("Prompt must be at least 3 characters.");
+      setGenStatus("error");
+      return;
+    }
+    setGenError(null);
+    setGenStatus("generating");
+    setGenPreview(null);
+    try {
+      const result = await generate({ data: { prompt: prompt.trim(), durationSeconds: duration } });
+      const dataUrl = `data:${result.mimeType};base64,${result.base64}`;
+      setGenPreview({ dataUrl, size: result.size });
+      setGenStatus("ready");
+    } catch (e) {
+      setGenError((e as Error).message ?? String(e));
+      setGenStatus("error");
+    }
+  };
+
+  const togglePreview = async () => {
+    if (!genPreview) return;
+    let el = previewAudioRef.current;
+    if (!el) {
+      el = new Audio();
+      el.volume = volume;
+      previewAudioRef.current = el;
+    }
+    if (!el.paused) { el.pause(); el.currentTime = 0; return; }
+    el.src = genPreview.dataUrl;
+    try { await el.play(); } catch (e) { setGenError((e as Error).message); }
+  };
+
+  const slugify = (s: string) =>
+    s.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 48);
+
+  const saveGenerated = () => {
+    if (!genPreview) return;
+    const baseSlug = slugify(draftLabel || prompt) || `draft-${Date.now()}`;
+    const existing = new Set(getDrafts().map((d) => d.name));
+    let name = baseSlug;
+    let i = 2;
+    while (existing.has(name)) name = `${baseSlug}-${i++}`;
+    saveDraft({
+      name,
+      label: draftLabel.trim() || prompt.trim().slice(0, 60),
+      prompt: prompt.trim(),
+      durationSeconds: duration,
+      dataUrl: genPreview.dataUrl,
+      size: genPreview.size,
+      createdAt: new Date().toISOString(),
+    });
+    setGenPreview(null);
+    setGenStatus("idle");
+    setPrompt("");
+    setDraftLabel("");
+  };
+
+  const assignGeneratedTo = (slotKey: string) => {
+    if (!genPreview || !slotKey) return;
+    setOverride(slotKey, genPreview.dataUrl);
   };
 
   return (
     <div className="min-h-screen bg-background text-foreground px-6 py-10 sm:px-10">
       <div className="mx-auto max-w-6xl space-y-10">
         <header className="space-y-2">
-          <p className="text-[10px] tracking-[0.28em] uppercase text-foreground/50">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-1 text-[11px] uppercase tracking-[0.22em] text-foreground/55 hover:text-foreground/90"
+          >
+            ← Back to Decision Nodes
+          </Link>
+          <p className="text-[10px] tracking-[0.28em] uppercase text-foreground/50 pt-2">
             Admin · temporary
           </p>
           <h1 className="font-display text-3xl sm:text-4xl">Sound Studio</h1>
@@ -299,6 +410,108 @@ function SoundStudio() {
           )}
         </section>
 
+        <section className="space-y-3 rounded-md border border-foreground/15 bg-background/40 p-5">
+          <div className="flex items-baseline justify-between gap-3">
+            <h2 className="font-display text-lg">Generate new sound</h2>
+            <span className="text-[10px] uppercase tracking-[0.22em] text-foreground/45">
+              ElevenLabs · sound-generation
+            </span>
+          </div>
+          <p className="text-xs text-foreground/55">
+            Generate an ambient bed from a text prompt. Preview it here, then assign
+            to a slot directly or save it as a named draft (stored in this browser).
+          </p>
+
+          <div className="grid gap-3 sm:grid-cols-[1fr_140px_auto]">
+            <input
+              type="text"
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              placeholder="Frozen checkpoint at night. Wind, idling diesel engine, distant boots on snow."
+              className="rounded border border-foreground/20 bg-background px-3 py-2 text-sm text-foreground/90 placeholder:text-foreground/35 focus:border-foreground/50 focus:outline-none"
+            />
+            <label className="flex items-center gap-2 text-xs text-foreground/65">
+              <span className="uppercase tracking-[0.18em]">Length</span>
+              <select
+                value={duration}
+                onChange={(e) => setDuration(Number(e.target.value))}
+                className="flex-1 rounded border border-foreground/20 bg-background px-2 py-2 text-xs text-foreground/85"
+              >
+                {[5, 8, 12, 16, 20, 22].map((d) => (
+                  <option key={d} value={d}>{d}s</option>
+                ))}
+              </select>
+            </label>
+            <button
+              type="button"
+              onClick={doGenerate}
+              disabled={genStatus === "generating"}
+              className="rounded border border-foreground/30 px-4 py-2 text-[11px] uppercase tracking-[0.22em] text-foreground/90 hover:border-foreground/60 disabled:opacity-50"
+            >
+              {genStatus === "generating" ? "Generating…" : "Generate"}
+            </button>
+          </div>
+
+          {genError && (
+            <div className="rounded border border-red-400/40 bg-red-500/10 px-3 py-2 text-xs text-red-200">
+              {genError}
+            </div>
+          )}
+
+          {genPreview && (
+            <div className="space-y-3 rounded border border-sky-400/30 bg-sky-400/5 p-3">
+              <div className="flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  onClick={togglePreview}
+                  className="rounded border border-foreground/30 px-3 py-1.5 text-[11px] uppercase tracking-[0.22em] text-foreground/85 hover:border-foreground/60"
+                >
+                  Play / stop preview
+                </button>
+                <span className="text-[11px] text-foreground/55 tabular-nums">
+                  {formatBytes(genPreview.size)} · {duration}s
+                </span>
+              </div>
+              <div className="grid gap-2 sm:grid-cols-[1fr_auto]">
+                <input
+                  type="text"
+                  value={draftLabel}
+                  onChange={(e) => setDraftLabel(e.target.value)}
+                  placeholder="Name this draft (optional)"
+                  className="rounded border border-foreground/20 bg-background px-3 py-2 text-sm text-foreground/85 placeholder:text-foreground/35"
+                />
+                <button
+                  type="button"
+                  onClick={saveGenerated}
+                  className="rounded border border-emerald-400/40 px-3 py-2 text-[11px] uppercase tracking-[0.22em] text-emerald-200 hover:border-emerald-300"
+                >
+                  Save as draft
+                </button>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-[11px] uppercase tracking-[0.18em] text-foreground/55">
+                  Assign directly to
+                </span>
+                <select
+                  value=""
+                  onChange={(e) => {
+                    assignGeneratedTo(e.target.value);
+                    e.currentTarget.value = "";
+                  }}
+                  className="rounded border border-foreground/20 bg-background px-2 py-1 text-xs text-foreground/85"
+                >
+                  <option value="">Choose slot…</option>
+                  {slots.map((s) => (
+                    <option key={s.key} value={s.key}>{s.label}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          )}
+        </section>
+
+
+
         {missingSlots.length > 0 && (
           <section className="rounded-md border border-amber-400/30 bg-amber-400/5 p-4 text-xs text-amber-200/90">
             <div className="mb-2 tracking-[0.22em] uppercase">Slots with no audio</div>
@@ -324,18 +537,36 @@ function SoundStudio() {
               {rows.map((row) => {
                 const status = statuses[row.key] ?? "idle";
                 const err = errors[row.key];
-                const assignedSlotKeys = basenameToSlots.get(row.key) ?? [];
+                const assignedSlotKeys = basenameToSlots.get(row.assignmentValue) ?? [];
                 return (
                   <tr key={row.key} className="border-t border-foreground/5 align-top">
                     <td className="px-3 py-3"><StatusPill s={status} /></td>
                     <td className="px-3 py-3">
-                      <div className="text-foreground/90">{row.displayName}</div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-foreground/90">{row.displayName}</span>
+                        {row.kind === "draft" && (
+                          <span className="rounded bg-sky-400/15 px-1.5 py-0.5 text-[9px] uppercase tracking-[0.18em] text-sky-200">
+                            draft
+                          </span>
+                        )}
+                      </div>
                       <div className="text-[11px] text-foreground/45">{row.filename}</div>
-                      <code className="text-[10px] text-foreground/35 break-all">{row.url}</code>
+                      {row.kind === "asset" && (
+                        <code className="text-[10px] text-foreground/35 break-all">{row.url}</code>
+                      )}
                       {err && (
                         <div className="mt-1 rounded border border-red-400/40 bg-red-500/10 px-2 py-1 text-[11px] text-red-200">
                           {err}
                         </div>
+                      )}
+                      {row.kind === "draft" && row.draftName && (
+                        <button
+                          type="button"
+                          onClick={() => deleteDraft(row.draftName!)}
+                          className="mt-1 text-[10px] uppercase tracking-[0.18em] text-foreground/40 hover:text-red-300"
+                        >
+                          Delete draft
+                        </button>
                       )}
                     </td>
                     <td className="px-3 py-3 text-xs text-foreground/70">
@@ -344,7 +575,7 @@ function SoundStudio() {
                       ) : (
                         <ul className="space-y-0.5">
                           {assignedSlotKeys.map((k) => {
-                            const isOverride = overrides[k] === row.key;
+                            const isOverride = overrides[k] === row.assignmentValue;
                             return (
                               <li key={k} className="flex items-center gap-2">
                                 <span>{slotLabel(slots, k)}</span>
@@ -371,7 +602,12 @@ function SoundStudio() {
                         <option value="">Assign to…</option>
                         {slots.map((s) => {
                           const current = effectiveAssignment(s, overrides);
-                          const tag = current === row.key ? " ✓" : current ? ` (${displayNameFor(current)})` : " (empty)";
+                          const currentLabel = !current
+                            ? " (empty)"
+                            : current.startsWith("data:")
+                              ? " (draft)"
+                              : ` (${displayNameFor(current)})`;
+                          const tag = current === row.assignmentValue ? " ✓" : currentLabel;
                           return (
                             <option key={s.key} value={s.key}>
                               {s.label}{tag}
