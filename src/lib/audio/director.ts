@@ -350,10 +350,12 @@ class Director {
       case "silence":   ok = await trackedSwitch(null, "bed:silence", fade); break;
     }
     if (!ok) {
-      if (screen === "mission") {
+      if (screen === "mission" || screen === "analysis") {
         await trackedSwitch("__archive__", "bed:archive (fallback)", Math.max(800, fade));
-      } else if (screen === "analysis") {
-        await trackedSwitch("__archive__", "bed:archive (fallback)", Math.max(800, fade));
+      } else if (screen === "landing" || screen === "archive") {
+        // Last-ditch: try the other system bed so the room is never silent.
+        const alt = screen === "landing" ? "__archive__" : "__landing__";
+        await trackedSwitch(alt, `bed:${alt} (fallback)`, Math.max(800, fade));
       }
     }
     this.emit();
