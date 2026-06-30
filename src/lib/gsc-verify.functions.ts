@@ -83,7 +83,9 @@ export const verifySite = createServerFn({ method: "POST" })
     async ({
       data,
     }): Promise<{ ok: boolean; verified: boolean; added: boolean; message: string }> => {
+      assertAdminToken(data.adminToken);
       const siteUrl = normalizeSiteUrl(data.siteUrl);
+
 
       const verifyRes = await fetch(
         `${GATEWAY}/siteVerification/v1/webResource?verificationMethod=META`,
