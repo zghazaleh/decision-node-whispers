@@ -26,6 +26,7 @@ import { Route as DiagnosticsAudioRouteImport } from './routes/diagnostics.audio
 import { Route as BlogDecisionMakingFrameworksGuideRouteImport } from './routes/blog.decision-making-frameworks-guide'
 import { Route as ApiTranscribeRouteImport } from './routes/api/transcribe'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as AdminSoundRouteImport } from './routes/admin.sound'
 import { Route as AdminGscVerifyRouteImport } from './routes/admin.gsc-verify'
 import { Route as AdminGscRouteImport } from './routes/admin.gsc'
 import { Route as AdminEvaluationRouteImport } from './routes/admin.evaluation'
@@ -116,6 +117,11 @@ const ApiChatRoute = ApiChatRouteImport.update({
   path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminSoundRoute = AdminSoundRouteImport.update({
+  id: '/admin/sound',
+  path: '/admin/sound',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminGscVerifyRoute = AdminGscVerifyRouteImport.update({
   id: '/admin/gsc-verify',
   path: '/admin/gsc-verify',
@@ -147,6 +153,7 @@ export interface FileRoutesByFullPath {
   '/admin/evaluation': typeof AdminEvaluationRoute
   '/admin/gsc': typeof AdminGscRoute
   '/admin/gsc-verify': typeof AdminGscVerifyRoute
+  '/admin/sound': typeof AdminSoundRoute
   '/api/chat': typeof ApiChatRoute
   '/api/transcribe': typeof ApiTranscribeRoute
   '/blog/decision-making-frameworks-guide': typeof BlogDecisionMakingFrameworksGuideRoute
@@ -169,6 +176,7 @@ export interface FileRoutesByTo {
   '/admin/evaluation': typeof AdminEvaluationRoute
   '/admin/gsc': typeof AdminGscRoute
   '/admin/gsc-verify': typeof AdminGscVerifyRoute
+  '/admin/sound': typeof AdminSoundRoute
   '/api/chat': typeof ApiChatRoute
   '/api/transcribe': typeof ApiTranscribeRoute
   '/blog/decision-making-frameworks-guide': typeof BlogDecisionMakingFrameworksGuideRoute
@@ -192,6 +200,7 @@ export interface FileRoutesById {
   '/admin/evaluation': typeof AdminEvaluationRoute
   '/admin/gsc': typeof AdminGscRoute
   '/admin/gsc-verify': typeof AdminGscVerifyRoute
+  '/admin/sound': typeof AdminSoundRoute
   '/api/chat': typeof ApiChatRoute
   '/api/transcribe': typeof ApiTranscribeRoute
   '/blog/decision-making-frameworks-guide': typeof BlogDecisionMakingFrameworksGuideRoute
@@ -216,6 +225,7 @@ export interface FileRouteTypes {
     | '/admin/evaluation'
     | '/admin/gsc'
     | '/admin/gsc-verify'
+    | '/admin/sound'
     | '/api/chat'
     | '/api/transcribe'
     | '/blog/decision-making-frameworks-guide'
@@ -238,6 +248,7 @@ export interface FileRouteTypes {
     | '/admin/evaluation'
     | '/admin/gsc'
     | '/admin/gsc-verify'
+    | '/admin/sound'
     | '/api/chat'
     | '/api/transcribe'
     | '/blog/decision-making-frameworks-guide'
@@ -260,6 +271,7 @@ export interface FileRouteTypes {
     | '/admin/evaluation'
     | '/admin/gsc'
     | '/admin/gsc-verify'
+    | '/admin/sound'
     | '/api/chat'
     | '/api/transcribe'
     | '/blog/decision-making-frameworks-guide'
@@ -283,6 +295,7 @@ export interface RootRouteChildren {
   AdminEvaluationRoute: typeof AdminEvaluationRoute
   AdminGscRoute: typeof AdminGscRoute
   AdminGscVerifyRoute: typeof AdminGscVerifyRoute
+  AdminSoundRoute: typeof AdminSoundRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiTranscribeRoute: typeof ApiTranscribeRoute
   BlogDecisionMakingFrameworksGuideRoute: typeof BlogDecisionMakingFrameworksGuideRoute
@@ -412,6 +425,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/sound': {
+      id: '/admin/sound'
+      path: '/admin/sound'
+      fullPath: '/admin/sound'
+      preLoaderRoute: typeof AdminSoundRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/gsc-verify': {
       id: '/admin/gsc-verify'
       path: '/admin/gsc-verify'
@@ -451,6 +471,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminEvaluationRoute: AdminEvaluationRoute,
   AdminGscRoute: AdminGscRoute,
   AdminGscVerifyRoute: AdminGscVerifyRoute,
+  AdminSoundRoute: AdminSoundRoute,
   ApiChatRoute: ApiChatRoute,
   ApiTranscribeRoute: ApiTranscribeRoute,
   BlogDecisionMakingFrameworksGuideRoute:
