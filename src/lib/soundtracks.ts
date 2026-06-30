@@ -1,5 +1,6 @@
-import { audioUrlVariants } from "@/lib/audio/assets";
+import { audioUrl, audioUrlVariants } from "@/lib/audio/assets";
 import { pickSessionVariant } from "@/lib/audio/sessionVariant";
+import { getOverrideFor } from "@/lib/audio/assignmentOverrides";
 
 // Existing per-mission pointers kept as fallbacks for missions whose beds
 // pre-date the ElevenLabs revamp. New beds (and variants) are resolved by
