@@ -200,8 +200,17 @@ function SoundStudio() {
     }
   };
 
-  // Cleanup on unmount.
-  useEffect(() => () => stopAll(), []);
+  // Eagerly preload every registered audio file on mount so the status
+  // column reflects actual cache/load state rather than waiting for a click.
+  useEffect(() => {
+    for (const row of rows) {
+      const el = ensureAudio(row);
+      setStatuses((p) => (p[row.key] ? p : { ...p, [row.key]: "loading" }));
+      try { el.load(); } catch { /* noop */ }
+    }
+    return () => stopAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rows]);
 
   const total = rows.length;
   const totalBytes = rows.reduce((n, r) => n + r.size, 0);
