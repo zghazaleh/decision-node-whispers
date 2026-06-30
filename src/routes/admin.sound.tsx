@@ -134,6 +134,10 @@ function useOverrides(): OverrideMap {
   return useSyncExternalStore(subscribeOverrides, getOverrides, () => ({}));
 }
 
+function useDrafts(): Draft[] {
+  return useSyncExternalStore(subscribeOverrides, getDrafts, () => [] as Draft[]);
+}
+
 function formatBytes(n: number): string {
   if (n < 1024) return `${n} B`;
   if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
@@ -143,7 +147,8 @@ function formatBytes(n: number): string {
 type Status = "idle" | "loading" | "ready" | "playing" | "error";
 
 function SoundStudio() {
-  const rows = useMemo(buildRows, []);
+  const drafts = useDrafts();
+  const rows = useMemo(() => buildRows(drafts), [drafts]);
   const slots = useMemo(buildAssignmentSlots, []);
   const overrides = useOverrides();
 
