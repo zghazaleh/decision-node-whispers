@@ -1,5 +1,6 @@
-import { audioUrlVariants } from "@/lib/audio/assets";
+import { audioUrl, audioUrlVariants } from "@/lib/audio/assets";
 import { pickSessionVariant } from "@/lib/audio/sessionVariant";
+import { getOverrideFor } from "@/lib/audio/assignmentOverrides";
 
 // Existing per-mission pointers kept as fallbacks for missions whose beds
 // pre-date the ElevenLabs revamp. New beds (and variants) are resolved by
@@ -66,7 +67,19 @@ const _missions: Record<string, Soundtrack | null> = {
 export const SOUNDTRACKS = _missions as Record<string, Soundtrack>;
 
 export function getSoundtrack(missionId: string): Soundtrack | null {
-  return _missions[missionId] ?? null;
+  const base = _missions[missionId] ?? null;
+  const override = getOverrideFor(missionId);
+  if (override) {
+    const url = audioUrl(override);
+    if (url) {
+      return {
+        url,
+        mood: base?.mood ?? `Override → ${override}`,
+        volume: base?.volume ?? 0.3,
+      };
+    }
+  }
+  return base;
 }
 
 export function getSoundtrackUrls(options: { missionsOnly?: boolean } = {}): string[] {
