@@ -68,11 +68,24 @@ export const SOUNDTRACKS = _missions as Record<string, Soundtrack>;
 
 export function getSoundtrack(missionId: string): Soundtrack | null {
   const base = _missions[missionId] ?? null;
-  const override = getOverrideFor(missionId);
-  if (override) {
+  let override: string | null = null;
+  try {
+    override = getOverrideFor(missionId);
+  } catch {
+    override = null;
+  }
+  if (override && typeof override === "string" && override.length > 0) {
     // Override may be either a registered basename or a data: URL pointing
-    // at a Sound Studio draft generated in this browser.
-    const url = override.startsWith("data:") ? override : audioUrl(override);
+    // at a Sound Studio draft. Validate both — a missing/corrupt override
+    // must never silence the room; fall through to the authored base bed.
+    let url: string | null = null;
+    if (override.startsWith("data:")) {
+      if (/^data:audio\/[a-z0-9+.-]+;base64,[A-Za-z0-9+/=]{256,}$/i.test(override)) {
+        url = override;
+      }
+    } else {
+      url = audioUrl(override);
+    }
     if (url) {
       return {
         url,

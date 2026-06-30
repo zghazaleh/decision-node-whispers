@@ -111,6 +111,28 @@ const MAX_ATTEMPTS = 80;
 let attemptSeq = 0;
 const GLOBAL_ARM_KEY = "__dnAudioGestureArmed";
 
+// One-time cleanup of any Sound Studio state that could silence the
+// platform — overrides pointing at deleted drafts, drafts with invalid
+// data URLs, a leftover failure-simulation toggle, or stale IndexedDB
+// audio buffers. Bump the version suffix to re-run for every existing
+// user after a release.
+const AUDIO_RESET_KEY = "dn:audio-reset:v2";
+function runOneTimeAudioReset() {
+  if (typeof window === "undefined") return;
+  try {
+    if (window.localStorage.getItem(AUDIO_RESET_KEY) === "1") return;
+    window.localStorage.removeItem("sound-studio:assignment-overrides:v1");
+    window.localStorage.removeItem("sound-studio:drafts:v1");
+    window.localStorage.removeItem("dn:audio-simulate-failures");
+    window.localStorage.setItem(AUDIO_RESET_KEY, "1");
+    if (typeof indexedDB !== "undefined") {
+      try { indexedDB.deleteDatabase("dn-audio-cache"); } catch { /* noop */ }
+    }
+  } catch { /* localStorage blocked — nothing to clean up */ }
+}
+runOneTimeAudioReset();
+
+
 class Director {
   private ambient: Ambient | null = null;
   private screen: Screen | null = null;
@@ -328,10 +350,12 @@ class Director {
       case "silence":   ok = await trackedSwitch(null, "bed:silence", fade); break;
     }
     if (!ok) {
-      if (screen === "mission") {
+      if (screen === "mission" || screen === "analysis") {
         await trackedSwitch("__archive__", "bed:archive (fallback)", Math.max(800, fade));
-      } else if (screen === "analysis") {
-        await trackedSwitch("__archive__", "bed:archive (fallback)", Math.max(800, fade));
+      } else if (screen === "landing" || screen === "archive") {
+        // Last-ditch: try the other system bed so the room is never silent.
+        const alt = screen === "landing" ? "__archive__" : "__landing__";
+        await trackedSwitch(alt, `bed:${alt} (fallback)`, Math.max(800, fade));
       }
     }
     this.emit();
