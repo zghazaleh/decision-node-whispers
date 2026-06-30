@@ -87,11 +87,9 @@ export function StreamingText({
     >
       {shown}
       {!isComplete && (
-        <span
-          aria-hidden
-          className="inline-block w-[0.5ch] -mb-[0.05em] ml-[0.05em] align-baseline bg-accent/70 animate-pulse"
-          style={{ height: "1em" }}
-        />
+        <span aria-hidden className="animate-pulse text-accent/70">
+          ▍
+        </span>
       )}
     </Tag>
   );
