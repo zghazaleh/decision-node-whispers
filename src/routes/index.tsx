@@ -11,13 +11,13 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Wake up in someone else's life. One irreversible decision. An interactive drama you play through dialogue.",
+          "20 moral dilemmas. One irreversible decision each. Find out how you decide.",
       },
       { property: "og:title", content: "Decision Nodes — An Interactive Drama" },
       {
         property: "og:description",
         content:
-          "Wake up in someone else's life. One irreversible decision. An interactive drama you play through dialogue.",
+          "20 moral dilemmas. One irreversible decision each. Find out how you decide.",
       },
       { property: "og:url", content: "https://decision-nodes.com/" },
     ],
