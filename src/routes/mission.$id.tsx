@@ -76,8 +76,46 @@ export const Route = createFileRoute("/mission/$id")({
     };
   },
   component: MissionRoute,
+  // Mission-local recovery: a transient AI/network hiccup or an unhandled
+  // component error should NOT escalate to the global "signal broke" screen
+  // (which would lose the player's in-progress mission state). Catch it
+  // here, log it, and offer a one-tap retry that re-runs the loader and
+  // resets the boundary in place. Mission state lives in localStorage, so
+  // the conversation is preserved across the retry.
+  errorComponent: MissionErrorComponent,
   ssr: false,
 });
+
+function MissionErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
+  // Surface to console + Lovable error reporting, but keep the player in the mission.
+  // eslint-disable-next-line no-console
+  console.error("[mission] recoverable error", error);
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+      <div className="max-w-md text-center">
+        <p className="font-display text-3xl text-foreground">A beat was missed.</p>
+        <p className="mt-3 text-sm text-muted-foreground">
+          The line dropped for a second. Your progress is saved — pick it back up.
+        </p>
+        <div className="mt-8 flex justify-center gap-6 text-sm tracking-[0.2em] uppercase">
+          <button
+            onClick={() => reset()}
+            className="text-foreground/80 hover:text-foreground border-b border-foreground/30 hover:border-foreground pb-1 transition-colors"
+          >
+            Continue
+          </button>
+          <a
+            href="/"
+            className="text-foreground/80 hover:text-foreground border-b border-foreground/30 hover:border-foreground pb-1 transition-colors"
+          >
+            Home
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 
 function MissionRoute() {
   const { id } = Route.useParams();
