@@ -3,8 +3,9 @@
 // each one through a plain <audio> element, and surfaces load failures
 // prominently. Remove this route when the audio investigation is done.
 
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { SOUNDTRACKS, getSoundtrack, type Soundtrack } from "@/lib/soundtracks";
 import { displayNameFor } from "@/lib/audio/displayNames";
 import {
@@ -12,8 +13,13 @@ import {
   setOverride,
   clearOverrides,
   subscribeOverrides,
+  getDrafts,
+  saveDraft,
+  deleteDraft,
+  type Draft,
   type OverrideMap,
 } from "@/lib/audio/assignmentOverrides";
+import { generateAmbientBed } from "@/lib/sound-studio.functions";
 
 export const Route = createFileRoute("/admin/sound")({
   head: () => ({
