@@ -39,12 +39,15 @@ type AssetMeta = {
 };
 
 type Row = {
-  key: string;             // pointer file basename without `.mp3.asset.json`
+  key: string;              // pointer file basename, or `draft:<name>` for drafts
+  kind: "asset" | "draft";
   displayName: string;
   filename: string;
   url: string;
+  assignmentValue: string;  // value stored in override map (basename or data: URL)
   size: number;
   contentType: string;
+  draftName?: string;
 };
 
 // Eager-glob every pointer JSON so we always see the full set.
