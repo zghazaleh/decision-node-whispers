@@ -280,7 +280,80 @@ function SoundStudio() {
 
   const onAssign = (row: Row, slotKey: string) => {
     if (!slotKey) return;
-    setOverride(slotKey, row.key);
+    setOverride(slotKey, row.assignmentValue);
+  };
+
+  // ----- Generate New Sound -----
+  const generate = useServerFn(generateAmbientBed);
+  const [prompt, setPrompt] = useState("");
+  const [draftLabel, setDraftLabel] = useState("");
+  const [duration, setDuration] = useState(12);
+  const [genStatus, setGenStatus] = useState<"idle" | "generating" | "ready" | "error">("idle");
+  const [genError, setGenError] = useState<string | null>(null);
+  const [genPreview, setGenPreview] = useState<{ dataUrl: string; size: number } | null>(null);
+  const previewAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  const doGenerate = async () => {
+    if (prompt.trim().length < 3) {
+      setGenError("Prompt must be at least 3 characters.");
+      setGenStatus("error");
+      return;
+    }
+    setGenError(null);
+    setGenStatus("generating");
+    setGenPreview(null);
+    try {
+      const result = await generate({ data: { prompt: prompt.trim(), durationSeconds: duration } });
+      const dataUrl = `data:${result.mimeType};base64,${result.base64}`;
+      setGenPreview({ dataUrl, size: result.size });
+      setGenStatus("ready");
+    } catch (e) {
+      setGenError((e as Error).message ?? String(e));
+      setGenStatus("error");
+    }
+  };
+
+  const togglePreview = async () => {
+    if (!genPreview) return;
+    let el = previewAudioRef.current;
+    if (!el) {
+      el = new Audio();
+      el.volume = volume;
+      previewAudioRef.current = el;
+    }
+    if (!el.paused) { el.pause(); el.currentTime = 0; return; }
+    el.src = genPreview.dataUrl;
+    try { await el.play(); } catch (e) { setGenError((e as Error).message); }
+  };
+
+  const slugify = (s: string) =>
+    s.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 48);
+
+  const saveGenerated = () => {
+    if (!genPreview) return;
+    const baseSlug = slugify(draftLabel || prompt) || `draft-${Date.now()}`;
+    const existing = new Set(getDrafts().map((d) => d.name));
+    let name = baseSlug;
+    let i = 2;
+    while (existing.has(name)) name = `${baseSlug}-${i++}`;
+    saveDraft({
+      name,
+      label: draftLabel.trim() || prompt.trim().slice(0, 60),
+      prompt: prompt.trim(),
+      durationSeconds: duration,
+      dataUrl: genPreview.dataUrl,
+      size: genPreview.size,
+      createdAt: new Date().toISOString(),
+    });
+    setGenPreview(null);
+    setGenStatus("idle");
+    setPrompt("");
+    setDraftLabel("");
+  };
+
+  const assignGeneratedTo = (slotKey: string) => {
+    if (!genPreview || !slotKey) return;
+    setOverride(slotKey, genPreview.dataUrl);
   };
 
   return (
