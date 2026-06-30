@@ -9,6 +9,7 @@ import { NoticedRail } from "@/components/NoticedRail";
 import { ShareCard } from "@/components/ShareCard";
 import { ReadingShareCard } from "@/components/ReadingShareCard";
 import { AlternatePaths } from "@/components/AlternatePaths";
+import { ChosenSecondOrder } from "@/components/ChosenSecondOrder";
 import { CommunityStats } from "@/components/CommunityStats";
 import { MISSIONS } from "@/lib/missions";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -355,6 +356,15 @@ function AnalysisDebrief({
           <WhatHappenedFilm beats={condensed} missionId={mission.missionId} />
         </section>
       )}
+
+      {/* Block 2b — Second-order ripples on the chosen path */}
+      <section className="animate-fade-up" style={{ animationDelay: "0.22s" }}>
+        <ChosenSecondOrder
+          missionId={mission.missionId}
+          chosenArchetypeId={mission.archetypeId ?? a.archetypeId}
+        />
+      </section>
+
 
       {/* Block 3 — How you reasoned */}
       {a.reasoningEcho && (
