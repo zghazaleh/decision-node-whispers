@@ -181,11 +181,14 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
   // (deliberation inside the modal) separately from total investigation time.
   const decideOpenedAtRef = useRef<number | null>(null);
 
-  // Ambient score — the root gesture listener unlocks the Web Audio context;
-  // this route always declares the current room so a delayed unlock can enter it.
-  useEffect(() => {
-    void audio.enter("mission", { missionId: MISSION_ID, profile: ENGINE.atmosphere });
-  }, [MISSION_ID, ENGINE.atmosphere]);
+  // Ambient score — useRoomEntrance enters immediately if the engine is
+  // already ignited, otherwise arms a one-shot pointer/keydown listener so
+  // the bed fires the moment the player makes their first gesture (browser
+  // autoplay policy unlock). Without this fallback, landing on this route
+  // via a direct URL leaves the bed silent until the user happens to
+  // trigger the global unlock listener — which can race the route's
+  // own enter() call.
+  useRoomEntrance("mission", { missionId: MISSION_ID, profile: ENGINE.atmosphere });
 
 
   const transcriptRef = useRef<HTMLDivElement>(null);
