@@ -692,12 +692,13 @@ export function createAmbient(initialMissionId: string | null = null): Ambient {
 
 
     async ignite() {
-      const c = ensureCtx(); if (!c) return;
-      if (c.state === "suspended") { try { await c.resume(); } catch { /* noop */ } }
-      // Mark the engine as running so subsequent `switchTo` calls actually
-      // start a bed instead of deferring forever (pendingMission only).
+      const c = ensureCtx(); if (!c) { console.warn("[ambient] ignite: no AudioContext"); return; }
+      console.debug(`[ambient] ignite (ctx=${c.state}, pending=${pendingMission})`);
+      if (c.state === "suspended") {
+        try { await c.resume(); } catch (err) { console.warn("[ambient] ignite: resume() failed", err); }
+      }
+      console.debug(`[ambient] ignited (ctx=${c.state})`);
       stopped = false;
-      // If a bed was requested before ignition, honor it now.
       if (pendingMission && !current) {
         const next = await playMission(pendingMission, 2200);
         if (next) current = next;
