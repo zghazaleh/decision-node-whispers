@@ -29,7 +29,10 @@ function normalizeSiteUrl(input: string): string {
   return `${u.protocol}//${u.host}${u.pathname}`;
 }
 
-const siteInput = z.object({ siteUrl: z.string().min(1) });
+const siteInput = z.object({
+  adminToken: z.string().min(1),
+  siteUrl: z.string().min(1).max(2048),
+});
 
 export type VerificationTokenRow = {
   siteUrl: string;
@@ -41,8 +44,10 @@ export type VerificationTokenRow = {
 export const requestMetaToken = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => siteInput.parse(data))
   .handler(async ({ data }): Promise<VerificationTokenRow> => {
+    assertAdminToken(data.adminToken);
     const siteUrl = normalizeSiteUrl(data.siteUrl);
     const res = await fetch(`${GATEWAY}/siteVerification/v1/token`, {
+
       method: "POST",
       headers: authHeaders(),
       body: JSON.stringify({
