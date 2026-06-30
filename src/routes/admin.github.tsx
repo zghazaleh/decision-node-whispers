@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { getConstitutionStatus } from "@/lib/admin/github.functions";
+import { getConstitutionStatus } from "@/lib/constitution.functions";
 import { FileText, CheckCircle2, XCircle, Github } from "lucide-react";
 
 export const Route = createFileRoute("/admin/github")({
