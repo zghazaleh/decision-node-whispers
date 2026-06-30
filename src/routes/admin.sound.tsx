@@ -4,8 +4,16 @@
 // prominently. Remove this route when the audio investigation is done.
 
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { SOUNDTRACKS, type Soundtrack } from "@/lib/soundtracks";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { SOUNDTRACKS, getSoundtrack, type Soundtrack } from "@/lib/soundtracks";
+import { displayNameFor } from "@/lib/audio/displayNames";
+import {
+  getOverrides,
+  setOverride,
+  clearOverrides,
+  subscribeOverrides,
+  type OverrideMap,
+} from "@/lib/audio/assignmentOverrides";
 
 export const Route = createFileRoute("/admin/sound")({
   head: () => ({
@@ -26,11 +34,11 @@ type AssetMeta = {
 
 type Row = {
   key: string;             // pointer file basename without `.mp3.asset.json`
+  displayName: string;
   filename: string;
   url: string;
   size: number;
   contentType: string;
-  assignments: string[];   // human-readable list of where this is used
 };
 
 // Eager-glob every pointer JSON so we always see the full set.
@@ -39,64 +47,64 @@ const pointers = import.meta.glob<AssetMeta>(
   { eager: true, import: "default" },
 );
 
-function buildRows(): Row[] {
-  // Reverse map: url -> assignment labels
-  const urlToAssignments = new Map<string, string[]>();
-  const add = (url: string, label: string) => {
-    const arr = urlToAssignments.get(url) ?? [];
-    arr.push(label);
-    urlToAssignments.set(url, arr);
-  };
-  for (const [key, track] of Object.entries(SOUNDTRACKS) as [string, Soundtrack | null][]) {
-    if (!track?.url) continue;
-    const label =
-      key === "__landing__" ? "Landing bed" :
-      key === "__archive__" ? "Archive bed" :
-      key === "__analysis__" ? "Analysis bed" :
-      `Bed · ${key}`;
-    add(track.url, label);
-  }
-  // Known one-shots by filename.
-  const sfxLabels: Record<string, string> = {
-    "awakening": "SFX · mission awakening",
-    "commit": "SFX · commit",
-    "analyzing": "SFX · analyzing",
-    "node-motif": "SFX · node motif",
-    "hover-tick": "SFX · hover tick",
-    "select-chip": "SFX · select chip",
-  };
+// Every assignable slot the operator can wire an audio file to. Order
+// matters for the dropdown.
+type AssignmentSlot = { key: string; label: string };
 
+function buildAssignmentSlots(): AssignmentSlot[] {
+  const slots: AssignmentSlot[] = [];
+  for (let i = 1; i <= 20; i++) {
+    const id = `mission-${String(i).padStart(2, "0")}`;
+    slots.push({ key: id, label: `Mission ${String(i).padStart(2, "0")}` });
+  }
+  slots.push({ key: "__landing__", label: "Landing" });
+  slots.push({ key: "__archive__", label: "Case Archive" });
+  slots.push({ key: "__analysis__", label: "Analysis" });
+  return slots;
+}
+
+function buildRows(): Row[] {
   const rows: Row[] = [];
   for (const [path, meta] of Object.entries(pointers)) {
     const base = path.replace("/src/assets/audio/", "").replace(".mp3.asset.json", "");
-    const assignments = urlToAssignments.get(meta.url) ?? [];
-    if (sfxLabels[base]) assignments.push(sfxLabels[base]);
     rows.push({
       key: base,
+      displayName: displayNameFor(base),
       filename: meta.original_filename,
       url: meta.url,
       size: meta.size,
       contentType: meta.content_type,
-      assignments,
     });
   }
-  rows.sort((a, b) => a.key.localeCompare(b.key));
+  rows.sort((a, b) => a.displayName.localeCompare(b.displayName));
   return rows;
 }
 
-function buildMissingAssignments(rows: Row[]): string[] {
-  const present = new Set<string>();
-  for (const r of rows) for (const a of r.assignments) present.add(a);
-  const expected: string[] = [];
-  for (const key of Object.keys(SOUNDTRACKS)) {
-    const label =
-      key === "__landing__" ? "Landing bed" :
-      key === "__archive__" ? "Archive bed" :
-      key === "__analysis__" ? "Analysis bed" :
-      `Bed · ${key}`;
-    expected.push(label);
+function slotLabel(slots: AssignmentSlot[], key: string): string {
+  return slots.find((s) => s.key === key)?.label ?? key;
+}
+
+/**
+ * For each assignment slot, which audio basename is effectively bound to it
+ * right now (taking overrides into account). Returns null when the slot has
+ * no registered audio file.
+ */
+function effectiveAssignment(slot: AssignmentSlot, overrides: OverrideMap): string | null {
+  const override = overrides[slot.key];
+  if (override) return override;
+  const track = (SOUNDTRACKS as Record<string, Soundtrack | null>)[slot.key];
+  if (!track?.url) return null;
+  // Find the basename whose pointer URL matches.
+  for (const [path, meta] of Object.entries(pointers)) {
+    if (meta.url === track.url) {
+      return path.replace("/src/assets/audio/", "").replace(".mp3.asset.json", "");
+    }
   }
-  return expected.filter((label) => !present.has(label));
+  return null;
+}
+
+function useOverrides(): OverrideMap {
+  return useSyncExternalStore(subscribeOverrides, getOverrides, () => ({}));
 }
 
 function formatBytes(n: number): string {
@@ -109,14 +117,30 @@ type Status = "idle" | "loading" | "ready" | "playing" | "error";
 
 function SoundStudio() {
   const rows = useMemo(buildRows, []);
-  const missing = useMemo(() => buildMissingAssignments(rows), [rows]);
+  const slots = useMemo(buildAssignmentSlots, []);
+  const overrides = useOverrides();
+
+  // Map: basename -> list of slot keys currently routed to it.
+  const basenameToSlots = useMemo(() => {
+    const m = new Map<string, string[]>();
+    for (const slot of slots) {
+      const bn = effectiveAssignment(slot, overrides);
+      if (!bn) continue;
+      const arr = m.get(bn) ?? [];
+      arr.push(slot.key);
+      m.set(bn, arr);
+    }
+    return m;
+  }, [slots, overrides]);
+
+  const missingSlots = slots.filter((s) => effectiveAssignment(s, overrides) === null);
+
   const [volume, setVolume] = useState(0.8);
   const [statuses, setStatuses] = useState<Record<string, Status>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const audiosRef = useRef<Record<string, HTMLAudioElement>>({});
   const currentlyPlayingRef = useRef<string | null>(null);
 
-  // Apply volume changes live.
   useEffect(() => {
     for (const el of Object.values(audiosRef.current)) el.volume = volume;
   }, [volume]);
@@ -183,7 +207,6 @@ function SoundStudio() {
       setStatus(row.key, "ready");
       return;
     }
-    // Stop any other currently playing track for clarity.
     if (currentlyPlayingRef.current && currentlyPlayingRef.current !== row.key) {
       const other = audiosRef.current[currentlyPlayingRef.current];
       if (other) { other.pause(); other.currentTime = 0; }
@@ -200,8 +223,7 @@ function SoundStudio() {
     }
   };
 
-  // Eagerly preload every registered audio file on mount so the status
-  // column reflects actual cache/load state rather than waiting for a click.
+  // Eagerly preload every registered audio file on mount.
   useEffect(() => {
     for (const row of rows) {
       const el = ensureAudio(row);
@@ -212,14 +234,26 @@ function SoundStudio() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rows]);
 
+  // When an override changes, also force getSoundtrack to be consulted so
+  // anyone (debug surfaces, audio engine) sees the new mapping. Touching it
+  // here is harmless and helps keep the displayed mapping in sync.
+  useEffect(() => {
+    for (const slot of slots) getSoundtrack(slot.key);
+  }, [overrides, slots]);
+
   const total = rows.length;
   const totalBytes = rows.reduce((n, r) => n + r.size, 0);
   const failed = Object.values(statuses).filter((s) => s === "error").length;
-  const unassigned = rows.filter((r) => r.assignments.length === 0);
+  const overrideCount = Object.keys(overrides).length;
+
+  const onAssign = (row: Row, slotKey: string) => {
+    if (!slotKey) return;
+    setOverride(slotKey, row.key);
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground px-6 py-10 sm:px-10">
-      <div className="mx-auto max-w-5xl space-y-10">
+      <div className="mx-auto max-w-6xl space-y-10">
         <header className="space-y-2">
           <p className="text-[10px] tracking-[0.28em] uppercase text-foreground/50">
             Admin · temporary
@@ -227,12 +261,13 @@ function SoundStudio() {
           <h1 className="font-display text-3xl sm:text-4xl">Sound Studio</h1>
           <p className="text-sm text-foreground/60">
             {total} files · {formatBytes(totalBytes)} total · {failed} failed ·{" "}
-            {unassigned.length} unassigned. Use the buttons to audition each
-            file. Load errors show below their row.
+            {overrideCount} override{overrideCount === 1 ? "" : "s"} active.
+            Use the dropdown to reassign any file to a case or system screen —
+            changes persist in this browser.
           </p>
         </header>
 
-        <section className="flex items-center gap-4 rounded-md border border-foreground/15 bg-background/40 p-4">
+        <section className="flex flex-wrap items-center gap-4 rounded-md border border-foreground/15 bg-background/40 p-4">
           <label className="flex items-center gap-3 text-xs uppercase tracking-[0.22em] text-foreground/70">
             Volume
             <input
@@ -253,13 +288,22 @@ function SoundStudio() {
           >
             Stop all
           </button>
+          {overrideCount > 0 && (
+            <button
+              type="button"
+              onClick={() => clearOverrides()}
+              className="rounded border border-amber-400/40 px-3 py-1.5 text-[11px] uppercase tracking-[0.2em] text-amber-200 hover:border-amber-300"
+            >
+              Reset overrides
+            </button>
+          )}
         </section>
 
-        {missing.length > 0 && (
+        {missingSlots.length > 0 && (
           <section className="rounded-md border border-amber-400/30 bg-amber-400/5 p-4 text-xs text-amber-200/90">
-            <div className="mb-2 tracking-[0.22em] uppercase">Missing beds</div>
+            <div className="mb-2 tracking-[0.22em] uppercase">Slots with no audio</div>
             <ul className="grid grid-cols-2 gap-x-6 gap-y-1 sm:grid-cols-3">
-              {missing.map((m) => <li key={m}>{m}</li>)}
+              {missingSlots.map((m) => <li key={m.key}>{m.label}</li>)}
             </ul>
           </section>
         )}
@@ -269,8 +313,9 @@ function SoundStudio() {
             <thead className="bg-foreground/[0.04] text-[10px] uppercase tracking-[0.18em] text-foreground/55">
               <tr>
                 <th className="px-3 py-2 text-left font-normal">Status</th>
-                <th className="px-3 py-2 text-left font-normal">File</th>
-                <th className="px-3 py-2 text-left font-normal">Assignment</th>
+                <th className="px-3 py-2 text-left font-normal">Track</th>
+                <th className="px-3 py-2 text-left font-normal">Assigned to</th>
+                <th className="px-3 py-2 text-left font-normal">Reassign</th>
                 <th className="px-3 py-2 text-right font-normal">Size</th>
                 <th className="px-3 py-2 text-right font-normal">Action</th>
               </tr>
@@ -279,12 +324,14 @@ function SoundStudio() {
               {rows.map((row) => {
                 const status = statuses[row.key] ?? "idle";
                 const err = errors[row.key];
+                const assignedSlotKeys = basenameToSlots.get(row.key) ?? [];
                 return (
                   <tr key={row.key} className="border-t border-foreground/5 align-top">
                     <td className="px-3 py-3"><StatusPill s={status} /></td>
                     <td className="px-3 py-3">
-                      <div className="text-foreground/90">{row.filename}</div>
-                      <code className="text-[10px] text-foreground/40 break-all">{row.url}</code>
+                      <div className="text-foreground/90">{row.displayName}</div>
+                      <div className="text-[11px] text-foreground/45">{row.filename}</div>
+                      <code className="text-[10px] text-foreground/35 break-all">{row.url}</code>
                       {err && (
                         <div className="mt-1 rounded border border-red-400/40 bg-red-500/10 px-2 py-1 text-[11px] text-red-200">
                           {err}
@@ -292,13 +339,46 @@ function SoundStudio() {
                       )}
                     </td>
                     <td className="px-3 py-3 text-xs text-foreground/70">
-                      {row.assignments.length === 0 ? (
+                      {assignedSlotKeys.length === 0 ? (
                         <span className="italic text-foreground/40">unassigned</span>
                       ) : (
                         <ul className="space-y-0.5">
-                          {row.assignments.map((a) => <li key={a}>{a}</li>)}
+                          {assignedSlotKeys.map((k) => {
+                            const isOverride = overrides[k] === row.key;
+                            return (
+                              <li key={k} className="flex items-center gap-2">
+                                <span>{slotLabel(slots, k)}</span>
+                                {isOverride && (
+                                  <span className="rounded bg-amber-400/15 px-1.5 py-0.5 text-[9px] uppercase tracking-[0.18em] text-amber-200">
+                                    override
+                                  </span>
+                                )}
+                              </li>
+                            );
+                          })}
                         </ul>
                       )}
+                    </td>
+                    <td className="px-3 py-3">
+                      <select
+                        value=""
+                        onChange={(e) => {
+                          onAssign(row, e.target.value);
+                          e.currentTarget.value = "";
+                        }}
+                        className="rounded border border-foreground/20 bg-background px-2 py-1 text-xs text-foreground/80 hover:border-foreground/40"
+                      >
+                        <option value="">Assign to…</option>
+                        {slots.map((s) => {
+                          const current = effectiveAssignment(s, overrides);
+                          const tag = current === row.key ? " ✓" : current ? ` (${displayNameFor(current)})` : " (empty)";
+                          return (
+                            <option key={s.key} value={s.key}>
+                              {s.label}{tag}
+                            </option>
+                          );
+                        })}
+                      </select>
                     </td>
                     <td className="px-3 py-3 text-right text-foreground/60 tabular-nums whitespace-nowrap">
                       {formatBytes(row.size)}
