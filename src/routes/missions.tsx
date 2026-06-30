@@ -434,7 +434,7 @@ function MissionsPage() {
 
         {/* ---------- Case Archive header ---------- */}
         <div className="mb-3 mt-8 flex items-baseline gap-3 border-b border-foreground/10 pb-3">
-          <h2 className="font-display text-xl text-foreground/95">Case Archive</h2>
+          <h1 className="font-display text-xl text-foreground/95">Case Archive</h1>
           <span className="h-px flex-1 bg-foreground/10" aria-hidden />
           <div className="flex items-center gap-2">
             <span className="text-[0.55rem] tracking-[0.4em] uppercase text-muted-foreground/55">
