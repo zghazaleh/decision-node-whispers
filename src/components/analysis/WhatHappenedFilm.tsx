@@ -1,9 +1,8 @@
 // WhatHappenedFilm — the post-decision consequence timeline, rendered as a
-// three-frame film-noir sequence. The beats auto-advance (with a brief
-// page-flip whoosh between frames) and the player can also tap/click to
-// advance manually. Each beat is a full-viewport cinematic image with the
-// text overlaid; the transition is a horizontal flip/slide, like a film
-// frame being pulled across the gate.
+// three-frame film-noir sequence. The beats wait for the player: tap, click,
+// swipe, or use arrow keys to advance. Each beat is a full-viewport cinematic
+// image with the text overlaid; the transition is a horizontal flip/slide,
+// like a film frame being pulled across the gate.
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { audio } from "@/lib/audio/director";
@@ -18,8 +17,6 @@ const HORIZONS: { numeral: string; label: string; image: string; pan: string }[]
   { numeral: "II", label: "Medium term", image: beatMedium, pan: "50% 55%" },
   { numeral: "III", label: "Long after", image: beatLong, pan: "50% 45%" },
 ];
-
-const AUTO_ADVANCE_MS = 5200;
 
 function horizonsFor(count: number): typeof HORIZONS {
   if (count >= 3) return HORIZONS;
@@ -40,14 +37,16 @@ export function WhatHappenedFilm({ beats }: { beats: ReadonlyArray<Beat> }) {
 
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState<1 | -1>(1);
-  const timerRef = useRef<number | null>(null);
+  const [hasInteracted, setHasInteracted] = useState(false);
   const total = panels.length;
+  const touchStartX = useRef<number | null>(null);
 
   const goTo = useCallback(
     (next: number, dir: 1 | -1) => {
       if (next < 0 || next >= total) return;
       setDirection(dir);
       setIndex(next);
+      setHasInteracted(true);
       playFlipSound();
     },
     [total],
@@ -59,18 +58,9 @@ export function WhatHappenedFilm({ beats }: { beats: ReadonlyArray<Beat> }) {
       return prev + 1;
     });
     setDirection(1);
+    setHasInteracted(true);
     playFlipSound();
   }, [total]);
-
-  // Auto-advance until the last frame is reached, then settle.
-  useEffect(() => {
-    if (total <= 1) return;
-    if (index >= total - 1) return;
-    timerRef.current = window.setTimeout(advance, AUTO_ADVANCE_MS);
-    return () => {
-      if (timerRef.current) window.clearTimeout(timerRef.current);
-    };
-  }, [index, total, advance]);
 
   // Keyboard support: left/right arrows.
   useEffect(() => {
@@ -87,9 +77,29 @@ export function WhatHappenedFilm({ beats }: { beats: ReadonlyArray<Beat> }) {
       // After the final frame, tapping loops back to the first.
       goTo(0, 1);
     } else {
-      goTo(index + 1, 1);
+      advance();
     }
   };
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const diff = touchStartX.current - e.changedTouches[0].clientX;
+    if (diff > 50) {
+      // Swiped left → next
+      if (index >= total - 1) goTo(0, 1);
+      else advance();
+    } else if (diff < -50) {
+      // Swiped right → previous
+      goTo(index - 1, -1);
+    }
+    touchStartX.current = null;
+  };
+
+  const showHint = total > 1 && index < total - 1 && !hasInteracted;
 
   return (
     <section className="-mx-6 sm:-mx-10">
@@ -99,6 +109,8 @@ export function WhatHappenedFilm({ beats }: { beats: ReadonlyArray<Beat> }) {
       <div
         className="relative h-[72svh] sm:h-[78svh] max-h-[680px] w-full overflow-hidden bg-[#06070a] select-none cursor-pointer touch-manipulation"
         onClick={onStageClick}
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
         role="button"
         tabIndex={0}
         aria-label={`Frame ${index + 1} of ${total}. Tap to advance.`}
@@ -202,6 +214,31 @@ export function WhatHappenedFilm({ beats }: { beats: ReadonlyArray<Beat> }) {
             <span className="text-foreground/30"> / {String(total).padStart(2, "0")}</span>
           </span>
         </div>
+
+        {/* Swipe hint — appears on non-final frames until first interaction. */}
+        {showHint && (
+          <div className="pointer-events-none absolute bottom-14 sm:bottom-16 right-5 sm:right-10 z-10 flex items-center gap-2 animate-hint-nudge">
+            <span className="text-[0.55rem] tracking-[0.4em] uppercase text-foreground/50">
+              Swipe
+            </span>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+              className="text-foreground/50"
+              aria-hidden
+            >
+              <path
+                d="M3 8h10M9 4l4 4-4 4"
+                stroke="currentColor"
+                strokeWidth="1.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </div>
+        )}
 
         {/* Frame pips — bottom center, clickable jump. */}
         {total > 1 && (
