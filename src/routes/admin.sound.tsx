@@ -141,7 +141,6 @@ function SoundStudio() {
     el.addEventListener("playing", () => setStatus(row.key, "playing"));
     el.addEventListener("pause", () => {
       if (currentlyPlayingRef.current === row.key) currentlyPlayingRef.current = null;
-      setStatus(row.key, (prev) => (prev as unknown as Status) ?? "ready");
       setStatuses((p) => ({ ...p, [row.key]: el!.ended || el!.paused ? "ready" : p[row.key] }));
     });
     el.addEventListener("ended", () => {
