@@ -2,6 +2,7 @@ import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
 import { createServerFn } from "@tanstack/react-start";
 import { generateObject } from "ai";
 import { z } from "zod";
+import { checkRateLimit, sanitizeSessionId } from "@/lib/rate-limit.server";
 
 /**
  * Generates the "portrait statement" line shown on the Decision Profile card.
@@ -27,6 +28,7 @@ const PortraitInput = z.object({
   calibration: z.string().default(""),
   luckVsSkill: z.string().default(""),
   missionsCompleted: z.number().default(0),
+  sessionId: z.string().max(96).optional(),
 });
 
 const PortraitSchema = z.object({
@@ -44,6 +46,12 @@ export type PortraitOutput = z.infer<typeof PortraitSchema>;
 export const generatePortrait = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => PortraitInput.parse(data))
   .handler(async ({ data }) => {
+    // Share the analyze bucket — portraits are generated alongside analyses,
+    // so a burst of one implies a burst of the other.
+    const sessionId = sanitizeSessionId(data.sessionId);
+    const ok = await checkRateLimit(`analyze:${sessionId}`, 10, 3600);
+    if (!ok) throw new Response("Rate limit exceeded", { status: 429 });
+
     const key = process.env.LOVABLE_API_KEY;
     if (!key) throw new Error("Missing LOVABLE_API_KEY");
     const gateway = createLovableAiGatewayProvider(key);
