@@ -14,7 +14,7 @@
 
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { listMissionEngineIds, requireMissionEngine } from "./missions/registry";
+import { listMissionEngineIds, requireMissionEngine } from "./missions/registry.server";
 import {
   getMissionFramework,
   validateMissionFramework,
