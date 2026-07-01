@@ -1,9 +1,10 @@
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
-import { getMissionEngine } from "@/lib/missions/registry";
 import { frameworkAnalyzerBlock, assertMissionFrameworkReady } from "@/lib/missions/framework";
 import { createServerFn } from "@tanstack/react-start";
 import { generateObject, generateText } from "ai";
 import { z } from "zod";
+import type { Archetype } from "@/lib/missions/types";
+import { checkRateLimit, sanitizeSessionId } from "@/lib/rate-limit.server";
 
 const DEFAULT_MISSION_ID = "mission-01";
 
