@@ -202,6 +202,20 @@ function RootComponent() {
     // Warm all critical audio immediately. The AudioContext can't exist until
     // the first user gesture, but encoded bytes should already be local by then.
     audio.warmKeyAssets();
+    // Contain background promise rejections (audio prefetch, telemetry,
+    // portrait regen). Report them, but never let them escalate into the
+    // global "signal broke" error screen mid-mission.
+    const onRejection = (event: PromiseRejectionEvent) => {
+      const reason = event.reason;
+      const name = (reason && typeof reason === "object" && "name" in reason) ? (reason as { name?: string }).name : undefined;
+      // Silence expected user-cancelled shares and aborted fetches.
+      if (name === "AbortError") { event.preventDefault(); return; }
+      console.warn("[root] unhandled rejection contained", reason);
+      try { reportLovableError(reason instanceof Error ? reason : new Error(String(reason)), { boundary: "unhandled_rejection" }); } catch { /* noop */ }
+      event.preventDefault();
+    };
+    window.addEventListener("unhandledrejection", onRejection);
+    return () => window.removeEventListener("unhandledrejection", onRejection);
   }, []);
   return (
     <QueryClientProvider client={queryClient}>
