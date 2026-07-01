@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { getWebRequest } from "@tanstack/react-start/server";
+import { getRequest } from "@tanstack/react-start/server";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { checkRateLimit, clientIpFromRequest } from "@/lib/rate-limit.server";
@@ -97,7 +97,7 @@ export const recordMissionPlay = createServerFn({ method: "POST" })
     // while normal single-session play sits far below.
     let ip = "unknown";
     try {
-      const req = getWebRequest();
+      const req = getRequest();
       if (req) ip = clientIpFromRequest(req);
     } catch { /* ignore — no request context in dev tools */ }
     const ok = await checkRateLimit(`play:${ip}`, 30, 3600);
