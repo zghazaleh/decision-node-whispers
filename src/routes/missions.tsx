@@ -194,12 +194,10 @@ function MissionsPage() {
   const user = useAuthUser();
   const profile = useDecisionProfile();
 
-  // Case Archive is the mission-selection surface: aggressively buffer every
-  // available mission bed here so entering any case never waits on the network.
+  // Warm only the archive bed on this surface. Individual mission beds are
+  // fetched on entry to keep mobile bandwidth down (was ~tens of MB).
   useEffect(() => {
     audio.prefetch({ screen: "archive" });
-    audio.prefetch({ screen: "analysis", sfx: ["awakening", "commit", "analyzing", "node-motif"] });
-    audio.warmMissionBeds();
   }, []);
 
 

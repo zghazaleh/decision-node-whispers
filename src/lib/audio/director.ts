@@ -85,7 +85,13 @@ const CRITICAL_SFX: SfxName[] = [
 ];
 
 export function criticalAudioUrls(): string[] {
-  const urls = new Set<string>(getSoundtrackUrls());
+  // Ship only the landing bed + critical SFX in the root <link rel=preload>.
+  // Mission beds are prefetched on demand (archive page warms the archive
+  // bed; each mission warms its own bed) so mobile doesn't download the
+  // full ~28-track catalog upfront.
+  const urls = new Set<string>();
+  const landing = getSoundtrack("__landing__");
+  if (landing?.url) urls.add(landing.url);
   for (const name of CRITICAL_SFX) {
     const url = audioUrl(name);
     if (url) urls.add(url);

@@ -152,7 +152,7 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
       if (!hasPrior && !seenOnboarding) {
         setShowOnboarding(true);
         window.localStorage.setItem("decision-node:onboarded", "1");
-        const t = window.setTimeout(() => setShowOnboarding(false), 3000);
+        const t = window.setTimeout(() => setShowOnboarding(false), 1500);
         return () => window.clearTimeout(t);
       }
     } catch { /* ignore */ }
@@ -164,10 +164,11 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
     return () => clearTimeout(t);
   }, []);
 
-  // Keep this mission, analysis, and decision SFX hot while the scene plays.
+  // Warm only the current mission's bed (plus the SFX we'll play in-scene).
+  // Other mission beds are not preloaded — the archive page handles its own
+  // bed, and each mission fetches its own bed on entry.
   useEffect(() => {
-    audio.prefetch({ missionId: MISSION_ID, sfx: ["awakening", "commit", "analyzing"] });
-    audio.prefetch({ screen: "analysis", sfx: ["node-motif"] });
+    audio.prefetch({ missionId: MISSION_ID, sfx: ["awakening", "commit", "analyzing", "node-motif"] });
   }, [MISSION_ID]);
 
 
