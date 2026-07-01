@@ -114,7 +114,23 @@ function useDrafts(): Draft[] {
   return useSyncExternalStore(subscribeOverrides, getDrafts, getServerDrafts);
 }
 
+const TOKEN_KEY = "dn-admin-token";
+
 function SoundStudio() {
+  // Admin token gate — mirrors the /admin/evaluation and /admin/gsc pattern
+  // so the paid ElevenLabs endpoint isn't reachable without the token.
+  const [tokenInput, setTokenInput] = useState("");
+  const [adminToken, setAdminToken] = useState("");
+  const [tokenError, setTokenError] = useState<string | null>(null);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const stored = sessionStorage.getItem(TOKEN_KEY) ?? "";
+    if (stored) {
+      setAdminToken(stored);
+      setTokenInput(stored);
+    }
+  }, []);
+
   const drafts = useDrafts();
   const overrides = useOverrides();
   const sounds = useMemo(() => buildSounds(drafts), [drafts]);
