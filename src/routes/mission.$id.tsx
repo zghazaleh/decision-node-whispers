@@ -30,17 +30,20 @@ import { recordMissionPlay } from "@/lib/mission-stats.functions";
 
 import { audio } from "@/lib/audio/director";
 import { useRoomEntrance } from "@/components/audio/useRoomEntrance";
-import { getMissionEngine } from "@/lib/missions/registry";
+import { getMissionShell, type MissionShell } from "@/lib/mission-shell.functions";
+import { useQuery } from "@tanstack/react-query";
+import { SCENE_SRC } from "@/lib/missions/client-manifest";
 import { MISSIONS } from "@/lib/missions";
-import type { MissionEngine } from "@/lib/missions/types";
+import type { DecisionPreset } from "@/lib/missions/types";
 import { logCommit } from "@/lib/discovery/signals";
 import { themeTint } from "@/lib/discovery/theme-tint";
+import { getSessionId } from "@/lib/session-id";
 
 
 export const Route = createFileRoute("/mission/$id")({
   head: ({ params }) => {
     const meta = MISSIONS.find((m) => m.id === params.id);
-    const engine = getMissionEngine(params.id);
+    const sceneSrc = SCENE_SRC[params.id] ?? "";
     if (!meta) {
       return {
         meta: [
@@ -51,7 +54,6 @@ export const Route = createFileRoute("/mission/$id")({
     }
     const title = `${meta.title} — Decision Nodes`;
     const description = meta.logline;
-    const sceneSrc = engine?.scene.src ?? "";
     const ogImage = sceneSrc
       ? sceneSrc.startsWith("http")
         ? sceneSrc
@@ -120,15 +122,21 @@ function MissionErrorComponent({ error, reset }: { error: Error; reset: () => vo
 function MissionRoute() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
-  const engine = getMissionEngine(id);
+  const fetchShell = useServerFn(getMissionShell);
+  const { data: shell, isLoading, isError } = useQuery({
+    queryKey: ["mission-shell", id],
+    queryFn: () => fetchShell({ data: { missionId: id } }),
+    staleTime: 5 * 60_000,
+  });
   useEffect(() => {
-    if (!engine) navigate({ to: "/missions" });
-  }, [engine, navigate]);
-  if (!engine) return null;
-  return <Mission key={id} missionId={id} engine={engine} />;
+    if (!isLoading && !shell && !isError) return;
+    if (isError || (shell === null)) navigate({ to: "/missions" });
+  }, [shell, isLoading, isError, navigate]);
+  if (isLoading || !shell) return null;
+  return <Mission key={id} missionId={id} shell={shell} />;
 }
 
-function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string; engine: MissionEngine }) {
+function Mission({ missionId: MISSION_ID, shell: SHELL }: { missionId: string; shell: MissionShell }) {
   const navigate = useNavigate();
   const meta = MISSIONS.find((m) => m.id === MISSION_ID);
   const missionTitle = meta ? `Mission ${meta.number} — ${meta.codename}` : "Mission";
