@@ -7,8 +7,8 @@ import { createAmbient } from "@/lib/ambient";
 import { getSoundtrack } from "@/lib/soundtracks";
 import { getAllMissionStats, type MissionStats } from "@/lib/mission-stats.functions";
 import { readMission } from "@/lib/mission-store";
-import { useServerFn } from "@tanstack/react-start";
 import { getArchetypeLabels } from "@/lib/mission-shell.functions";
+
 
 type PriorDecision = { archetypeLabel: string; decidedAt: number };
 
