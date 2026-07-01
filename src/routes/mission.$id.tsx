@@ -209,6 +209,19 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages]);
 
+  // Surface streaming/network errors from the AI stream without escalating to
+  // the global error boundary. Progress is already persisted turn-by-turn, so
+  // the player can just re-send their last line.
+  useEffect(() => {
+    if (!error) return;
+    console.warn("[mission] chat stream error", error);
+    toast("The line dropped mid-sentence.", {
+      id: "chat-error",
+      description: "Send that again — your progress is saved.",
+      duration: 8000,
+    });
+  }, [error]);
+
   const [input, setInput] = useState("");
   const [decideOpen, setDecideOpen] = useState(false);
   const [resetOpen, setResetOpen] = useState(false);
