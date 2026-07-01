@@ -43,19 +43,21 @@ const ANON_FREE_MISSIONS = 3;
 export const Route = createFileRoute("/missions")({
   head: () => ({
     meta: [
-      { title: "Case Archive — Decision Nodes" },
+      { title: "Case Archive — Interactive Fiction & Decision Making Games | Decision Nodes" },
       {
         name: "description",
         content:
-          "The Case Archive. Choose one and step inside the single moment before an irreversible decision.",
+          "Browse 20 story games — moral-dilemma cases across corporate, legal, medical, and personal life. Each is a decision-making game with one irreversible commit.",
       },
-      { property: "og:title", content: "Case Archive — Decision Nodes" },
+      { property: "og:title", content: "Case Archive — Interactive Fiction & Decision Making Games" },
       {
         property: "og:description",
         content:
-          "The Case Archive. Choose one and step inside the single moment before an irreversible decision.",
+          "Browse 20 story games — moral-dilemma cases across corporate, legal, medical, and personal life. Each is a decision-making game with one irreversible commit.",
       },
+      { property: "og:url", content: "https://decision-nodes.com/missions" },
     ],
+    links: [{ rel: "canonical", href: "https://decision-nodes.com/missions" }],
   }),
   component: MissionsPage,
 });

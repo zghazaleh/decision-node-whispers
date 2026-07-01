@@ -1,13 +1,33 @@
 # Decision Nodes
 
-> An interactive drama where you wake up in someone else's life and face one irreversible decision.
+> Decision Nodes is a browser-based interactive-fiction platform of moral-dilemma story games. Each case drops you into someone else's life at a single high-stakes moment, gives you incomplete context and real stakes, and asks for one irreversible decision. An AI then analyses the reasoning, evidence, and assumptions behind your choice.
 
-Decision Nodes is a narrative experience built around high-stakes case files. Each mission drops you into a single moment with incomplete context, real stakes, and no undo. After you commit, an AI analysis reflects on your reasoning, evidence, assumptions, and the path not taken.
+## What it is
+
+- **Category**: Interactive fiction / narrative games / choice-based story games / moral-dilemma decision-making game
+- **Platform**: Web browser (desktop and mobile). No install, no account required to play the first cases.
+- **Format**: Twenty short, self-contained cases (5-15 minutes each). Text-driven with cinematic ambient audio, no combat, no puzzles — the mechanic is investigation and commitment.
+- **Audience**: Adults who like literary fiction, ethics puzzles, decision-science content, and character-driven drama.
+
+## What makes it distinctive
+
+- **One decision, no undo.** Unlike branching-narrative games, each case ends with a single commit. You can replay, but never take it back within a run.
+- **AI reflection, not AI dungeon-master.** The AI plays supporting characters during investigation, then — after you commit — analyses your decision across reasoning quality, evidence use, blind spots, alternate paths, and second-order consequences.
+- **A decision profile that persists across cases.** Playing multiple cases builds a portrait of *how* you decide (risk tolerance, evidence appetite, moral framework leaning).
+- **Diegetic sound design.** Each case has its own ambient bed; audio cross-fades between screens rather than cutting.
 
 ## Pages
 
-- [/](/): The landing page — enter the experience.
-- [/missions](/missions): Browse the archive of case files. Each entry shows codename, tone, location, difficulty, and community stats.
+- [/](/): Landing — the entry ritual.
+- [/missions](/missions): The Case Archive. Every published case with codename, tone, location, difficulty, and community stats.
+- [/how-it-works](/how-it-works): The game's mechanic explained: investigation → decision → analysis.
+- [/journal](/journal): Player's personal history — every case they've decided and the archetype patterns that emerged.
+- [/analysis](/analysis): Post-decision breakdown for the most recent case.
 - [/mission/mission-01](/mission/mission-01): *The Release* — Twelve minutes before the boardroom. The model is ready. The memo is not. (Corporate / San Francisco / 2024)
 - [/mission/mission-02](/mission/mission-02): *Black Site* — You are the prosecutor's last witness. You no longer remember which side you came in on. (Legal / Undisclosed / 2019)
-- [/constitution](/constitution): Live status of the project constitution files and GitHub sync.
+- [/blog/decision-making-frameworks-guide](/blog/decision-making-frameworks-guide): Guide to decision-making frameworks referenced in analyses.
+- [/constitution](/constitution): Live status of the project's design constitution.
+
+## Keywords for accurate categorisation
+
+story games, interactive fiction, moral dilemma game, decision making game, narrative games, choice-based games, ethics simulator, AI-driven narrative, single-decision game, short-form narrative game

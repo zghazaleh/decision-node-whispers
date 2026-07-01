@@ -88,25 +88,27 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
       { name: "theme-color", content: "#000000" },
-      { title: "Decision Nodes — An Interactive Drama" },
+      { title: "Decision Nodes — Interactive Fiction & Moral Dilemma Story Games" },
       {
         name: "description",
         content:
-          "20 moral dilemmas. One irreversible decision each. Find out how you decide.",
+          "Story games with real weight. 20 interactive fiction cases, each a moral dilemma with one irreversible decision — then an AI reads how you decided.",
       },
-      { property: "og:title", content: "Decision Nodes — An Interactive Drama" },
+      { name: "keywords", content: "story games, interactive fiction, moral dilemma game, decision making game, narrative games, choice-based games" },
+      { property: "og:title", content: "Decision Nodes — Interactive Fiction & Moral Dilemma Story Games" },
       {
         property: "og:description",
         content:
-          "20 moral dilemmas. One irreversible decision each. Find out how you decide.",
+          "Story games with real weight. 20 interactive fiction cases, each a moral dilemma with one irreversible decision — then an AI reads how you decided.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "Decision Nodes" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Decision Nodes — An Interactive Drama" },
+      { name: "twitter:title", content: "Decision Nodes — Interactive Fiction & Moral Dilemma Story Games" },
       {
         name: "twitter:description",
         content:
-          "20 moral dilemmas. One irreversible decision each. Find out how you decide.",
+          "Story games with real weight. 20 interactive fiction cases, each a moral dilemma with one irreversible decision — then an AI reads how you decided.",
       },
       { property: "og:image", content: "https://decision-nodes.com/og-decision-nodes.jpg" },
       { name: "twitter:image", content: "https://decision-nodes.com/og-decision-nodes.jpg" },
@@ -131,6 +133,46 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         crossOrigin: "anonymous",
         fetchPriority: "high",
       } as const)),
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebApplication",
+              name: "Decision Nodes",
+              url: "https://decision-nodes.com",
+              applicationCategory: "GameApplication",
+              applicationSubCategory: "Interactive Fiction",
+              operatingSystem: "Any (web browser)",
+              description:
+                "An interactive fiction platform. 20 moral-dilemma story games, each a single irreversible decision with AI-generated reflection on how you decided.",
+              offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+              browserRequirements: "Requires JavaScript. Requires HTML5.",
+            },
+            {
+              "@type": "VideoGame",
+              name: "Decision Nodes",
+              url: "https://decision-nodes.com",
+              genre: ["Interactive Fiction", "Narrative Adventure", "Moral Dilemma"],
+              gamePlatform: ["Web Browser"],
+              playMode: "SinglePlayer",
+              applicationCategory: "GameApplication",
+              description:
+                "Story games where you wake up in someone else's life, investigate a single moment, and commit to one irreversible decision. Twenty cases across corporate, legal, medical, and personal dilemmas.",
+              publisher: { "@type": "Organization", name: "Decision Nodes" },
+            },
+            {
+              "@type": "Organization",
+              name: "Decision Nodes",
+              url: "https://decision-nodes.com",
+              logo: "https://decision-nodes.com/og-decision-nodes.jpg",
+            },
+          ],
+        }),
+      },
     ],
   }),
   shellComponent: RootShell,
@@ -160,6 +202,20 @@ function RootComponent() {
     // Warm all critical audio immediately. The AudioContext can't exist until
     // the first user gesture, but encoded bytes should already be local by then.
     audio.warmKeyAssets();
+    // Contain background promise rejections (audio prefetch, telemetry,
+    // portrait regen). Report them, but never let them escalate into the
+    // global "signal broke" error screen mid-mission.
+    const onRejection = (event: PromiseRejectionEvent) => {
+      const reason = event.reason;
+      const name = (reason && typeof reason === "object" && "name" in reason) ? (reason as { name?: string }).name : undefined;
+      // Silence expected user-cancelled shares and aborted fetches.
+      if (name === "AbortError") { event.preventDefault(); return; }
+      console.warn("[root] unhandled rejection contained", reason);
+      try { reportLovableError(reason instanceof Error ? reason : new Error(String(reason)), { boundary: "unhandled_rejection" }); } catch { /* noop */ }
+      event.preventDefault();
+    };
+    window.addEventListener("unhandledrejection", onRejection);
+    return () => window.removeEventListener("unhandledrejection", onRejection);
   }, []);
   return (
     <QueryClientProvider client={queryClient}>

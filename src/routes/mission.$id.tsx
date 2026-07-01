@@ -209,6 +209,19 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages]);
 
+  // Surface streaming/network errors from the AI stream without escalating to
+  // the global error boundary. Progress is already persisted turn-by-turn, so
+  // the player can just re-send their last line.
+  useEffect(() => {
+    if (!error) return;
+    console.warn("[mission] chat stream error", error);
+    toast("The line dropped mid-sentence.", {
+      id: "chat-error",
+      description: "Send that again — your progress is saved.",
+      duration: 8000,
+    });
+  }, [error]);
+
   const [input, setInput] = useState("");
   const [decideOpen, setDecideOpen] = useState(false);
   const [resetOpen, setResetOpen] = useState(false);
@@ -323,42 +336,75 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
     archetypeId?: string,
   ) {
     if (!decision.trim()) return;
+    // Persist draft BEFORE any async work: a mid-flight refresh, network drop,
+    // or tab suspension can't erase the player's decision + reasoning. The
+    // `analysis` field is written only after Stage A returns.
+    const decidedAt = Date.now();
+    try {
+      update({
+        decision: decision.trim(),
+        reasoning: reasoning.trim(),
+        decidedAt,
+        ...(archetypeId ? { archetypeId } : {}),
+      });
+    } catch (err) {
+      console.warn("draft persist failed", err);
+    }
     setAnalyzing(true);
-    // Commit ritual: lock the bed, drop a deep settle, then a rising shimmer
-    // that bridges into the analysis bed on /analysis.
     void audio.playSfx("commit", { gain: 0.55 });
     audio.duck(0.18, 400);
     window.setTimeout(() => { void audio.playSfx("analyzing", { gain: 0.4 }); }, 700);
-    try {
-      const transcript = messages.map((m) => ({
-        role: m.role,
-        text: partsToText(m),
-      }));
-      const analysisPayload = {
-        missionId: MISSION_ID,
-        decision: decision.trim(),
-        reasoning: reasoning.trim(),
-        transcript,
-        ...(archetypeId ? { archetypeId } : {}),
-      };
-      let analysis;
+    const transcript = messages.map((m) => ({
+      role: m.role,
+      text: partsToText(m),
+    }));
+    const analysisPayload = {
+      missionId: MISSION_ID,
+      decision: decision.trim(),
+      reasoning: reasoning.trim(),
+      transcript,
+      ...(archetypeId ? { archetypeId } : {}),
+    };
+    // Up to 3 attempts with exponential backoff. Transient rate-limits and
+    // network hiccups shouldn't cost the player their run.
+    let analysis: Awaited<ReturnType<typeof analyzeFn>> | undefined;
+    let lastErr: unknown = null;
+    for (let i = 0; i < 3; i++) {
       try {
         analysis = await analyzeFn({ data: analysisPayload });
-      } catch (firstErr) {
-        console.warn("analyze attempt 1 failed, retrying", firstErr);
-        await new Promise((r) => setTimeout(r, 800));
-        analysis = await analyzeFn({ data: analysisPayload });
+        lastErr = null;
+        break;
+      } catch (err) {
+        lastErr = err;
+        console.warn(`analyze attempt ${i + 1} failed`, err);
+        if (i < 2) await new Promise((r) => setTimeout(r, 600 * Math.pow(2, i)));
       }
+    }
+    if (!analysis) {
+      console.error("analyze failed after retries", lastErr);
+      setAnalyzing(false);
+      // Draft is saved — offer a one-tap retry instead of a blocking alert().
+      toast("The line dropped for a moment.", {
+        id: "analyze-retry",
+        description: "Your decision is saved. Try the analysis again?",
+        duration: 12000,
+        action: {
+          label: "Retry",
+          onClick: () => { void handleDecide(decision, reasoning, archetypeId); },
+        },
+      });
+      return;
+    }
+    try {
       update({
         decision: decision.trim(),
         reasoning: reasoning.trim(),
         analysis,
-        decidedAt: Date.now(),
+        decidedAt,
         ...(archetypeId ? { archetypeId } : {}),
       });
       try {
         const updatedProfile = updateProfileWithAnalysis(MISSION_ID, analysis);
-        // Fire-and-forget: regenerate the AI portrait line off the new profile.
         void (async () => {
           try {
             const payload = buildPortraitInput(updatedProfile, analysis);
@@ -374,7 +420,6 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
         console.error("profile update failed", err);
       }
 
-      // Discovery signal: this case has been *held*, not just opened.
       try {
         const meta = MISSIONS.find((m) => m.id === MISSION_ID);
         logCommit(MISSION_ID, meta?.theme);
@@ -382,8 +427,6 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
         console.error("signal log failed", err);
       }
 
-
-      // Fire-and-forget community telemetry — no PII, only timings + counts.
       try {
         const now = Date.now();
         const investigationSeconds = mission.startedAt
@@ -407,12 +450,14 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
       }
 
       setDecideOpen(false);
-      // Small dramatic pause before transition.
       setTimeout(() => navigate({ to: "/analysis" }), 600);
     } catch (e) {
-      console.error(e);
+      console.error("post-analyze persist failed", e);
       setAnalyzing(false);
-      alert("The signal broke for a moment. Please try again.");
+      toast("Something snagged saving your analysis.", {
+        id: "analyze-persist",
+        description: "Try opening the decision again.",
+      });
     }
   }
 
