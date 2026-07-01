@@ -143,7 +143,7 @@ function Mission({ missionId: MISSION_ID, shell: SHELL }: { missionId: string; s
   const OPENING: UIMessage = {
     id: "opening",
     role: "assistant",
-    parts: [{ type: "text", text: ENGINE.opening.text }],
+    parts: [{ type: "text", text: SHELL.opening.text }],
   };
   const { mission, update } = useMission(MISSION_ID);
   const [awakening, setAwakening] = useState(true);
@@ -248,7 +248,7 @@ function Mission({ missionId: MISSION_ID, shell: SHELL }: { missionId: string; s
   // via a direct URL leaves the bed silent until the user happens to
   // trigger the global unlock listener — which can race the route's
   // own enter() call.
-  useRoomEntrance("mission", { missionId: MISSION_ID, profile: ENGINE.atmosphere });
+  useRoomEntrance("mission", { missionId: MISSION_ID, profile: SHELL.atmosphere });
 
 
   const transcriptRef = useRef<HTMLDivElement>(null);
@@ -526,8 +526,8 @@ function Mission({ missionId: MISSION_ID, shell: SHELL }: { missionId: string; s
           className="absolute inset-0 animate-scene-sway animate-chroma-breathe"
           style={{
             transform: "translate3d(var(--px), var(--py), 0)",
-            animationDuration: ENGINE.atmosphere?.chromaBreatheDuration
-              ? `${ENGINE.atmosphere.chromaBreatheDuration}s`
+            animationDuration: SHELL.atmosphere?.chromaBreatheDuration
+              ? `${SHELL.atmosphere.chromaBreatheDuration}s`
               : undefined,
           }}
 
@@ -554,16 +554,16 @@ function Mission({ missionId: MISSION_ID, shell: SHELL }: { missionId: string; s
             );
           })()}
           <img
-            src={ENGINE.scene.src}
+            src={SHELL.scene.src}
             alt=""
             aria-hidden
             onLoad={() => setSceneLoaded(true)}
             className={`h-full w-full object-cover object-[50%_38%] sm:object-center animate-ken-burns transition-opacity duration-700 ${sceneLoaded ? "opacity-100" : "opacity-0"}`}
             style={{
-              filter: `${ENGINE.scene.filter ?? "saturate(0.88) contrast(1.06)"} ${filterShift}`,
+              filter: `${SHELL.scene.filter ?? "saturate(0.88) contrast(1.06)"} ${filterShift}`,
               transition: "filter 8000ms linear, opacity 700ms ease-out",
-              animationDuration: ENGINE.atmosphere?.kenBurnsDuration
-                ? `${ENGINE.atmosphere.kenBurnsDuration}s`
+              animationDuration: SHELL.atmosphere?.kenBurnsDuration
+                ? `${SHELL.atmosphere.kenBurnsDuration}s`
                 : undefined,
             }}
           />
@@ -572,7 +572,7 @@ function Mission({ missionId: MISSION_ID, shell: SHELL }: { missionId: string; s
         <div
           className="scene-haze"
           aria-hidden
-          style={{ background: ENGINE.atmosphere?.hazeBackground }}
+          style={{ background: SHELL.atmosphere?.hazeBackground }}
         />
         <div className="scene-light" aria-hidden />
         <div
@@ -580,8 +580,8 @@ function Mission({ missionId: MISSION_ID, shell: SHELL }: { missionId: string; s
           aria-hidden
           style={{
             opacity:
-              ENGINE.atmosphere?.dustOpacityScale !== undefined
-                ? 0.5 * ENGINE.atmosphere.dustOpacityScale
+              SHELL.atmosphere?.dustOpacityScale !== undefined
+                ? 0.5 * SHELL.atmosphere.dustOpacityScale
                 : undefined,
           }}
         />
@@ -589,9 +589,9 @@ function Mission({ missionId: MISSION_ID, shell: SHELL }: { missionId: string; s
           className="scene-pulse"
           aria-hidden
           style={{
-            background: ENGINE.atmosphere?.pulseBackground,
-            animationDuration: ENGINE.atmosphere?.pulseDuration
-              ? `${ENGINE.atmosphere.pulseDuration}s`
+            background: SHELL.atmosphere?.pulseBackground,
+            animationDuration: SHELL.atmosphere?.pulseDuration
+              ? `${SHELL.atmosphere.pulseDuration}s`
               : undefined,
           }}
         />
@@ -886,8 +886,8 @@ function Mission({ missionId: MISSION_ID, shell: SHELL }: { missionId: string; s
       {/* Decide modal */}
       {decideOpen && (
         <DecideModal
-          presets={ENGINE.decisionPresets}
-          freeWritePlaceholder={ENGINE.decideFreeWritePlaceholder ?? "In your own words…"}
+          presets={SHELL.decisionPresets}
+          freeWritePlaceholder={SHELL.decideFreeWritePlaceholder ?? "In your own words…"}
           analyzing={analyzing}
           initialDecision={decidePrefill}
           onClose={() => { if (!analyzing) { setDecideOpen(false); audio.release(900); } }}
@@ -1182,7 +1182,7 @@ function DecideModal({
   onClose,
   onSubmit,
 }: {
-  presets: MissionEngine["decisionPresets"];
+  presets: DecisionPreset[];
   freeWritePlaceholder: string;
   analyzing: boolean;
   initialDecision?: string;
