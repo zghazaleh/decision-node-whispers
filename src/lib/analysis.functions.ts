@@ -198,7 +198,7 @@ function fallbackAnalysis({
   reasoning,
 }: {
   raw?: Record<string, unknown>;
-  archetype: ReturnType<NonNullable<ReturnType<typeof getMissionEngine>>["getArchetype"]> | null;
+  archetype: Archetype | null;
   decision: string;
   reasoning: string;
 }): DecisionAnalysis {
