@@ -1,9 +1,7 @@
-import { getMissionEngine } from "@/lib/missions/registry";
+import { SCENE_SRC } from "@/lib/missions/client-manifest";
 
 export function getSceneSrc(missionId: string): string | null {
-  const engine = getMissionEngine(missionId);
-  const src = engine?.scene?.src;
-  return typeof src === "string" ? src : null;
+  return SCENE_SRC[missionId] ?? null;
 }
 
 export function shortDuration(d: string | undefined): string {
