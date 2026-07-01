@@ -79,7 +79,7 @@ export function AlternatePaths({
                     Path not taken
                   </span>
                   <span className="mt-1 block font-display text-base sm:text-lg text-foreground/90">
-                    {arc?.label ?? "…"}
+                    {labels[archetypeId] ?? "…"}
                   </span>
                 </span>
                 <span
