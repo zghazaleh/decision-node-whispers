@@ -373,6 +373,7 @@ function Mission({ missionId: MISSION_ID, shell: SHELL }: { missionId: string; s
       decision: decision.trim(),
       reasoning: reasoning.trim(),
       transcript,
+      sessionId: getSessionId(),
       ...(archetypeId ? { archetypeId } : {}),
     };
     // Up to 3 attempts with exponential backoff. Transient rate-limits and
@@ -417,7 +418,7 @@ function Mission({ missionId: MISSION_ID, shell: SHELL }: { missionId: string; s
         const updatedProfile = updateProfileWithAnalysis(MISSION_ID, analysis);
         void (async () => {
           try {
-            const payload = buildPortraitInput(updatedProfile, analysis);
+            const payload = { ...buildPortraitInput(updatedProfile, analysis), sessionId: getSessionId() };
             const { portrait } = await generatePortrait({ data: payload });
             if (portrait && portrait.trim()) {
               applyPortraitToProfile(portrait.trim());
@@ -452,6 +453,7 @@ function Mission({ missionId: MISSION_ID, shell: SHELL }: { missionId: string; s
             decisionSeconds,
             messageCount: messages.length,
             completed: true,
+            sessionId: getSessionId(),
             ...(archetypeId ? { archetypeId } : {}),
           },
         });
