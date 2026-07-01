@@ -103,10 +103,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:image", content: "https://decision-nodes.com/og-decision-nodes.jpg" },
       { name: "twitter:image", content: "https://decision-nodes.com/og-decision-nodes.jpg" },
-      ...((loaderData?.gscTokens ?? []).map((t) => ({
-        name: "google-site-verification",
-        content: t.token,
-      }))),
     ],
     links: [
       { rel: "stylesheet", href: appCss },
