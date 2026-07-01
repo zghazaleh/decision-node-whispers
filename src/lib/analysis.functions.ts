@@ -19,6 +19,7 @@ const AnalysisInput = z.object({
     .array(z.object({ role: z.string().max(32), text: z.string().max(4000) }))
     .min(1)
     .max(60),
+  sessionId: z.string().max(96).optional(),
 });
 
 
@@ -295,23 +296,9 @@ function fallbackAnalysis({
 export type DecisionAnalysis = z.infer<typeof AnalysisSchema>;
 
 export const analyzeDecision = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
-    z
-      .object({
-        sessionId: z.string().max(96).optional(),
-        payload: AnalysisInput,
-      })
-      .or(AnalysisInput)
-      .parse(input),
-  )
+  .inputValidator((input: unknown) => AnalysisInput.parse(input))
   .handler(async ({ data }) => {
-    // Accept both the new { sessionId, payload } envelope and the legacy
-    // raw AnalysisInput shape so older clients don't break during rollout.
-    const envelope = (data as { payload?: unknown; sessionId?: string });
-    const payload = (envelope.payload
-      ? envelope.payload
-      : data) as z.infer<typeof AnalysisInput>;
-    const sessionId = sanitizeSessionId(envelope.sessionId);
+    const sessionId = sanitizeSessionId(data.sessionId);
 
     // 10 analyses / hour / session. A real player completes at most a
     // handful of missions per hour; this cap sits well above that.
@@ -324,17 +311,17 @@ export const analyzeDecision = createServerFn({ method: "POST" })
     if (!key) throw new Error("Missing LOVABLE_API_KEY");
 
     const { getMissionEngine } = await import("@/lib/missions/registry.server");
-    const engine = getMissionEngine(payload.missionId);
-    if (!engine) throw new Error(`Unknown mission: ${payload.missionId}`);
+    const engine = getMissionEngine(data.missionId);
+    if (!engine) throw new Error(`Unknown mission: ${data.missionId}`);
 
     // Hard precondition: the Decision Nodes framework fields must be fully
     // populated for this mission, or the reasoning assessment degrades to
     // generic output. Fail loudly here instead of silently shipping a weak debrief.
-    assertMissionFrameworkReady(payload.missionId);
+    assertMissionFrameworkReady(data.missionId);
 
     const gateway = createLovableAiGatewayProvider(key);
 
-    const transcriptText = payload.transcript
+    const transcriptText = data.transcript
       .map((m) => `${m.role.toUpperCase()}: ${m.text}`)
       .join("\n\n");
 
