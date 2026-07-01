@@ -201,6 +201,7 @@ function Mission({ missionId: MISSION_ID, shell: SHELL }: { missionId: string; s
       new DefaultChatTransport({
         api: "/api/chat",
         body: { missionId: MISSION_ID },
+        headers: { "X-DN-Session": getSessionId() },
       }),
     [MISSION_ID]
   );
