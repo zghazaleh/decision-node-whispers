@@ -1,12 +1,12 @@
-import { useMemo, useState } from "react";
-import { getMissionEngine } from "@/lib/missions/registry";
+import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { getArchetypeReveal, type ArchetypeReveal } from "@/lib/mission-shell.functions";
 
 /**
  * ChosenSecondOrder — expandable "how this ripples" block for the player's
- * own chosen archetype. Mirrors the second-order effects shown in
- * <AlternatePaths /> but for the path that actually ran.
- *
- * Read-only: does not alter the saved mission, the analysis, or the profile.
+ * own chosen archetype. Fetches the single archetype from the server so the
+ * timeline / secondOrder / tone never ships into the client bundle for other
+ * archetypes.
  */
 export function ChosenSecondOrder({
   missionId,
@@ -15,14 +15,18 @@ export function ChosenSecondOrder({
   missionId: string;
   chosenArchetypeId?: string | null;
 }) {
-  const arc = useMemo(() => {
-    if (!chosenArchetypeId) return null;
-    const engine = getMissionEngine(missionId);
-    if (!engine) return null;
-    return engine.getArchetype(chosenArchetypeId);
-  }, [missionId, chosenArchetypeId]);
-
+  const fetchReveal = useServerFn(getArchetypeReveal);
+  const [arc, setArc] = useState<ArchetypeReveal | null>(null);
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (!chosenArchetypeId) { setArc(null); return; }
+    let cancelled = false;
+    fetchReveal({ data: { missionId, archetypeId: chosenArchetypeId } })
+      .then((r) => { if (!cancelled) setArc(r); })
+      .catch(() => { if (!cancelled) setArc(null); });
+    return () => { cancelled = true; };
+  }, [missionId, chosenArchetypeId, fetchReveal]);
 
   if (!arc) return null;
   const entries = Object.entries(arc.secondOrder ?? {});
@@ -61,7 +65,7 @@ export function ChosenSecondOrder({
               {entries.map(([k, v]) => (
                 <div key={k} className="text-xs sm:text-sm leading-relaxed">
                   <dt className="inline text-foreground/55">{k}: </dt>
-                  <dd className="inline text-foreground/80">{v}</dd>
+                  <dd className="inline text-foreground/80">{String(v)}</dd>
                 </div>
               ))}
             </dl>
