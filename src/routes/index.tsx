@@ -7,17 +7,17 @@ import { audio } from "@/lib/audio/director";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Decision Nodes — An Interactive Drama" },
+      { title: "Decision Nodes — Interactive Fiction & Moral Dilemma Story Games" },
       {
         name: "description",
         content:
-          "20 moral dilemmas. One irreversible decision each. Find out how you decide.",
+          "Story games with real weight. Twenty interactive fiction cases, each a moral dilemma with one irreversible decision — then an AI reflects on how you decided.",
       },
-      { property: "og:title", content: "Decision Nodes — An Interactive Drama" },
+      { property: "og:title", content: "Decision Nodes — Interactive Fiction & Moral Dilemma Story Games" },
       {
         property: "og:description",
         content:
-          "20 moral dilemmas. One irreversible decision each. Find out how you decide.",
+          "Story games with real weight. Twenty interactive fiction cases, each a moral dilemma with one irreversible decision — then an AI reflects on how you decided.",
       },
       { property: "og:url", content: "https://decision-nodes.com/" },
     ],
