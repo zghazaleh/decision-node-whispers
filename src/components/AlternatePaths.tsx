@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { getArchetypeReveal, type ArchetypeReveal } from "@/lib/mission-shell.functions";
+import {
+  getArchetypeLabels,
+  getArchetypeReveal,
+  type ArchetypeReveal,
+} from "@/lib/mission-shell.functions";
 
 /**
  * Alternate Paths — read-only "what would have happened" view.
@@ -13,18 +17,25 @@ import { getArchetypeReveal, type ArchetypeReveal } from "@/lib/mission-shell.fu
 export function AlternatePaths({
   missionId,
   chosenArchetypeId,
-  archetypeIds,
 }: {
   missionId: string;
   chosenArchetypeId?: string | null;
-  /** Ids of archetypes to offer — pass only those the player did NOT pick. */
-  archetypeIds: string[];
 }) {
+  const fetchLabels = useServerFn(getArchetypeLabels);
   const fetchReveal = useServerFn(getArchetypeReveal);
+  const [labels, setLabels] = useState<Record<string, string>>({});
   const [openId, setOpenId] = useState<string | null>(null);
   const [reveals, setReveals] = useState<Record<string, ArchetypeReveal>>({});
 
-  const alternates = archetypeIds.filter((id) => id !== chosenArchetypeId);
+  useEffect(() => {
+    let cancelled = false;
+    fetchLabels({ data: { missionId } })
+      .then((r) => { if (!cancelled) setLabels(r); })
+      .catch(() => { /* ignore */ });
+    return () => { cancelled = true; };
+  }, [missionId, fetchLabels]);
+
+  const alternates = Object.keys(labels).filter((id) => id !== chosenArchetypeId);
 
   useEffect(() => {
     if (!openId || reveals[openId]) return;
