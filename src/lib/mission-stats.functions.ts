@@ -1,6 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getWebRequest } from "@tanstack/react-start/server";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
+import { checkRateLimit, clientIpFromRequest } from "@/lib/rate-limit.server";
 
 function publicClient() {
   return createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
@@ -85,11 +87,22 @@ const RecordInput = z.object({
   difficultyRating: z.number().int().min(1).max(5).optional(),
   archetypeId: z.string().min(1).max(64).optional(),
   completed: z.boolean().default(true),
+  sessionId: z.string().max(96).optional(),
 });
 
 export const recordMissionPlay = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => RecordInput.parse(input))
   .handler(async ({ data }) => {
+    // Per-IP cap keeps anonymous scripts from poisoning community stats
+    // while normal single-session play sits far below.
+    let ip = "unknown";
+    try {
+      const req = getWebRequest();
+      if (req) ip = clientIpFromRequest(req);
+    } catch { /* ignore — no request context in dev tools */ }
+    const ok = await checkRateLimit(`play:${ip}`, 30, 3600);
+    if (!ok) return { ok: false as const, error: "rate_limited" };
+
     const supabase = publicClient();
     const { error } = await supabase.from("mission_plays").insert({
       mission_id: data.missionId,
