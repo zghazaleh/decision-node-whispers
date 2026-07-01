@@ -7,25 +7,35 @@ import { createAmbient } from "@/lib/ambient";
 import { getSoundtrack } from "@/lib/soundtracks";
 import { getAllMissionStats, type MissionStats } from "@/lib/mission-stats.functions";
 import { readMission } from "@/lib/mission-store";
-import { getMissionEngine } from "@/lib/missions/registry";
+import { getArchetypeLabels } from "@/lib/mission-shell.functions";
+
 
 type PriorDecision = { archetypeLabel: string; decidedAt: number };
 
 /** Read the player's last committed decision per mission from localStorage.
- *  Client-only; returns {} on the server. */
+ *  Client-only; returns {} on the server. Archetype labels are fetched
+ *  server-side to avoid bundling the full mission engine into the client. */
 function usePriorDecisions(): Record<string, PriorDecision> {
+  const fetchLabels = useServerFn(getArchetypeLabels);
   const [prior, setPrior] = useState<Record<string, PriorDecision>>({});
   useEffect(() => {
-    const out: Record<string, PriorDecision> = {};
-    for (const m of MISSIONS) {
-      const saved = readMission(m.id);
-      if (!saved.archetypeId || !saved.decidedAt) continue;
-      const engine = getMissionEngine(m.id);
-      const arche = engine?.getArchetype(saved.archetypeId);
-      if (!arche) continue;
-      out[m.id] = { archetypeLabel: arche.label, decidedAt: saved.decidedAt };
-    }
-    setPrior(out);
+    let cancelled = false;
+    (async () => {
+      const out: Record<string, PriorDecision> = {};
+      for (const m of MISSIONS) {
+        const saved = readMission(m.id);
+        if (!saved.archetypeId || !saved.decidedAt) continue;
+        try {
+          const labels = await fetchLabels({ data: { missionId: m.id } });
+          const label = labels[saved.archetypeId];
+          if (!label) continue;
+          out[m.id] = { archetypeLabel: label, decidedAt: saved.decidedAt };
+        } catch { /* ignore */ }
+      }
+      if (!cancelled) setPrior(out);
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return prior;
 }

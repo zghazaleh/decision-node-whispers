@@ -114,7 +114,23 @@ function useDrafts(): Draft[] {
   return useSyncExternalStore(subscribeOverrides, getDrafts, getServerDrafts);
 }
 
+const TOKEN_KEY = "dn-admin-token";
+
 function SoundStudio() {
+  // Admin token gate — mirrors the /admin/evaluation and /admin/gsc pattern
+  // so the paid ElevenLabs endpoint isn't reachable without the token.
+  const [tokenInput, setTokenInput] = useState("");
+  const [adminToken, setAdminToken] = useState("");
+  const [tokenError, setTokenError] = useState<string | null>(null);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const stored = sessionStorage.getItem(TOKEN_KEY) ?? "";
+    if (stored) {
+      setAdminToken(stored);
+      setTokenInput(stored);
+    }
+  }, []);
+
   const drafts = useDrafts();
   const overrides = useOverrides();
   const sounds = useMemo(() => buildSounds(drafts), [drafts]);
@@ -180,6 +196,11 @@ function SoundStudio() {
   const [genPreview, setGenPreview] = useState<{ dataUrl: string; size: number } | null>(null);
 
   const doGenerate = async () => {
+    if (!adminToken) {
+      setGenError("Enter an admin token first.");
+      setGenStatus("error");
+      return;
+    }
     if (prompt.trim().length < 3) {
       setGenError("Describe the sound in a few words first.");
       setGenStatus("error");
@@ -189,15 +210,66 @@ function SoundStudio() {
     setGenStatus("generating");
     setGenPreview(null);
     try {
-      const result = await generate({ data: { prompt: prompt.trim(), durationSeconds: duration } });
+      const result = await generate({
+        data: { token: adminToken, prompt: prompt.trim(), durationSeconds: duration },
+      });
       const dataUrl = `data:${result.mimeType};base64,${result.base64}`;
       setGenPreview({ dataUrl, size: result.size });
       setGenStatus("ready");
     } catch (e) {
-      setGenError((e as Error).message ?? String(e));
+      const msg = (e as Error).message ?? String(e);
+      if (msg.includes("401") || msg.toLowerCase().includes("unauthorized")) {
+        setTokenError("Invalid admin token.");
+        setAdminToken("");
+        if (typeof window !== "undefined") sessionStorage.removeItem(TOKEN_KEY);
+      }
+      setGenError(msg);
       setGenStatus("error");
     }
   };
+
+  function submitToken(e: React.FormEvent) {
+    e.preventDefault();
+    if (typeof window !== "undefined" && tokenInput) {
+      sessionStorage.setItem(TOKEN_KEY, tokenInput);
+    }
+    setAdminToken(tokenInput);
+    setTokenError(null);
+  }
+
+  if (!adminToken) {
+    return (
+      <div className="min-h-screen bg-background text-foreground px-6 py-12">
+        <div className="max-w-md mx-auto">
+          <p className="text-[0.6rem] tracking-[0.5em] uppercase text-accent/80 mb-2">Admin</p>
+          <h1 className="font-display text-3xl mb-2">Sound Studio</h1>
+          <p className="text-sm text-foreground/60 mb-8">
+            Locked. Enter your admin token to generate paid ElevenLabs beds.
+          </p>
+          <form onSubmit={submitToken} className="flex gap-3 items-end">
+            <input
+              type="password"
+              value={tokenInput}
+              onChange={(e) => setTokenInput(e.target.value)}
+              placeholder="ADMIN_EVAL_TOKEN"
+              autoFocus
+              className="flex-1 bg-transparent border border-foreground/20 px-3 py-2 text-sm focus:border-foreground/60 outline-none"
+            />
+            <button
+              type="submit"
+              disabled={!tokenInput}
+              className="border border-foreground/40 px-4 py-2 text-xs tracking-[0.3em] uppercase hover:bg-foreground/5 disabled:opacity-40"
+            >
+              Unlock
+            </button>
+          </form>
+          {tokenError && (
+            <p className="mt-4 text-sm text-destructive">{tokenError}</p>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   const slugify = (s: string) =>
     s.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 48);

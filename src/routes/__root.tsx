@@ -16,7 +16,6 @@ import { Toaster } from "@/components/ui/sonner";
 import { SoundControls } from "@/components/audio/SoundControls";
 import { AudioFailureIndicator } from "@/components/audio/AudioFailureIndicator";
 import { armGlobalAudioUnlock, audio, criticalAudioUrls } from "@/lib/audio/director";
-import { listMetaTokens } from "@/lib/gsc-verify.functions";
 import { UserMenu } from "@/components/auth/UserMenu";
 
 
@@ -75,15 +74,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  loader: async () => {
-    try {
-      const tokens = await listMetaTokens();
-      return { gscTokens: tokens };
-    } catch {
-      return { gscTokens: [] };
-    }
-  },
-  head: ({ loaderData }) => ({
+  head: () => ({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
@@ -112,10 +103,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:image", content: "https://decision-nodes.com/og-decision-nodes.jpg" },
       { name: "twitter:image", content: "https://decision-nodes.com/og-decision-nodes.jpg" },
-      ...((loaderData?.gscTokens ?? []).map((t) => ({
-        name: "google-site-verification",
-        content: t.token,
-      }))),
     ],
     links: [
       { rel: "stylesheet", href: appCss },

@@ -1,14 +1,18 @@
-import { useMemo, useState } from "react";
-import { getMissionEngine } from "@/lib/missions/registry";
-import type { Archetype } from "@/lib/missions/types";
+import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import {
+  getArchetypeLabels,
+  getArchetypeReveal,
+  type ArchetypeReveal,
+} from "@/lib/mission-shell.functions";
 
 /**
  * Alternate Paths — read-only "what would have happened" view.
  *
- * Unlocks after a mission is completed. Lets the player explore the canonical
- * outcomes for the archetypes they did NOT pick. Pure presentational read of
- * the mission engine; does NOT touch the saved mission, the analysis, or the
- * Decision Profile.
+ * Unlocks after a mission is completed. Fetches ONE archetype at a time from
+ * the server (never bundles other archetypes' hidden outcomes into the client
+ * JS). This keeps mission twists reachable-but-undelivered until the player
+ * has actually committed a decision on this mission.
  */
 export function AlternatePaths({
   missionId,
@@ -17,16 +21,34 @@ export function AlternatePaths({
   missionId: string;
   chosenArchetypeId?: string | null;
 }) {
-  const alternates = useMemo<Archetype[]>(() => {
-    const engine = getMissionEngine(missionId);
-    if (!engine) return [];
-    return engine.archetypeIds
-      .filter((id) => id !== chosenArchetypeId)
-      .map((id) => engine.getArchetype(id))
-      .filter((a): a is Archetype => a !== null);
-  }, [missionId, chosenArchetypeId]);
-
+  const fetchLabels = useServerFn(getArchetypeLabels);
+  const fetchReveal = useServerFn(getArchetypeReveal);
+  const [labels, setLabels] = useState<Record<string, string>>({});
   const [openId, setOpenId] = useState<string | null>(null);
+  const [reveals, setReveals] = useState<Record<string, ArchetypeReveal>>({});
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchLabels({ data: { missionId } })
+      .then((r) => { if (!cancelled) setLabels(r); })
+      .catch(() => { /* ignore */ });
+    return () => { cancelled = true; };
+  }, [missionId, fetchLabels]);
+
+  const alternates = Object.keys(labels).filter((id) => id !== chosenArchetypeId);
+
+  useEffect(() => {
+    if (!openId || reveals[openId]) return;
+    let cancelled = false;
+    fetchReveal({ data: { missionId, archetypeId: openId } })
+      .then((r) => {
+        if (!cancelled && r) {
+          setReveals((prev) => ({ ...prev, [openId]: r }));
+        }
+      })
+      .catch(() => { /* ignore */ });
+    return () => { cancelled = true; };
+  }, [openId, missionId, fetchReveal, reveals]);
 
   if (alternates.length === 0) return null;
 
@@ -38,16 +60,17 @@ export function AlternatePaths({
         </p>
       </div>
       <ul className="space-y-3">
-        {alternates.map((arc) => {
-          const isOpen = openId === arc.id;
+        {alternates.map((archetypeId) => {
+          const isOpen = openId === archetypeId;
+          const arc = reveals[archetypeId] ?? null;
           return (
             <li
-              key={arc.id}
+              key={archetypeId}
               className="border border-foreground/10 bg-foreground/[0.02] backdrop-blur-sm transition-colors hover:border-accent/30"
             >
               <button
                 type="button"
-                onClick={() => setOpenId(isOpen ? null : arc.id)}
+                onClick={() => setOpenId(isOpen ? null : archetypeId)}
                 aria-expanded={isOpen}
                 className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left"
               >
@@ -56,7 +79,7 @@ export function AlternatePaths({
                     Path not taken
                   </span>
                   <span className="mt-1 block font-display text-base sm:text-lg text-foreground/90">
-                    {arc.label}
+                    {labels[archetypeId] ?? "…"}
                   </span>
                 </span>
                 <span
@@ -69,7 +92,7 @@ export function AlternatePaths({
                 </span>
               </button>
 
-              {isOpen && (
+              {isOpen && arc && (
                 <div className="px-5 pb-6 pt-1 animate-fade-in">
                   <ol className="space-y-5 border-l border-foreground/15 pl-5">
                     {arc.timeline.map((t, i) => (
@@ -106,6 +129,9 @@ export function AlternatePaths({
                     </p>
                   )}
                 </div>
+              )}
+              {isOpen && !arc && (
+                <p className="px-5 pb-6 text-xs text-foreground/45">Loading…</p>
               )}
             </li>
           );

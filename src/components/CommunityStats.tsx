@@ -4,7 +4,7 @@ import {
   getMissionArchetypeBreakdown,
   type ArchetypeBreakdown,
 } from "@/lib/mission-stats.functions";
-import { getMissionEngine } from "@/lib/missions/registry";
+import { getArchetypeLabels } from "@/lib/mission-shell.functions";
 
 /**
  * Community Stats — "How did others decide?"
@@ -20,7 +20,9 @@ export function CommunityStats({
   chosenArchetypeId?: string | null;
 }) {
   const fetchBreakdown = useServerFn(getMissionArchetypeBreakdown);
+  const fetchLabels = useServerFn(getArchetypeLabels);
   const [data, setData] = useState<ArchetypeBreakdown | null>(null);
+  const [labelsMap, setLabelsMap] = useState<Record<string, string>>({});
   const [error, setError] = useState(false);
 
   useEffect(() => {
@@ -31,17 +33,20 @@ export function CommunityStats({
     return () => { cancelled = true; };
   }, [fetchBreakdown, missionId]);
 
+  useEffect(() => {
+    let cancelled = false;
+    fetchLabels({ data: { missionId } })
+      .then((r) => { if (!cancelled) setLabelsMap(r); })
+      .catch(() => { /* ignore — falls back to archetype id */ });
+    return () => { cancelled = true; };
+  }, [fetchLabels, missionId]);
+
   const labels = useMemo(() => {
-    const engine = getMissionEngine(missionId);
     const map = new Map<string, string>();
-    if (engine) {
-      for (const id of engine.archetypeIds) {
-        const arc = engine.getArchetype(id);
-        if (arc) map.set(id, arc.label);
-      }
-    }
+    for (const [id, label] of Object.entries(labelsMap)) map.set(id, label);
     return map;
-  }, [missionId]);
+  }, [labelsMap]);
+
 
   if (error) return null;
   if (!data) {

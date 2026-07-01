@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { MISSIONS } from "@/lib/missions";
 import { createAmbient, type Ambient } from "@/lib/ambient";
-import { requireMissionEngine } from "@/lib/missions/registry";
+import { getMissionShell, type MissionShell } from "@/lib/mission-shell.functions";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/sound-test")({
@@ -20,6 +21,8 @@ function SoundTestPage() {
   const ambientRef = useRef<Ambient | null>(null);
   const [playing, setPlaying] = useState<string | null>(null);
   const [pressure, setPressure] = useState(0);
+  const fetchShell = useServerFn(getMissionShell);
+  const shellCacheRef = useRef<Map<string, MissionShell>>(new Map());
 
   useEffect(() => {
     const a = createAmbient(null);
@@ -34,13 +37,17 @@ function SoundTestPage() {
     const a = ambientRef.current;
     if (!a) return;
     try {
-      const engine = requireMissionEngine(missionId);
-      if (engine.atmosphere) {
+      let shell = shellCacheRef.current.get(missionId) ?? null;
+      if (!shell) {
+        shell = await fetchShell({ data: { missionId } });
+        if (shell) shellCacheRef.current.set(missionId, shell);
+      }
+      if (shell?.atmosphere) {
         a.setAudioProfile({
-          padFrequency: engine.atmosphere.padFrequency,
-          filterBaseHz: engine.atmosphere.filterBaseHz,
-          filterLfoDepthHz: engine.atmosphere.filterLfoDepthHz,
-          lfoRateHz: engine.atmosphere.lfoRateHz,
+          padFrequency: shell.atmosphere.padFrequency,
+          filterBaseHz: shell.atmosphere.filterBaseHz,
+          filterLfoDepthHz: shell.atmosphere.filterLfoDepthHz,
+          lfoRateHz: shell.atmosphere.lfoRateHz,
         });
       }
     } catch {

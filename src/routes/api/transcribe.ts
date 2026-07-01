@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { checkRateLimit, clientIpFromRequest } from "@/lib/rate-limit.server";
 
 export const Route = createFileRoute("/api/transcribe")({
   server: {
@@ -6,6 +7,14 @@ export const Route = createFileRoute("/api/transcribe")({
       POST: async ({ request }) => {
         const key = process.env.LOVABLE_API_KEY;
         if (!key) return new Response("Missing LOVABLE_API_KEY", { status: 500 });
+
+        // Per-IP rate limit: 20 transcriptions / hour. Real players don't
+        // exceed this; a script hammering Whisper does.
+        const ip = clientIpFromRequest(request);
+        const ok = await checkRateLimit(`transcribe:${ip}`, 20, 3600);
+        if (!ok) {
+          return new Response("Rate limit exceeded. Try again later.", { status: 429 });
+        }
 
         const form = await request.formData();
         const file = form.get("file");

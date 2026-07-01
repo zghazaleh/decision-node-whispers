@@ -132,20 +132,25 @@ export const verifySite = createServerFn({ method: "POST" })
     },
   );
 
-/** Public list of meta tokens to inject into the site HTML. */
-export const listMetaTokens = createServerFn({ method: "GET" }).handler(
-  async (): Promise<VerificationTokenRow[]> => {
+/** Meta tokens to inject into the site HTML — admin-gated so the
+ *  `gsc_verification_tokens` table cannot be dumped anonymously via the
+ *  service-role client. Callers must pass the admin token. */
+export const listMetaTokens = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) =>
+    z.object({ adminToken: z.string().min(1) }).parse(d),
+  )
+  .handler(async ({ data }): Promise<VerificationTokenRow[]> => {
+    assertAdminToken(data.adminToken);
     const { supabaseAdmin } = await import(
       "@/integrations/supabase/client.server"
     );
-    const { data, error } = await supabaseAdmin
+    const { data: rows, error } = await supabaseAdmin
       .from("gsc_verification_tokens")
       .select("site_url, token, verified");
     if (error) return [];
-    return (data ?? []).map((r) => ({
+    return (rows ?? []).map((r) => ({
       siteUrl: r.site_url,
       token: r.token,
       verified: r.verified,
     }));
-  },
-);
+  });

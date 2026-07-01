@@ -42,8 +42,9 @@ function GscVerifyPage() {
   }, []);
 
   const tokensQ = useQuery({
-    queryKey: ["gsc", "tokens"],
-    queryFn: () => fetchTokens(),
+    queryKey: ["gsc", "tokens", adminToken],
+    queryFn: () => fetchTokens({ data: { adminToken } }),
+    enabled: Boolean(adminToken),
   });
 
   const requestMut = useMutation({

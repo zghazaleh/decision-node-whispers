@@ -1,9 +1,10 @@
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
-import { getMissionEngine } from "@/lib/missions/registry";
 import { frameworkAnalyzerBlock, assertMissionFrameworkReady } from "@/lib/missions/framework";
 import { createServerFn } from "@tanstack/react-start";
 import { generateObject, generateText } from "ai";
 import { z } from "zod";
+import type { Archetype } from "@/lib/missions/types";
+import { checkRateLimit, sanitizeSessionId } from "@/lib/rate-limit.server";
 
 const DEFAULT_MISSION_ID = "mission-01";
 
@@ -18,6 +19,7 @@ const AnalysisInput = z.object({
     .array(z.object({ role: z.string().max(32), text: z.string().max(4000) }))
     .min(1)
     .max(60),
+  sessionId: z.string().max(96).optional(),
 });
 
 
@@ -197,7 +199,7 @@ function fallbackAnalysis({
   reasoning,
 }: {
   raw?: Record<string, unknown>;
-  archetype: ReturnType<NonNullable<ReturnType<typeof getMissionEngine>>["getArchetype"]> | null;
+  archetype: Archetype | null;
   decision: string;
   reasoning: string;
 }): DecisionAnalysis {
@@ -296,9 +298,19 @@ export type DecisionAnalysis = z.infer<typeof AnalysisSchema>;
 export const analyzeDecision = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => AnalysisInput.parse(input))
   .handler(async ({ data }) => {
+    const sessionId = sanitizeSessionId(data.sessionId);
+
+    // 10 analyses / hour / session. A real player completes at most a
+    // handful of missions per hour; this cap sits well above that.
+    const ok = await checkRateLimit(`analyze:${sessionId}`, 10, 3600);
+    if (!ok) {
+      throw new Response("Rate limit exceeded. Try again in a bit.", { status: 429 });
+    }
+
     const key = process.env.LOVABLE_API_KEY;
     if (!key) throw new Error("Missing LOVABLE_API_KEY");
 
+    const { getMissionEngine } = await import("@/lib/missions/registry.server");
     const engine = getMissionEngine(data.missionId);
     if (!engine) throw new Error(`Unknown mission: ${data.missionId}`);
 

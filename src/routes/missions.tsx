@@ -13,7 +13,8 @@ import { audio } from "@/lib/audio/director";
 import { getSoundtrack } from "@/lib/soundtracks";
 import { getAllMissionStats, type MissionStats } from "@/lib/mission-stats.functions";
 import { readMission } from "@/lib/mission-store";
-import { getMissionEngine } from "@/lib/missions/registry";
+import { SCENE_SRC } from "@/lib/missions/client-manifest";
+import { getArchetypeLabels } from "@/lib/mission-shell.functions";
 import { HeroDetail } from "@/components/discovery/HeroDetail";
 import { GuildCarousel } from "@/components/discovery/GuildCarousel";
 import { ThemeCarousel } from "@/components/discovery/ThemeCarousel";
@@ -69,30 +70,36 @@ export const Route = createFileRoute("/missions")({
 type PriorDecision = { archetypeLabel: string; decidedAt: number };
 
 function usePriorDecisions(): Record<string, PriorDecision> {
+  const fetchLabels = useServerFn(getArchetypeLabels);
   const [prior, setPrior] = useState<Record<string, PriorDecision>>({});
   useEffect(() => {
-    const out: Record<string, PriorDecision> = {};
-    for (const m of MISSIONS) {
-      const saved = readMission(m.id);
-      // Require a genuine committed decision: archetype id, a real timestamp,
-      // and the actual decision text the player wrote. Opening a mission alone
-      // must never produce a "you last chose" line.
-      if (!saved.archetypeId || !saved.decidedAt) continue;
-      if (typeof saved.decision !== "string" || saved.decision.trim() === "") continue;
-      const engine = getMissionEngine(m.id);
-      const arche = engine?.getArchetype(saved.archetypeId);
-      if (!arche?.label) continue;
-      out[m.id] = { archetypeLabel: arche.label, decidedAt: saved.decidedAt };
-    }
-    setPrior(out);
+    let cancelled = false;
+    (async () => {
+      const out: Record<string, PriorDecision> = {};
+      for (const m of MISSIONS) {
+        const saved = readMission(m.id);
+        // Require a genuine committed decision: archetype id, a real timestamp,
+        // and the actual decision text the player wrote. Opening a mission alone
+        // must never produce a "you last chose" line.
+        if (!saved.archetypeId || !saved.decidedAt) continue;
+        if (typeof saved.decision !== "string" || saved.decision.trim() === "") continue;
+        try {
+          const labels = await fetchLabels({ data: { missionId: m.id } });
+          const label = labels[saved.archetypeId];
+          if (!label) continue;
+          out[m.id] = { archetypeLabel: label, decidedAt: saved.decidedAt };
+        } catch { /* ignore */ }
+      }
+      if (!cancelled) setPrior(out);
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return prior;
 }
 
 function getSceneSrc(missionId: string): string | null {
-  const engine = getMissionEngine(missionId);
-  const src = engine?.scene?.src;
-  return typeof src === "string" ? src : null;
+  return SCENE_SRC[missionId] ?? null;
 }
 
 function shortDuration(d: string | undefined): string {

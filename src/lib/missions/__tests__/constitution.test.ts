@@ -11,7 +11,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { listMissionEngineIds, requireMissionEngine } from "../registry";
+import { listMissionEngineIds, requireMissionEngine } from "../registry.server";
 import { getMissionFramework, validateMissionFramework } from "../framework";
 import { DIRECTOR_INVARIANTS } from "../director-invariants";
 

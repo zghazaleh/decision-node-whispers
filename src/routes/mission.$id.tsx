@@ -30,17 +30,20 @@ import { recordMissionPlay } from "@/lib/mission-stats.functions";
 
 import { audio } from "@/lib/audio/director";
 import { useRoomEntrance } from "@/components/audio/useRoomEntrance";
-import { getMissionEngine } from "@/lib/missions/registry";
+import { getMissionShell, type MissionShell } from "@/lib/mission-shell.functions";
+import { useQuery } from "@tanstack/react-query";
+import { SCENE_SRC } from "@/lib/missions/client-manifest";
 import { MISSIONS } from "@/lib/missions";
-import type { MissionEngine } from "@/lib/missions/types";
+import type { DecisionPreset } from "@/lib/missions/types";
 import { logCommit } from "@/lib/discovery/signals";
 import { themeTint } from "@/lib/discovery/theme-tint";
+import { getSessionId } from "@/lib/session-id";
 
 
 export const Route = createFileRoute("/mission/$id")({
   head: ({ params }) => {
     const meta = MISSIONS.find((m) => m.id === params.id);
-    const engine = getMissionEngine(params.id);
+    const sceneSrc = SCENE_SRC[params.id] ?? "";
     if (!meta) {
       return {
         meta: [
@@ -51,7 +54,6 @@ export const Route = createFileRoute("/mission/$id")({
     }
     const title = `${meta.title} — Decision Nodes`;
     const description = meta.logline;
-    const sceneSrc = engine?.scene.src ?? "";
     const ogImage = sceneSrc
       ? sceneSrc.startsWith("http")
         ? sceneSrc
@@ -120,22 +122,28 @@ function MissionErrorComponent({ error, reset }: { error: Error; reset: () => vo
 function MissionRoute() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
-  const engine = getMissionEngine(id);
+  const fetchShell = useServerFn(getMissionShell);
+  const { data: shell, isLoading, isError } = useQuery({
+    queryKey: ["mission-shell", id],
+    queryFn: () => fetchShell({ data: { missionId: id } }),
+    staleTime: 5 * 60_000,
+  });
   useEffect(() => {
-    if (!engine) navigate({ to: "/missions" });
-  }, [engine, navigate]);
-  if (!engine) return null;
-  return <Mission key={id} missionId={id} engine={engine} />;
+    if (!isLoading && !shell && !isError) return;
+    if (isError || (shell === null)) navigate({ to: "/missions" });
+  }, [shell, isLoading, isError, navigate]);
+  if (isLoading || !shell) return null;
+  return <Mission key={id} missionId={id} shell={shell} />;
 }
 
-function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string; engine: MissionEngine }) {
+function Mission({ missionId: MISSION_ID, shell: SHELL }: { missionId: string; shell: MissionShell }) {
   const navigate = useNavigate();
   const meta = MISSIONS.find((m) => m.id === MISSION_ID);
   const missionTitle = meta ? `Mission ${meta.number} — ${meta.codename}` : "Mission";
   const OPENING: UIMessage = {
     id: "opening",
     role: "assistant",
-    parts: [{ type: "text", text: ENGINE.opening.text }],
+    parts: [{ type: "text", text: SHELL.opening.text }],
   };
   const { mission, update } = useMission(MISSION_ID);
   const [awakening, setAwakening] = useState(true);
@@ -193,6 +201,7 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
       new DefaultChatTransport({
         api: "/api/chat",
         body: { missionId: MISSION_ID },
+        headers: { "X-DN-Session": getSessionId() },
       }),
     [MISSION_ID]
   );
@@ -240,7 +249,7 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
   // via a direct URL leaves the bed silent until the user happens to
   // trigger the global unlock listener — which can race the route's
   // own enter() call.
-  useRoomEntrance("mission", { missionId: MISSION_ID, profile: ENGINE.atmosphere });
+  useRoomEntrance("mission", { missionId: MISSION_ID, profile: SHELL.atmosphere });
 
 
   const transcriptRef = useRef<HTMLDivElement>(null);
@@ -364,6 +373,7 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
       decision: decision.trim(),
       reasoning: reasoning.trim(),
       transcript,
+      sessionId: getSessionId(),
       ...(archetypeId ? { archetypeId } : {}),
     };
     // Up to 3 attempts with exponential backoff. Transient rate-limits and
@@ -408,7 +418,7 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
         const updatedProfile = updateProfileWithAnalysis(MISSION_ID, analysis);
         void (async () => {
           try {
-            const payload = buildPortraitInput(updatedProfile, analysis);
+            const payload = { ...buildPortraitInput(updatedProfile, analysis), sessionId: getSessionId() };
             const { portrait } = await generatePortrait({ data: payload });
             if (portrait && portrait.trim()) {
               applyPortraitToProfile(portrait.trim());
@@ -443,6 +453,7 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
             decisionSeconds,
             messageCount: messages.length,
             completed: true,
+            sessionId: getSessionId(),
             ...(archetypeId ? { archetypeId } : {}),
           },
         });
@@ -518,8 +529,8 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
           className="absolute inset-0 animate-scene-sway animate-chroma-breathe"
           style={{
             transform: "translate3d(var(--px), var(--py), 0)",
-            animationDuration: ENGINE.atmosphere?.chromaBreatheDuration
-              ? `${ENGINE.atmosphere.chromaBreatheDuration}s`
+            animationDuration: SHELL.atmosphere?.chromaBreatheDuration
+              ? `${SHELL.atmosphere.chromaBreatheDuration}s`
               : undefined,
           }}
 
@@ -546,16 +557,16 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
             );
           })()}
           <img
-            src={ENGINE.scene.src}
+            src={SHELL.scene.src}
             alt=""
             aria-hidden
             onLoad={() => setSceneLoaded(true)}
             className={`h-full w-full object-cover object-[50%_38%] sm:object-center animate-ken-burns transition-opacity duration-700 ${sceneLoaded ? "opacity-100" : "opacity-0"}`}
             style={{
-              filter: `${ENGINE.scene.filter ?? "saturate(0.88) contrast(1.06)"} ${filterShift}`,
+              filter: `${SHELL.scene.filter ?? "saturate(0.88) contrast(1.06)"} ${filterShift}`,
               transition: "filter 8000ms linear, opacity 700ms ease-out",
-              animationDuration: ENGINE.atmosphere?.kenBurnsDuration
-                ? `${ENGINE.atmosphere.kenBurnsDuration}s`
+              animationDuration: SHELL.atmosphere?.kenBurnsDuration
+                ? `${SHELL.atmosphere.kenBurnsDuration}s`
                 : undefined,
             }}
           />
@@ -564,7 +575,7 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
         <div
           className="scene-haze"
           aria-hidden
-          style={{ background: ENGINE.atmosphere?.hazeBackground }}
+          style={{ background: SHELL.atmosphere?.hazeBackground }}
         />
         <div className="scene-light" aria-hidden />
         <div
@@ -572,8 +583,8 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
           aria-hidden
           style={{
             opacity:
-              ENGINE.atmosphere?.dustOpacityScale !== undefined
-                ? 0.5 * ENGINE.atmosphere.dustOpacityScale
+              SHELL.atmosphere?.dustOpacityScale !== undefined
+                ? 0.5 * SHELL.atmosphere.dustOpacityScale
                 : undefined,
           }}
         />
@@ -581,9 +592,9 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
           className="scene-pulse"
           aria-hidden
           style={{
-            background: ENGINE.atmosphere?.pulseBackground,
-            animationDuration: ENGINE.atmosphere?.pulseDuration
-              ? `${ENGINE.atmosphere.pulseDuration}s`
+            background: SHELL.atmosphere?.pulseBackground,
+            animationDuration: SHELL.atmosphere?.pulseDuration
+              ? `${SHELL.atmosphere.pulseDuration}s`
               : undefined,
           }}
         />
@@ -878,8 +889,8 @@ function Mission({ missionId: MISSION_ID, engine: ENGINE }: { missionId: string;
       {/* Decide modal */}
       {decideOpen && (
         <DecideModal
-          presets={ENGINE.decisionPresets}
-          freeWritePlaceholder={ENGINE.decideFreeWritePlaceholder ?? "In your own words…"}
+          presets={SHELL.decisionPresets}
+          freeWritePlaceholder={SHELL.decideFreeWritePlaceholder ?? "In your own words…"}
           analyzing={analyzing}
           initialDecision={decidePrefill}
           onClose={() => { if (!analyzing) { setDecideOpen(false); audio.release(900); } }}
@@ -1174,7 +1185,7 @@ function DecideModal({
   onClose,
   onSubmit,
 }: {
-  presets: MissionEngine["decisionPresets"];
+  presets: DecisionPreset[];
   freeWritePlaceholder: string;
   analyzing: boolean;
   initialDecision?: string;
