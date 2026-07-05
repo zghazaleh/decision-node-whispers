@@ -872,7 +872,7 @@ function Mission({ missionId: MISSION_ID, shell: SHELL }: { missionId: string; s
                 style={{ opacity: 0.15 + pressureForDecide * 0.85 }}
                 className={`group inline-flex items-center gap-2 rounded-full border px-5 min-h-11 py-2.5 text-[0.65rem] font-medium tracking-[0.32em] uppercase transition-all duration-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
                   decideReady
-                    ? "border-accent/70 bg-accent/10 text-accent hover:bg-accent/20 hover:border-accent shadow-[0_0_24px_-8px_var(--color-accent)] cursor-pointer"
+                    ? "border-accent/70 bg-accent/10 text-accent hover:bg-accent/20 hover:border-accent shadow-[0_0_24px_-8px_var(--color-accent)] cursor-pointer decide-ignite"
                     : "border-foreground/20 bg-transparent text-foreground/60 cursor-not-allowed"
                 }`}
               >
