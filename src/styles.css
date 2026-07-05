@@ -645,3 +645,174 @@ input[type="range"].dn-fader:active::-moz-range-thumb {
 }
 
 
+
+/* ═══════════════════════════════════════════════════════════════════
+   Art & Ambiance Elevation — additive primitives (opt-in)
+   Every rule below is honored by the reduced-motion block at the end.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* §3 — Room pressure. Components tween --room-pressure 0→1 as decide nears.
+   The vignette tightens (transparent center shrinks 30%→8%) and grain
+   nudges up slightly. Attach .room-pressure to the scene wrapper. */
+@utility room-pressure-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at center,
+    transparent calc((30% - 22% * var(--room-pressure, 0))),
+    oklch(0 0 0 / calc(0.55 + 0.25 * var(--room-pressure, 0))) 100%
+  );
+  transition: background 900ms ease-out;
+}
+
+/* §3 — Pointer parallax. Components set --parallax-x / --parallax-y
+   (-1..1); this transform lets the scene feel like a room you're inside.
+   Cheap because the scene layer is `contain`ed. */
+@utility scene-parallax {
+  transform: scale(1.02)
+    translate3d(calc(var(--parallax-x, 0) * -2.2%),
+                calc(var(--parallax-y, 0) * -1.6%), 0);
+  transition: transform 320ms cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+/* §3 — Chip as a "held option": soft self ignition + caret drift on hover.
+   Author with <button class="dn-chip">…<span class="dn-chip-caret">›</span></button>. */
+@utility dn-chip {
+  position: relative;
+  transition: background-color 220ms ease, box-shadow 220ms ease, color 220ms ease;
+}
+.dn-chip:hover,
+.dn-chip:focus-visible {
+  background-color: var(--self-soft);
+  box-shadow: inset 0 0 0 1px var(--self-ink);
+  color: var(--foreground);
+}
+.dn-chip-caret {
+  display: inline-block;
+  transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.dn-chip:hover .dn-chip-caret,
+.dn-chip:focus-visible .dn-chip-caret {
+  transform: translateX(3px);
+}
+
+/* §3 — The DECIDE pill igniting on unlock. Add .decide-ignite when the
+   gate opens; the warm bloom fires once, then holds a subtle self ring. */
+@keyframes decide-bloom {
+  0%   { box-shadow: 0 0 0 0 var(--self-soft), 0 0 0 0 var(--self); }
+  50%  { box-shadow: 0 0 44px -4px var(--self), 0 0 0 1px var(--self-ink); }
+  100% { box-shadow: 0 0 22px -6px var(--self-ink), 0 0 0 1px var(--self-ink); }
+}
+@utility decide-ignite {
+  animation: decide-bloom 1400ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  color: var(--self);
+  border-color: var(--self-ink);
+}
+
+/* §5 — Hold-to-commit sweep. The button carries a ::before that fills
+   L→R over ~1s while pressed. Class stays on until release/commit. */
+@keyframes commit-sweep {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+@utility commit-holding {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.commit-holding::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform-origin: left center;
+  transform: scaleX(0);
+  background: linear-gradient(90deg, var(--self-soft), var(--self) 90%);
+  z-index: -1;
+  animation: commit-sweep 1000ms linear forwards;
+}
+
+/* §4 — Awakening sequence. Compose stages by toggling classes on the
+   scene root; each stage is one shot and honors reduced-motion. */
+@keyframes awaken-scene {
+  0%   { filter: blur(14px) brightness(0.28); opacity: 0; }
+  30%  { opacity: 1; }
+  100% { filter: blur(0) brightness(1); opacity: 1; }
+}
+@utility awaken-scene {
+  animation: awaken-scene 2200ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes awaken-audio-rise {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@utility awaken-audio-rise {
+  animation: awaken-audio-rise 1400ms ease-out both;
+}
+
+/* §6 — Reading surface. Warm paper for the analysis prose so the
+   reader steps out of the cold room and someone has *written* about
+   what happened. Wrap prose sections in <div class="reading-surface">. */
+@utility reading-surface {
+  position: relative;
+  background:
+    radial-gradient(120% 60% at 50% 0%, oklch(0.93 0.024 84), oklch(0.90 0.02 84) 70%);
+  color: oklch(0.26 0.028 60); /* ink brown, not pure black */
+  box-shadow: 0 40px 90px -30px oklch(0 0 0 / 0.8);
+  border-radius: calc(var(--radius) + 4px);
+  isolation: isolate;
+}
+.reading-surface::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.12;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='260' height='260'><filter id='p'><feTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23p)'/></svg>");
+  border-radius: inherit;
+}
+/* Ink brown palette overrides for children of the paper surface. */
+.reading-surface :where(h1, h2, h3, h4) { color: oklch(0.22 0.032 60); }
+.reading-surface :where(p, li)          { color: oklch(0.30 0.024 60); }
+.reading-surface :where(.muted, [data-muted]) { color: oklch(0.46 0.02 60); }
+/* §6 — The indictment pull-quote: one italic word tinted --self. */
+@utility indictment {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+  font-variation-settings: "opsz" 144;
+  font-size: clamp(1.5rem, 2.4vw, 2.4rem);
+  line-height: 1.2;
+  text-align: center;
+  text-wrap: balance;
+  color: oklch(0.20 0.032 60);
+}
+.indictment em { font-style: italic; color: var(--self); }
+
+/* §7 — Portrait rings. Faint concentric guides for the astronomical
+   instrument look; the actual axes/band render on <canvas>. */
+@utility portrait-rings {
+  background:
+    radial-gradient(circle at center, transparent calc(24% - 1px),
+      oklch(0.62 0.008 240 / 0.14) 24%, transparent calc(24% + 1px)),
+    radial-gradient(circle at center, transparent calc(48% - 1px),
+      oklch(0.62 0.008 240 / 0.10) 48%, transparent calc(48% + 1px)),
+    radial-gradient(circle at center, transparent calc(72% - 1px),
+      oklch(0.62 0.008 240 / 0.08) 72%, transparent calc(72% + 1px));
+}
+
+/* Reduced-motion cover for every animation added above. */
+@media (prefers-reduced-motion: reduce) {
+  .film-grain,
+  .awaken-scene,
+  .awaken-audio-rise,
+  .commit-holding::before,
+  .decide-ignite,
+  .scene-parallax,
+  .dn-chip,
+  .dn-chip-caret,
+  .room-pressure-vignette { animation: none !important; transition: none !important; }
+  .scene-parallax { transform: none !important; }
+  .commit-holding::before { transform: scaleX(0) !important; }
+}
