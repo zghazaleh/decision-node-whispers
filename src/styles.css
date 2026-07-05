@@ -97,16 +97,20 @@
 }
 
 @layer utilities {
-  /* Fraunces is variable with an optical axis (§1). Ask for display-grade
-     contrast at large sizes; body ranges keep normal opsz. */
+  /* Fraunces is variable with an optical axis (§1). Let the browser
+     interpolate `opsz` by size so body-scale display text stays legible;
+     opt into max-contrast only on the largest headlines via .font-display-xl. */
   .font-display {
     font-family: var(--font-display);
     font-feature-settings: "ss01", "ss02";
     letter-spacing: -0.012em;
     font-optical-sizing: auto;
-    font-variation-settings: "opsz" 144;
     text-wrap: balance;
   }
+  .font-display-xl {
+    font-variation-settings: "opsz" 144;
+  }
+
   .text-balance { text-wrap: balance; }
   .text-pretty { text-wrap: pretty; }
   .tabular-nums { font-variant-numeric: tabular-nums; }
@@ -815,4 +819,14 @@ input[type="range"].dn-fader:active::-moz-range-thumb {
   .room-pressure-vignette { animation: none !important; transition: none !important; }
   .scene-parallax { transform: none !important; }
   .commit-holding::before { transform: scaleX(0) !important; }
+}
+
+/* Dialogue tuning — Fraunces at reading opsz so strokes stay legible
+   even though we're using the display face for narrative body. */
+.dialogue-serif {
+  font-family: var(--font-display);
+  font-feature-settings: "ss01", "ss02";
+  letter-spacing: -0.008em;
+  font-optical-sizing: auto;
+  font-variation-settings: "opsz" 18, "wght" 440, "SOFT" 50;
 }
