@@ -97,16 +97,20 @@
 }
 
 @layer utilities {
-  /* Fraunces is variable with an optical axis (§1). Ask for display-grade
-     contrast at large sizes; body ranges keep normal opsz. */
+  /* Fraunces is variable with an optical axis (§1). Let the browser
+     interpolate `opsz` by size so body-scale display text stays legible;
+     opt into max-contrast only on the largest headlines via .font-display-xl. */
   .font-display {
     font-family: var(--font-display);
     font-feature-settings: "ss01", "ss02";
     letter-spacing: -0.012em;
     font-optical-sizing: auto;
-    font-variation-settings: "opsz" 144;
     text-wrap: balance;
   }
+  .font-display-xl {
+    font-variation-settings: "opsz" 144;
+  }
+
   .text-balance { text-wrap: balance; }
   .text-pretty { text-wrap: pretty; }
   .tabular-nums { font-variant-numeric: tabular-nums; }
