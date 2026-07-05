@@ -47,7 +47,25 @@
 
   --border: oklch(0.95 0.005 80 / 0.12);
   --ring: oklch(0.78 0.10 80 / 0.5);
+
+  /* ── Semantic duotone (§0) — warm self, cold system ─────────────
+     Amber = the hand that decides. Steel = the institution around you.
+     Apply sparingly: character labels, decision affordances lean --self;
+     institutional / world framing leans --system. */
+  --self: oklch(0.80 0.108 78);
+  --system: oklch(0.62 0.075 250);
+  --self-soft: oklch(0.80 0.108 78 / 0.14);
+  --system-soft: oklch(0.62 0.075 250 / 0.14);
+  --self-ink: oklch(0.80 0.108 78 / 0.55);
+  --system-ink: oklch(0.62 0.075 250 / 0.55);
+
+  /* Room-pressure knob (§3). Components tween this 0→1 as decide nears. */
+  --room-pressure: 0;
+  /* Pointer parallax vector (§3), -1..1 on each axis. */
+  --parallax-x: 0;
+  --parallax-y: 0;
 }
+
 
 @layer base {
   * {
@@ -79,12 +97,44 @@
 }
 
 @layer utilities {
-  .font-display { font-family: var(--font-display); font-feature-settings: "ss01", "ss02"; letter-spacing: -0.012em; }
+  /* Fraunces is variable with an optical axis (§1). Ask for display-grade
+     contrast at large sizes; body ranges keep normal opsz. */
+  .font-display {
+    font-family: var(--font-display);
+    font-feature-settings: "ss01", "ss02";
+    letter-spacing: -0.012em;
+    font-optical-sizing: auto;
+    font-variation-settings: "opsz" 144;
+    text-wrap: balance;
+  }
   .text-balance { text-wrap: balance; }
   .text-pretty { text-wrap: pretty; }
   .tabular-nums { font-variant-numeric: tabular-nums; }
+  .oldstyle-nums { font-feature-settings: "onum" 1; font-variant-numeric: oldstyle-nums; }
   .small-caps { font-variant: all-small-caps; letter-spacing: 0.18em; }
+  /* §1 — character labels: small-caps with wider tracking. Colorway
+     applied via .voice-self / .voice-system. */
+  .voice-label {
+    font-variant: all-small-caps;
+    letter-spacing: 0.28em;
+    font-family: var(--font-display);
+  }
+  .voice-self { color: var(--self); }
+  .voice-system { color: var(--system); }
+  /* §1 — narration measure. Cap at ~60ch, pretty-wrap, generous leading. */
+  .narration {
+    max-width: 60ch;
+    line-height: 1.62;
+    text-wrap: pretty;
+  }
+  /* §0 — semantic ink helpers. */
+  .text-self { color: var(--self); }
+  .text-system { color: var(--system); }
+  .bg-self-soft { background-color: var(--self-soft); }
+  .bg-system-soft { background-color: var(--system-soft); }
+  .ring-self { box-shadow: 0 0 0 1px var(--self-ink); }
 }
+
 
 /* ── Cinematic letterbox ──────────────────────────────────────────── */
 @keyframes letterbox-in {
