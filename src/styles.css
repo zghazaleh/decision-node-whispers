@@ -820,3 +820,13 @@ input[type="range"].dn-fader:active::-moz-range-thumb {
   .scene-parallax { transform: none !important; }
   .commit-holding::before { transform: scaleX(0) !important; }
 }
+
+/* Dialogue tuning — Fraunces at reading opsz so strokes stay legible
+   even though we're using the display face for narrative body. */
+.dialogue-serif {
+  font-family: var(--font-display);
+  font-feature-settings: "ss01", "ss02";
+  letter-spacing: -0.008em;
+  font-optical-sizing: auto;
+  font-variation-settings: "opsz" 18, "wght" 440, "SOFT" 50;
+}
