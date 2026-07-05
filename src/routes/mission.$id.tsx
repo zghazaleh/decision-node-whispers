@@ -967,7 +967,7 @@ function MessageBubble({
 const CLASS_LABEL =
   "font-sans text-[0.65rem] tracking-[0.35em] uppercase text-accent/80 mb-2";
 const CLASS_DIALOGUE =
-  "font-display text-2xl sm:text-3xl leading-snug text-foreground/95 text-pretty";
+  "dialogue-serif text-2xl sm:text-3xl leading-snug text-foreground text-pretty";
 const CLASS_SENSORY =
   "font-sans text-sm italic text-foreground/55 leading-relaxed text-pretty max-w-prose";
 const CLASS_INLINE_ITALIC =
