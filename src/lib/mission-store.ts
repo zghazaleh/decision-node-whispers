@@ -19,6 +19,8 @@ export type SavedMission = {
   archetypeId?: string;
   /** Player-reported confidence 0..100 at commit time. */
   confidence?: number;
+  /** The one thing the player said they still didn't know at commit time. */
+  openUncertainty?: string;
 };
 
 const empty = (missionId: string): SavedMission => ({
