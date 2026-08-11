@@ -314,6 +314,12 @@ function AnalysisDebrief({
   // Stance line. Prefer the saved decision text — it is the player's own words.
   const stance = (mission.decision ?? "").trim();
   const why = (mission.reasoning ?? "").trim();
+  const statedConfidence = typeof mission.confidence === "number" ? mission.confidence : null;
+  const openUncertainty = (mission.openUncertainty ?? "").trim();
+
+  // Aftermath first, analysis second. The human consequence lands, the room
+  // goes quiet, and only then does the reading open — on the player's cue.
+  const [analysisOpen, setAnalysisOpen] = useState(false);
 
   return (
     <div className="relative z-10 mx-auto max-w-2xl px-6 sm:px-10 py-20 sm:py-28 space-y-20">
