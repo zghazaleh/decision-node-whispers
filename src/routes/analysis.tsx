@@ -354,6 +354,21 @@ function AnalysisDebrief({
             {a.archetypeLabel}
           </p>
         )}
+        {(statedConfidence !== null || openUncertainty) && (
+          <div className="mt-10 mx-auto max-w-md border-t border-foreground/10 pt-6 space-y-3">
+            {statedConfidence !== null && (
+              <p className="text-[0.65rem] tracking-[0.3em] uppercase text-foreground/45">
+                Stated confidence at commit —{" "}
+                <span className="text-accent/90 tabular-nums">{statedConfidence}%</span>
+              </p>
+            )}
+            {openUncertainty && (
+              <p className="text-sm text-foreground/55 leading-relaxed text-pretty italic">
+                Still unknown to you: {openUncertainty}
+              </p>
+            )}
+          </div>
+        )}
       </section>
 
       {/* Block 2 — What happened (cinematic noir sequence) */}
@@ -371,8 +386,33 @@ function AnalysisDebrief({
         />
       </section>
 
+      {/* The pause. Consequence has landed; the reading waits for your cue. */}
+      {!analysisOpen && (
+        <section className="animate-fade-up text-center space-y-8 py-8" style={{ animationDelay: "0.35s" }}>
+          <p className="mx-auto max-w-md text-sm leading-relaxed text-foreground/50 text-pretty">
+            That is what happened. Sit with it for a moment. What follows is not about the
+            outcome — it is about how you got there.
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
+            <button
+              onClick={() => setAnalysisOpen(true)}
+              className="group inline-flex items-center gap-3 rounded-full border border-accent/70 px-6 py-3 text-[0.65rem] tracking-[0.4em] uppercase text-accent transition-colors hover:bg-accent/10"
+            >
+              Read how you decided
+            </button>
+            <button
+              onClick={onReturn}
+              className="text-[0.65rem] tracking-[0.4em] uppercase text-foreground/40 hover:text-foreground/80 transition-colors"
+            >
+              Back to case files
+            </button>
+          </div>
+        </section>
+      )}
 
+      {analysisOpen && (<>
       {/* Block 3 — How you reasoned */}
+
       {a.reasoningEcho && (
         <section className="animate-fade-up" style={{ animationDelay: "0.3s" }}>
           <p className="text-[0.6rem] tracking-[0.5em] uppercase text-accent/80 mb-6 text-center">
