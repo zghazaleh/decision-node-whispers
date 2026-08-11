@@ -479,6 +479,12 @@ FINAL DECISION: ${data.decision}
 
 PLAYER REASONING: ${data.reasoning || "(none provided)"}
 
+STATED CONFIDENCE AT COMMIT (0-100): ${typeof data.confidence === "number" ? data.confidence : "(not stated)"}
+
+STATED OPEN UNCERTAINTY AT COMMIT (what you said you still did not know): ${data.openUncertainty || "(none stated)"}
+${typeof data.confidence === "number" ? "Judge calibration against this stated number and the evidence actually gathered — never against the outcome. If the stated uncertainty was material and reachable, say so plainly in calibration." : ""}
+
+
 FULL TRANSCRIPT:
 ${transcriptText}`,
     });
