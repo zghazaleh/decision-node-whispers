@@ -146,6 +146,14 @@ const RawAnalysisSchema = AnalysisSchema.extend({
   evidenceUsed: TextBlockOrList,
   evidenceIgnored: TextBlockOrList,
   alternatives: TextBlockOrList,
+  evidenceLayers: z
+    .object({
+      observed: TextBlockOrList,
+      inference: TextBlockOrList,
+      alternativeReading: TextBlockOrList,
+      questionBack: TextBlockOrList,
+    })
+    .optional(),
 });
 
 type RawDecisionAnalysis = z.infer<typeof RawAnalysisSchema>;
@@ -163,6 +171,14 @@ function normalizeAnalysis(raw: RawDecisionAnalysis): DecisionAnalysis {
     evidenceUsed: normalizeTextBlock(raw.evidenceUsed),
     evidenceIgnored: normalizeTextBlock(raw.evidenceIgnored),
     alternatives: normalizeTextBlock(raw.alternatives),
+    evidenceLayers: raw.evidenceLayers
+      ? {
+          observed: normalizeTextBlock(raw.evidenceLayers.observed),
+          inference: normalizeTextBlock(raw.evidenceLayers.inference),
+          alternativeReading: normalizeTextBlock(raw.evidenceLayers.alternativeReading),
+          questionBack: normalizeTextBlock(raw.evidenceLayers.questionBack),
+        }
+      : undefined,
   });
 }
 
