@@ -314,6 +314,12 @@ function AnalysisDebrief({
   // Stance line. Prefer the saved decision text — it is the player's own words.
   const stance = (mission.decision ?? "").trim();
   const why = (mission.reasoning ?? "").trim();
+  const statedConfidence = typeof mission.confidence === "number" ? mission.confidence : null;
+  const openUncertainty = (mission.openUncertainty ?? "").trim();
+
+  // Aftermath first, analysis second. The human consequence lands, the room
+  // goes quiet, and only then does the reading open — on the player's cue.
+  const [analysisOpen, setAnalysisOpen] = useState(false);
 
   return (
     <div className="relative z-10 mx-auto max-w-2xl px-6 sm:px-10 py-20 sm:py-28 space-y-20">
@@ -348,6 +354,21 @@ function AnalysisDebrief({
             {a.archetypeLabel}
           </p>
         )}
+        {(statedConfidence !== null || openUncertainty) && (
+          <div className="mt-10 mx-auto max-w-md border-t border-foreground/10 pt-6 space-y-3">
+            {statedConfidence !== null && (
+              <p className="text-[0.65rem] tracking-[0.3em] uppercase text-foreground/45">
+                Stated confidence at commit —{" "}
+                <span className="text-accent/90 tabular-nums">{statedConfidence}%</span>
+              </p>
+            )}
+            {openUncertainty && (
+              <p className="text-sm text-foreground/55 leading-relaxed text-pretty italic">
+                Still unknown to you: {openUncertainty}
+              </p>
+            )}
+          </div>
+        )}
       </section>
 
       {/* Block 2 — What happened (cinematic noir sequence) */}
@@ -365,8 +386,33 @@ function AnalysisDebrief({
         />
       </section>
 
+      {/* The pause. Consequence has landed; the reading waits for your cue. */}
+      {!analysisOpen && (
+        <section className="animate-fade-up text-center space-y-8 py-8" style={{ animationDelay: "0.35s" }}>
+          <p className="mx-auto max-w-md text-sm leading-relaxed text-foreground/50 text-pretty">
+            That is what happened. Sit with it for a moment. What follows is not about the
+            outcome — it is about how you got there.
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
+            <button
+              onClick={() => setAnalysisOpen(true)}
+              className="group inline-flex items-center gap-3 rounded-full border border-accent/70 px-6 py-3 text-[0.65rem] tracking-[0.4em] uppercase text-accent transition-colors hover:bg-accent/10"
+            >
+              Read how you decided
+            </button>
+            <button
+              onClick={onReturn}
+              className="text-[0.65rem] tracking-[0.4em] uppercase text-foreground/40 hover:text-foreground/80 transition-colors"
+            >
+              Back to case files
+            </button>
+          </div>
+        </section>
+      )}
 
+      {analysisOpen && (<>
       {/* Block 3 — How you reasoned */}
+
       {a.reasoningEcho && (
         <section className="animate-fade-up" style={{ animationDelay: "0.3s" }}>
           <p className="text-[0.6rem] tracking-[0.5em] uppercase text-accent/80 mb-6 text-center">
@@ -389,6 +435,36 @@ function AnalysisDebrief({
           )}
         </section>
       )}
+
+      {/* Block 3b — The reading, layered. Observation is kept visibly separate
+          from interpretation so nothing here reads as a diagnosis. */}
+      {a.evidenceLayers && (
+        <section className="animate-fade-up" style={{ animationDelay: "0.38s" }}>
+          <p className="text-[0.6rem] tracking-[0.5em] uppercase text-accent/80 mb-8 text-center">
+            The reading, layer by layer
+          </p>
+          <div className="mx-auto max-w-xl space-y-8">
+            {[
+              { label: "What was observed", text: a.evidenceLayers.observed, tone: "text-foreground/85" },
+              { label: "What it might mean", text: a.evidenceLayers.inference, tone: "text-foreground/70" },
+              { label: "Another reading", text: a.evidenceLayers.alternativeReading, tone: "text-foreground/60" },
+              { label: "A question back to you", text: a.evidenceLayers.questionBack, tone: "text-accent/90 italic" },
+            ]
+              .filter((l) => (l.text ?? "").trim().length > 0)
+              .map((l) => (
+                <div key={l.label} className="border-l border-foreground/15 pl-6">
+                  <p className="text-[0.6rem] tracking-[0.35em] uppercase text-foreground/40 mb-2">
+                    {l.label}
+                  </p>
+                  <p className={`text-sm sm:text-base leading-relaxed text-pretty ${l.tone}`}>
+                    {l.text}
+                  </p>
+                </div>
+              ))}
+          </div>
+        </section>
+      )}
+
 
       {/* Block 4 — A pattern worth noticing (optional) */}
       {pattern && (
@@ -532,6 +608,7 @@ function AnalysisDebrief({
           </button>
         </div>
       </section>
+      </>)}
     </div>
   );
 }

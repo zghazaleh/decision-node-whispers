@@ -15,6 +15,8 @@ const AnalysisInput = z.object({
   reasoning: z.string().max(4000).default(""),
   archetypeId: z.string().max(64).optional(),
   confidence: z.number().min(0).max(100).optional(),
+  /** The single thing the player said they still did not know at commit time. */
+  openUncertainty: z.string().max(600).default(""),
   transcript: z
     .array(z.object({ role: z.string().max(32), text: z.string().max(4000) }))
     .min(1)
@@ -121,6 +123,17 @@ const AnalysisSchema = z.object({
   // invent consequences, MUST NOT contradict canon, MUST NOT use forbidden
   // vocabulary (good/bad/right/wrong/correct/incorrect).
   reasoningEcho: z.string().optional(),
+
+  // NEW: the four honesty layers. Keeps observation separate from inference so
+  // the debrief never reads as a diagnosis. Rendered as distinct blocks.
+  evidenceLayers: z
+    .object({
+      observed: z.string(),
+      inference: z.string(),
+      alternativeReading: z.string(),
+      questionBack: z.string(),
+    })
+    .optional(),
 });
 
 const TextBlockOrList = z.union([z.string(), z.array(z.string())]);
@@ -133,6 +146,14 @@ const RawAnalysisSchema = AnalysisSchema.extend({
   evidenceUsed: TextBlockOrList,
   evidenceIgnored: TextBlockOrList,
   alternatives: TextBlockOrList,
+  evidenceLayers: z
+    .object({
+      observed: TextBlockOrList,
+      inference: TextBlockOrList,
+      alternativeReading: TextBlockOrList,
+      questionBack: TextBlockOrList,
+    })
+    .optional(),
 });
 
 type RawDecisionAnalysis = z.infer<typeof RawAnalysisSchema>;
@@ -150,6 +171,14 @@ function normalizeAnalysis(raw: RawDecisionAnalysis): DecisionAnalysis {
     evidenceUsed: normalizeTextBlock(raw.evidenceUsed),
     evidenceIgnored: normalizeTextBlock(raw.evidenceIgnored),
     alternatives: normalizeTextBlock(raw.alternatives),
+    evidenceLayers: raw.evidenceLayers
+      ? {
+          observed: normalizeTextBlock(raw.evidenceLayers.observed),
+          inference: normalizeTextBlock(raw.evidenceLayers.inference),
+          alternativeReading: normalizeTextBlock(raw.evidenceLayers.alternativeReading),
+          questionBack: normalizeTextBlock(raw.evidenceLayers.questionBack),
+        }
+      : undefined,
   });
 }
 
@@ -289,6 +318,17 @@ function fallbackAnalysis({
     reasoningEcho: safeString(raw?.reasoningEcho, reasoning
       ? `You described your reasoning as: ${reasoning}. Your confidence sat where the evidence appeared to be in the moment, and the remaining uncertainty is part of the lesson.`
       : "You gave little explicit reasoning, so the clearest signal is the path you took through the conversation before committing."),
+    evidenceLayers: (() => {
+      const layers = raw?.evidenceLayers && typeof raw.evidenceLayers === "object"
+        ? raw.evidenceLayers as Record<string, unknown>
+        : {};
+      return {
+        observed: safeString(layers.observed, `You committed to: ${decision}.`),
+        inference: safeString(layers.inference, "From the sequence alone, you appeared to weigh what you were told more heavily than what you could have checked."),
+        alternativeReading: safeString(layers.alternativeReading, "You may equally have judged the untested material peripheral to the decision in front of you."),
+        questionBack: safeString(layers.questionBack, "What made the account you accepted feel credible enough to act on?"),
+      };
+    })(),
   };
 }
 
@@ -423,7 +463,12 @@ Return ONLY a valid JSON object. Do not wrap it in markdown. Do not include comm
 - dimensionScores: REQUIRED. Score your reasoning on each of these eight axes, 0-100, grounded ONLY in transcript behavior. Anchors: 0 = absent or actively counterproductive; 35 = thin or inconsistent; 50 = baseline with mixed signals; 65 = clearly present and load-bearing; 85 = a defining strength of this session; 100 = exemplary across multiple moments. Do NOT default everything to 50 — differentiate. Outcome MUST NOT affect any score.
    - strategicThinking, curiosity, informationGathering, confidenceCalibration, adaptability, negotiation, longTermThinking, biasResistance — all judged against your behavior.
 - dimensionNotes: REQUIRED. For each of the eight axes above, one short sentence (max 25 words) addressed to you and grounded in a specific transcript moment.
-- reasoningEcho: REQUIRED. 2–3 sentences in an executive-coach voice, addressed to "you", that mirror your reasoning back with precision. Use your own WHY text as the spine. Reference the calibrationVerdict explicitly in plain language (e.g. for "calibrated": "your confidence sat where the evidence actually was"; for "over": "you stated more certainty than the evidence carried"; for "under": "the evidence was stronger than your confidence suggested"). Quote or paraphrase one or two specific transcript moments that map to the highest- and lowest-scoring dimensions. Do NOT invent consequences, do NOT repeat the canon timeline, do NOT contradict it, do NOT use the forbidden vocabulary (good/bad/right/wrong/correct/incorrect). If you provided no reasoning text, ground the echo entirely in your behavior. Tone: quiet, specific, respectful — never congratulatory, never scolding.`,
+- reasoningEcho: REQUIRED. 2–3 sentences in an executive-coach voice, addressed to "you", that mirror your reasoning back with precision. Use your own WHY text as the spine. Reference the calibrationVerdict explicitly in plain language (e.g. for "calibrated": "your confidence sat where the evidence actually was"; for "over": "you stated more certainty than the evidence carried"; for "under": "the evidence was stronger than your confidence suggested"). Quote or paraphrase one or two specific transcript moments that map to the highest- and lowest-scoring dimensions. Do NOT invent consequences, do NOT repeat the canon timeline, do NOT contradict it, do NOT use the forbidden vocabulary (good/bad/right/wrong/correct/incorrect). If you provided no reasoning text, ground the echo entirely in your behavior. Tone: quiet, specific, respectful — never congratulatory, never scolding.
+- evidenceLayers: REQUIRED. Four separate strings that keep observation apart from interpretation. This system can only see what you typed, what you asked, what you inspected, and the order you did it in — it cannot see motive or attention, so never state an inference as fact.
+   - observed: 1-2 sentences of PURE behavior, no interpretation whatsoever. Literal and checkable against the transcript. E.g. "You questioned the CFO twice and never opened the audit attachment."
+   - inference: 1-2 sentences, explicitly hedged ("appeared to", "reads as", "suggests"), naming what that behavior may indicate about how you weighed evidence.
+   - alternativeReading: 1-2 sentences giving a genuinely different, equally plausible explanation for the same behavior. Never a straw man.
+   - questionBack: exactly one short question to you, about your own reasoning. Never rhetorical, never leading, never containing an answer.`,
 
 
       prompt: `${canonTimelineBlock}
@@ -433,6 +478,12 @@ ${frameworkAnalyzerBlock(data.missionId)}
 FINAL DECISION: ${data.decision}
 
 PLAYER REASONING: ${data.reasoning || "(none provided)"}
+
+STATED CONFIDENCE AT COMMIT (0-100): ${typeof data.confidence === "number" ? data.confidence : "(not stated)"}
+
+STATED OPEN UNCERTAINTY AT COMMIT (what you said you still did not know): ${data.openUncertainty || "(none stated)"}
+${typeof data.confidence === "number" ? "Judge calibration against this stated number and the evidence actually gathered — never against the outcome. If the stated uncertainty was material and reachable, say so plainly in calibration." : ""}
+
 
 FULL TRANSCRIPT:
 ${transcriptText}`,
