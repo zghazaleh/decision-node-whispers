@@ -344,8 +344,11 @@ function Mission({ missionId: MISSION_ID, shell: SHELL }: { missionId: string; s
     decision: string,
     reasoning: string,
     archetypeId?: string,
+    commitment?: { confidence?: number; openUncertainty?: string },
   ) {
     if (!decision.trim()) return;
+    const confidence = commitment?.confidence;
+    const openUncertainty = (commitment?.openUncertainty ?? "").trim();
     // Persist draft BEFORE any async work: a mid-flight refresh, network drop,
     // or tab suspension can't erase the player's decision + reasoning. The
     // `analysis` field is written only after Stage A returns.
@@ -355,6 +358,8 @@ function Mission({ missionId: MISSION_ID, shell: SHELL }: { missionId: string; s
         decision: decision.trim(),
         reasoning: reasoning.trim(),
         decidedAt,
+        ...(typeof confidence === "number" ? { confidence } : {}),
+        ...(openUncertainty ? { openUncertainty } : {}),
         ...(archetypeId ? { archetypeId } : {}),
       });
     } catch (err) {
@@ -372,8 +377,10 @@ function Mission({ missionId: MISSION_ID, shell: SHELL }: { missionId: string; s
       missionId: MISSION_ID,
       decision: decision.trim(),
       reasoning: reasoning.trim(),
+      openUncertainty,
       transcript,
       sessionId: getSessionId(),
+      ...(typeof confidence === "number" ? { confidence } : {}),
       ...(archetypeId ? { archetypeId } : {}),
     };
     // Up to 3 attempts with exponential backoff. Transient rate-limits and
