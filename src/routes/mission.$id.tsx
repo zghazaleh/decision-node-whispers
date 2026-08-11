@@ -408,7 +408,7 @@ function Mission({ missionId: MISSION_ID, shell: SHELL }: { missionId: string; s
         duration: 12000,
         action: {
           label: "Retry",
-          onClick: () => { void handleDecide(decision, reasoning, archetypeId); },
+          onClick: () => { void handleDecide(decision, reasoning, archetypeId, commitment); },
         },
       });
       return;
@@ -419,6 +419,8 @@ function Mission({ missionId: MISSION_ID, shell: SHELL }: { missionId: string; s
         reasoning: reasoning.trim(),
         analysis,
         decidedAt,
+        ...(typeof confidence === "number" ? { confidence } : {}),
+        ...(openUncertainty ? { openUncertainty } : {}),
         ...(archetypeId ? { archetypeId } : {}),
       });
       try {
