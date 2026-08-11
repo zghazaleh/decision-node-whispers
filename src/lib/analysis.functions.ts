@@ -15,6 +15,8 @@ const AnalysisInput = z.object({
   reasoning: z.string().max(4000).default(""),
   archetypeId: z.string().max(64).optional(),
   confidence: z.number().min(0).max(100).optional(),
+  /** The single thing the player said they still did not know at commit time. */
+  openUncertainty: z.string().max(600).default(""),
   transcript: z
     .array(z.object({ role: z.string().max(32), text: z.string().max(4000) }))
     .min(1)
@@ -121,6 +123,17 @@ const AnalysisSchema = z.object({
   // invent consequences, MUST NOT contradict canon, MUST NOT use forbidden
   // vocabulary (good/bad/right/wrong/correct/incorrect).
   reasoningEcho: z.string().optional(),
+
+  // NEW: the four honesty layers. Keeps observation separate from inference so
+  // the debrief never reads as a diagnosis. Rendered as distinct blocks.
+  evidenceLayers: z
+    .object({
+      observed: z.string(),
+      inference: z.string(),
+      alternativeReading: z.string(),
+      questionBack: z.string(),
+    })
+    .optional(),
 });
 
 const TextBlockOrList = z.union([z.string(), z.array(z.string())]);
