@@ -1249,7 +1249,7 @@ function DecideModal({
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                onSubmit(decision, reasoning, archetypeId);
+                onSubmit(decision, reasoning, archetypeId, { confidence, openUncertainty });
               }}
               className="space-y-6"
             >
