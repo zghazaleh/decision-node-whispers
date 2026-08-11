@@ -1314,7 +1314,7 @@ function DecideModal({
               </div>
               <div>
                 <label className="block text-[0.6rem] tracking-[0.3em] uppercase text-foreground/50 mb-2">
-                  Why (optional)
+                  Why — one line
                 </label>
                 <textarea
                   value={reasoning}
@@ -1324,6 +1324,45 @@ function DecideModal({
                   className="w-full resize-none rounded-sm border border-foreground/15 bg-background/45 px-3 py-3 text-foreground/95 outline-none transition-colors placeholder:text-foreground/25 focus:border-foreground/60"
                 />
               </div>
+
+              {/* Commitment: stated confidence, recorded before the outcome is known. */}
+              <div>
+                <div className="mb-3 flex items-baseline justify-between">
+                  <label htmlFor="commit-confidence" className="text-[0.6rem] tracking-[0.3em] uppercase text-foreground/50">
+                    How sure are you
+                  </label>
+                  <span className="font-display text-lg text-accent tabular-nums">{confidence}%</span>
+                </div>
+                <input
+                  id="commit-confidence"
+                  type="range"
+                  min={0}
+                  max={100}
+                  step={1}
+                  value={confidence}
+                  onChange={(e) => setConfidence(Number(e.target.value))}
+                  className="dn-fader w-full"
+                  aria-label="Stated confidence at commit"
+                />
+                <p className="mt-2 text-[0.65rem] leading-relaxed text-foreground/40">
+                  Recorded now, before you know what happens. It is read against the evidence you gathered — never against the outcome.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-[0.6rem] tracking-[0.3em] uppercase text-foreground/50 mb-2">
+                  The one thing you still don't know
+                </label>
+                <input
+                  type="text"
+                  value={openUncertainty}
+                  onChange={(e) => setOpenUncertainty(e.target.value.slice(0, 300))}
+                  placeholder="The uncertainty you're carrying into this…"
+                  className="w-full rounded-sm border border-foreground/15 bg-background/45 px-3 py-3 text-foreground/95 outline-none transition-colors placeholder:text-foreground/25 focus:border-foreground/60"
+                />
+              </div>
+
+
 
 
 
