@@ -578,6 +578,7 @@ function AnalysisDebrief({
           </button>
         </div>
       </section>
+      </>)}
     </div>
   );
 }
