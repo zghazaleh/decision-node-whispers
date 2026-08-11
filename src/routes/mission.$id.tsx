@@ -1199,10 +1199,17 @@ function DecideModal({
   analyzing: boolean;
   initialDecision?: string;
   onClose: () => void;
-  onSubmit: (decision: string, reasoning: string, archetypeId?: string) => void;
+  onSubmit: (
+    decision: string,
+    reasoning: string,
+    archetypeId?: string,
+    commitment?: { confidence?: number; openUncertainty?: string },
+  ) => void;
 }) {
   const [decision, setDecision] = useState(initialDecision ?? "");
   const [reasoning, setReasoning] = useState("");
+  const [confidence, setConfidence] = useState(60);
+  const [openUncertainty, setOpenUncertainty] = useState("");
   const [archetypeId, setArchetypeId] = useState<string | undefined>();
   const selectedPreset = presets.find((p) => p.text.trim() === decision.trim());
   const canCommit = decision.trim().length > 0 && !analyzing;
