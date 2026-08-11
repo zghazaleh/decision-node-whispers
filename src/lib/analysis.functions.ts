@@ -318,6 +318,17 @@ function fallbackAnalysis({
     reasoningEcho: safeString(raw?.reasoningEcho, reasoning
       ? `You described your reasoning as: ${reasoning}. Your confidence sat where the evidence appeared to be in the moment, and the remaining uncertainty is part of the lesson.`
       : "You gave little explicit reasoning, so the clearest signal is the path you took through the conversation before committing."),
+    evidenceLayers: (() => {
+      const layers = raw?.evidenceLayers && typeof raw.evidenceLayers === "object"
+        ? raw.evidenceLayers as Record<string, unknown>
+        : {};
+      return {
+        observed: safeString(layers.observed, `You committed to: ${decision}.`),
+        inference: safeString(layers.inference, "From the sequence alone, you appeared to weigh what you were told more heavily than what you could have checked."),
+        alternativeReading: safeString(layers.alternativeReading, "You may equally have judged the untested material peripheral to the decision in front of you."),
+        questionBack: safeString(layers.questionBack, "What made the account you accepted feel credible enough to act on?"),
+      };
+    })(),
   };
 }
 
