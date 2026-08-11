@@ -436,6 +436,36 @@ function AnalysisDebrief({
         </section>
       )}
 
+      {/* Block 3b — The reading, layered. Observation is kept visibly separate
+          from interpretation so nothing here reads as a diagnosis. */}
+      {a.evidenceLayers && (
+        <section className="animate-fade-up" style={{ animationDelay: "0.38s" }}>
+          <p className="text-[0.6rem] tracking-[0.5em] uppercase text-accent/80 mb-8 text-center">
+            The reading, layer by layer
+          </p>
+          <div className="mx-auto max-w-xl space-y-8">
+            {[
+              { label: "What was observed", text: a.evidenceLayers.observed, tone: "text-foreground/85" },
+              { label: "What it might mean", text: a.evidenceLayers.inference, tone: "text-foreground/70" },
+              { label: "Another reading", text: a.evidenceLayers.alternativeReading, tone: "text-foreground/60" },
+              { label: "A question back to you", text: a.evidenceLayers.questionBack, tone: "text-accent/90 italic" },
+            ]
+              .filter((l) => (l.text ?? "").trim().length > 0)
+              .map((l) => (
+                <div key={l.label} className="border-l border-foreground/15 pl-6">
+                  <p className="text-[0.6rem] tracking-[0.35em] uppercase text-foreground/40 mb-2">
+                    {l.label}
+                  </p>
+                  <p className={`text-sm sm:text-base leading-relaxed text-pretty ${l.tone}`}>
+                    {l.text}
+                  </p>
+                </div>
+              ))}
+          </div>
+        </section>
+      )}
+
+
       {/* Block 4 — A pattern worth noticing (optional) */}
       {pattern && (
         <section className="animate-fade-up" style={{ animationDelay: "0.45s" }}>
