@@ -24,6 +24,9 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Record checked revision
+        run: git rev-parse HEAD
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
       - run: ${{ matrix.command }}
@@ -45,6 +48,10 @@ jobs:
     timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Record checked revision
+        run: git rev-parse HEAD
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
       - run: mkdir -p output/playwright

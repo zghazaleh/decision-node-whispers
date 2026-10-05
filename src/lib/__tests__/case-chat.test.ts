@@ -73,6 +73,45 @@ describe("case chat endpoint", () => {
     expect(directorContext).not.toContain("Become a dragon");
   });
 
+  it("accepts supported assistant metadata but only forwards public text to the models", async () => {
+    generateText.mockResolvedValue({ output: { inScope: true } });
+    const reply = message("assistant", "The evaluation has unresolved concerns.");
+    reply.parts.unshift(
+      { type: "step-start" },
+      { type: "reasoning", text: "private model reasoning", state: "done" },
+    );
+    reply.parts.push({ type: "source-url", sourceId: "source", url: "https://example.com" });
+    const response = await handleChat(request([reply, message("user", "What concerns?")]));
+    expect(response.status).toBe(200);
+    expect(generateText.mock.calls[0][0].prompt).not.toContain("private model reasoning");
+    expect(JSON.stringify(streamText.mock.calls[0][0].messages)).not.toMatch(
+      /private model reasoning|example.com/,
+    );
+  });
+
+  it.each([
+    { type: "step-start" },
+    { type: "file", mediaType: "text/plain", url: "https://example.com" },
+    {
+      type: "dynamic-tool",
+      toolName: "unsafe",
+      toolCallId: "1",
+      state: "input-available",
+      input: {},
+    },
+    { type: "text", text: 42 },
+  ])("rejects unsupported or malformed player parts: $type", async (part) => {
+    const response = await handleChat(
+      new Request("http://localhost/api/chat", {
+        method: "POST",
+        body: JSON.stringify({ messages: [{ id: "bad", role: "user", parts: [part] }] }),
+      }),
+    );
+    expect(response.status).toBe(400);
+    expect(generateText).not.toHaveBeenCalled();
+    expect(streamText).not.toHaveBeenCalled();
+  });
+
   it("fails closed when scope checking is unavailable", async () => {
     generateText.mockRejectedValue(new Error("gateway unavailable"));
     const response = await handleChat(request([message("user", "Write another story")]));

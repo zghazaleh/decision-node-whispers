@@ -49,9 +49,16 @@ describe("case boundary", () => {
   it("allows a relevant request when the scope check accepts it", async () => {
     generateText.mockResolvedValue({ output: { inScope: true } });
     const engine = requireMissionEngine("mission-01");
-    expect(await isCaseRequest(engine, [message("user", "Who am I?")], "test/model")).toBe(true);
+    expect(
+      await isCaseRequest(
+        engine,
+        [message("user", "If funding were guaranteed, would you still release?")],
+        "test/model",
+      ),
+    ).toBe(true);
     expect(generateText.mock.calls[0][0].temperature).toBe(0);
     expect(generateText.mock.calls[0][0].system).toContain(engine.systemPrompt);
+    expect(generateText.mock.calls[0][0].system).toContain("Allow counterfactual questions");
   });
 
   it("rejects a diversion without asking the scope check to narrate it", async () => {

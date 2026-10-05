@@ -6,6 +6,8 @@ import { z } from "zod";
 import type { Archetype } from "@/lib/missions/types";
 import { checkRateLimit, sanitizeSessionId } from "@/lib/rate-limit.server";
 
+import { withoutRedirectedTranscript } from "@/lib/case-conversation";
+
 const DEFAULT_MISSION_ID = "mission-01";
 
 
@@ -361,7 +363,7 @@ export const analyzeDecision = createServerFn({ method: "POST" })
 
     const gateway = createLovableAiGatewayProvider(key);
 
-    const transcriptText = data.transcript
+    const transcriptText = withoutRedirectedTranscript(data.transcript, engine.opening.text)
       .map((m) => `${m.role.toUpperCase()}: ${m.text}`)
       .join("\n\n");
 

@@ -5,6 +5,7 @@ import {
   createUIMessageStream,
   createUIMessageStreamResponse,
   streamText,
+  validateUIMessages,
   type UIMessage,
 } from "ai";
 import { caseRedirect, isCaseRequest, withoutRedirectedTurns } from "@/lib/case-scope.server";
@@ -16,17 +17,6 @@ const DEFAULT_MISSION_ID = "mission-01";
 const MAX_MESSAGES = 60;
 const MAX_MESSAGE_CHARS = 4000;
 
-function messageTextLength(m: UIMessage): number {
-  if (!m || typeof m !== "object") return 0;
-  const parts = (m as { parts?: Array<{ type?: string; text?: string }> }).parts;
-  if (!Array.isArray(parts)) return 0;
-  let n = 0;
-  for (const p of parts) {
-    if (p && p.type === "text" && typeof p.text === "string") n += p.text.length;
-  }
-  return n;
-}
-
 export async function handleChat(request: Request): Promise<Response> {
   let body: ChatRequestBody;
   try {
@@ -35,6 +25,7 @@ export async function handleChat(request: Request): Promise<Response> {
     return new Response("Invalid JSON body", { status: 400 });
   }
 
+  if (!body || typeof body !== "object") return new Response("Invalid JSON body", { status: 400 });
   const { messages, missionId } = body;
   if (!Array.isArray(messages)) {
     return new Response("Messages are required", { status: 400 });
@@ -42,21 +33,54 @@ export async function handleChat(request: Request): Promise<Response> {
   if (messages.length > MAX_MESSAGES) {
     return new Response(`Too many messages (max ${MAX_MESSAGES})`, { status: 400 });
   }
-  for (const m of messages as UIMessage[]) {
+  // Text is the only player input. Ordinary SDK assistant replies also carry
+  // step/reasoning/source parts; validate those, then omit them from model input.
+  const assistantParts = new Set([
+    "text",
+    "step-start",
+    "reasoning",
+    "source-url",
+    "source-document",
+  ]);
+  for (const m of messages) {
     if (
       !m ||
       (m.role !== "user" && m.role !== "assistant") ||
       !Array.isArray(m.parts) ||
-      m.parts.some((part) => !part || part.type !== "text" || typeof part.text !== "string")
-    ) {
+      m.parts.length > 100 ||
+      m.parts.some(
+        (part: { type?: string } | null) =>
+          !part ||
+          (m.role === "user" ? part.type !== "text" : !assistantParts.has(part.type ?? "")),
+      )
+    )
       return new Response("Invalid conversation message", { status: 400 });
-    }
-    if (messageTextLength(m) > MAX_MESSAGE_CHARS) {
+    const length = m.parts.reduce(
+      (total: number, part: { text?: unknown }) =>
+        total + (typeof part.text === "string" ? part.text.length : 0),
+      0,
+    );
+    if (length > MAX_MESSAGE_CHARS) {
       return new Response(`A single message exceeds ${MAX_MESSAGE_CHARS} chars`, { status: 400 });
     }
   }
-
-  if (messages.at(-1)?.role !== "user") {
+  let validated: UIMessage[];
+  try {
+    validated = await validateUIMessages({ messages });
+  } catch {
+    return new Response("Invalid conversation message", { status: 400 });
+  }
+  const conversation = validated.map((message) => ({
+    id: message.id,
+    role: message.role,
+    parts: message.parts
+      .filter((part) => part.type === "text")
+      .map((part) => ({ type: "text" as const, text: part.text })),
+  }));
+  if (
+    conversation.at(-1)?.role !== "user" ||
+    !conversation.at(-1)?.parts.some((part) => part.text.trim())
+  ) {
     return new Response("A player request is required", { status: 400 });
   }
 
@@ -86,7 +110,7 @@ export async function handleChat(request: Request): Promise<Response> {
   const redirect = caseRedirect(engine.opening.text);
   let inScope: boolean;
   try {
-    inScope = await isCaseRequest(engine, messages as UIMessage[], model);
+    inScope = await isCaseRequest(engine, conversation, model);
   } catch {
     // Fail closed: a classifier outage must not send unchecked text to the Director.
     return new Response("The line dropped. Try again.", { status: 503 });
@@ -94,7 +118,7 @@ export async function handleChat(request: Request): Promise<Response> {
   if (!inScope) {
     return createUIMessageStreamResponse({
       stream: createUIMessageStream({
-        originalMessages: messages as UIMessage[],
+        originalMessages: validated,
         execute: ({ writer }) => {
           writer.write({ type: "start" });
           writer.write({ type: "text-start", id: "case-redirect" });
@@ -108,14 +132,12 @@ export async function handleChat(request: Request): Promise<Response> {
   const result = streamText({
     model,
     system: engine.systemPrompt,
-    messages: await convertToModelMessages(
-      withoutRedirectedTurns(messages as UIMessage[], redirect),
-    ),
+    messages: await convertToModelMessages(withoutRedirectedTurns(conversation, redirect)),
     temperature: 0.85,
   });
 
   return result.toUIMessageStreamResponse({
-    originalMessages: messages as UIMessage[],
+    originalMessages: validated,
   });
 }
 

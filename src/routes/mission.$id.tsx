@@ -19,6 +19,7 @@ import { toast } from "sonner";
 
 
 import { clearMission, partsToText, readMission, useMission } from "@/lib/mission-store";
+import { caseInvestigation, MIN_INVESTIGATION_EXCHANGES } from "@/lib/case-conversation";
 import { analyzeDecision } from "@/lib/analysis.functions";
 import {
   updateProfileWithAnalysis,
@@ -264,9 +265,10 @@ function Mission({ missionId: MISSION_ID, shell: SHELL }: { missionId: string; s
     const t = window.setTimeout(() => { audio.release(900); }, 250);
     return () => { window.clearTimeout(t); };
   }, [busy, decideOpen, analyzing]);
-  const userTurnsCount = messages.filter((m) => m.role === "user").length;
-  const pressureForDecide = Math.min(1, Math.max(0, (messages.length - 1) / 18));
-  const decideReady = !busy && pressureForDecide >= 0.45;
+  const investigation = caseInvestigation(messages, SHELL.opening.text, busy);
+  const userTurnsCount = investigation.completedExchanges;
+  const pressureForDecide = investigation.pressure;
+  const decideReady = !busy && investigation.decisionReady;
   const [decidePrefill, setDecidePrefill] = useState<string>("");
 
   // Natural-language decision triggers — opens the Decide modal pre-filled
@@ -311,7 +313,7 @@ function Mission({ missionId: MISSION_ID, shell: SHELL }: { missionId: string; s
     }
     if (intent && !decideReady) {
       // Advisory only — never swallow the player's message.
-      const turnsToGo = Math.max(0, 4 - userTurnsCount);
+      const turnsToGo = Math.max(0, MIN_INVESTIGATION_EXCHANGES - userTurnsCount);
       toast("Stay in the room a little longer.", {
         id: "decide-gate",
         description: turnsToGo > 0
@@ -352,10 +354,7 @@ function Mission({ missionId: MISSION_ID, shell: SHELL }: { missionId: string; s
     void audio.playSfx("commit", { gain: 0.55 });
     audio.duck(0.18, 400);
     window.setTimeout(() => { void audio.playSfx("analyzing", { gain: 0.4 }); }, 700);
-    const transcript = messages.map((m) => ({
-      role: m.role,
-      text: partsToText(m),
-    }));
+    const transcript = investigation.transcript;
     const analysisPayload = {
       missionId: MISSION_ID,
       decision: decision.trim(),
@@ -443,7 +442,7 @@ function Mission({ missionId: MISSION_ID, shell: SHELL }: { missionId: string; s
             missionId: MISSION_ID,
             investigationSeconds,
             decisionSeconds,
-            messageCount: messages.length,
+            messageCount: investigation.transcript.length,
             completed: true,
             sessionId: getSessionId(),
             ...(archetypeId ? { archetypeId } : {}),
@@ -494,7 +493,7 @@ function Mission({ missionId: MISSION_ID, shell: SHELL }: { missionId: string; s
   // Acts as a proxy for time elapsed + stakes accumulating. 0 = just woke up,
   // 1 = deep in the decision. Used to drive slow, low-contrast lighting drift.
   // Capped softly so it never goes harsh.
-  const pressure = Math.min(1, Math.max(0, (messages.length - 1) / 18));
+  const pressure = investigation.pressure;
   // Slow audio swell + low heartbeat synth that tracks the visual pressure curve.
   useEffect(() => {
     audio.setPressure(pressure);

@@ -45,9 +45,11 @@ async (page) => {
       : '*Amara Okafor*\n"The marked section concerns evaluation behavior. Ask me what we tested."\n\n<<chips: "Ask about the evaluation setup" | "Read the marked section" | "Call Marcus about the memo">>';
     const chunks = [
       { type: "start", messageId: "qa-" + body.messages.length },
+      ...(text === redirect ? [] : [{ type: "start-step" }]),
       { type: "text-start", id: "text" },
       { type: "text-delta", id: "text", delta: text },
       { type: "text-end", id: "text" },
+      ...(text === redirect ? [] : [{ type: "finish-step" }]),
       { type: "finish", finishReason: "stop" },
     ];
     await route.fulfill({
@@ -74,6 +76,9 @@ async (page) => {
   await send("Ask Marcus about the memo");
   reports.push({ check: "repeated redirect and return with fixture responses", status: "passed" });
   await send("Ask about the evaluation setup");
+  if (!(await page.getByRole("button", { name: "Decide", exact: true }).isDisabled())) throw new Error("Rejected turns opened commitment at five displayed exchanges");
+  const redirected = await page.screenshot({ path: "output/playwright/narrow-redirect-gate.png" });
+  reports.push({ check: "two redirects do not count toward commitment", status: "passed" });
   const count = await page.evaluate(() => JSON.parse(localStorage.getItem("decision-node:mission:mission-01")).messages.length);
   await page.getByRole("button", { name: "Case Archive", exact: true }).click();
   await page.waitForURL("**/missions");
@@ -85,6 +90,14 @@ async (page) => {
   await page.waitForTimeout(8000);
   const restoredCount = await page.evaluate(() => JSON.parse(localStorage.getItem("decision-node:mission:mission-01")).messages.length);
   if (restoredCount !== count) throw new Error("Back/reload duplicated or lost messages");
+  if (!(await page.getByRole("button", { name: "Decide", exact: true }).isDisabled())) throw new Error("Reload counted rejected turns");
+  await send("If funding were guaranteed, would you still release?");
+  if (!(await page.getByRole("button", { name: "Decide", exact: true }).isDisabled())) throw new Error("Commitment opened before five substantive exchanges");
+  await send("Read the marked section");
+  if (!(await page.getByRole("button", { name: "Decide", exact: true }).isEnabled())) throw new Error("Commitment did not open after five substantive exchanges");
+  const stepParts = await page.evaluate(() => JSON.parse(localStorage.getItem("decision-node:mission:mission-01")).messages.filter((m) => m.parts.some((p) => p.type === "step-start")).length);
+  if (stepParts !== 5) throw new Error("SDK step metadata was not preserved across restore");
+  reports.push({ check: "counterfactual question and five accepted exchanges after restore", status: "passed", stepParts });
   await page.getByRole("button", { name: "Decide", exact: true }).click();
   await page.getByRole("dialog").waitFor();
   await page.getByRole("dialog").getByRole("button", { name: /Hold two weeks/ }).click();
@@ -99,10 +112,6 @@ async (page) => {
   return {
     reports,
     limitations: ["Fixture AI responses; live semantic and full commit-to-analysis flow still require LOVABLE_API_KEY", "Chromium narrow viewport; iOS Safari is not covered"],
-    screenshots: [
-      { name: "desktop-opening.png", base64: desktop.toString("base64") },
-      { name: "narrow-opening.png", base64: narrow.toString("base64") },
-      { name: "narrow-decision-modal.png", base64: modal.toString("base64") },
-    ],
+    screenshots: ["desktop-opening.png", "narrow-opening.png", "narrow-redirect-gate.png", "narrow-decision-modal.png"],
   };
 }
