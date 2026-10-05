@@ -1,0 +1,27 @@
+name: Userbrain regression checks
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  checks:
+    name: ${{ matrix.check }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - check: Case regressions
+            command: bunx vitest run --config vitest.config.ts
+          - check: Typecheck
+            command: bunx tsc --noEmit
+          - check: Lint
+            command: bun run lint
+          - check: Production build
+            command: bun run build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - run: ${{ matrix.command }}

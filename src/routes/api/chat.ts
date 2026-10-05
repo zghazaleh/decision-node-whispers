@@ -1,6 +1,13 @@
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
 import { createFileRoute } from "@tanstack/react-router";
-import { convertToModelMessages, streamText, type UIMessage } from "ai";
+import {
+  convertToModelMessages,
+  createUIMessageStream,
+  createUIMessageStreamResponse,
+  streamText,
+  type UIMessage,
+} from "ai";
+import { caseRedirect, isCaseRequest, withoutRedirectedTurns } from "@/lib/case-scope.server";
 import { checkRateLimit, sanitizeSessionId } from "@/lib/rate-limit.server";
 
 type ChatRequestBody = { messages?: unknown; missionId?: unknown };
@@ -39,12 +46,24 @@ export const Route = createFileRoute("/api/chat")({
           return new Response(`Too many messages (max ${MAX_MESSAGES})`, { status: 400 });
         }
         for (const m of messages as UIMessage[]) {
+          if (
+            !m ||
+            (m.role !== "user" && m.role !== "assistant") ||
+            !Array.isArray(m.parts) ||
+            m.parts.some((part) => !part || part.type !== "text" || typeof part.text !== "string")
+          ) {
+            return new Response("Invalid conversation message", { status: 400 });
+          }
           if (messageTextLength(m) > MAX_MESSAGE_CHARS) {
             return new Response(
               `A single message exceeds ${MAX_MESSAGE_CHARS} chars`,
               { status: 400 },
             );
           }
+        }
+
+        if (messages.at(-1)?.role !== "user") {
+          return new Response("A player request is required", { status: 400 });
         }
 
         // Per-session rate limit: 40 messages / 20 minutes. The pressure meter
@@ -71,10 +90,35 @@ export const Route = createFileRoute("/api/chat")({
         if (!key) return new Response("Missing LOVABLE_API_KEY", { status: 500 });
 
         const gateway = createLovableAiGatewayProvider(key);
+        const model = gateway("google/gemini-3-flash-preview");
+        const redirect = caseRedirect(engine.opening.text);
+        let inScope: boolean;
+        try {
+          inScope = await isCaseRequest(engine, messages as UIMessage[], model);
+        } catch {
+          // Fail closed: a classifier outage must not send unchecked text to the Director.
+          return new Response("The line dropped. Try again.", { status: 503 });
+        }
+        if (!inScope) {
+          return createUIMessageStreamResponse({
+            stream: createUIMessageStream({
+              originalMessages: messages as UIMessage[],
+              execute: ({ writer }) => {
+                writer.write({ type: "start" });
+                writer.write({ type: "text-start", id: "case-redirect" });
+                writer.write({ type: "text-delta", id: "case-redirect", delta: redirect });
+                writer.write({ type: "text-end", id: "case-redirect" });
+                writer.write({ type: "finish", finishReason: "stop" });
+              },
+            }),
+          });
+        }
         const result = streamText({
-          model: gateway("google/gemini-3-flash-preview"),
+          model,
           system: engine.systemPrompt,
-          messages: await convertToModelMessages(messages as UIMessage[]),
+          messages: await convertToModelMessages(
+            withoutRedirectedTurns(messages as UIMessage[], redirect),
+          ),
           temperature: 0.85,
         });
 

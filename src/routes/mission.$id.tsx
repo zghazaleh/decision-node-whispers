@@ -148,23 +148,6 @@ function Mission({ missionId: MISSION_ID, shell: SHELL }: { missionId: string; s
   const { mission, update } = useMission(MISSION_ID);
   const [awakening, setAwakening] = useState(true);
   const [sceneLoaded, setSceneLoaded] = useState(false);
-  const [showOnboarding, setShowOnboarding] = useState(false);
-
-  // First-case interstitial — only if no prior mission state exists.
-  useEffect(() => {
-    try {
-      const hasPrior = Object.keys(window.localStorage).some((k) =>
-        k.startsWith("decision-node:mission:"),
-      );
-      const seenOnboarding = window.localStorage.getItem("decision-node:onboarded");
-      if (!hasPrior && !seenOnboarding) {
-        setShowOnboarding(true);
-        window.localStorage.setItem("decision-node:onboarded", "1");
-        const t = window.setTimeout(() => setShowOnboarding(false), 1500);
-        return () => window.clearTimeout(t);
-      }
-    } catch { /* ignore */ }
-  }, []);
 
   // Awakening: 3.6s of darkness with slow fade-in of the scene.
   useEffect(() => {
@@ -722,7 +705,7 @@ function Mission({ missionId: MISSION_ID, shell: SHELL }: { missionId: string; s
           <nav className="flex min-w-0 items-center gap-3" aria-label="Breadcrumb">
             <button
               onClick={() => navigate({ to: "/missions" })}
-              className="group inline-flex items-center gap-1.5 text-[0.6rem] tracking-[0.4em] uppercase text-foreground/55 hover:text-foreground/95 transition-colors"
+              className="group inline-flex items-center gap-1.5 text-xs tracking-[0.2em] uppercase text-foreground/85 hover:text-foreground/95 transition-colors"
               title="Back to Case Archive"
             >
               <ChevronLeft className="h-3 w-3 transition-transform group-hover:-translate-x-0.5" aria-hidden />
@@ -731,14 +714,14 @@ function Mission({ missionId: MISSION_ID, shell: SHELL }: { missionId: string; s
             <span className="hidden sm:inline text-foreground/25" aria-hidden>
               ·
             </span>
-            <span className="hidden sm:inline truncate text-[0.6rem] tracking-[0.4em] uppercase text-foreground/40">
+            <span className="hidden sm:inline truncate text-xs tracking-[0.2em] uppercase text-foreground/75">
               {MISSIONS.find((m) => m.id === MISSION_ID)?.codename ?? "Decision Nodes"}
             </span>
           </nav>
 
           <button
             onClick={() => setResetOpen(true)}
-            className="shrink-0 text-[0.6rem] tracking-[0.4em] uppercase text-foreground/40 hover:text-foreground/80 transition-colors"
+            className="shrink-0 text-xs tracking-[0.2em] uppercase text-foreground/75 hover:text-foreground/80 transition-colors"
             title="Clear this mission and start over"
           >
             Reset
@@ -758,7 +741,7 @@ function Mission({ missionId: MISSION_ID, shell: SHELL }: { missionId: string; s
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel className="text-[0.65rem] tracking-[0.35em] uppercase">
+              <AlertDialogCancel className="text-xs tracking-[0.35em] uppercase">
                 Keep playing
               </AlertDialogCancel>
               <AlertDialogAction
@@ -766,7 +749,7 @@ function Mission({ missionId: MISSION_ID, shell: SHELL }: { missionId: string; s
                   clearMission(MISSION_ID);
                   window.location.reload();
                 }}
-                className="text-[0.65rem] tracking-[0.35em] uppercase"
+                className="text-xs tracking-[0.35em] uppercase"
               >
                 Reset mission
               </AlertDialogAction>
@@ -835,9 +818,10 @@ function Mission({ missionId: MISSION_ID, shell: SHELL }: { missionId: string; s
                   }
                 }}
                 rows={1}
-                placeholder="Speak or act."
+                aria-label="Speak or act in this case"
+                placeholder="Ask someone, inspect something, or act."
                 disabled={busy}
-                className="flex-1 resize-none bg-transparent text-foreground/95 placeholder:text-foreground/30 outline-none text-base font-sans leading-relaxed max-h-40 py-2"
+                className="flex-1 resize-none bg-transparent text-foreground/95 placeholder:text-foreground/65 outline-none text-base font-sans leading-relaxed max-h-40 py-2"
               />
               <button
                 type="submit"
@@ -861,7 +845,7 @@ function Mission({ missionId: MISSION_ID, shell: SHELL }: { missionId: string; s
               return (
                 <p
                   key={line}
-                  className="mt-6 text-center font-sans text-[0.6rem] tracking-[0.35em] uppercase text-foreground/40 italic animate-fade-in"
+                  className="mt-6 text-center font-sans text-sm tracking-[0.15em] uppercase text-foreground/85 animate-fade-in"
                 >
                   {line}
                 </p>
@@ -879,7 +863,7 @@ function Mission({ missionId: MISSION_ID, shell: SHELL }: { missionId: string; s
                   ? "Commit to a decision"
                   : "Stay in the moment — the decision opens as the pressure builds."}
                 style={{ opacity: 0.15 + pressureForDecide * 0.85 }}
-                className={`group inline-flex items-center gap-2 rounded-full border px-5 min-h-11 py-2.5 text-[0.65rem] font-medium tracking-[0.32em] uppercase transition-all duration-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+                className={`group inline-flex items-center gap-2 rounded-full border px-5 min-h-11 py-2.5 text-xs font-medium tracking-[0.2em] uppercase transition-all duration-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
                   decideReady
                     ? "border-accent/70 bg-accent/10 text-accent hover:bg-accent/20 hover:border-accent shadow-[0_0_24px_-8px_var(--color-accent)] cursor-pointer decide-ignite"
                     : "border-foreground/20 bg-transparent text-foreground/60 cursor-not-allowed"
@@ -906,28 +890,7 @@ function Mission({ missionId: MISSION_ID, shell: SHELL }: { missionId: string; s
           onSubmit={handleDecide}
         />
       )}
-      {/* First-case onboarding interstitial */}
-      {showOnboarding && (
-        <button
-          type="button"
-          onClick={() => setShowOnboarding(false)}
-          aria-label="Dismiss"
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/85 backdrop-blur-sm animate-fade-in cursor-pointer focus:outline-none"
-        >
-          <div className="max-w-xl px-8 text-center">
-            <p className="font-display text-2xl sm:text-3xl leading-relaxed text-foreground/90 text-balance">
-              You'll wake up in someone else's life.
-              <br />
-              Explore through dialogue.
-              <br />
-              When the time comes — decide.
-            </p>
-            <p className="mt-6 font-sans text-[0.65rem] tracking-[0.4em] uppercase text-accent/75">
-              Your decision is final.
-            </p>
-          </div>
-        </button>
-      )}
+
     </main>
   );
 }
@@ -974,13 +937,13 @@ function MessageBubble({
  * preserved as soft wraps within the same speaker beat.
  */
 const CLASS_LABEL =
-  "font-sans text-[0.65rem] tracking-[0.35em] uppercase text-accent/80 mb-2";
+  "font-sans text-xs tracking-[0.2em] uppercase text-accent mb-2";
 const CLASS_DIALOGUE =
   "dialogue-serif text-2xl sm:text-3xl leading-snug text-foreground text-pretty";
 const CLASS_SENSORY =
-  "font-sans text-sm italic text-foreground/55 leading-relaxed text-pretty max-w-prose";
+  "font-sans text-base text-foreground/85 leading-relaxed text-pretty max-w-prose";
 const CLASS_INLINE_ITALIC =
-  "not-italic font-sans text-base text-foreground/55";
+  "not-italic font-sans text-base sm:text-lg text-foreground/85";
 
 function CinematicText({ text }: { text: string; blink?: boolean }) {
   const blocks = text.split(/\n{2,}/).map((b) => b.trim()).filter(Boolean);
@@ -1091,7 +1054,7 @@ function ChipRow({ chips, onPick }: { chips: string[]; onPick: (text: string) =>
           key={`${c}-${i}`}
           type="button"
           onClick={() => onPick(c)}
-          className="group rounded-full border border-foreground/20 bg-background/30 backdrop-blur-sm px-3.5 py-2 min-h-11 text-xs sm:text-[0.8rem] text-foreground/75 hover:text-foreground hover:border-accent/60 hover:bg-accent/10 transition-colors text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          className="group rounded-full border border-foreground/20 bg-background/30 backdrop-blur-sm px-3.5 py-2 min-h-11 text-sm text-foreground/90 hover:text-foreground hover:border-accent/60 hover:bg-accent/10 transition-colors text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
           <span className="text-accent/70 mr-2 group-hover:text-accent">›</span>
           {c}
@@ -1140,7 +1103,7 @@ function AnalyzingProgress() {
 
   return (
     <div className="p-8 py-14 sm:p-12 sm:py-16">
-      <p className="text-[0.6rem] tracking-[0.4em] uppercase text-accent/80 mb-4 text-center">
+      <p className="text-xs tracking-[0.4em] uppercase text-accent/80 mb-4 text-center">
         The reading
       </p>
       <p className="font-display text-2xl sm:text-3xl text-foreground/95 text-center text-balance min-h-[2.5em] transition-opacity duration-500">
@@ -1236,7 +1199,7 @@ function DecideModal({
           <AnalyzingProgress />
         ) : (
           <div className="overflow-y-auto p-6 pb-0 sm:p-12 sm:pb-0">
-            <p className="text-[0.6rem] tracking-[0.4em] uppercase text-accent/80 mb-3">
+            <p className="text-xs tracking-[0.4em] uppercase text-accent/80 mb-3">
               Your decision
             </p>
             <h2 id="decision-title" className="font-display text-3xl text-foreground mb-2">
@@ -1254,7 +1217,7 @@ function DecideModal({
               className="space-y-6"
             >
               <div>
-                <label className="block text-[0.6rem] tracking-[0.3em] uppercase text-foreground/50 mb-3">
+                <label className="block text-xs tracking-[0.2em] uppercase text-foreground/85 mb-3">
                   Select a position
                 </label>
                 <div className="space-y-2 mb-4">
@@ -1284,7 +1247,7 @@ function DecideModal({
                             <Check className="h-3 w-3" />
                           </span>
                           <span className="min-w-0">
-                            <span className="block text-[0.65rem] tracking-[0.3em] uppercase text-accent/80 mb-1">
+                            <span className="block text-xs tracking-[0.3em] uppercase text-accent/80 mb-1">
                               {p.label}
                             </span>
                             <span className="block text-sm leading-relaxed text-pretty">
@@ -1301,7 +1264,7 @@ function DecideModal({
                     Selected: {selectedPreset.label}. You may confirm or edit before committing.
                   </p>
                 )}
-                <label className="block text-[0.6rem] tracking-[0.3em] uppercase text-foreground/50 mb-2">
+                <label className="block text-xs tracking-[0.2em] uppercase text-foreground/85 mb-2">
                   Or in your own words
                 </label>
                 <textarea
@@ -1309,11 +1272,11 @@ function DecideModal({
                   onChange={(e) => { setDecision(e.target.value); setArchetypeId(undefined); }}
                   rows={3}
                   placeholder={freeWritePlaceholder}
-                  className="w-full resize-none rounded-sm border border-foreground/15 bg-background/45 px-3 py-3 text-foreground/95 outline-none transition-colors placeholder:text-foreground/25 focus:border-foreground/60"
+                  className="w-full resize-none rounded-sm border border-foreground/15 bg-background/45 px-3 py-3 text-foreground/95 outline-none transition-colors placeholder:text-foreground/65 focus:border-foreground/60"
                 />
               </div>
               <div>
-                <label className="block text-[0.6rem] tracking-[0.3em] uppercase text-foreground/50 mb-2">
+                <label className="block text-xs tracking-[0.2em] uppercase text-foreground/85 mb-2">
                   Why — one line
                 </label>
                 <textarea
@@ -1321,14 +1284,14 @@ function DecideModal({
                   onChange={(e) => setReasoning(e.target.value)}
                   rows={3}
                   placeholder="Because…"
-                  className="w-full resize-none rounded-sm border border-foreground/15 bg-background/45 px-3 py-3 text-foreground/95 outline-none transition-colors placeholder:text-foreground/25 focus:border-foreground/60"
+                  className="w-full resize-none rounded-sm border border-foreground/15 bg-background/45 px-3 py-3 text-foreground/95 outline-none transition-colors placeholder:text-foreground/65 focus:border-foreground/60"
                 />
               </div>
 
               {/* Commitment: stated confidence, recorded before the outcome is known. */}
               <div>
                 <div className="mb-3 flex items-baseline justify-between">
-                  <label htmlFor="commit-confidence" className="text-[0.6rem] tracking-[0.3em] uppercase text-foreground/50">
+                  <label htmlFor="commit-confidence" className="text-xs tracking-[0.2em] uppercase text-foreground/85">
                     How sure are you
                   </label>
                   <span className="font-display text-lg text-accent tabular-nums">{confidence}%</span>
@@ -1344,13 +1307,13 @@ function DecideModal({
                   className="dn-fader w-full"
                   aria-label="Stated confidence at commit"
                 />
-                <p className="mt-2 text-[0.65rem] leading-relaxed text-foreground/40">
+                <p className="mt-2 text-sm leading-relaxed text-foreground/85">
                   Recorded now, before you know what happens. It is read against the evidence you gathered — never against the outcome.
                 </p>
               </div>
 
               <div>
-                <label className="block text-[0.6rem] tracking-[0.3em] uppercase text-foreground/50 mb-2">
+                <label className="block text-xs tracking-[0.2em] uppercase text-foreground/85 mb-2">
                   The one thing you still don't know
                 </label>
                 <input
@@ -1358,7 +1321,7 @@ function DecideModal({
                   value={openUncertainty}
                   onChange={(e) => setOpenUncertainty(e.target.value.slice(0, 300))}
                   placeholder="The uncertainty you're carrying into this…"
-                  className="w-full rounded-sm border border-foreground/15 bg-background/45 px-3 py-3 text-foreground/95 outline-none transition-colors placeholder:text-foreground/25 focus:border-foreground/60"
+                  className="w-full rounded-sm border border-foreground/15 bg-background/45 px-3 py-3 text-foreground/95 outline-none transition-colors placeholder:text-foreground/65 focus:border-foreground/60"
                 />
               </div>
 
@@ -1371,14 +1334,14 @@ function DecideModal({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="rounded-sm px-3 py-3 text-[0.65rem] tracking-[0.28em] uppercase text-foreground/50 transition-colors hover:text-foreground/80"
+                  className="rounded-sm px-3 py-3 text-xs tracking-[0.2em] uppercase text-foreground/50 transition-colors hover:text-foreground/80"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={!canCommit}
-                  className="inline-flex min-h-11 items-center justify-center rounded-full border border-accent/70 bg-accent px-5 py-3 text-[0.65rem] font-medium tracking-[0.28em] uppercase text-accent-foreground shadow-[0_0_24px_-8px_var(--color-accent)] transition-all hover:border-accent hover:bg-accent/90 disabled:border-foreground/15 disabled:bg-foreground/10 disabled:text-foreground/35 disabled:shadow-none disabled:cursor-not-allowed"
+                  className="inline-flex min-h-11 items-center justify-center rounded-full border border-accent/70 bg-accent px-5 py-3 text-xs font-medium tracking-[0.2em] uppercase text-accent-foreground shadow-[0_0_24px_-8px_var(--color-accent)] transition-all hover:border-accent hover:bg-accent/90 disabled:border-foreground/15 disabled:bg-foreground/10 disabled:text-foreground/35 disabled:shadow-none disabled:cursor-not-allowed"
                 >
                   Commit
                 </button>

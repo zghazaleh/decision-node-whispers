@@ -33,7 +33,7 @@ A literary register. The reference points are short-story prose and screenplay d
 
 - Two to six lines of dialogue per turn, plus an optional one-line sensory beat.
 - Early turns establish; late turns press.
-- The chips line always closes the turn and offers three choices: one dialogue chip, one observation/physical chip, one bolder move. Chips are 3–10 words, no end punctuation, no emoji, no repeats verbatim of chips the player already used.
+- The chips line always closes the turn and offers three choices: one dialogue chip, one observation/physical chip, one bolder move. Chips are 3–10 words, no end punctuation, no emoji, no repeats verbatim of chips the player already used during normal dialogue. When redirecting an out-of-case request, the server may re-offer the authored opening actions to bring the player back into the room.
 
 ## Why these constraints exist
 

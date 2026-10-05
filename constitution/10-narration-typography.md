@@ -1,6 +1,6 @@
 # 10 — Narration Typography & Text Rendering
 
-The chat surface is not a chat. It is a typeset page that happens to update. Every assistant turn is composed of a small, fixed set of text *kinds*, and each kind has exactly one rendering. The Director writes in this vocabulary; the renderer (`CinematicText` in `src/routes/mission.$id.tsx`) honors it. This file is the canonical contract between the two.
+The chat surface is not a chat. It is a typeset page that happens to update. Every assistant turn is composed of a small, fixed set of text *kinds*, and each kind has exactly one rendering. Starred sensory markup identifies a text kind; it does not require italic rendering. Body text must remain legible at normal zoom on narrow screens. The Director writes in this vocabulary; the renderer (`CinematicText` in `src/routes/mission.$id.tsx`) honors it. This file is the canonical contract between the two.
 
 If the page ever looks like a chat transcript — uniform paragraphs, no hierarchy, no white space — the contract has been broken on one side or the other.
 
@@ -12,7 +12,7 @@ There are exactly five. No others ship. New kinds require a constitution change,
 A character name on its own line, wrapped in `*…*`. Renders as a small, wide-tracked, uppercased label in the accent color. It is a *frame*, not dialogue — short, quiet, sets the speaker.
 
   Markup: `*Cole Avery*`
-  Class:  `text-[0.65rem] tracking-[0.35em] uppercase text-accent/80 mb-2`
+  Class:  `text-xs tracking-[0.2em] uppercase text-accent mb-2`
   Reads as: a printed cue above a line of stage direction.
 
 A character label is only valid when followed (same block) by dialogue. A bare label with nothing under it is a bug.
@@ -27,10 +27,10 @@ The line directly under a character label. Renders in the display serif at the l
 Dialogue is short. Two to four lines per turn, plus an optional sensory beat. Lush dialogue collapses the typography; it stops feeling weighted because every line is weighted.
 
 ### 3. Sensory beat (standalone)
-A full italic paragraph standing on its own, wrapped in `*…*` end to end. Renders in the *sans* face at a small size in low-contrast foreground — the visual opposite of dialogue. It is the camera, the room, the weather. Never the player's interiority.
+A full italic paragraph standing on its own, wrapped in `*…*` end to end. Renders in the *sans* face at a readable body size in quieter foreground — the visual opposite of dialogue. It is the camera, the room, the weather. Never the player's interiority.
 
   Markup: `*Rain against tall windows. The CMS cursor blinks.*`
-  Class:  `font-sans text-sm italic text-foreground/55 leading-relaxed`
+  Class:  `font-sans text-base text-foreground/85 leading-relaxed`
   Reads as: an editor's stage direction in the margin.
 
 One or two sentences. A sensory beat that runs three sentences is prose creep and must be cut.
@@ -39,7 +39,7 @@ One or two sentences. A sensory beat that runs three sentences is prose creep an
 A short italic phrase *inside* a dialogue line, used for a remembered fragment, a piece of read text, a half-thought. Wrapped in `*…*` mid-sentence. The renderer flips it to the sans face at body weight so it visually *recedes* against the surrounding display serif — the eye reads it as a different register, not louder emphasis.
 
   Markup: `"They wrote *we are still holding the front* — that's it."`
-  Class:  `not-italic text-foreground/55 text-base font-sans`
+  Class:  `not-italic text-foreground/85 text-base sm:text-lg font-sans`
   Reads as: a quoted scrap inside the speaker's line.
 
 Never use inline italics for emphasis. Emphasis in this product is carried by line breaks and white space, never by italics or bold. There is no bold in narration, ever.
@@ -51,7 +51,7 @@ A single trailing line in the exact form `<<chips: "..." | "..." | "...">>`. The
   Class:  rendered by the chips component, not as text.
   Reads as: a printed footer of next actions.
 
-Three chips, 3–10 words each, no end punctuation, no emoji, separated by ` | `, never repeated verbatim, only on the final line. Already covered in `04-ai-director-philosophy.md`; restated here so the typography contract is complete in one place.
+Three chips, 3–10 words each, no end punctuation, no emoji, separated by ` | `, never repeated verbatim, only on the final line. A server redirection may re-offer authored opening chips to restore the case after an unrelated request. Already covered in `04-ai-director-philosophy.md`; restated here so the typography contract is complete in one place.
 
 ## The rhythm of a turn
 
@@ -78,7 +78,7 @@ The product is asking the player to take a real hour and turn it inward. The typ
 
 - **Display serif for dialogue** says: this is a line worth weighing.
 - **Wide-tracked label for names** says: someone is speaking *to you*, and they have a body in the room.
-- **Small, italic sans for sensory beats** says: this is the camera, not the script — read it and let it set the air, then move on.
+- **Quieter, upright sans for sensory beats** says: this is the camera, not the script — read it and let it set the air, then move on.
 - **Inline italic that *recedes*** says: this fragment is borrowed — a memory, a quote, a thing on a screen — not the speaker raising their voice.
 - **Chips footer** says: you are never stranded, but the menu is never the point.
 

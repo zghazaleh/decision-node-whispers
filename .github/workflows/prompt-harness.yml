@@ -19,6 +19,9 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Authored case and scope regression tests
+        run: bunx vitest run --config vitest.config.ts
+
       - name: Typecheck
         run: bunx tsgo --noEmit
 
@@ -56,6 +59,12 @@ jobs:
           else
             echo "has_key=true" >> "$GITHUB_OUTPUT"
           fi
+
+      - name: Live normal and off-topic scope checks
+        if: steps.keycheck.outputs.has_key == 'true'
+        env:
+          LOVABLE_API_KEY: ${{ secrets.LOVABLE_API_KEY }}
+        run: bun run scripts/check-case-scope.ts
 
       - name: Run harness (Director + Analysis, mission-01)
         if: steps.keycheck.outputs.has_key == 'true'
