@@ -89,6 +89,10 @@ async (page) => {
   await page.getByRole("dialog").waitFor();
   await page.getByRole("dialog").getByRole("button", { name: /Hold two weeks/ }).click();
   if (!(await page.getByText(/Selected: Hold two weeks/).count())) throw new Error("Decision selection missing");
+  await page.waitForFunction(() => {
+    const dialog = document.querySelector('[role="dialog"]');
+    return dialog && getComputedStyle(dialog.parentElement).opacity === "1";
+  });
   const modal = await page.screenshot({ path: "output/playwright/narrow-decision-modal.png" });
   await page.getByRole("button", { name: "Close", exact: true }).click();
   reports.push({ check: "back, reload and decision modal", status: "passed", messages: count });
