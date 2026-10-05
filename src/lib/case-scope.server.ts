@@ -19,10 +19,7 @@ export function caseRedirect(opening: string): string {
 }
 
 /** Keep rejected attempts visible to the player but out of later Director context. */
-export function withoutRedirectedTurns(
-  messages: UIMessage[],
-  redirect: string,
-): UIMessage[] {
+export function withoutRedirectedTurns(messages: UIMessage[], redirect: string): UIMessage[] {
   const accepted: UIMessage[] = [];
   for (const message of messages) {
     if (message.role === "assistant" && textOf(message) === redirect) {

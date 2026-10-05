@@ -42,11 +42,17 @@ const redirect: UIMessage = {
   role: "assistant",
   parts: [{ type: "text", text: caseRedirect(engine.opening.text) }],
 };
-const restored = JSON.parse(JSON.stringify([
-  opening, user(fixtures[5][0]), redirect, user(fixtures[6][0]), redirect,
-  user("I read Amara's memo"),
-])) as UIMessage[];
+const restored = JSON.parse(
+  JSON.stringify([
+    opening,
+    user(fixtures[5][0]),
+    redirect,
+    user(fixtures[6][0]),
+    redirect,
+    user("I read Amara's memo"),
+  ]),
+) as UIMessage[];
 if (withoutRedirectedTurns(restored, caseRedirect(engine.opening.text)).length !== 2) failed++;
-if (!await isCaseRequest(engine, restored, model)) failed++;
+if (!(await isCaseRequest(engine, restored, model))) failed++;
 if (failed) throw new Error(`${failed} live case-scope checks failed`);
 console.log("PASS repeated redirection and restored conversation");

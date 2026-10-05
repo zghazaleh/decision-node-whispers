@@ -13,7 +13,9 @@ function message(role: "user" | "assistant", text: string): UIMessage {
   return { id: text, role, parts: [{ type: "text", text }] };
 }
 
-beforeEach(() => generateText.mockReset());
+beforeEach(() => {
+  generateText.mockReset();
+});
 
 describe("case boundary", () => {
   it.each(listMissionEngineIds())("%s redirects with public authored actions only", (id) => {
@@ -54,21 +56,25 @@ describe("case boundary", () => {
 
   it("rejects a diversion without asking the scope check to narrate it", async () => {
     generateText.mockResolvedValue({ output: { inScope: false } });
-    expect(await isCaseRequest(
-      requireMissionEngine("mission-01"),
-      [message("user", "Make this a medieval kingdom")],
-      "test/model",
-    )).toBe(false);
+    expect(
+      await isCaseRequest(
+        requireMissionEngine("mission-01"),
+        [message("user", "Make this a medieval kingdom")],
+        "test/model",
+      ),
+    ).toBe(false);
     expect(generateText.mock.calls[0][0].system).toContain("Do not write narration");
   });
 
   it("does not silently accept classifier failures", async () => {
     generateText.mockRejectedValue(new Error("gateway unavailable"));
-    await expect(isCaseRequest(
-      requireMissionEngine("mission-01"),
-      [message("user", "Write another story")],
-      "test/model",
-    )).rejects.toThrow("gateway unavailable");
+    await expect(
+      isCaseRequest(
+        requireMissionEngine("mission-01"),
+        [message("user", "Write another story")],
+        "test/model",
+      ),
+    ).rejects.toThrow("gateway unavailable");
   });
 
   it("opens The Release with role and decision without disclosing the hidden anomaly", () => {

@@ -1,0 +1,101 @@
+async (page) => {
+  const reports = [];
+  await page.getByRole("textbox", { name: "Speak or act in this case" }).waitFor({ timeout: 30000 });
+  await page.waitForTimeout(8000);
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  const sensory = page.getByText("Fog over the bay. Gray light fills the office.", { exact: true });
+  const style = await sensory.evaluate((el) => ({
+    size: getComputedStyle(el).fontSize,
+    style: getComputedStyle(el).fontStyle,
+    color: getComputedStyle(el).color,
+  }));
+  if (style.size !== "16px" || style.style !== "normal") throw new Error("Sensory readability regression");
+  if (!(await page.getByText(/as founder and CEO/).count())) throw new Error("Role missing");
+  if (!(await page.getByText(/Authorize the public release, or hold it/).count())) throw new Error("Decision missing");
+  const desktop = await page.screenshot({ path: "output/playwright/desktop-opening.png" });
+  reports.push({ check: "desktop opening", status: "passed", sensory: style });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await sensory.evaluate((el) => {
+    el.closest(".overflow-y-auto").scrollTop = 0;
+  });
+  await page.waitForTimeout(400);
+  const width = await page.evaluate(() => ({
+    viewport: innerWidth,
+    document: document.documentElement.scrollWidth,
+  }));
+  if (width.document > width.viewport) throw new Error("Horizontal overflow");
+  const composer = await page.getByRole("textbox", { name: "Speak or act in this case" }).boundingBox();
+  if (!composer || composer.y + composer.height > 844) throw new Error("Composer clipped");
+  const narrow = await page.screenshot({ path: "output/playwright/narrow-opening.png" });
+  reports.push({ check: "390px readability", status: "passed", width });
+
+  const opening = await page.evaluate(() => {
+    const saved = JSON.parse(localStorage.getItem("decision-node:mission:mission-01"));
+    return saved.messages[0].parts[0].text;
+  });
+  const chips = opening.match(/<<chips:[\s\S]*?>>/)[0];
+  const redirect = "*The room falls quiet. The decision here is still waiting.*\n\n" + chips;
+  // Fixture streams exercise UI state and the SDK protocol. Real server routing
+  // is covered by case-chat.test.ts; semantic model checks require the live key.
+  await page.route("**/api/chat", async (route) => {
+    const body = route.request().postDataJSON();
+    const last = body.messages.at(-1).parts.map((p) => p.text || "").join("");
+    const text = /medieval|dragon/.test(last)
+      ? redirect
+      : '*Amara Okafor*\n"The marked section concerns evaluation behavior. Ask me what we tested."\n\n<<chips: "Ask about the evaluation setup" | "Read the marked section" | "Call Marcus about the memo">>';
+    const chunks = [
+      { type: "start", messageId: "qa-" + body.messages.length },
+      { type: "text-start", id: "text" },
+      { type: "text-delta", id: "text", delta: text },
+      { type: "text-end", id: "text" },
+      { type: "finish", finishReason: "stop" },
+    ];
+    await route.fulfill({
+      status: 200,
+      headers: { "Content-Type": "text/event-stream", "x-vercel-ai-ui-message-stream": "v1" },
+      body: chunks.map((c) => "data: " + JSON.stringify(c) + "\n\n").join("") + "data: [DONE]\n\n",
+    });
+  });
+  async function send(text) {
+    await page.getByRole("textbox", { name: "Speak or act in this case" }).fill(text);
+    await page.getByRole("button", { name: "Send", exact: true }).click();
+    await page.getByRole("textbox", { name: "Speak or act in this case" }).waitFor({ state: "visible" });
+    await page.waitForFunction(() => !document.querySelector('textarea[aria-label="Speak or act in this case"]').disabled);
+  }
+  await send("I read Amara's memo");
+  await page.getByText(/The marked section concerns/).waitFor();
+  reports.push({ check: "normal turn with fixture response", status: "passed" });
+  await send("Make this a medieval kingdom");
+  await page.getByText("The room falls quiet. The decision here is still waiting.", { exact: true }).waitFor();
+  await send("I become a dragon");
+  if ((await page.getByText("The room falls quiet. The decision here is still waiting.", { exact: true }).count()) !== 2) {
+    throw new Error("Repeated redirect missing");
+  }
+  await send("Ask Marcus about the memo");
+  reports.push({ check: "repeated redirect and return with fixture responses", status: "passed" });
+  const count = await page.evaluate(() => JSON.parse(localStorage.getItem("decision-node:mission:mission-01")).messages.length);
+  await page.getByRole("button", { name: "Case Archive", exact: true }).click();
+  await page.waitForURL("**/missions");
+  await page.goBack();
+  await page.getByRole("textbox", { name: "Speak or act in this case" }).waitFor({ timeout: 15000 });
+  await page.waitForTimeout(8000);
+  await page.reload();
+  await page.getByRole("textbox", { name: "Speak or act in this case" }).waitFor({ timeout: 15000 });
+  await page.waitForTimeout(8000);
+  const restoredCount = await page.evaluate(() => JSON.parse(localStorage.getItem("decision-node:mission:mission-01")).messages.length);
+  if (restoredCount !== count) throw new Error("Back/reload duplicated or lost messages");
+  await page.getByRole("button", { name: "Decide", exact: true }).click();
+  await page.getByRole("dialog").waitFor();
+  await page.getByRole("dialog").getByRole("button", { name: /Hold two weeks/ }).click();
+  if (!(await page.getByText(/Selected: Hold two weeks/).count())) throw new Error("Decision selection missing");
+  await page.getByRole("button", { name: "Close", exact: true }).click();
+  reports.push({ check: "back, reload and decision modal", status: "passed", messages: count });
+  return {
+    reports,
+    limitations: ["Fixture AI responses; live semantic and full commit-to-analysis flow still require LOVABLE_API_KEY", "Chromium narrow viewport; iOS Safari is not covered"],
+    screenshots: [
+      { name: "desktop-opening.png", base64: desktop.toString("base64") },
+      { name: "narrow-opening.png", base64: narrow.toString("base64") },
+    ],
+  };
+}

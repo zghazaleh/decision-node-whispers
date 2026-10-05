@@ -238,7 +238,7 @@ function Mission({ missionId: MISSION_ID, shell: SHELL }: { missionId: string; s
   const transcriptRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     transcriptRef.current?.scrollTo({
-      top: transcriptRef.current.scrollHeight,
+      top: messages.length === 1 ? 0 : transcriptRef.current.scrollHeight,
       behavior: "smooth",
     });
   }, [messages, status]);
