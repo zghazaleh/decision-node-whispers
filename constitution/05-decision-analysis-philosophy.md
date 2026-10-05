@@ -8,6 +8,8 @@ The Analyzer is the one moment the product steps out of the scene and turns the 
 - The **calibration** between the player's self-reported confidence and the actual strength of the evidence they gathered.
 - The **belief trajectory** — the reconstructed arc of the player's working theory across the transcript, snapshot by snapshot.
 
+Self-reported confidence at commit describes confidence in the chosen decision. It is not a probability that a particular claim or person is correct: 60% confidence in a hold does not mean a 40% chance that Marcus's explanation is true. The Analyzer must not invent that mapping or complementary arithmetic. It may reflect claim probabilities the player explicitly supplies, with their named events and conditions; a complement is valid only when the player explicitly defines mutually exclusive, exhaustive outcomes. Character estimates and questions about probabilities are not estimates endorsed by the player. Without an explicit relationship, discuss uncertainty qualitatively.
+
 ## What it intentionally ignores
 
 - Whether the outcome was "good." Outcomes are noisy; reasoning is not.

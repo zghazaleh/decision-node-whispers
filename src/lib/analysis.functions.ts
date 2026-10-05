@@ -6,6 +6,8 @@ import { z } from "zod";
 import type { Archetype } from "@/lib/missions/types";
 import { checkRateLimit, sanitizeSessionId } from "@/lib/rate-limit.server";
 
+import { withoutRedirectedTranscript } from "@/lib/case-conversation";
+
 const DEFAULT_MISSION_ID = "mission-01";
 
 
@@ -361,7 +363,7 @@ export const analyzeDecision = createServerFn({ method: "POST" })
 
     const gateway = createLovableAiGatewayProvider(key);
 
-    const transcriptText = data.transcript
+    const transcriptText = withoutRedirectedTranscript(data.transcript, engine.opening.text)
       .map((m) => `${m.role.toUpperCase()}: ${m.text}`)
       .join("\n\n");
 
@@ -419,6 +421,13 @@ CLOSING TONE: ${archetype.tone}`
 You draw from modern decision science, behavioral economics, cognitive psychology, probabilistic reasoning under uncertainty, and strategic thinking. Judge process, not outcome. A sound process that produced a poor outcome is still a sound process. A lucky outcome from a sloppy process is still a sloppy process — name that separation explicitly.
 
 Style: precise, kind, human, never a rubric. Never use the words "good", "bad", "right", "wrong", "correct", "incorrect". Never congratulate. Never scold. Never accuse you of a bias — describe the pattern in your behavior and let you recognize it. Always ground every claim in something you actually did, said, asked, or skipped in the transcript. Every sentence of every field is addressed to "you" in the second person.
+
+CONFIDENCE IS NOT A CLAIM PROBABILITY — applies to EVERY field, including reasoningEcho, calibration, beliefTrajectory and evidenceLayers:
+- The commit slider measures your self-reported confidence in the chosen decision. It does not measure the probability of a factual hypothesis, a character's claim, or an alternative action.
+- Never convert that slider value, or its complement (100 minus the value), into a probability that a particular claim or person is correct. In particular, 60% confidence in holding the release does NOT imply a 40% chance that Marcus's explanation is true, nor a 60% chance that Amara's explanation is true. Confidence in an action does not make those claims an exhaustive binary pair.
+- Attribute a claim probability to you only when you explicitly supplied that probability relationship in your own reasoning, stated uncertainty, decision text or USER transcript turns. An ASSISTANT/character statement is not your probability estimate. A question about a probability is not an estimate you endorsed.
+- Preserve legitimate explicitly supplied binary probabilities with their named events and conditions. For example, if you explicitly assign 60% to deployment-like deception and 40% to a benign artifact, you may reflect those estimates as YOUR stated beliefs, not as established facts. Use a complement only when you explicitly define the outcomes as mutually exclusive and exhaustive; never use the commit slider for this calculation.
+- Discuss remaining uncertainty and calibration qualitatively when no such relationship is stated. Do not invent arithmetic or silently assign the remaining percentage to one hypothesis. You may quote the slider as confidence in the chosen decision, while keeping it separate from any explicitly stated claim probabilities.
 
 WHAT TO OBSERVE FROM THE TRANSCRIPT:
 - What information did you actively seek? What did you ignore that was reachable?
@@ -479,7 +488,7 @@ FINAL DECISION: ${data.decision}
 
 PLAYER REASONING: ${data.reasoning || "(none provided)"}
 
-STATED CONFIDENCE AT COMMIT (0-100): ${typeof data.confidence === "number" ? data.confidence : "(not stated)"}
+SELF-REPORTED CONFIDENCE IN THE CHOSEN DECISION (0-100; NOT a claim probability): ${typeof data.confidence === "number" ? data.confidence : "(not stated)"}
 
 STATED OPEN UNCERTAINTY AT COMMIT (what you said you still did not know): ${data.openUncertainty || "(none stated)"}
 ${typeof data.confidence === "number" ? "Judge calibration against this stated number and the evidence actually gathered — never against the outcome. If the stated uncertainty was material and reachable, say so plainly in calibration." : ""}

@@ -1,0 +1,75 @@
+name: Userbrain regression checks
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  checks:
+    name: ${{ matrix.check }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - check: Case regressions
+            command: bunx vitest run --config vitest.config.ts
+          - check: Typecheck
+            command: bunx tsc --noEmit
+          - check: Lint
+            command: bun run lint
+          - check: Production build
+            command: bun run build
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Record checked revision
+        run: git rev-parse HEAD
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - run: ${{ matrix.command }}
+
+  baseline-lint:
+    name: Base branch lint evidence
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: c7d3758dfcac296d3b7728b6fb49e41178d8c6b0
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - run: bun run lint
+
+  browser:
+    name: Browser UI fixture QA
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Record checked revision
+        run: git rev-parse HEAD
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - run: mkdir -p output/playwright
+      - name: Start local preview in runner
+        run: |
+          bun run dev --host 127.0.0.1 --port 4173 > /tmp/decision-nodes-vite.log 2>&1 &
+          curl --retry 20 --retry-connrefused --retry-delay 1 --fail http://127.0.0.1:4173/
+      - name: Open browser and snapshot
+        run: |
+          npx --yes --package @playwright/cli playwright-cli open http://127.0.0.1:4173/mission/mission-01 --browser=chrome
+          npx --yes --package @playwright/cli playwright-cli snapshot
+      - name: Verify case UI
+        run: npx --yes --package @playwright/cli playwright-cli run-code --filename=scripts/qa-case-ui.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: decision-node-ui-screenshots
+          path: output/playwright
+      - name: Preview diagnostics
+        if: failure()
+        run: tail -80 /tmp/decision-nodes-vite.log
