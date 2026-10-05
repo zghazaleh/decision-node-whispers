@@ -52,10 +52,7 @@ export async function handleChat(request: Request): Promise<Response> {
       return new Response("Invalid conversation message", { status: 400 });
     }
     if (messageTextLength(m) > MAX_MESSAGE_CHARS) {
-      return new Response(
-        `A single message exceeds ${MAX_MESSAGE_CHARS} chars`,
-        { status: 400 },
-      );
+      return new Response(`A single message exceeds ${MAX_MESSAGE_CHARS} chars`, { status: 400 });
     }
   }
 
@@ -74,9 +71,7 @@ export async function handleChat(request: Request): Promise<Response> {
   }
 
   const resolvedMissionId =
-    typeof missionId === "string" && missionId.length > 0
-      ? missionId
-      : DEFAULT_MISSION_ID;
+    typeof missionId === "string" && missionId.length > 0 ? missionId : DEFAULT_MISSION_ID;
   const { getMissionEngine } = await import("@/lib/missions/registry.server");
   const engine = getMissionEngine(resolvedMissionId);
   if (!engine) {

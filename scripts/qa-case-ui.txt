@@ -73,6 +73,7 @@ async (page) => {
   }
   await send("Ask Marcus about the memo");
   reports.push({ check: "repeated redirect and return with fixture responses", status: "passed" });
+  await send("Ask about the evaluation setup");
   const count = await page.evaluate(() => JSON.parse(localStorage.getItem("decision-node:mission:mission-01")).messages.length);
   await page.getByRole("button", { name: "Case Archive", exact: true }).click();
   await page.waitForURL("**/missions");
@@ -88,6 +89,7 @@ async (page) => {
   await page.getByRole("dialog").waitFor();
   await page.getByRole("dialog").getByRole("button", { name: /Hold two weeks/ }).click();
   if (!(await page.getByText(/Selected: Hold two weeks/).count())) throw new Error("Decision selection missing");
+  const modal = await page.screenshot({ path: "output/playwright/narrow-decision-modal.png" });
   await page.getByRole("button", { name: "Close", exact: true }).click();
   reports.push({ check: "back, reload and decision modal", status: "passed", messages: count });
   return {
@@ -96,6 +98,7 @@ async (page) => {
     screenshots: [
       { name: "desktop-opening.png", base64: desktop.toString("base64") },
       { name: "narrow-opening.png", base64: narrow.toString("base64") },
+      { name: "narrow-decision-modal.png", base64: modal.toString("base64") },
     ],
   };
 }

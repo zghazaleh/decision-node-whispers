@@ -23,7 +23,7 @@ jobs:
         run: bunx vitest run --config vitest.config.ts
 
       - name: Typecheck
-        run: bunx tsgo --noEmit
+        run: bunx tsc --noEmit
 
       # Stub mode if no key (no live gateway calls), live mode if the secret
       # is present. Either way the integration test must exit 0.

@@ -57,7 +57,7 @@ jobs:
           npx --yes --package @playwright/cli playwright-cli open http://127.0.0.1:4173/mission/mission-01 --browser=chrome
           npx --yes --package @playwright/cli playwright-cli snapshot
       - name: Verify case UI
-        run: npx --yes --package @playwright/cli playwright-cli run-code --filename=scripts/qa-case-ui.js
+        run: npx --yes --package @playwright/cli playwright-cli run-code --filename=scripts/qa-case-ui.txt
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -66,22 +66,3 @@ jobs:
       - name: Preview diagnostics
         if: failure()
         run: tail -80 /tmp/decision-nodes-vite.log
-
-  formatting:
-    name: Changed module formatting evidence
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
-      - run: bun install --frozen-lockfile
-      - name: Suggested formatting for new modules
-        run: |
-          node --input-type=module <<'JS'
-          import fs from "node:fs";
-          import prettier from "prettier";
-          for (const path of ["src/lib/case-scope.server.ts", "src/routes/api/chat.ts", "src/lib/__tests__/case-scope.test.ts", "src/lib/__tests__/case-chat.test.ts", "scripts/check-case-scope.ts", "scripts/qa-case-ui.js", "vitest.config.ts"]) {
-            const config = await prettier.resolveConfig(path);
-            const content = await prettier.format(fs.readFileSync(path, "utf8"), { ...config, filepath: path });
-            console.log("FORMATTED_FILE " + JSON.stringify({ path, base64: Buffer.from(content).toString("base64") }));
-          }
-          JS

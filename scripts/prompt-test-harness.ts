@@ -28,7 +28,7 @@
  */
 
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
-import { getMissionEngine } from "@/lib/missions/registry";
+import { getMissionEngine } from "@/lib/missions/registry.server";
 import { generateObject, generateText } from "ai";
 import { z } from "zod";
 import { DIRECTOR_FIXTURES, ANALYSIS_FIXTURES } from "./prompt-test-fixtures";
